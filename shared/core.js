@@ -175,7 +175,7 @@ function win() {
     $('#win-next').hidden = last;
     $('#win-next b').textContent = g.date ? 'Share result' : `Level ${g.n + 1}  →`;
     $('#dlg-win').showModal();
-  }, 1100);
+  }, game.winDelay ?? 1100);
 }
 
 async function share() {
