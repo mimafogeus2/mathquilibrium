@@ -26,6 +26,8 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; min-height: 100dvh; }
+/* no double-tap zoom anywhere on mobile; pinch-zoom still works */
+html { touch-action: manipulation; }
 body {
   background-image: radial-gradient(var(--dots) 1.2px, transparent 1.2px);
   background-size: 22px 22px;
@@ -99,7 +101,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   border-radius: 999px; border: 2px solid var(--line); background: transparent; font-weight: 600; font-size: 15px;
 }
 .chip svg { width: 18px; height: 18px; }
-.chip:hover { border-color: var(--muted); }
+.chip:hover:not(:disabled) { border-color: var(--muted); }
+.chip:disabled { opacity: .4; cursor: default; }
 
 /* ---------- dialogs ---------- */
 dialog {
