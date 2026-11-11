@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- Social card source (1200×630). Re-render after edits:
+     for g in home mathquilibrium coronet wordswipe orderly; do
+       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
+         --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
+     done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png) -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="core.css">
+<style>
+  html, body { width: 1200px; height: 630px; min-height: 0; overflow: hidden; }
+  body { background-size: 30px 30px; display: flex; align-items: center; gap: 56px; padding: 0 80px; }
+  .art { width: 300px; height: 300px; flex: none; stroke: none; }
+  .art.small { width: 190px; height: 190px; }
+  .row { display: flex; gap: 36px; margin-bottom: 52px; }
+  .card { flex: none; padding: 30px; border-radius: 44px; background: var(--card); box-shadow: 0 6px 0 var(--edge), 0 30px 60px -30px rgb(40 30 10 / .45); }
+  h1 { margin: 0; font-size: 96px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
+  h1 span { color: var(--brand, var(--op)); }
+  p { margin: 22px 0 0; font-size: 38px; line-height: 1.25; color: var(--muted); max-width: 620px; }
+  small { display: block; margin-top: 40px; font-size: 26px; font-weight: 700; color: var(--ink); opacity: .55; letter-spacing: .02em; }
+  body.home { flex-direction: column; justify-content: center; align-items: center; gap: 0; text-align: center; }
+  body.home h1 { font-size: 120px; }
+  body.home p { max-width: none; }
+  .art-tile { fill: var(--tile); }
+  .art-op { fill: var(--op); }
+  .art-ink { fill: var(--ink); font: 600 15px Outfit, sans-serif; text-anchor: middle; dominant-baseline: central; }
+  .art-ink.w { fill: #fff; }
+</style>
+</head>
+<body>
+<template id="mathquilibrium">
+  <svg viewBox="0 0 96 96">
+    <rect class="art-tile" x="4" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="17" y="47">4</text>
+    <rect class="art-op" x="35" y="34" width="26" height="26" rx="7"/><text class="art-ink w" x="48" y="47">+</text>
+    <rect class="art-tile" x="66" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="79" y="47">3</text>
+    <rect class="art-tile" x="35" y="3" width="26" height="26" rx="7"/><text class="art-ink" x="48" y="16">5</text>
+    <rect x="36" y="66" width="24" height="24" rx="7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
+  </svg>
+</template>
+<template id="coronet">
+  <svg viewBox="-50 -50 100 100">
+    <circle r="46" cy="2" fill="var(--edge)"/>
+    <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="#f59e85"/>
+    <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="#8cc2f0"/>
+    <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="#9fd68b"/>
+    <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="#f7c25c"/>
+    <g fill="none" stroke="#3b3428" stroke-width="2"><circle r="45"/><circle r="27.5" stroke-width=".8" opacity=".5"/><circle r="10"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
+    <path transform="translate(22 -22) scale(.85)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+    <path transform="translate(-14 14) scale(.6)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+    <circle r="10" fill="var(--tile)" stroke="#3b3428" stroke-width="2"/>
+  </svg>
+</template>
+<template id="wordswipe">
+  <svg viewBox="0 0 96 96">
+    <rect x="18" y="16" width="44" height="60" rx="10" fill="var(--bad)" transform="rotate(-14 40 46)"/>
+    <rect x="34" y="14" width="44" height="60" rx="10" fill="var(--ok)" transform="rotate(12 56 44)"/>
+    <rect x="24" y="22" width="44" height="60" rx="10" class="art-tile" stroke="var(--edge)" stroke-width="2"/>
+    <text class="art-ink" x="46" y="52" style="font-size: 13px">Owl?</text>
+  </svg>
+</template>
+<template id="orderly">
+  <svg viewBox="0 0 96 96">
+    <rect x="14" y="16" width="38" height="16" rx="6" fill="var(--op)"/>
+    <rect x="14" y="40" width="54" height="16" rx="6" fill="var(--accent)"/>
+    <rect x="14" y="64" width="70" height="16" rx="6" fill="var(--gold)"/>
+  </svg>
+</template>
+<script>
+  const GAMES = {
+    mathquilibrium: ['Math', 'quilibrium', 'var(--op)', 'The numbers are given. Fill in the operators so every line is true.'],
+    coronet: ['Coro', 'net', 'var(--accent)', 'Queens in the round: one per ring, slice and color.'],
+    wordswipe: ['Word', 'swipe', 'var(--ok)', 'A subject, 24 words, 60 seconds. Swipe right if it fits.'],
+    orderly: ['Order', 'ly', 'var(--accent)', 'Ten cards, one subject. Drag them into order.'],
+  };
+  const art = (id, cls = 'art') => {
+    const svg = document.getElementById(id).content.firstElementChild.cloneNode(true);
+    svg.classList.add(...cls.split(' '));
+    return svg.outerHTML;
+  };
+  const g = new URLSearchParams(location.search).get('g');
+  if (GAMES[g]) {
+    const [a, b, brand, line] = GAMES[g];
+    document.body.style.setProperty('--brand', brand);
+    document.body.innerHTML = `${art(g)}<div><h1>${a}<span>${b}</span></h1><p>${line}</p><small>A daily puzzle · Puzzle Shelf</small></div>`;
+  } else {
+    document.body.className = 'home';
+    document.body.innerHTML = `<div class="row">${Object.keys(GAMES).map((k) => `<div class="card">${art(k, 'art small')}</div>`).join('')}</div>` +
+      `<h1>Puzzle<span>shelf</span></h1><p>Daily logic games. Same puzzles for everyone.</p>`;
+  }
+</script>
+</body>
+</html>
