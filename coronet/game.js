@@ -74,7 +74,7 @@ function startLevel(G, save) {
   const ok = (a) => Array.isArray(a) && a.every((i) => Number.isInteger(i) && i >= 0 && i < N * N);
   const fits = ok(save.queens) && ok(save.marks) && ok(save.hinted) && save.hinted.every((i) => p.queens.includes(i));
   const s = fits ? save : {};
-  Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set() });
+  Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
   $('#g-sub').textContent = `${N} queens`;
   $('#tip').innerHTML = G.date ? `One ${TIERS[G.pack].toLowerCase()} puzzle a day — the same for everyone.` : G.n === 1 ? FIRST_TIP : '';
@@ -106,14 +106,34 @@ function refresh(sound, placed = null) {
   view.cursor.setAttribute('d', G.kbd && !G.done ? view.els[G.sel].getAttribute('d') : '');
   $('#board').setAttribute('aria-label', `${left} of ${N} queens left`);
   if (!G.done && G.queens.size === N && !conflicts.size) win();
+  $('#btn-undo').disabled = !G.history.length || G.done;
 }
 
-// Tap cycle on what the arc shows: empty -> × -> queen -> empty.
-function cycle(i) {
+// ---------- undo ----------
+// A snapshot of queens + marks; act() records one only if fn actually changed something.
+// ponytail: history lives in memory only, a reload starts it fresh.
+const snap = () => JSON.stringify([[...G.queens], [...G.marks]]);
+function act(fn, before = snap()) {
+  fn();
+  if (snap() !== before) { G.history.push(before); refresh(false); }
+}
+function undo() {
+  if (!playing() || !G.history.length) return;
+  const [q, m] = JSON.parse(G.history.pop());
+  G.queens = new Set([...q, ...G.hinted]);
+  G.marks = new Set(m);
+  sfx.erase();
+  refresh(false);
+  saveGame();
+}
+
+// Tap cycle on what the arc shows: empty -> × -> queen -> empty. toQueen skips the × step.
+function cycle(i, toQueen = false) {
   if (!playing() || G.hinted.has(i)) return;
   const k = shown(i);
+  G.history.push(snap());
   if (k === 'q') { G.queens.delete(i); sfx.erase(); refresh(true); }
-  else if (k) { G.marks.delete(i); G.queens.add(i); sfx.place(); refresh(true, i); }
+  else if (k || toQueen) { G.marks.delete(i); G.queens.add(i); sfx.place(); refresh(true, i); }
   else { G.marks.add(i); sfx.tap(); refresh(false); }
   saveGame();
 }
@@ -134,6 +154,7 @@ function hint() {
   G.marks.delete(q);
   G.queens.add(q);
   G.hinted.add(q);
+  G.history = []; // a hint is final: undoing past it could bring back the queens it removed
   sfx.hint();
   refresh(false);
   flash(G.view.pieces[q].firstChild, 'pop');
@@ -143,10 +164,8 @@ function hint() {
 function reset() {
   if (!playing() || (G.queens.size === G.hinted.size && !G.marks.size)) return;
   if (!confirm('Restart this level? Your queens and marks are cleared; the clock keeps running.')) return;
-  G.queens = new Set(G.hinted);
-  G.marks.clear();
+  act(() => { G.queens = new Set(G.hinted); G.marks.clear(); });
   sfx.erase();
-  refresh(false);
   saveGame();
 }
 
@@ -171,7 +190,7 @@ $('#board').addEventListener('pointerdown', (e) => {
   e.preventDefault();
   $('#board').setPointerCapture(e.pointerId);
   G.sel = i; G.kbd = false;
-  drag = { from: i, last: i, mode: null };
+  drag = { from: i, last: i, mode: null, before: snap() };
 });
 $('#board').addEventListener('pointermove', (e) => {
   if (!drag || !playing()) return;
@@ -190,7 +209,7 @@ const endDrag = (e) => {
   const d = drag;
   drag = null;
   if (e.type === 'pointerup' && d.mode === null) cycle(d.from);
-  else if (d.mode) saveGame();
+  else if (d.mode) { act(() => {}, d.before); saveGame(); }
 };
 $('#board').addEventListener('pointerup', endDrag);
 $('#board').addEventListener('pointercancel', endDrag);
@@ -207,18 +226,20 @@ function onKey(e) {
   } else if (e.key === ' ' || e.key === 'Enter') { G.kbd = true; cycle(G.sel); }
   else if (e.key === 'q' || e.key === 'Q') {
     G.kbd = true;
-    if (shown(G.sel) !== 'q') { if (!shown(G.sel)) G.marks.add(G.sel); cycle(G.sel); }
+    if (shown(G.sel) !== 'q') cycle(G.sel, true);
   } else if (e.key === 'x' || e.key === 'X' || e.key === 'm' || e.key === 'M') {
     G.kbd = true;
-    if (!G.queens.has(G.sel)) { setMark(G.sel, !G.marks.has(G.sel)); saveGame(); }
+    if (!G.queens.has(G.sel)) { act(() => setMark(G.sel, !G.marks.has(G.sel))); saveGame(); }
   } else if (e.key === 'Backspace' || e.key === 'Delete') {
     G.kbd = true;
     if (G.queens.has(G.sel)) cycle(G.sel);
-    else { setMark(G.sel, false); saveGame(); }
-  } else return false;
+    else { act(() => setMark(G.sel, false)); saveGame(); }
+  } else if (e.key === 'u' || e.key === 'U' || e.key === 'z' || e.key === 'Z') undo();
+  else return false;
   return true;
 }
 
+$('#btn-undo').onclick = undo;
 $('#btn-hint').onclick = hint;
 $('#btn-reset').onclick = reset;
 
