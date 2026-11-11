@@ -21,4 +21,10 @@ function hash(str) {
 const int = (rand, lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
 const pick = (rand, arr) => arr[Math.floor(rand() * arr.length)];
 
-if (typeof module === 'object') module.exports = { TIERS, PACK_SIZE, rng, hash, int, pick };
+// A game's special day ("YYYY-MM-DD|Occasion|puzzle line", from its special.js): { occasion, line }, or undefined.
+function special(list, date) {
+  const s = list.find((l) => l.startsWith(date + '|'));
+  if (s) { const i = s.indexOf('|', 11); return { occasion: s.slice(11, i), line: s.slice(i + 1) }; }
+}
+
+if (typeof module === 'object') module.exports = { TIERS, PACK_SIZE, rng, hash, int, pick, special };

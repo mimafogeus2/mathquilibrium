@@ -8,6 +8,8 @@ const stars = (checks) => (checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
 // The daily walks the pool by day number; the multiplier is coprime with the pool size, so no repeats until it's all been used.
 const DAY0 = Date.UTC(2026, 0, 1);
 const dailyIndex = (date) => ((Math.round((Date.parse(date) - DAY0) / 864e5) * 1237 + 811) % LEVELS.length + LEVELS.length) % LEVELS.length;
+// On a special day (special.js) its themed level replaces the pool's.
+const dailyLine = (date) => special(SPECIAL, date)?.line ?? LEVELS[dailyIndex(date)];
 
 function parse(line) {
   const [d, subject, top, bottom, items] = line.split('|');
@@ -39,10 +41,10 @@ function screen(id) {
 }
 
 function home() {
-  const t = today(), rec = store.daily[t]?.r, st = streak(), next = nextLevel(), solved = Object.keys(store.stars).length;
+  const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), next = nextLevel(), solved = Object.keys(store.stars).length;
   $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (st ? `  ·  🔥 ${st}` : '');
   $('#btn-daily').classList.toggle('done', !!rec);
-  $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · see result` : store.saves['D' + t] ? 'Resume' : parse(LEVELS[dailyIndex(t)]).subject;
+  $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · see result` : store.saves['D' + t] ? 'Resume' : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
   $('#lv-meta').textContent = `${solved} / ${LEVELS.length}`;
   $('#btn-next b').textContent = `Level ${next}`;
   $('#btn-next small').textContent = store.saves['L' + next] ? 'Resume' : DIFF[parse(LEVELS[next - 1]).d];
@@ -51,11 +53,11 @@ const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
 
 function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
-  const lv = parse(LEVELS[date ? dailyIndex(date) : n - 1]), rec = date && store.daily[date]?.r, sv = store.saves[key];
+  const lv = parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, done: false };
   $('#g-title').textContent = date ? 'Daily' : `Level ${n}`;
-  $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + DIFF[lv.d];
+  $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + (sp ? sp.occasion : DIFF[lv.d]);
   $('#subject').textContent = lv.subject;
   $('#lbl-top').textContent = '▲ ' + lv.top;
   $('#lbl-bottom').textContent = '▼ ' + lv.bottom;
@@ -177,7 +179,7 @@ function showResult(fresh) {
 
 async function share() {
   const r = store.daily[P.date].r;
-  const text = `Orderly daily · ${P.date}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
+  const sp = special(SPECIAL, P.date), text = `Orderly daily · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
     `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   try {
     if (navigator.share) await navigator.share({ text });

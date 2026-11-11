@@ -9,9 +9,11 @@ const TIME = 60000, PENALTY = 3000, PER_RIGHT = 10, PER_SEC = 5;
 const DAY0 = Date.UTC(2026, 0, 1);
 const dailyIndex = (date) => ((Math.round((Date.parse(date) - DAY0) / 864e5) * 1237 + 4021) % ROUNDS.length + ROUNDS.length) % ROUNDS.length;
 const unlimitedIndex = (n) => (n * 2903 + 1777) % ROUNDS.length;
+// On a special day (special.js) its themed round replaces the pool's.
+const dailyLine = (date) => special(SPECIAL, date)?.line ?? ROUNDS[dailyIndex(date)];
 
-function deal(idx, seed) {
-  const [subject, yes, no] = ROUNDS[idx].split('|');
+function deal(line, seed) {
+  const [subject, yes, no] = line.split('|');
   const cards = [...yes.split(',').map((w) => ({ w, yes: true })), ...no.split(',').map((w) => ({ w, yes: false }))];
   const rand = rng(seed);
   for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
@@ -32,10 +34,10 @@ function screen(id) {
 }
 
 function home() {
-  const t = today(), rec = store.daily[t]?.r, st = streak();
+  const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
   $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (st ? `  ·  🔥 ${st}` : '');
   $('#btn-daily').classList.toggle('done', !!rec);
-  $('#btn-daily small').textContent = rec ? `✓ ${rec.s} points · see result` : store.cur?.key === 'D' + t ? 'Resume' : '24 words · 60 seconds';
+  $('#btn-daily small').textContent = rec ? `✓ ${rec.s} points · see result` : store.cur?.key === 'D' + t ? 'Resume' : sp ? sp.occasion : '24 words · 60 seconds';
   $('#btn-unlimited small').textContent = `Round ${store.n + 1}` + (store.best ? ` · best ${store.best}` : '') +
     (store.cur?.key === 'U' + store.n ? ' · resume' : '');
 }
@@ -44,9 +46,10 @@ function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
   if (date && store.daily[date]?.r) return showEnd(store.daily[date].r, true);
   R = store.cur?.key === key ? store.cur
-    : { key, date, n, ...deal(date ? dailyIndex(date) : unlimitedIndex(n), hash(key)), marks: [], left: TIME, over: false };
+    : { key, date, n, ...deal(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)], hash(key)), marks: [], left: TIME, over: false };
   $('#g-title').textContent = date ? 'Daily' : `Round ${n + 1}`;
-  $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+  const sp = date && special(SPECIAL, date);
+  $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
   $('#stack').replaceChildren();
@@ -184,7 +187,7 @@ const esc = (s) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 async function shareDaily(rec) {
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
-  const text = `WordSwipe daily · ${date}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
+  const sp = special(SPECIAL, date), text = `WordSwipe daily · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
     `${rec.s} points${rec.t ? ` · ${rec.t}s left` : ' · ⏰ out of time'}` +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   try {
