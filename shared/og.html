@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Social card source (1200×630). Re-render after edits:
-     for g in home mathquilibrium coronet wordswipe orderly; do
+     for g in home mathquilibrium coronet wordswipe orderly biggr; do
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
          --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
      done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png) -->
@@ -13,8 +13,8 @@
   html, body { width: 1200px; height: 630px; min-height: 0; overflow: hidden; }
   body { background-size: 30px 30px; display: flex; align-items: center; gap: 56px; padding: 0 80px; }
   .art { width: 300px; height: 300px; flex: none; stroke: none; }
-  .art.small { width: 190px; height: 190px; }
-  .row { display: flex; gap: 36px; margin-bottom: 52px; }
+  .art.small { width: 150px; height: 150px; }
+  .row { display: flex; gap: 28px; margin-bottom: 52px; }
   .card { flex: none; padding: 30px; border-radius: 44px; background: var(--card); box-shadow: 0 6px 0 var(--edge), 0 30px 60px -30px rgb(40 30 10 / .45); }
   h1 { margin: 0; font-size: 96px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
   h1 span { color: var(--brand, var(--op)); }
@@ -67,12 +67,21 @@
     <rect x="14" y="64" width="70" height="16" rx="6" fill="var(--gold)"/>
   </svg>
 </template>
+<template id="biggr">
+  <svg viewBox="0 0 96 96">
+    <rect x="6" y="34" width="38" height="38" rx="9" fill="var(--op)"/>
+    <rect x="52" y="14" width="38" height="58" rx="9" fill="var(--accent)"/>
+    <text class="art-ink w" x="25" y="53" style="font-size: 13px">7×8</text>
+    <text class="art-ink w" x="71" y="43" style="font-size: 13px">9×6</text>
+  </svg>
+</template>
 <script>
   const GAMES = {
     mathquilibrium: ['Math', 'quilibrium', 'var(--op)', 'The numbers are given. Fill in the operators so every line is true.'],
     coronet: ['Coro', 'net', 'var(--accent)', 'Queens in the round: one per ring, slice and color.'],
     wordswipe: ['Word', 'swipe', 'var(--ok)', 'A subject, 24 words, 60 seconds. Swipe right if it fits.'],
     orderly: ['Order', 'ly', 'var(--accent)', 'Ten cards, one subject. Drag them into order.'],
+    biggr: ['Bigg', 'r', 'var(--accent)', 'Two sums, no answers. Pick the bigger one, fast.'],
   };
   const art = (id, cls = 'art') => {
     const svg = document.getElementById(id).content.firstElementChild.cloneNode(true);

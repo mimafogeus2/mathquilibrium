@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Biggr — which is bigger?</title>
+<meta name="description" content="Two sums, no answers. Pick the bigger one, ten pairs against the clock. Three new dailies every day plus 3,000 levels.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Puzzle Shelf">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/biggr/">
+<meta property="og:title" content="Biggr — which is bigger?">
+<meta property="og:description" content="Two sums, no answers. Pick the bigger one, ten pairs against the clock. Three new dailies every day plus 3,000 levels.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/biggr/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13151d" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='18' width='24' height='28' rx='7' fill='%2333388f'/%3E%3Crect x='36' y='8' width='24' height='48' rx='7' fill='%23ff6a3d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="home" class="screen">
+  <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <button class="icon js-sound corner" aria-label="Sound"></button>
+  <div id="logo" aria-hidden="true"><i>7×8</i><b>?</b><i>9×6</i></div>
+  <h1 class="wordmark">Bigg<span>r</span></h1>
+  <p class="tagline">Two sums. Pick the bigger one. Fast.</p>
+  <nav class="menu">
+    <div class="block-head"><h2>Daily</h2><span id="daily-meta"></span></div>
+    <div id="daily-btns" class="trio"></div>
+    <div class="block-head"><h2>Level packs</h2></div>
+    <div id="pack-btns" class="packs"></div>
+    <div class="row">
+      <button id="btn-levels" class="btn ghost"><b>Levels</b></button>
+      <button id="btn-help" class="btn ghost"><b>How to play</b></button>
+    </div>
+  </nav>
+</main>
+
+<section id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="clock" aria-label="Seconds left"></span>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="fuse"><i id="fuse"></i></div>
+  <p class="ask">Which is bigger?</p>
+  <div class="pair" aria-live="polite">
+    <button id="side-l" class="side"><span class="expr"></span><span class="val"></span><kbd>←</kbd></button>
+    <button id="side-r" class="side"><span class="expr"></span><span class="val"></span><kbd>→</kbd></button>
+  </div>
+  <p class="tally"><b id="progress"></b><small id="score"></small></p>
+</section>
+
+<dialog id="dlg-levels">
+  <h2>Levels</h2>
+  <div id="pack-tabs" class="tabs" role="tablist"></div>
+  <div id="level-grid" class="level-grid"></div>
+  <div class="pager">
+    <button id="pg-prev" class="icon" aria-label="Previous levels"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span id="pg-label"></span>
+    <button id="pg-next" class="icon" aria-label="Next levels"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <form method="dialog"><button class="btn ghost center"><b>Close</b></button></form>
+</dialog>
+
+<dialog id="dlg-help">
+  <h2>How to play</h2>
+  <ol class="rules">
+    <li>Each level shows <b>10 pairs</b> of sums, without their answers.</li>
+    <li>Tap the <b>bigger</b> one, or press <kbd>←</kbd> / <kbd>→</kbd>.</li>
+    <li>The clock runs: <b>30s</b> on Easy, <b>45s</b> on Medium, <b>60s</b> on Hard. A wrong pick costs <b>3 seconds</b>.</li>
+    <li><b>10 points</b> per right pick, plus up to <b>5 points</b> for every second left when you finish (scaled by how many you got right).</li>
+  </ol>
+  <p class="muted small">Three dailies, the same for everyone, plus 1,000 levels of each difficulty. No mistakes for three stars, up to two for two.</p>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-end">
+  <div id="end-stars" class="stars"></div>
+  <h2 id="end-title"></h2>
+  <p id="end-score" class="big-score"></p>
+  <p id="end-stats" class="stats"></p>
+  <div class="win-actions">
+    <button id="end-next" class="btn primary center" autofocus><b></b></button>
+    <button id="end-home" class="btn ghost center"><b>Menu</b></button>
+  </div>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="gen.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

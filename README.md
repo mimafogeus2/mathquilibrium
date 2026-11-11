@@ -10,6 +10,7 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 | Coronet | `coronet/` | Queens in the round: N rings of N arcs, N colors. One queen per ring, slice and color. Easy 5, Medium 6, Hard 7. |
 | WordSwipe | `wordswipe/` | A subject and 24 words against a 60-second fuse: swipe right if the word fits, left if not. One daily round plus unlimited, from 5,000 hand-written rounds. |
 | Orderly | `orderly/` | A subject and 10 cards: drag them into order (oldest→newest, mildest→hottest…). Check joins runs of cards in the right order into groups that move as one. One daily plus 2,030 levels. |
+| Biggr | `biggr/` | Two sums side by side, no answers: pick the bigger one. 10 pairs against the clock (30/45/60s), wrong picks cost 3s, leftover seconds score. Three dailies plus 1,000 seeded levels per difficulty. |
 
 Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (the same for everyone), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard.
 
@@ -29,4 +30,4 @@ No build step. Serve the folder:
 python3 -m http.server
 ```
 
-Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js`
+Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js`
