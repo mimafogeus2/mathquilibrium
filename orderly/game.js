@@ -164,6 +164,23 @@ function win() {
   showResult(true);
 }
 
+// Give up: the cards snap into the right order, nothing is recorded, and the save is dropped.
+function giveUp() {
+  if (!P || P.done || !confirm("Give up and see the right order? This puzzle won't count as solved.")) return;
+  P.done = true;
+  delete store.saves[P.key];
+  persist();
+  P.order = [...Array(N).keys()];
+  P.links.fill(true);
+  layout();
+  sfx.erase();
+  $('#play').hidden = true;
+  $('#result').hidden = false;
+  $('#res-stars').innerHTML = '';
+  $('#res-text').textContent = "Here's the right order.";
+  $('#res-next').hidden = true;
+}
+
 function showResult(fresh) {
   const c = P.rows.length, s = stars(c);
   $('#play').hidden = true;
@@ -222,6 +239,7 @@ $('#btn-levels').onclick = () => openLevels();
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); P = null; screen('home'); };
 $('#btn-check').onclick = check;
+$('#btn-giveup').onclick = giveUp;
 $('#res-home').onclick = () => { P = null; screen('home'); };
 $('#list').addEventListener('pointerdown', drag);
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });

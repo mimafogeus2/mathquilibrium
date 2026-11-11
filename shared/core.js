@@ -5,6 +5,7 @@
 //   start(G, save) -> builds the board for G.key into #board; returns true if it restored `save`
 //   save(G)        -> what to persist besides elapsed
 //   key(e)         -> handle a keydown during play; return true if used
+//   reveal(G)      -> show the answer on the board (after giving up)
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
 const ICON_ON = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
@@ -178,6 +179,17 @@ function win() {
   }, game.winDelay ?? 1100);
 }
 
+// Give up: the answer is shown, nothing is recorded (no stars, no daily), and the save is dropped.
+function giveUp() {
+  if (!playing() || !confirm("Give up and see the answer? This puzzle won't count as solved.")) return;
+  G.done = true;
+  clearInterval(timer);
+  delete store.saves[G.key];
+  persist();
+  game.reveal(G);
+  sfx.erase();
+}
+
 async function share() {
   const r = store.daily[G.date][G.pack];
   const text = `${game.name} daily · ${G.date} · ${TIERS[G.pack]}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ no hints'}` +
@@ -269,6 +281,7 @@ function boot(g) {
   $('#btn-back').onclick = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
   $('#btn-pause').onclick = () => setPaused(!G.paused);
   $('#btn-resume').onclick = () => setPaused(false);
+  $('#btn-giveup').onclick = giveUp;
   $('#win-home').onclick = () => { $('#dlg-win').close(); show('home'); };
   $('#win-next').onclick = () => {
     if (G.date) share(); else { $('#dlg-win').close(); start(G.pack, G.n + 1); }

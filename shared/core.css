@@ -95,7 +95,10 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .tip { color: var(--muted); text-align: center; min-height: 1.4em; margin: 4px 0 14px; max-width: 420px; font-size: 15px; }
 .tip b { color: var(--ink); }
 
-.tools { display: flex; gap: 10px; margin-top: 18px; }
+.tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
+/* quiet on purpose: giving up shouldn't compete with the real controls */
+.give-up { border: 0; background: none; padding: 6px 10px; color: var(--muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.tools .give-up { flex-basis: 100%; }
 .chip {
   display: flex; align-items: center; gap: 6px; padding: 8px 16px 8px 12px;
   border-radius: 999px; border: 2px solid var(--line); background: transparent; font-weight: 600; font-size: 15px;
