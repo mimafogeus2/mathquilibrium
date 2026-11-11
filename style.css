@@ -44,7 +44,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 /* ---------- home ---------- */
 #home { justify-content: center; gap: 6px; position: relative; }
 .corner { position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px; }
-.wordmark { font-size: clamp(48px, 13vw, 72px); font-weight: 800; letter-spacing: -0.04em; margin: 18px 0 0; line-height: 1; }
+.wordmark { font-size: clamp(32px, 9.5vw, 64px); font-weight: 800; letter-spacing: -0.04em; margin: 18px 0 0; line-height: 1; }
 .wordmark span { color: var(--op); }
 .tagline { color: var(--muted); margin: 8px 0 28px; font-size: 17px; }
 .menu { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }

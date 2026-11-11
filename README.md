@@ -1,8 +1,8 @@
-# CrosSum
+# Mathquilibrium
 
 A crossword where the numbers are given and you fill in the math. Every row and column must be a true equation, and operators where lines cross have to work both ways.
 
-**Play:** https://mimafogeus2.github.io/crossum/
+**Play:** https://mimafogeus2.github.io/mathquilibrium/
 
 - Easy, Medium and Hard packs of 1,000 levels each, generated from seeds, ramping from `+ −` up to `× ÷ ^ . %` and `< >`
 - Three daily puzzles (easy, medium, hard), the same for everyone, with streaks and sharing

@@ -1,4 +1,4 @@
-// CrosSum puzzle engine: evaluation, seeded RNG, level configs, generator.
+// Mathquilibrium puzzle engine: evaluation, seeded RNG, level configs, generator.
 // Plain script (globals in the browser), also require()-able from node for tests.
 
 const OPS = {

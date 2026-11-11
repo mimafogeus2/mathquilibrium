@@ -23,6 +23,7 @@ const ICON_ERASE = '<svg viewBox="0 0 24 24"><path d="M9 5h11v14H9l-6-7 6-7zM12 
 
 // ---------- storage ----------
 let store = {};
+// ponytail: storage key keeps the old name so existing saves survive the rename.
 try { store = JSON.parse(localStorage.getItem('crossum2')) || {}; } catch {}
 store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...store };
 for (const k in PACKS) store.packs[k] ??= { unlocked: 1, stars: {} };
@@ -391,7 +392,7 @@ function win() {
 
 async function share() {
   const r = store.daily[G.date][G.pack];
-  const text = `CrosSum daily · ${G.date} · ${PACKS[G.pack].name}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ no hints'}` +
+  const text = `Mathquilibrium daily · ${G.date} · ${PACKS[G.pack].name}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ no hints'}` +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   try {
     if (navigator.share) await navigator.share({ text });
