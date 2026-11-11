@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coronet — queens in the round</title>
+<meta name="description" content="Crown one queen in every ring, every slice and every color of a circular board. New daily puzzle every day.">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13151d" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ff6a3d'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23fff' stroke-width='3' opacity='.6'/%3E%3Cpath d='M20 40l-2-15 8 6 6-11 6 11 8-6-2 15z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="home" class="screen">
+  <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <button class="icon js-sound corner" aria-label="Sound"></button>
+  <svg id="logo" class="board mini" aria-hidden="true"></svg>
+  <h1 class="wordmark">Coro<span>net</span></h1>
+  <p class="tagline">One crown per ring, slice and color.</p>
+  <nav class="menu">
+    <div class="block-head"><h2>Daily</h2><span id="daily-meta"></span></div>
+    <div id="daily-btns" class="trio"></div>
+    <div class="block-head"><h2>Level packs</h2></div>
+    <div id="pack-btns" class="packs"></div>
+    <div class="row">
+      <button id="btn-levels" class="btn ghost"><b>Levels</b></button>
+      <button id="btn-help" class="btn ghost"><b>How to play</b></button>
+    </div>
+  </nav>
+</main>
+
+<section id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button id="btn-pause" class="icon" aria-label="Pause"></button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="timer" aria-label="Time">0:00</span>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="board-wrap">
+    <svg id="board" class="board" role="img" aria-label="Puzzle"></svg>
+    <div id="pause-cover" class="pause-cover" hidden>
+      <b>Paused</b>
+      <button id="btn-resume" class="btn primary center"><b>Resume</b></button>
+    </div>
+  </div>
+  <p id="tip" class="tip"></p>
+  <div class="tools">
+    <button id="btn-hint" class="chip">
+      <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>Hint
+    </button>
+    <button id="btn-reset" class="chip">
+      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>Restart
+    </button>
+  </div>
+</section>
+
+<dialog id="dlg-levels">
+  <h2>Levels</h2>
+  <div id="pack-tabs" class="tabs" role="tablist"></div>
+  <div id="level-grid" class="level-grid"></div>
+  <div class="pager">
+    <button id="pg-prev" class="icon" aria-label="Previous levels"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span id="pg-label"></span>
+    <button id="pg-next" class="icon" aria-label="Next levels"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <form method="dialog"><button class="btn ghost center"><b>Close</b></button></form>
+</dialog>
+
+<dialog id="dlg-help">
+  <h2>How to play</h2>
+  <svg id="help-board" class="board mini" aria-hidden="true"></svg>
+  <ol class="rules">
+    <li>Place one <b>queen</b> in every <b>ring</b>, every <b>slice</b> and every <b>color</b>.</li>
+    <li>Tap an arc to mark it <b>×</b>, tap again for a queen, once more to clear. Drag across arcs to mark many.</li>
+    <li>A queen marks its whole ring, slice and color for you. Take it away and those marks go too — yours stay.</li>
+  </ol>
+  <p class="muted small">Keyboard: arrows to move, <kbd>Space</kbd> to cycle, <kbd>Q</kbd> queen, <kbd>X</kbd> mark, <kbd>⌫</kbd> clear, <kbd>P</kbd> pause.</p>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-win">
+  <div id="win-stars" class="stars"></div>
+  <h2 id="win-title"></h2>
+  <p id="win-stats" class="stats"></p>
+  <div class="win-actions">
+    <button id="win-next" class="btn primary center"><b></b></button>
+    <button id="win-home" class="btn ghost center"><b>Menu</b></button>
+  </div>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="gen.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

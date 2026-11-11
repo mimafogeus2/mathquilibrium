@@ -3,105 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mathquilibrium — the operator crossword</title>
-<meta name="description" content="A crossword where the numbers are given and you fill in the math. New daily puzzle every day.">
+<title>Puzzle Shelf — daily logic games</title>
+<meta name="description" content="Small daily logic puzzles: Mathquilibrium and Coronet. New puzzles every day, the same for everyone.">
 <meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#13151d" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2333388f'/%3E%3Cpath d='M32 16v32M16 32h32' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2333388f'/%3E%3Crect x='14' y='14' width='15' height='15' rx='4' fill='%23fff'/%3E%3Crect x='35' y='14' width='15' height='15' rx='4' fill='%23ff6a3d'/%3E%3Crect x='14' y='35' width='15' height='15' rx='4' fill='%23f2b134'/%3E%3Crect x='35' y='35' width='15' height='15' rx='4' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="shared/core.css">
+<style>
+  .games { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
+  .game {
+    display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 18px;
+    padding: 18px; border-radius: 24px; background: var(--card); color: inherit; text-decoration: none;
+    box-shadow: 0 4px 0 var(--edge), 0 18px 34px -22px rgb(40 30 10 / .45);
+    transition: transform .12s, box-shadow .12s;
+    animation: rise .5s var(--d) both cubic-bezier(.2, .9, .3, 1.2);
+  }
+  .game:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--edge), 0 22px 40px -22px rgb(40 30 10 / .5); }
+  .game:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--edge); }
+  .game svg { width: 96px; height: 96px; }
+  .game h2 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .game h2 span { color: var(--brand); }
+  .game p { margin: 4px 0 10px; color: var(--muted); font-size: 15px; line-height: 1.35; }
+  .today { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .today i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); }
+  .today i.on { border-color: var(--tier); background: var(--tier); }
+  .today i + span { margin-left: 4px; }
+  .art-tile { fill: var(--tile); }
+  .art-op { fill: var(--op); }
+  .art-ink { fill: var(--ink); font: 600 15px Outfit, sans-serif; text-anchor: middle; dominant-baseline: central; }
+  .art-ink.w { fill: #fff; }
+</style>
 </head>
 <body>
-
-<main id="home" class="screen">
-  <button class="icon js-sound corner" aria-label="Sound"></button>
-  <div id="logo" class="board mini" aria-hidden="true"></div>
-  <h1 class="wordmark">Math<span>quilibrium</span></h1>
-  <p class="tagline">The numbers are given. The math is yours.</p>
-  <nav class="menu">
-    <div class="block-head"><h2>Daily</h2><span id="daily-meta"></span></div>
-    <div id="daily-btns" class="trio"></div>
-    <div class="block-head"><h2>Level packs</h2></div>
-    <div id="pack-btns" class="packs"></div>
-    <div class="row">
-      <button id="btn-levels" class="btn ghost"><b>Levels</b></button>
-      <button id="btn-help" class="btn ghost"><b>How to play</b></button>
-    </div>
+<main class="screen" style="justify-content: center; gap: 6px">
+  <h1 class="wordmark">Puzzle<span>shelf</span></h1>
+  <p class="tagline">Daily logic games. Same puzzles for everyone.</p>
+  <nav class="games">
+    <a class="game" href="mathquilibrium/" data-store="crossum2" style="--brand: var(--op); --d: 0ms">
+      <svg viewBox="0 0 96 96" aria-hidden="true">
+        <rect class="art-tile" x="4" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="17" y="47">4</text>
+        <rect class="art-op" x="35" y="34" width="26" height="26" rx="7"/><text class="art-ink w" x="48" y="47">+</text>
+        <rect class="art-tile" x="66" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="79" y="47">3</text>
+        <rect class="art-tile" x="35" y="3" width="26" height="26" rx="7"/><text class="art-ink" x="48" y="16">5</text>
+        <rect x="36" y="66" width="24" height="24" rx="7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
+      </svg>
+      <div>
+        <h2>Math<span>quilibrium</span></h2>
+        <p>The numbers are given. Fill in the operators so every line is true.</p>
+        <div class="today"></div>
+      </div>
+    </a>
+    <a class="game" href="coronet/" data-store="coronet" style="--brand: var(--accent); --d: 80ms">
+      <svg viewBox="-50 -50 100 100" aria-hidden="true">
+        <circle r="46" cy="2" fill="var(--edge)"/>
+        <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="#f59e85"/>
+        <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="#8cc2f0"/>
+        <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="#9fd68b"/>
+        <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="#f7c25c"/>
+        <g fill="none" stroke="#3b3428" stroke-width="2"><circle r="45"/><circle r="27.5" stroke-width=".8" opacity=".5"/><circle r="10"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
+        <path transform="translate(22 -22) scale(.85)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+        <path transform="translate(-14 14) scale(.6)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+        <circle r="10" fill="var(--tile)" stroke="#3b3428" stroke-width="2"/>
+      </svg>
+      <div>
+        <h2>Coro<span>net</span></h2>
+        <p>Queens in the round: one per ring, slice and color.</p>
+        <div class="today"></div>
+      </div>
+    </a>
   </nav>
 </main>
-
-<section id="game" class="screen" hidden>
-  <header class="bar">
-    <div class="bar-start">
-      <button id="btn-back" class="icon" aria-label="Back to menu">
-        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-      </button>
-      <button id="btn-pause" class="icon" aria-label="Pause"></button>
-    </div>
-    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
-    <div class="bar-end">
-      <span id="timer" aria-label="Time">0:00</span>
-      <button class="icon js-sound" aria-label="Sound"></button>
-    </div>
-  </header>
-  <div class="board-wrap">
-    <div id="board" class="board" role="grid" aria-label="Puzzle"></div>
-    <div id="pause-cover" class="pause-cover" hidden>
-      <b>Paused</b>
-      <button id="btn-resume" class="btn primary center"><b>Resume</b></button>
-    </div>
-  </div>
-  <p id="tip" class="tip"></p>
-  <div id="palette" class="palette" aria-label="Operators"></div>
-  <div class="tools">
-    <button id="btn-hint" class="chip">
-      <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>Hint
-    </button>
-    <button id="btn-reset" class="chip">
-      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>Restart
-    </button>
-  </div>
-</section>
-
-<dialog id="dlg-levels">
-  <h2>Levels</h2>
-  <div id="pack-tabs" class="tabs" role="tablist"></div>
-  <div id="level-grid" class="level-grid"></div>
-  <div class="pager">
-    <button id="pg-prev" class="icon" aria-label="Previous levels"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <span id="pg-label"></span>
-    <button id="pg-next" class="icon" aria-label="Next levels"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-  </div>
-  <form method="dialog"><button class="btn ghost center"><b>Close</b></button></form>
-</dialog>
-
-<dialog id="dlg-help">
-  <h2>How to play</h2>
-  <div id="help-grid" class="board mini" aria-hidden="true"></div>
-  <ol class="rules">
-    <li>Fill every blank tile with an operator so <b>each row and column is a true equation</b>.</li>
-    <li>Tiles where lines cross are <b>shared</b> — one symbol has to work both ways.</li>
-    <li>Usual math order: <b>×  ÷</b> before <b>+  −</b>. Division must come out exact.</li>
-    <li>Harder levels add <b>^</b> power, <b>.</b> decimal point (3 . 5 is 3.5), <b>%</b> remainder, and <b>&lt;  &gt;</b> for lines that are inequalities.</li>
-  </ol>
-  <p class="muted small">Keyboard: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, arrows to move, <kbd>⌫</kbd> to clear, <kbd>P</kbd> to pause.</p>
-  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
-</dialog>
-
-<dialog id="dlg-win">
-  <div id="win-stars" class="stars"></div>
-  <h2 id="win-title"></h2>
-  <p id="win-stats" class="stats"></p>
-  <div class="win-actions">
-    <button id="win-next" class="btn primary center"><b></b></button>
-    <button id="win-home" class="btn ghost center"><b>Menu</b></button>
-  </div>
-</dialog>
-
-<canvas id="fx" aria-hidden="true"></canvas>
-<script src="gen.js"></script>
-<script src="game.js"></script>
+<script>
+  // Today's dailies, read from each game's saved progress.
+  const d = new Date(), today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  for (const a of document.querySelectorAll('.game')) {
+    let done = {};
+    try { done = JSON.parse(localStorage.getItem(a.dataset.store))?.daily?.[today] || {}; } catch {}
+    const n = Object.keys(done).length;
+    a.querySelector('.today').innerHTML = ['E', 'M', 'H'].map((k) => `<i class="tier-${k}${done[k] ? ' on' : ''}"></i>`).join('') +
+      `<span>${n === 3 ? 'All dailies done' : n ? `${n} of 3 dailies today` : '3 new dailies today'}</span>`;
+    a.setAttribute('aria-label', `${a.querySelector('h2').textContent}. ${a.querySelector('.today span').textContent}`);
+  }
+</script>
 </body>
 </html>

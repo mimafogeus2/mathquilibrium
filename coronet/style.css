@@ -1,0 +1,61 @@
+/* Coronet: the round board. Everything else is in shared/core.css. */
+:root {
+  --r0: #f59e85; --r1: #f7c25c; --r2: #e6dc72; --r3: #9fd68b; --r4: #79cfc0;
+  --r5: #8cc2f0; --r6: #a3a2f0; --r7: #dca2e0; --r8: #f6a9bd; --r9: #c8c0b2;
+  --wall: #3b3428; --seam: rgb(255 255 255 / .6); --piece: #1e2230;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --r0: #b8644f; --r1: #b98a2e; --r2: #9c963c; --r3: #5e9a4f; --r4: #3f9384;
+    --r5: #4b84b5; --r6: #6466c4; --r7: #9a5aa6; --r8: #b8607a; --r9: #7d776c;
+    --wall: #0b0c11; --seam: rgb(0 0 0 / .3); --piece: #f6f2ea;
+  }
+}
+.wordmark span { color: var(--accent); }
+
+.board {
+  width: min(620px, calc(100vw - 24px), calc(100dvh - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
+  fill: initial; stroke: none; stroke-width: 1;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  filter: drop-shadow(0 14px 18px rgb(40 30 10 / .18));
+  animation: spin-in .8s cubic-bezier(.2, .9, .3, 1.15) both;
+}
+.board.mini { width: 132px; filter: none; }
+#logo { animation: spin-in .8s cubic-bezier(.2, .9, .3, 1.15) both, turn 90s linear infinite; }
+#help-board { display: block; margin: 0 auto 8px; width: 120px; }
+@keyframes spin-in { from { opacity: 0; transform: rotate(-50deg) scale(.7); } }
+@keyframes turn { to { transform: rotate(360deg); } }
+
+.lip { fill: var(--edge); }
+.c {
+  stroke: var(--seam); stroke-width: .5; stroke-linejoin: round;
+  transform-box: fill-box; transform-origin: center;
+  animation: enter .5s var(--d, 0ms) both cubic-bezier(.2, .9, .3, 1.35);
+}
+.rg0 { fill: var(--r0); } .rg1 { fill: var(--r1); } .rg2 { fill: var(--r2); } .rg3 { fill: var(--r3); } .rg4 { fill: var(--r4); }
+.rg5 { fill: var(--r5); } .rg6 { fill: var(--r6); } .rg7 { fill: var(--r7); } .rg8 { fill: var(--r8); } .rg9 { fill: var(--r9); }
+.walls, .rim { fill: none; stroke: var(--wall); stroke-width: 1.5; stroke-linecap: round; }
+.mini .walls, .mini .rim { stroke-width: 2.2; }
+.hub circle { fill: var(--tile); }
+.hub text { fill: var(--ink); font-weight: 800; text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+
+.pc { pointer-events: none; }
+.crown { fill: var(--piece); transform-box: fill-box; transform-origin: center; }
+.x { stroke: var(--piece); stroke-width: 2.4; stroke-linecap: round; opacity: .55; }
+.pc[data-k="a"] .x { opacity: .3; }
+.pc.bad .crown { fill: var(--bad); }
+.pc.hinted .crown { fill: var(--gold-edge); }
+.cursor { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
+
+.crown.pop { animation: pop .3s cubic-bezier(.2, .9, .3, 1.6); }
+.crown.shake { animation: shake .4s; }
+
+/* solved: a ripple runs out from the hub, ring by ring */
+.board.solved .c { transform-box: view-box; transform-origin: 50% 50%; animation: ripple .7s calc(var(--ring) * 70ms) both; }
+.board.solved .crown { animation: wave .7s .3s both; }
+.board.solved .hub text { fill: var(--gold-edge); }
+@keyframes ripple { 40% { transform: scale(1.035); filter: brightness(1.15); } }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .board:not(.mini) { width: min(calc(100dvh - 90px), calc(100vw - 380px)); }
+}

@@ -1,6 +1,7 @@
 // node test.js — checks the evaluator and that the generator produces valid, well-formed puzzles.
 const assert = require('assert');
-const { checkEquation, evalExpr, nextInEquation, saveFits, levelConfig, generate, hash, PACKS, PACK_SIZE, packDifficulty } = require('./gen.js');
+Object.assign(globalThis, require('../shared/common.js'));
+const { checkEquation, evalExpr, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty } = require('./gen.js');
 
 assert(checkEquation([2, '+', 3, '×', 4, '=', 14]));
 assert(checkEquation([12, '=', 3, '×', 4]));
