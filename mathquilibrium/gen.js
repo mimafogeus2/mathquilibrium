@@ -1,5 +1,6 @@
 // Mathquilibrium puzzle engine: evaluation, seeded RNG, level configs, generator.
 // Plain script (globals in the browser), also require()-able from node for tests.
+// Uses rng/int/pick/PACK_SIZE from shared/common.js (a global in both).
 
 const OPS = {
   '+': (a, b) => a + b,
@@ -63,32 +64,14 @@ function saveFits(p, s) {
   return [...fills.keys()].every((k) => blanks.has(k)) && (s.hinted || []).every((k) => fills.get(k) === blanks.get(k));
 }
 
-function rng(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-function hash(str) {
-  let h = 2166136261;
-  for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
-  return h >>> 0;
-}
-const int = (rand, lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
-const pick = (rand, arr) => arr[Math.floor(rand() * arr.length)];
-
 // Three packs of 1000 seeded levels. Each ramps across its slice of the difficulty scale over the
 // first RAMP levels, then stays at its top difficulty.
 // ponytail: flat after the ramp; more headroom needs harder puzzle shapes, not more levels.
-const PACK_SIZE = 1000, RAMP = 60;
+const RAMP = 60;
 const PACKS = {
-  E: { name: 'Easy', from: 1, to: 8, daily: 4 },
-  M: { name: 'Medium', from: 5, to: 18, daily: 11 },
-  H: { name: 'Hard', from: 12, to: 28, daily: 22 },
+  E: { from: 1, to: 8, daily: 4 },
+  M: { from: 5, to: 18, daily: 11 },
+  H: { from: 12, to: 28, daily: 22 },
 };
 const packDifficulty = (pack, n) =>
   Math.round(PACKS[pack].from + (PACKS[pack].to - PACKS[pack].from) * Math.min(1, (n - 1) / (RAMP - 1)));
@@ -241,4 +224,4 @@ function tryGenerate(seed, cfg) {
   };
 }
 
-if (typeof module === 'object') module.exports = { evalExpr, checkEquation, nextInEquation, saveFits, rng, hash, levelConfig, generate, PACKS, PACK_SIZE, packDifficulty };
+if (typeof module === 'object') module.exports = { evalExpr, checkEquation, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty };
