@@ -30,7 +30,14 @@ function deal(seed) {
 // links[c] = a check found card c directly above card c + 1. Linked cards always move together, so links never break.
 let P = null;
 const today = () => ymd(new Date());
-const nextLevel = () => { let n = 1; while (store.stars[n]) n++; return Math.min(n, LEVELS.length); };
+// A random unsolved puzzle (any puzzle once all are solved), never today's daily. store.cur is the one in play, resumed until solved or given up.
+function playRandom(fresh) {
+  if (fresh || !store.saves['L' + store.cur]) {
+    const skip = dailyIndex(today()) + 1, all = LEVELS.map((_, i) => i + 1).filter((n) => n !== skip), open = all.filter((n) => !store.stars[n]);
+    store.cur = pick(Math.random, open.length ? open : all);
+  }
+  play('L' + store.cur);
+}
 const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, links: P.links, rows: P.rows, moved: P.moved }; persist(); };
 // The order split into units: runs of linked cards (groups) and lone cards, top to bottom.
 const units = () => P.order.reduce((u, c, p) => (p && P.links[c - 1] && P.order[p - 1] === c - 1 ? u.at(-1).push(c) : u.push([c]), u), []);
@@ -41,13 +48,12 @@ function screen(id) {
 }
 
 function home() {
-  const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), next = nextLevel(), solved = Object.keys(store.stars).length;
+  const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
   $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (st ? `  ·  🔥 ${st}` : '');
   $('#btn-daily').classList.toggle('done', !!rec);
   $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · see result` : store.saves['D' + t] ? 'Resume' : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
-  $('#lv-meta').textContent = `${solved} / ${LEVELS.length}`;
-  $('#btn-next b').textContent = `Level ${next}`;
-  $('#btn-next small').textContent = store.saves['L' + next] ? 'Resume' : DIFF[parse(LEVELS[next - 1]).d];
+  $('#lv-meta').textContent = `${solved} / ${LEVELS.length} solved`;
+  $('#btn-random small').textContent = store.saves['L' + store.cur] ? 'Resume' : 'From the whole collection';
 }
 const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
 
@@ -56,7 +62,7 @@ function play(key) {
   const lv = parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, done: false };
-  $('#g-title').textContent = date ? 'Daily' : `Level ${n}`;
+  $('#g-title').textContent = date ? 'Daily' : 'Random';
   $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + (sp ? sp.occasion : DIFF[lv.d]);
   $('#subject').textContent = lv.subject;
   $('#lbl-top').textContent = '▲ ' + lv.top;
@@ -187,10 +193,9 @@ function showResult(fresh) {
   $('#result').hidden = false;
   $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
   $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.date && streak() ? ` · 🔥 ${streak()}-day streak` : '');
-  const last = !P.date && P.n === LEVELS.length;
-  $('#res-next').hidden = last;
-  $('#res-next b').textContent = P.date ? 'Share result' : `Level ${P.n + 1}  →`;
-  $('#res-next').onclick = P.date ? () => share() : () => play('L' + (P.n + 1));
+  $('#res-next').hidden = false;
+  $('#res-next b').textContent = P.date ? 'Share result' : 'Another puzzle  →';
+  $('#res-next').onclick = P.date ? () => share() : () => playRandom(true);
   $('#result').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
@@ -204,38 +209,13 @@ async function share() {
   } catch {}
 }
 
-// PAGE (50, from core.js) levels per page, opening on the page with the next unsolved level.
-function openLevels(page) {
-  const next = nextLevel(), grid = $('#level-grid'), lastPage = Math.floor((LEVELS.length - 1) / PAGE);
-  page ??= Math.floor((next - 1) / PAGE);
-  const from = page * PAGE + 1, to = Math.min(from + PAGE - 1, LEVELS.length);
-  $('#pg-label').textContent = `${from}–${to}`;
-  $('#pg-prev').disabled = page === 0;
-  $('#pg-next').disabled = page >= lastPage;
-  $('#pg-prev').onclick = () => openLevels(page - 1);
-  $('#pg-next').onclick = () => openLevels(page + 1);
-  grid.replaceChildren();
-  for (let n = from; n <= to; n++) {
-    const b = document.createElement('button'), s = store.stars[n] || 0;
-    b.className = 'lvl' + (n === next && !s ? ' current' : '');
-    b.disabled = n > next;
-    b.innerHTML = `<span>${n}</span><small>${b.disabled ? '🔒' : s ? '★'.repeat(s) + '☆'.repeat(3 - s) : ''}</small>`;
-    b.setAttribute('aria-label', `Level ${n}${b.disabled ? ', locked' : s ? `, ${s} stars` : ''}`);
-    b.onclick = () => { $('#dlg-levels').close(); play('L' + n); };
-    grid.append(b);
-  }
-  if (!$('#dlg-levels').open) $('#dlg-levels').showModal();
-  grid.querySelector('.current')?.scrollIntoView({ block: 'center' });
-}
-
 // ---------- wiring ----------
 game = { name: 'Orderly', storeKey: 'orderly', glyphs: ['↑', '↓'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { daily: {}, stars: {}, saves: {}, muted: false, seenHelp: false, ...store };
 
 $('#btn-daily').onclick = () => play('D' + today());
-$('#btn-next').onclick = () => play('L' + nextLevel());
-$('#btn-levels').onclick = () => openLevels();
+$('#btn-random').onclick = () => playRandom();
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); P = null; screen('home'); };
 $('#btn-check').onclick = check;
