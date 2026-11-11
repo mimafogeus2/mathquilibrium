@@ -7,7 +7,7 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 | Game | Path | |
 |---|---|---|
 | Mathquilibrium | `mathquilibrium/` | A crossword where the numbers are given and you fill in the math. Every row and column must be a true equation. |
-| Coronet | `coronet/` | Queens in the round: N rings of N arcs, N colors. One queen per ring, slice and color. Easy 6, Medium 8, Hard 10. |
+| Coronet | `coronet/` | Queens in the round: N rings of N arcs, N colors. One queen per ring, slice and color. Easy 5, Medium 6, Hard 7. |
 
 Every game has Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (the same for everyone), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard.
 

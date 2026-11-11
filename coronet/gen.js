@@ -2,7 +2,7 @@
 // Place N queens: one per ring, one per angle (spoke), one per color. Every puzzle has exactly one solution.
 // Cell index = ring * N + spoke, ring 0 innermost. Uses rng/pick from shared/common.js (a global).
 
-const SIZES = { E: 6, M: 8, H: 10 };
+const SIZES = { E: 5, M: 6, H: 7 };
 
 // Arcs touch along rings (wrapping all the way round) and across neighboring rings.
 function neighbors(N, i) {
