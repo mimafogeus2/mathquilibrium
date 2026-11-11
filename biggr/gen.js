@@ -2,7 +2,7 @@
 // A pair is [left text, left value, right text, right value]; the values always differ, by at most GAP[tier].
 
 const PAIRS = 10;
-const TIME = { E: 30, M: 45, H: 60 }; // seconds per level
+const TIME = { E: 45, M: 70, H: 90 }; // seconds per level
 const GAP = { E: 4, M: 5, H: 6 };
 
 // Each template makes [text, value]. Templates are mixed freely within a tier, so ranges overlap on purpose.
