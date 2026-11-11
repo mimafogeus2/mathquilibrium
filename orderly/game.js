@@ -1,5 +1,5 @@
 'use strict';
-// Orderly: a subject and 10 cards; drag them into order. Check locks the cards already in place.
+// Orderly: a subject and 10 cards; drag them into order. Check joins runs of cards already in the right order into groups that move as one.
 // Borrows storage, sound, confetti and helpers from shared/core.js (but not its level-pack shell: no boot()).
 // Levels come from levels.js: LEVELS[i] = "difficulty|Subject|top label|bottom label|Name=Value;..." in the right order.
 const N = 10, DIFF = ['', 'Easy', 'Medium', 'Hard'];
@@ -24,12 +24,14 @@ function deal(seed) {
 }
 
 // ---------- state ----------
-// P = the puzzle on screen: { key, date?, n?, lv, order, rows: ['0110…' per check], moved, done }
+// P = the puzzle on screen: { key, date?, n?, lv, order, links, rows: ['0110…' per check, 1 = grouped], moved, done }
+// links[c] = a check found card c directly above card c + 1. Linked cards always move together, so links never break.
 let P = null;
 const today = () => ymd(new Date());
-const locked = (pos) => P.rows.length > 0 && P.rows.at(-1)[pos] === '1';
 const nextLevel = () => { let n = 1; while (store.stars[n]) n++; return Math.min(n, LEVELS.length); };
-const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, rows: P.rows, moved: P.moved }; persist(); };
+const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, links: P.links, rows: P.rows, moved: P.moved }; persist(); };
+// The order split into units: runs of linked cards (groups) and lone cards, top to bottom.
+const units = () => P.order.reduce((u, c, p) => (p && P.links[c - 1] && P.order[p - 1] === c - 1 ? u.at(-1).push(c) : u.push([c]), u), []);
 
 function screen(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
@@ -50,8 +52,8 @@ const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
 function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
   const lv = parse(LEVELS[date ? dailyIndex(date) : n - 1]), rec = date && store.daily[date]?.r, sv = store.saves[key];
-  P = rec ? { key, date, lv, order: [...Array(N).keys()], rows: rec.rows, done: true }
-    : { key, date, n, lv, order: sv?.order || deal(hash(key)), rows: sv?.rows || [], moved: sv?.moved ?? true, done: false };
+  P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, done: true }
+    : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, done: false };
   $('#g-title').textContent = date ? 'Daily' : `Level ${n}`;
   $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + DIFF[lv.d];
   $('#subject').textContent = lv.subject;
@@ -76,60 +78,52 @@ function play(key) {
 // Cards sit at --pos; the CSS turns that into a translateY, so moving one is just changing a number.
 function layout(dom = true) {
   const cards = cardEls();
-  P.order.forEach((i, pos) => {
-    const el = cards[i], ok = locked(pos);
-    el.style.setProperty('--pos', pos);
-    el.classList.toggle('ok', ok || P.done);
-    el.setAttribute('aria-label', `${P.lv.items[i].name}, ${pos + 1} of ${N}${ok || P.done ? `, correct: ${P.lv.items[i].val}` : ''}`);
-    el.tabIndex = ok || P.done ? -1 : 0;
-  });
+  let pos = 0;
+  for (const u of units()) for (const [k, i] of u.entries()) {
+    const el = cards[i], ok = u.length > 1;
+    el.style.setProperty('--pos', pos++);
+    el.classList.toggle('ok', ok);
+    el.classList.toggle('link', k < u.length - 1);
+    el.setAttribute('aria-label', `${P.lv.items[i].name}, ${pos} of ${N}${ok ? `, grouped: ${P.lv.items[i].val}` : ''}`);
+    el.tabIndex = P.done ? -1 : 0;
+  }
   // DOM order = visual order, so Tab walks top to bottom. Not mid-drag: re-inserting the held card drops its pointer capture.
   if (dom) $('#list').append(...P.order.map((i) => cards[i]));
 }
 const cardEls = () => [...$('#list').children].sort((a, b) => a.dataset.i - b.dataset.i);
 
 function status() {
-  const r = P.rows.at(-1), inPlace = r ? [...r].filter((c) => c === '1').length : 0;
-  $('#status').textContent = !r ? 'Drag the cards into order, then check.' : `${inPlace} of ${N} in place · ${checksText(P.rows.length)} so far`;
+  const r = P.rows.at(-1), grouped = r ? [...r].filter((c) => c === '1').length : 0;
+  $('#status').textContent = !r ? 'Drag the cards into order, then check.' : `${grouped} of ${N} grouped · ${checksText(P.rows.length)} so far`;
   $('#btn-check').disabled = !P.moved;
 }
 
-// Move the card at `from` to the unlocked slot `to`; the unlocked cards between shift over, locked ones stay put.
-function move(from, to) {
-  if (from === to || locked(to)) return;
-  const free = P.order.map((_, p) => p).filter((p) => !locked(p)), seq = free.map((p) => P.order[p]);
-  const [c] = seq.splice(free.indexOf(from), 1);
-  seq.splice(free.indexOf(to), 0, c);
-  free.forEach((p, k) => (P.order[p] = seq[k]));
-  P.moved = true;
-}
-// The unlocked slot nearest to a (fractional) position.
-const nearestFree = (pos) => {
-  let best = -1;
-  for (let p = 0; p < N; p++) if (!locked(p) && (best < 0 || Math.abs(p - pos) < Math.abs(best - pos))) best = p;
-  return best;
-};
+// Rebuild the order with `unit` inserted at index j among the other units.
+const place = (rest, unit, j) => { P.order = [...rest.slice(0, j), unit, ...rest.slice(j)].flat(); P.moved = true; };
 
+// Grabbing any card picks up its whole unit; it slides to wherever its top card lands nearest the pointer.
 function drag(e) {
   const el = e.target.closest('.card');
-  if (!el || el.classList.contains('ok') || P.done || e.button) return;
+  if (!el || P.done || e.button) return;
   e.preventDefault();
-  const i = +el.dataset.i, start = P.order.indexOf(i), y0 = e.clientY;
+  const all = units(), unit = all.find((u) => u.includes(+el.dataset.i)), rest = all.filter((u) => u !== unit);
+  const cards = cardEls(), els = unit.map((c) => cards[c]), start = P.order.indexOf(unit[0]), y0 = e.clientY;
   const pitch = el.offsetHeight + parseFloat(getComputedStyle($('#list')).rowGap || 0);
+  // tops[j] = where the unit's top card sits if inserted at index j
+  const tops = rest.reduce((t, u) => [...t, t.at(-1) + u.length], [0]);
   el.setPointerCapture(e.pointerId);
-  el.classList.add('held');
+  els.forEach((c) => c.classList.add('held'));
   const moveTo = (ev) => {
-    const dy = ev.clientY - y0, to = nearestFree(Math.max(0, Math.min(N - 1, start + dy / pitch)));
-    const at = P.order.indexOf(i);
-    if (to !== at) { move(at, to); layout(false); sfx.tap(); }
-    el.style.setProperty('--dy', dy - (P.order.indexOf(i) - start) * pitch + 'px');
+    const dy = ev.clientY - y0, want = start + dy / pitch;
+    const j = tops.reduce((b, t, k) => (Math.abs(t - want) < Math.abs(tops[b] - want) ? k : b), 0);
+    if (tops[j] !== P.order.indexOf(unit[0])) { place(rest, unit, j); layout(false); sfx.tap(); }
+    els.forEach((c) => c.style.setProperty('--dy', dy - (tops[j] - start) * pitch + 'px'));
   };
   const up = () => {
     el.removeEventListener('pointermove', moveTo);
-    el.classList.remove('held');
-    el.style.setProperty('--dy', '0px');
+    els.forEach((c) => { c.classList.remove('held'); c.style.setProperty('--dy', '0px'); });
     layout();
-    if (P.order.indexOf(i) !== start) { sfx.place(); status(); save(); }
+    if (P.order.indexOf(unit[0]) !== start) { sfx.place(); status(); save(); }
   };
   el.addEventListener('pointermove', moveTo);
   el.addEventListener('pointerup', up, { once: true });
@@ -138,15 +132,18 @@ function drag(e) {
 
 function check() {
   if (!P || P.done || !P.moved) return;
-  const prev = P.rows.at(-1) || '', row = P.order.map((c, p) => (c === p ? '1' : '0')).join('');
+  const was = new Set(units().filter((u) => u.length > 1).flat());
+  P.order.forEach((c, p) => { if (P.order[p + 1] === c + 1) P.links[c] = true; });
+  const row = P.order.map((c, p) => (P.order[p + 1] === c + 1 || P.order[p - 1] === c - 1 ? '1' : '0')).join('');
   P.rows.push(row);
   P.moved = false;
   layout();
-  if (!row.includes('0')) return win();
-  const fresh = [...row].filter((c, p) => c === '1' && prev[p] !== '1').length;
-  if (fresh) sfx.good([...row].filter((c) => c === '1').length);
+  if (P.order.every((c, p) => c === p)) return win();
+  const fresh = units().filter((u) => u.length > 1).flat().filter((c) => !was.has(c));
+  if (fresh.length) sfx.good([...row].filter((c) => c === '1').length);
   else { sfx.bad(); flash($('#list'), 'shake'); }
-  cardEls().forEach((el) => el.classList.contains('ok') && prev[P.order.indexOf(+el.dataset.i)] !== '1' && flash(el, 'pop'));
+  const cards = cardEls();
+  fresh.forEach((c) => flash(cards[c], 'pop'));
   status();
   save();
 }
@@ -231,10 +228,8 @@ document.addEventListener('keydown', (e) => {
   if (!P || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
   const el = document.activeElement?.closest?.('.card');
   if (el && !P.done && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-    const at = P.order.indexOf(+el.dataset.i), d = e.key === 'ArrowUp' ? -1 : 1;
-    let to = at + d;
-    while (to >= 0 && to < N && locked(to)) to += d;
-    if (to >= 0 && to < N) { move(at, to); layout(); el.focus(); sfx.place(); status(); save(); }
+    const all = units(), k = all.findIndex((u) => u.includes(+el.dataset.i)), to = k + (e.key === 'ArrowUp' ? -1 : 1);
+    if (to >= 0 && to < all.length) { place(all.filter((_, x) => x !== k), all[k], to); layout(); el.focus(); sfx.place(); status(); save(); }
   } else if (e.key === 'Escape') $('#btn-back').click();
   else return;
   e.preventDefault();

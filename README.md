@@ -9,7 +9,7 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 | Mathquilibrium | `mathquilibrium/` | A crossword where the numbers are given and you fill in the math. Every row and column must be a true equation. |
 | Coronet | `coronet/` | Queens in the round: N rings of N arcs, N colors. One queen per ring, slice and color. Easy 5, Medium 6, Hard 7. |
 | WordSwipe | `wordswipe/` | A subject and 24 words against a 60-second fuse: swipe right if the word fits, left if not. One daily round plus unlimited, from 5,000 hand-written rounds. |
-| Orderly | `orderly/` | A subject and 10 cards: drag them into order (oldest→newest, mildest→hottest…). Check locks the cards in place. One daily plus 2,030 levels. |
+| Orderly | `orderly/` | A subject and 10 cards: drag them into order (oldest→newest, mildest→hottest…). Check joins runs of cards in the right order into groups that move as one. One daily plus 2,030 levels. |
 
 Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (the same for everyone), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard.
 
