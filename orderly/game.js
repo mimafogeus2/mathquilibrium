@@ -84,6 +84,7 @@ function layout(dom = true) {
     el.style.setProperty('--pos', pos++);
     el.classList.toggle('ok', ok);
     el.classList.toggle('link', k < u.length - 1);
+    el.classList.toggle('linked', k > 0);
     el.setAttribute('aria-label', `${P.lv.items[i].name}, ${pos} of ${N}${ok ? `, grouped: ${P.lv.items[i].val}` : ''}`);
     el.tabIndex = P.done ? -1 : 0;
   }
