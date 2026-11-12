@@ -79,3 +79,17 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 }
 
 #logo { --cell: 32px; --gap: 4px; }
+
+/* ---------- print ---------- */
+.p-ops { margin: 0; font-size: 12pt; display: flex; align-items: center; gap: 4mm; }
+.p-ops b { display: grid; place-items: center; min-width: 9mm; height: 9mm; border: 1pt solid #000; border-radius: 2mm; font-size: 16pt; font-weight: 500; }
+.p-grid {
+  --cell: min(16mm, calc(180mm / var(--cols) / 1.1), calc(165mm / var(--rows) / 1.1)); /* cell + its .1 gap */
+  display: grid; gap: calc(var(--cell) * .1);
+  grid-template-columns: repeat(var(--cols), var(--cell)); grid-template-rows: repeat(var(--rows), var(--cell));
+}
+.p-grid > div { display: grid; place-items: center; border-radius: calc(var(--cell) * .16); font-size: calc(var(--cell) * .44); font-weight: 600; font-variant-numeric: tabular-nums; }
+.p-grid .long { font-size: calc(var(--cell) * .34); }
+.p-num { border: 1pt solid #000; }
+.p-given { font-weight: 400 !important; font-size: calc(var(--cell) * .54) !important; }
+.p-blank { border: 1pt dashed #000; }
