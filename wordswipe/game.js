@@ -185,7 +185,6 @@ function showEnd(rec, daily) {
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); play('U' + store.n); };
   $('#dlg-end').showModal();
 }
-const esc = (s) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 async function shareDaily(rec) {
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
@@ -226,6 +225,16 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
 });
 
+// Paper version: the 24 words in three columns of 8, each with a fits / doesn't box. No clock on paper.
+printable(() => R && {
+  top: `<p class="subject"><small>Does it fit?</small><b>${esc(R.subject)}</b></p>`,
+  rules: [
+    'Each of these <b>24 words</b> either fits the subject above or it doesn\'t.',
+    'Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn\'t. One box per word.',
+  ],
+  body: `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>
+    `<li><span class="p-box"></span><span class="p-box"></span>${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`,
+});
 syncSound();
 // #daily is today's round; #round-7 is unlimited round 7, open once reached (so Forward can replay the last one).
 router((h) => {
