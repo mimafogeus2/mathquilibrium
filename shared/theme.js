@@ -13,10 +13,11 @@
     const p = pref(), dark = p === 'dark' || (p === 'auto' && mq.matches);
     root.dataset.theme = dark ? 'dark' : 'light';
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#1d2a55' : '#f3ede1');
+    const label = (typeof I18N === 'object' && I18N[`Theme: ${p}`]) || `Theme: ${p}`; // core.js's T() isn't loaded yet
     for (const b of document.querySelectorAll('.js-theme')) {
       b.innerHTML = ICONS[p];
-      b.setAttribute('aria-label', `Theme: ${p}`);
-      b.title = `Theme: ${p}`;
+      b.setAttribute('aria-label', label);
+      b.title = label;
     }
   }
   mq.addEventListener('change', apply);

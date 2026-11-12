@@ -1,6 +1,8 @@
 // node orderly/test.js — every level (and special day) well-formed, subjects unique, deals scrambled, the daily covers the whole pool.
 const assert = require('assert');
-const LEVELS = require('./levels.js');
+// `node orderly/test.js he` checks a translation's content instead (he/orderly/), against the same rules
+const dir = process.argv[2] ? `${__dirname}/../${process.argv[2]}/orderly` : __dirname;
+const LEVELS = require(dir + '/levels.js');
 globalThis.LEVELS = LEVELS;
 Object.assign(globalThis, require('../shared/common.js'));
 
@@ -35,7 +37,7 @@ LEVELS.forEach((line, i) => {
 for (const t in TOPICS) for (const d of [1, 2, 3]) assert(LEVELS.some((l) => parse(l).topic === t && parse(l).d === d), `no ${DIFF[d]} ${t} puzzles`);
 
 // special days: real dates, each used once, in order, with an occasion
-const SPECIAL = require('./special.js'), dates = SPECIAL.map((l) => l.slice(0, 10));
+const SPECIAL = require(dir + '/special.js'), dates = SPECIAL.map((l) => l.slice(0, 10));
 SPECIAL.forEach((l, i) => {
   const d = dates[i], sp = special(SPECIAL, d);
   assert(/^\d{4}-\d{2}-\d{2}$/.test(d) && new Date(d + 'T12:00Z').toISOString().startsWith(d), 'bad date ' + l);

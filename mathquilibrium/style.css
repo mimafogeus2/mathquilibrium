@@ -1,6 +1,10 @@
 /* Mathquilibrium: the tile board and operator keys. Everything else is in shared/core.css. */
 :root { --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink); }
 
+/* Equations read left to right in every language: the board (and its scroller), the keys and the operator lists never mirror
+   (in right-to-left text a lone < would even show as >) */
+.zoom, .board, .p-grid, .palette, .intro-keys, #g-sub, .p-ops b { direction: ltr; unicode-bidi: isolate; }
+
 /* The board pinch-zooms (game.js sets --zoom) inside its own scroller; the page keeps one screen tall so the keys stay put. */
 #game { height: 100dvh; container-type: inline-size; } /* keys size from cqw, not vw */
 .board-wrap { min-height: 0; grid-template: minmax(0, 1fr) / minmax(0, 1fr); container-type: size; }

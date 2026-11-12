@@ -24,11 +24,12 @@
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .15 0 0 0 0 .21 0 0 0 0 .42 .9 0 0 0 -.42'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --speck: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .98 0 0 0 0 .96 0 0 0 0 .92 2.4 0 0 0 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
 
-  --display: 'Fraunces', Georgia, serif;
+  /* Hebrew pages also load Frank Ruhl Libre and Heebo (build.js): Fraunces and Inter have no Hebrew, so those glyphs fall through to them */
+  --display: 'Fraunces', 'Frank Ruhl Libre', Georgia, serif;
   --ease: cubic-bezier(.2, .8, .2, 1);
   --r: 14px;
 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Heebo', system-ui, -apple-system, sans-serif;
   font-feature-settings: 'cv11', 'ss01';
   color: var(--ink);
   -webkit-tap-highlight-color: transparent;
@@ -88,8 +89,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 
 /* ---------- home ---------- */
 #home { justify-content: center; position: relative; max-width: 460px; }
-.corner, .corner-start { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 10px; display: flex; gap: 2px; }
-.corner-start { right: auto; left: 10px; color: inherit; }
+.corner, .corner-start { position: absolute; top: max(12px, env(safe-area-inset-top)); inset-inline-end: 10px; display: flex; gap: 2px; }
+.corner-start { inset-inline: 10px auto; color: inherit; }
 .wordmark {
   font-size: clamp(44px, 12vw, 68px); font-weight: 600; letter-spacing: -0.035em; line-height: .95;
   margin: 14px 0 0; text-align: center;
@@ -111,7 +112,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 
 .btn {
   display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
-  width: 100%; padding: 15px 20px; border: 0; border-radius: var(--r); text-align: left;
+  width: 100%; padding: 15px 20px; border: 0; border-radius: var(--r); text-align: start;
 }
 .btn b { font-size: 17px; font-weight: 650; }
 .btn small { font-size: 13.5px; }
@@ -142,7 +143,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .title small { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 .bar-start { display: flex; gap: 2px; }
 .bar-end { display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
-#timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); min-width: 3.5ch; text-align: right; }
+#timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); min-width: 3.5ch; text-align: end; }
 
 .board-wrap { flex: 1; display: grid; place-items: center; width: 100%; padding: 12px 0; }
 
@@ -161,7 +162,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .give-up { border: 0; background: none; padding: 6px 10px; color: var(--muted); font-size: 13.5px; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
 .tools .give-up { flex-basis: 100%; }
 .chip {
-  display: flex; align-items: center; gap: 6px; padding: 8px 16px 8px 12px;
+  display: flex; align-items: center; gap: 6px; padding-block: 8px; padding-inline: 12px 16px;
   border-radius: 999px; border: 0; background: transparent; box-shadow: inset 0 0 0 1px var(--line);
   font-weight: 600; font-size: 14px; transition: box-shadow .15s, background-color .15s, opacity .2s;
 }
@@ -180,7 +181,7 @@ dialog::backdrop { background: rgb(20 28 60 / .38); backdrop-filter: blur(3px) s
 dialog h2 { margin: 0 0 16px; font-size: 32px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
 dialog form { margin-top: 20px; }
 
-.rules { text-align: left; padding-left: 22px; line-height: 1.5; margin: 16px 0 8px; font-size: 15px; }
+.rules { text-align: start; padding-inline-start: 22px; line-height: 1.5; margin: 16px 0 8px; font-size: 15px; }
 .rules li { margin-bottom: 7px; }
 .rules li::marker { font-family: var(--display); color: var(--brand-text); font-weight: 600; }
 .rules b { font-weight: 600; }
@@ -190,7 +191,7 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 
 /* only the level numbers scroll: the grid absorbs any height the viewport can't spare */
 #dlg-levels[open] { display: flex; flex-direction: column; overflow: hidden; max-height: calc(100dvh - 32px); }
-.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 55dvh; min-height: 0; overflow-y: auto; padding: 4px 6px 8px 4px; }
+.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 55dvh; min-height: 0; overflow-y: auto; padding-block: 4px 8px; padding-inline: 4px 6px; }
 .lvl {
   aspect-ratio: 1; border: 0; border-radius: 10px; background: var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
@@ -210,7 +211,7 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 .stats b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .win-actions { display: flex; flex-direction: column; gap: 10px; }
 /* the win dialog's ×: closing it leaves the solved board on view, with #btn-result to bring the dialog back */
-.dlg-x { position: absolute; top: 8px; right: 8px; margin: 0; }
+.dlg-x { position: absolute; top: 8px; inset-inline-end: 8px; margin: 0; }
 /* done (solved or given up): the play controls go, the board stays */
 #game.done :is(.tools > :not(#btn-result), .palette, .give-up, #btn-pause) { display: none; }
 #btn-result { width: auto; padding: 14px 40px; }
@@ -251,8 +252,8 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 .trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
 .daily-btn {
   --fill: var(--brand); --on-fill: var(--on-brand);
-  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 12px 12px 12px 14px; min-height: 104px;
-  border: 0; border-radius: var(--r); text-align: left;
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding-block: 12px; padding-inline: 14px 12px; min-height: 104px;
+  border: 0; border-radius: var(--r); text-align: start;
   background: var(--speck), var(--fill); color: var(--on-fill); box-shadow: 2px 3px 0 var(--reg);
   transition: transform .14s var(--ease), box-shadow .14s var(--ease);
   animation: enter .35s calc(var(--i, 0) * 60ms) both var(--ease);
@@ -268,12 +269,12 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 .packs { display: flex; flex-direction: column; }
 .pack-btn {
   display: grid; grid-template-columns: 4.6em 1fr auto; align-items: center; gap: 16px;
-  padding: 14px 4px; border: 0; border-bottom: 1px solid var(--hair); border-radius: 0; text-align: left;
+  padding: 14px 4px; border: 0; border-bottom: 1px solid var(--hair); border-radius: 0; text-align: start;
   background: transparent; transition: background-color .15s, padding .2s var(--ease);
 }
-.pack-btn:hover { background: var(--slot); padding-left: 10px; padding-right: 10px; }
+.pack-btn:hover { background: var(--slot); padding-inline: 10px; }
 .pack-name { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
-.pack-name::after { content: var(--pips); display: block; font-family: 'Inter', sans-serif; font-size: 8px; letter-spacing: 2px; color: var(--brand-text); margin-top: 2px; }
+.pack-name::after { content: var(--pips); display: block; font-family: 'Inter', 'Heebo', sans-serif; font-size: 8px; letter-spacing: 2px; color: var(--brand-text); margin-top: 2px; }
 .pack-bar { height: 3px; background: var(--hair); overflow: hidden; }
 .pack-bar i { display: block; height: 100%; min-width: 3px; background: var(--brand); }
 .pack-count { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
@@ -294,6 +295,16 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 }
 .pause-cover > b { font-size: 40px; font-weight: 500; font-style: italic; letter-spacing: -0.02em; }
 .pause-cover .btn { width: auto; padding: 14px 40px; }
+
+/* ---------- right-to-left ---------- */
+/* Everything above uses logical sides (inline-start/end), so it mirrors on its own. Arrows that mean back/forward turn with the text. */
+[dir="rtl"] :is(.corner-start, #btn-back, .pager .icon) svg { scale: -1 1; }
+/* Key caps and math (a translation marks its math dir="ltr") keep their order, and < > don't mirror; math doesn't break across lines */
+kbd { direction: ltr; unicode-bidi: isolate; }
+span[dir="ltr"] { white-space: nowrap; }
+/* Hebrew has no capitals and isn't tracked out: labels set in spaced caps go back to normal spacing. And no fake italics. */
+:lang(he) :is(.kicker, .block-head h2, .title small, .p-head p, .issue, .end-label, .subject small, .big-score small), :lang(he) .card::before, :lang(he) .card::after { letter-spacing: normal; }
+:lang(he) { font-synthesis-style: none; }
 
 /* small text controls still get a full-size touch target */
 .foot-link, .chip, .give-up { min-height: 44px; }

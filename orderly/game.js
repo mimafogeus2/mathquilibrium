@@ -64,15 +64,14 @@ function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
   $('#daily-meta').textContent = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
-  $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · see result` : store.saves['D' + t] ? 'Resume' : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
-  $('#lv-meta').textContent = `${solved} / ${LEVELS.length} solved`;
+  $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · ${T('see result')}` : store.saves['D' + t] ? T('Resume') : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
+  $('#lv-meta').textContent = T('{n} / {total} solved', { n: solved, total: LEVELS.length });
   // A random puzzle in progress: the main button resumes it. The difficulty row always deals a new one.
   const cur = store.saves['L' + store.cur];
-  $('#btn-random b').textContent = cur ? 'Resume puzzle' : 'Random puzzle';
-  $('#btn-random small').textContent = cur ? parse(LEVELS[store.cur - 1]).subject : 'From the whole collection';
+  $('#btn-random b').textContent = T(cur ? 'Resume puzzle' : 'Random puzzle');
+  $('#btn-random small').textContent = cur ? parse(LEVELS[store.cur - 1]).subject : T('From the whole collection');
 }
-const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
-const hintsText = (h) => `${h} hint${h > 1 ? 's' : ''}`;
+const checksText = (c) => (c === 1 ? T('1 check') : T('{n} checks', { n: c }));
 
 function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
@@ -80,8 +79,8 @@ function play(key) {
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, hints: sv?.hints || 0, done: false };
   toGame(date ? 'daily' : code(n));
-  $('#g-title').textContent = date ? 'Daily' : 'Random';
-  $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + (sp ? sp.occasion : DIFF[lv.d]);
+  $('#g-title').textContent = T(date ? 'Daily' : 'Random');
+  $('#g-sub').textContent = (date ? shortDate(date) + ' · ' : '') + (sp ? sp.occasion : T(DIFF[lv.d]));
   $('#subject').textContent = lv.subject;
   $('#lbl-top').textContent = '▲ ' + lv.top;
   $('#lbl-bottom').textContent = '▼ ' + lv.bottom;
@@ -111,7 +110,7 @@ function layout(dom = true) {
     el.classList.toggle('ok', ok);
     el.classList.toggle('link', k < u.length - 1);
     el.classList.toggle('linked', k > 0);
-    el.setAttribute('aria-label', `${P.lv.items[i].name}, ${pos} of ${N}${ok ? `, grouped: ${P.lv.items[i].val}` : ''}`);
+    el.setAttribute('aria-label', T(ok ? '{name}, {pos} of {n}, grouped: {val}' : '{name}, {pos} of {n}', { name: P.lv.items[i].name, pos, n: N, val: P.lv.items[i].val }));
     el.tabIndex = P.done ? -1 : 0;
   }
   // DOM order = visual order, so Tab walks top to bottom. Not mid-drag: re-inserting the held card drops its pointer capture.
@@ -121,9 +120,9 @@ const cardEls = () => [...$('#list').children].sort((a, b) => a.dataset.i - b.da
 
 function status() {
   const r = P.rows.at(-1), grouped = r ? [...r].filter((c) => c === '1').length : 0;
-  $('#status').textContent = !r ? 'Drag the cards into order, then check.' : `${grouped} of ${N} grouped · ${checksText(P.rows.length)} so far`;
+  $('#status').textContent = !r ? T('Drag the cards into order, then check.') : T('{n} of {total} grouped · {checks} so far', { n: grouped, total: N, checks: checksText(P.rows.length) });
   $('#btn-check').disabled = !P.moved;
-  $('#btn-hint b').textContent = `Hint (${HINTS - P.hints} left)`;
+  $('#btn-hint b').textContent = T('Hint ({n} left)', { n: HINTS - P.hints });
   $('#btn-hint').disabled = P.hints >= HINTS || P.links.slice(0, N - 1).every(Boolean);
 }
 
@@ -212,7 +211,7 @@ function win() {
 
 // Give up: the cards snap into the right order, nothing is recorded, and the save is dropped.
 function giveUp() {
-  if (!P || P.done || !confirm("Give up and see the right order? This puzzle won't count as solved.")) return;
+  if (!P || P.done || !confirm(T("Give up and see the right order? This puzzle won't count as solved."))) return;
   P.done = true;
   delete store.saves[P.key];
   persist();
@@ -224,7 +223,7 @@ function giveUp() {
   $('#result').hidden = false;
   $('#res-stars').innerHTML = '';
   $('#res-stars').removeAttribute('aria-label');
-  $('#res-text').textContent = "Here's the right order.";
+  $('#res-text').textContent = T("Here's the right order.");
   $('#res-next').hidden = true;
 }
 
@@ -233,21 +232,21 @@ function showResult(fresh) {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
-  $('#res-stars').setAttribute('aria-label', `${s} of 3 stars`);
-  $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date && streak() ? ` · ${streak()}-day streak` : '');
+  $('#res-stars').setAttribute('aria-label', T('{n} of 3 stars', { n: s }));
+  $('#res-text').innerHTML = T('Solved in <b>{checks}</b>', { checks: checksText(c) }) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
   $('#res-next').hidden = false;
-  $('#res-next b').textContent = P.date ? 'Share result' : 'Another puzzle  →';
+  $('#res-next b').textContent = T(P.date ? 'Share result' : 'Another puzzle  →');
   $('#res-next').onclick = P.date ? () => share() : () => playRandom(true, P.lv.d);
   $('#result').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 async function share() {
   const r = store.daily[P.date].r;
-  const sp = special(SPECIAL, P.date), text = `Orderly daily · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
+  const sp = special(SPECIAL, P.date), text = `${T('{game} daily', { game: game.name })} · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
     `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
   try {
     if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $('#res-next b').textContent = 'Copied ✓'; }
+    else { await navigator.clipboard.writeText(text); $('#res-next b').textContent = T('Copied ✓'); }
   } catch {}
 }
 
@@ -255,13 +254,14 @@ async function share() {
 async function shareLink() {
   const url = location.href;
   try {
-    if (navigator.share) await navigator.share({ title: 'Orderly', url });
+    if (navigator.share) await navigator.share({ title: game.name, url });
     else { await navigator.clipboard.writeText(url); flash($('#btn-link'), 'pop'); }
   } catch {}
 }
 
 // ---------- wiring ----------
-game = { name: 'Orderly', storeKey: 'orderly', glyphs: ['↑', '↓'] };
+// Each language has its own levels, so its own progress (math games share theirs: the puzzles are the same)
+game = { name: T('Orderly'), storeKey: LANG === 'en' ? 'orderly' : 'orderly-' + LANG, glyphs: ['↑', '↓'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { daily: {}, stars: {}, saves: {}, off: [], muted: false, seenHelp: false, ...store };
 
@@ -270,7 +270,7 @@ $('#btn-random').onclick = () => playRandom();
 // Easy / Medium / Hard ask which topics first; the choice is kept (as store.off, the unticked ones) for next time and for "Another puzzle".
 $('#t-list').replaceChildren(...Object.entries(TOPICS).map(([k, name]) => {
   const l = document.createElement('label');
-  l.innerHTML = `<input type="checkbox" value="${k}"> ${name}`;
+  l.innerHTML = `<input type="checkbox" value="${k}"> ${T(name)}`;
   return l;
 }));
 const boxes = [...document.querySelectorAll('#t-list input')], dlgTopics = $('#dlg-topics');
@@ -281,7 +281,7 @@ $('#t-all').onclick = () => tickAll(true);
 $('#t-none').onclick = () => tickAll(false);
 for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => {
   dlgTopics.dataset.d = b.dataset.d;
-  $('#t-title').textContent = DIFF[b.dataset.d] + ' puzzle';
+  $('#t-title').textContent = T(DIFF[b.dataset.d] + ' puzzle');
   for (const x of boxes) x.checked = !store.off.includes(x.value);
   syncGo();
   dlgTopics.returnValue = '';
@@ -320,9 +320,9 @@ document.addEventListener('keydown', (e) => {
 printable(() => P && {
   top: `<p class="subject"><b>${esc(P.lv.subject)}</b></p>`,
   rules: [
-    '<b>Cut out</b> the 10 cards along the dashed lines.',
-    `<b>Sort them on the table</b>, from <b>${esc(P.lv.top)}</b> at the top to <b>${esc(P.lv.bottom)}</b> at the bottom.`,
-    'Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.',
+    T('<b>Cut out</b> the 10 cards along the dashed lines.'),
+    T('<b>Sort them on the table</b>, from <b>{top}</b> at the top to <b>{bottom}</b> at the bottom.', { top: esc(P.lv.top), bottom: esc(P.lv.bottom) }),
+    T('Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.'),
   ],
   body: `<ul class="p-strips">${deal(hash(P.key)).map((i) => `<li><i></i>${esc(P.lv.items[i].name)}</li>`).join('')}</ul>`,
 });

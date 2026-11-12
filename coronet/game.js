@@ -1,7 +1,7 @@
 'use strict';
 const SVGNS = 'http://www.w3.org/2000/svg';
 const R = 96; // outer radius in viewBox units (viewBox is -100..100)
-const FIRST_TIP = 'Tap an arc to mark it <b>×</b>, again for a <b>queen</b>. One queen per <b>ring</b>, <b>slice</b> and <b>color</b>.';
+const FIRST_TIP = T('Tap an arc to mark it <b>×</b>, again for a <b>queen</b>. One queen per <b>ring</b>, <b>slice</b> and <b>color</b>.');
 // a crown in a 26-unit box around the origin; pieces are scaled to fit their arc
 const CROWN = '<g class="crown"><path d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>' +
   '<circle cx="-10.5" cy="-6.5" r="1.8"/><circle cy="-10" r="1.8"/><circle cx="10.5" cy="-6.5" r="1.8"/></g>';
@@ -90,8 +90,8 @@ function startLevel(G, save) {
   const s = fits ? save : {};
   Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
-  $('#g-sub').textContent = `${N} queens`;
-  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
+  $('#g-sub').textContent = T('{n} queens', { n: N });
+  $('#tip').innerHTML = G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -118,7 +118,7 @@ function refresh(sound, placed = null) {
   view.hubText.textContent = left || ''; // at zero the hub clears for the seal
   // keyboard cursor: outline the selected arc
   view.cursor.setAttribute('d', G.kbd && !G.done ? view.els[G.sel].getAttribute('d') : '');
-  $('#board').setAttribute('aria-label', `Coronet board, ${N} rings. ${left} of ${N} queens left`);
+  $('#board').setAttribute('aria-label', T('Coronet board, {n} rings. {left} of {n} queens left', { n: N, left }));
   // screen readers hear the arc under the keyboard cursor, and what just changed there
   if (G.kbd && !G.done) $('#sr').textContent = describe(G.sel, left, conflicts);
   if (!G.done && G.queens.size === N && !conflicts.size) win();
@@ -129,9 +129,10 @@ function refresh(sound, placed = null) {
 const REGION = ['pink', 'yellow', 'blue', 'lime', 'orange', 'teal', 'violet'];
 function describe(i, left, conflicts) {
   const N = N_(), k = shown(i);
-  const what = k === 'q' ? (G.hinted.has(i) ? 'queen, from a hint' : 'queen') + (conflicts.has(i) ? ', clashes with another queen' : '')
-    : k === 'm' ? 'marked' : k === 'a' ? 'ruled out' : 'empty';
-  return `Ring ${Math.floor(i / N) + 1} of ${N} from the centre, slice ${(i % N) + 1}, ${REGION[G.p.region[i]]}: ${what}. ${left} queens left.`;
+  const what = k === 'q' ? T(G.hinted.has(i) ? 'queen, from a hint' : 'queen') + (conflicts.has(i) ? T(', clashes with another queen') : '')
+    : T(k === 'm' ? 'marked' : k === 'a' ? 'ruled out' : 'empty');
+  return T('Ring {r} of {n} from the centre, slice {s}, {color}: {what}. {left} queens left.',
+    { r: Math.floor(i / N) + 1, n: N, s: (i % N) + 1, color: T(REGION[G.p.region[i]]), what, left });
 }
 // Keyboard focus on the board shows the cursor and starts describing it (a mouse click focuses it too, but quietly).
 $('#board').addEventListener('focus', () => { if (playing() && $('#board').matches(':focus-visible')) { G.kbd = true; refresh(false); } });
@@ -190,7 +191,7 @@ function hint() {
 
 function reset() {
   if (!playing() || (G.queens.size === G.hinted.size && !G.marks.size)) return;
-  if (!confirm('Restart this level? Your queens and marks are cleared; the clock keeps running.')) return;
+  if (!confirm(T('Restart this level? Your queens and marks are cleared; the clock keeps running.'))) return;
   act(() => { G.queens = new Set(G.hinted); G.marks.clear(); });
   sfx.erase();
   saveGame();
@@ -285,9 +286,9 @@ printable(() => {
   el.insertAdjacentHTML('afterbegin', PRINT_DEFS);
   return {
     rules: [
-      `Place <b>${G.p.N} queens</b>: one in every <b>ring</b>, every <b>slice</b> and every <b>shade</b>.`,
-      'Draw a <b>crown</b> or <b>Q</b> for a queen, and an <b>×</b> on arcs that can\'t hold one.',
-      'Each queen rules out the rest of its ring, its slice and its shade.',
+      T('Place <b>{n} queens</b>: one in every <b>ring</b>, every <b>slice</b> and every <b>shade</b>.', { n: G.p.N }),
+      T('Draw a <b>crown</b> or <b>Q</b> for a queen, and an <b>×</b> on arcs that can\'t hold one.'),
+      T('Each queen rules out the rest of its ring, its slice and its shade.'),
     ],
     body: el.outerHTML,
   };
@@ -295,5 +296,5 @@ printable(() => {
 
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
-boot({ name: 'Coronet', storeKey: 'coronet', random: true, winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+boot({ name: T('Coronet'), storeKey: 'coronet', random: true, winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });

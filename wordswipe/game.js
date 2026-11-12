@@ -37,9 +37,9 @@ function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
   $('#daily-meta').textContent = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
-  $('#btn-daily small').textContent = rec ? `✓ ${rec.s} points · see result` : store.cur?.key === 'D' + t ? 'Resume' : sp ? sp.occasion : '24 words · 60 seconds';
-  $('#btn-unlimited small').textContent = `Round ${store.n + 1}` + (store.best ? ` · best ${store.best}` : '') +
-    (store.cur?.key === 'U' + store.n ? ' · resume' : '');
+  $('#btn-daily small').textContent = rec ? `✓ ${T('{n} points', { n: rec.s })} · ${T('see result')}` : store.cur?.key === 'D' + t ? T('Resume') : sp ? sp.occasion : T('24 words · 60 seconds');
+  $('#btn-unlimited small').textContent = T('Round {n}', { n: store.n + 1 }) + (store.best ? ' · ' + T('best {n}', { n: store.best }) : '') +
+    (store.cur?.key === 'U' + store.n ? ' · ' + T('resume') : '');
 }
 
 function play(key) {
@@ -48,9 +48,9 @@ function play(key) {
   if (date && store.daily[date]?.r) { toMenu(false); screen('home'); return showEnd(store.daily[date].r, true); }
   R = store.cur?.key === key ? store.cur
     : { key, date, n, ...deal(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)], hash(key)), marks: [], left: TIME, over: false };
-  $('#g-title').textContent = date ? 'Daily' : `Round ${n + 1}`;
+  $('#g-title').textContent = date ? T('Daily') : T('Round {n}', { n: n + 1 });
   const sp = date && special(SPECIAL, date);
-  $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (sp ? ' · ' + sp.occasion : '') : '';
+  $('#g-sub').textContent = date ? shortDate(date) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
   $('#game').classList.remove('done');
@@ -85,8 +85,8 @@ function hud() {
   $('#clock').textContent = secs;
   $('#fuse').style.width = (R.left / TIME) * 100 + '%';
   $('#game').classList.toggle('hurry', secs <= 10);
-  $('#progress').textContent = `${Math.min(R.marks.length + 1, 24)} / 24`;
-  $('#score').textContent = `${R.marks.filter(Boolean).length * PER_RIGHT} pts`;
+  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, 24), total: 24 });
+  $('#score').textContent = T('{n} pts', { n: R.marks.filter(Boolean).length * PER_RIGHT });
 }
 
 // ---------- cards ----------
@@ -97,12 +97,14 @@ function refill() {
     const c = document.createElement('div');
     c.className = 'card';
     c.textContent = R.cards[i].w;
+    c.dataset.yes = T('YES');
+    c.dataset.no = T('NOPE');
     c.style.setProperty('--len', R.cards[i].w.length);
     st.prepend(c);
   }
   st.querySelectorAll('.card:not(.gone)').forEach((c, i, all) => c.style.setProperty('--depth', all.length - 1 - i));
   const top = topCard();
-  if (top) { top.setAttribute('role', 'img'); top.setAttribute('aria-label', `${top.textContent}: does it fit ${R.subject}?`); }
+  if (top) { top.setAttribute('role', 'img'); top.setAttribute('aria-label', T('{word}: does it fit {subject}?', { word: top.textContent, subject: R.subject })); }
 }
 const topCard = () => [...$('#stack').querySelectorAll('.card:not(.gone)')].pop();
 
@@ -130,7 +132,7 @@ function answer(saidYes) {
 function penalty() {
   const p = document.createElement('span');
   p.className = 'minus';
-  p.textContent = `−${PENALTY / 1000}s`;
+  p.textContent = T('−{n}s', { n: PENALTY / 1000 });
   $('.bar-end').append(p);
   setTimeout(() => p.remove(), 900);
 }
@@ -177,14 +179,15 @@ function finish() {
 
 function showEnd(rec, daily) {
   const right = [...rec.m].filter((c) => c === '1').length, done = rec.m.length === 24;
-  $('#end-title').textContent = !done ? "Time's up!" : right === 24 ? 'Flawless!' : right >= 20 ? 'Sharp!' : 'Done!';
-  $('#end-score').innerHTML = `${rec.s}<small>points</small>`;
-  $('#end-stats').innerHTML = `<b>${right}/24</b> right · ` + (done ? `<b>${rec.t}s</b> left (+${rec.t * PER_SEC})` : `${24 - rec.m.length} unanswered`);
+  $('#end-title').textContent = T(!done ? "Time's up!" : right === 24 ? 'Flawless!' : right >= 20 ? 'Sharp!' : 'Done!');
+  $('#end-score').innerHTML = `${rec.s}<small>${T('points')}</small>`;
+  $('#end-stats').innerHTML = T('<b>{n}/{total}</b> right', { n: right, total: 24 }) + ' · ' +
+    (done ? T('<b>{n}s</b> left (+{bonus})', { n: rec.t, bonus: rec.t * PER_SEC }) : T('{n} unanswered', { n: 24 - rec.m.length }));
   $('#end-misses').innerHTML = rec.misses.length
-    ? `<p class="muted small">${esc(rec.subject)} — you missed:</p>` +
+    ? `<p class="muted small">${T('{subject} — you missed:', { subject: esc(rec.subject) })}</p>` +
       rec.misses.map((w) => `<span class="${w[0] === '+' ? 'yes' : 'no'}">${w[0] === '+' ? '✓' : '✗'} ${esc(w.slice(1))}</span>`).join('')
     : '';
-  $('#end-next b').textContent = daily ? 'Share result' : `Round ${store.n + 1}  →`;
+  $('#end-next b').textContent = daily ? T('Share result') : T('Round {n}  →', { n: store.n + 1 });
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); play('U' + store.n); };
   $('#btn-result').hidden = false;
   $('#dlg-end').showModal();
@@ -192,17 +195,18 @@ function showEnd(rec, daily) {
 
 async function shareDaily(rec) {
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
-  const sp = special(SPECIAL, date), text = `WordSwipe daily · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
-    `${rec.s} points${rec.t ? ` · ${rec.t}s left` : ' · ⏰ out of time'}` +
+  const sp = special(SPECIAL, date), text = `${T('{game} daily', { game: game.name })} · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
+    T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
   try {
     if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = 'Copied ✓'; }
+    else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = T('Copied ✓'); }
   } catch {}
 }
 
 // ---------- wiring ----------
-game = { name: 'WordSwipe', storeKey: 'wordswipe', glyphs: ['✓', '✗'] };
+// Each language has its own rounds, so its own progress
+game = { name: T('WordSwipe'), storeKey: LANG === 'en' ? 'wordswipe' : 'wordswipe-' + LANG, glyphs: ['✓', '✗'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { daily: {}, n: 0, best: 0, muted: false, seenHelp: false, ...store };
 
@@ -215,7 +219,7 @@ $('#btn-yes').onclick = () => answer(true);
 $('#btn-no').onclick = () => answer(false);
 $('#stack').addEventListener('pointerdown', drag);
 // Giving up runs the clock out: the round ends as if time were up.
-$('#btn-giveup').onclick = () => { if (R && !R.over && confirm('Give up? The round ends now, scored as it stands.')) { R.left = 0; hud(); finish(); } };
+$('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The round ends now, scored as it stands.'))) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
@@ -232,10 +236,10 @@ document.addEventListener('keydown', (e) => {
 
 // Paper version: the 24 words in three columns of 8, each with a fits / doesn't box. No clock on paper.
 printable(() => R && {
-  top: `<p class="subject"><small>Does it fit?</small><b>${esc(R.subject)}</b></p>`,
+  top: `<p class="subject"><small>${T('Does it fit?')}</small><b>${esc(R.subject)}</b></p>`,
   rules: [
-    'Each of these <b>24 words</b> either fits the subject above or it doesn\'t.',
-    'Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn\'t. One box per word.',
+    T('Each of these <b>24 words</b> either fits the subject above or it doesn\'t.'),
+    T('Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn\'t. One box per word.'),
   ],
   body: `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>
     `<li><span class="p-box"></span><span class="p-box"></span>${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`,

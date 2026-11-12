@@ -24,12 +24,24 @@ Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded leve
 - `orderly/special.js`, `wordswipe/special.js` — special days: `YYYY-MM-DD|Occasion|puzzle line` replaces that date's daily with a themed one. Each date is used once ever: a small day gets one line, a big holiday one per year, and small days sharing a date take turns by year
 - `<game>/gen.js` — the generator; `<game>/game.js` — the board, calling `boot({ ... })`
 
+## Translations
+
+Hebrew lives at `/he/` (`/he/orderly/`…), right to left. The English pages are the source; the translated ones are generated:
+
+- `i18n/he.js` — the Hebrew text: strings the scripts look up with `T('…')` (grouped by script), and `[English, Hebrew]` replacements for each page's HTML
+- `node build.js` writes `he/index.html` and `he/<game>/index.html` (committed, so Pages needs no build step). Each page gets its strings inlined, `lang="he" dir="rtl"`, the Hebrew fonts, and paths back to the shared English scripts and styles. It fails if a replacement no longer matches the English, a `T('…')` string has no translation, or English is left on a page — so after changing a page or a string, run it and fill in what it reports
+- `he/orderly/levels.js`, `he/orderly/special.js`, `he/wordswipe/rounds.js`, `he/wordswipe/special.js` — the Hebrew puzzles, written for Israeli players (same formats as the English ones). A file here replaces the English one of the same name; every other file is shared
+- Layout uses logical CSS (`inset-inline-start`, `padding-inline`, `text-align: start`), so one stylesheet serves both directions. Math (boards, sums, the swipe buttons) stays left to right: see `direction: ltr` in the game styles
+- Word games keep separate progress per language (`orderly-he`, `wordswipe-he`); the math games share theirs
+
 ## Run locally
 
-No build step. Serve the folder:
+No build step for the English pages (Hebrew: `node build.js`, see above). Serve the folder:
 
 ```sh
 python3 -m http.server
 ```
 
 Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js && node quadflip/test.js`
+
+Hebrew: `node build.js --check && node wordswipe/test.js he && node orderly/test.js he`

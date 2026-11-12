@@ -1,6 +1,8 @@
 // node wordswipe/test.js — every round (and special day) well-formed, subjects unique, daily/unlimited cover the whole pool.
 const assert = require('assert');
-const ROUNDS = require('./rounds.js');
+// `node wordswipe/test.js he` checks a translation's content instead (he/wordswipe/), against the same rules
+const dir = process.argv[2] ? `${__dirname}/../${process.argv[2]}/wordswipe` : __dirname;
+const ROUNDS = require(dir + '/rounds.js');
 globalThis.ROUNDS = ROUNDS;
 Object.assign(globalThis, require('../shared/common.js'));
 
@@ -21,7 +23,7 @@ const CHECK = (line, at) => {
 ROUNDS.forEach((line, i) => CHECK(line, `round ${i}: ${line}`));
 
 // special days: real dates, each used once, in order, with an occasion
-const SPECIAL = require('./special.js'), dates = SPECIAL.map((l) => l.slice(0, 10));
+const SPECIAL = require(dir + '/special.js'), dates = SPECIAL.map((l) => l.slice(0, 10));
 SPECIAL.forEach((l, i) => {
   const d = dates[i], sp = special(SPECIAL, d);
   assert(/^\d{4}-\d{2}-\d{2}$/.test(d) && new Date(d + 'T12:00Z').toISOString().startsWith(d), 'bad date ' + l);
