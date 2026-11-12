@@ -42,6 +42,9 @@
   width: min(420px, 100%); flex: 1; min-height: 380px; max-height: 620px;
   touch-action: none; user-select: none; -webkit-user-select: none;
 }
+/* .name clips (overflow: hidden), so it's a scroll container: the list's touch-action stops there and the global
+   `* { manipulation }` would let a drag that starts on a card's text pan the page */
+.list * { touch-action: none; }
 .list.shake { animation: shake .4s; }
 .card {
   --pos: 0; --dy: 0px;
