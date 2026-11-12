@@ -54,10 +54,11 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 .cell.shake { animation: shake .4s; }
 .board.solved .cell { animation: wave .6s calc(var(--d) * 1.6) both var(--ease); }
 
-.palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+/* the widest palette is 11 keys (7 ops, 3 relations, erase): size for 6 per row so it never takes more than 2 */
 .key {
-  width: clamp(48px, 13vw, 60px); height: clamp(52px, 14vw, 60px);
-  border: 0; border-radius: 14px; font-size: 28px; font-weight: 400;
+  width: min(52px, calc((100vw - 32px - 5 * 6px) / 6)); height: min(48px, calc((100vw - 32px - 5 * 6px) / 6));
+  border: 0; border-radius: 12px; font-size: 24px; font-weight: 400;
   background: var(--speck), var(--brand); color: var(--on-brand); box-shadow: 2px 3px 0 var(--reg);
   transition: transform .1s var(--ease), box-shadow .1s var(--ease);
 }
@@ -70,7 +71,7 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 #help-grid { margin: 0 auto 8px; --cell: 34px; }
 
 @media (orientation: landscape) and (max-height: 540px) {
-  .key { width: 52px; height: 52px; font-size: 26px; }
+  .key { width: 44px; height: 44px; font-size: 22px; } /* 6 per row in the 300px side column */
   .board {
     --cell: min(62px,
       calc((100dvh - 90px) / var(--rows) - var(--gap)),
