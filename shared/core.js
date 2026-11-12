@@ -6,6 +6,7 @@
 //   save(G)        -> what to persist besides elapsed
 //   key(e)         -> handle a keydown during play; return true if used
 //   reveal(G)      -> show the answer on the board (after giving up)
+//   random         -> optional: random levels per difficulty with share codes (playRandom), no unlocks or levels grid
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
 const ICON_ON = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
@@ -100,13 +101,30 @@ function router(open, home) {
   go();
 }
 // Pack games: #daily-easy is today's Easy daily, #easy-12 is Easy level 12 (if unlocked).
-const levelHash = (pack, n) => (n ? '' : 'daily-') + TIERS[pack].toLowerCase() + (n ? '-' + n : '');
+// Random games (game.random) use an opaque 3-char code instead (#easy-k3f), and any level opens, unlocked or not.
+// n * 9973 mod 36^3 is a bijection (9973 is coprime with 36^3), so codes don't follow level order (as in Orderly).
+const levelCode = (n) => ((n * 9973) % 46656).toString(36).padStart(3, '0');
+const levelHash = (pack, n) => (n ? '' : 'daily-') + TIERS[pack].toLowerCase() + (n ? '-' + (game.random ? levelCode(n) : n) : '');
 function openLevel(h, start) {
-  const [a, b] = h.split('-'), tier = (s) => Object.keys(TIERS).find((k) => TIERS[k].toLowerCase() === s), p = tier(a), n = +b;
+  const [a, b] = h.split('-'), tier = (s) => Object.keys(TIERS).find((k) => TIERS[k].toLowerCase() === s), p = tier(a);
+  const n = game.random ? Array.from({ length: PACK_SIZE }, (_, i) => i + 1).find((i) => levelCode(i) === b) : +b;
   if (a === 'daily' && tier(b)) start(tier(b), null, ymd(new Date()));
+  else if (p && game.random && n) { store.cur[p] = n; persist(); start(p, n); }
   else if (p && Number.isInteger(n) && n >= 1 && n <= store.packs[p].unlocked) start(p, n);
   else return false;
   return true;
+}
+// Random games: store.cur[pack] is that difficulty's puzzle in play, resumed until solved or given up (or a new one is dealt).
+// A new one is a random unsolved level of the pack (any level once all are solved).
+function playRandom(pack, fresh) {
+  const cur = store.cur[pack];
+  if (fresh || !store.saves[pack + cur]) {
+    delete store.saves[pack + cur];
+    const all = Array.from({ length: PACK_SIZE }, (_, i) => i + 1), open = all.filter((n) => !store.packs[pack].stars[n]);
+    store.cur[pack] = pick(Math.random, open.length ? open : all);
+    persist();
+  }
+  start(pack, store.cur[pack]);
 }
 
 // ---------- screens ----------
@@ -133,6 +151,12 @@ function renderHome() {
     b.innerHTML = `<span class="pack-name">${name}</span>
       <span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span>
       <span class="pack-count">${done}/${PACK_SIZE}</span>`;
+    if (game.random) {
+      const resume = !!store.saves[k + store.cur[k]];
+      b.querySelector('.pack-count').insertAdjacentHTML('beforeend', `<small>${resume ? 'Resume' : 'New puzzle'}</small>`);
+      b.onclick = () => playRandom(k);
+      return b;
+    }
     const next = firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
@@ -144,7 +168,7 @@ function renderHome() {
 function start(pack, n, date = null) {
   const key = date ? 'D' + pack + date : pack + n, save = store.saves[key] || {};
   G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: false, paused: false };
-  $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
+  $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${game.random ? levelCode(n) : n}`;
   show('game');
   toGame(levelHash(pack, n));
   if (game.start(G, save)) G.elapsed = save.elapsed || 0;
@@ -206,10 +230,10 @@ function win() {
     const st = streak();
     $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b> · ${h ? `${h} hint${h > 1 ? 's' : ''}` : 'no hints'}` +
       (g.date && st ? ` · ${st}-day streak` : '');
-    const last = !g.date && g.n === PACK_SIZE;
+    const last = !g.date && !game.random && g.n === PACK_SIZE;
     if (last) $('#win-title').textContent = `${TIERS[g.pack]} pack complete!`;
     $('#win-next').hidden = last;
-    $('#win-next b').textContent = g.date ? 'Share result' : `Level ${g.n + 1}  →`;
+    $('#win-next b').textContent = g.date ? 'Share result' : game.random ? 'Another puzzle  →' : `Level ${g.n + 1}  →`;
     $('#dlg-win').showModal();
   }, game.winDelay ?? 1100);
 }
@@ -314,8 +338,12 @@ function boot(g) {
   try { store = JSON.parse(localStorage.getItem(g.storeKey)) || {}; } catch { store = {}; }
   store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...store };
   for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
-
-  $('#btn-levels').onclick = () => openLevels();
+  if (g.random) {
+    store.cur ??= {};
+    // a level left mid-way under the old fixed progression becomes that difficulty's puzzle to resume
+    for (const k in TIERS) store.cur[k] ??= +Object.keys(store.saves).find((s) => s[0] === k && /^\d+$/.test(s.slice(1)))?.slice(1) || undefined;
+    for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(b.dataset.pack, true);
+  } else $('#btn-levels').onclick = () => openLevels();
   $('#btn-help').onclick = () => $('#dlg-help').showModal();
   const home = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
   $('#btn-back').onclick = home;
@@ -324,7 +352,7 @@ function boot(g) {
   $('#btn-giveup').onclick = giveUp;
   $('#win-home').onclick = () => { $('#dlg-win').close(); show('home'); };
   $('#win-next').onclick = () => {
-    if (G.date) share(); else { $('#dlg-win').close(); start(G.pack, G.n + 1); }
+    if (G.date) share(); else { $('#dlg-win').close(); game.random ? playRandom(G.pack, true) : start(G.pack, G.n + 1); }
   };
   $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
   for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
