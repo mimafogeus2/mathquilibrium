@@ -9,6 +9,10 @@
   display: grid; place-items: safe center;
   padding: 6px; margin: -6px; /* room for the selection outline and the tile animations, without scrollbars */
   touch-action: pan-x pan-y; /* pinch is ours, not the page's */
+  /* edges with more board past them fade out (game.js sets --l/--r/--t/--b to 0 there) */
+  mask: linear-gradient(to right, rgb(0 0 0 / var(--l, 1)), #000 28px, #000 calc(100% - 28px), rgb(0 0 0 / var(--r, 1))),
+        linear-gradient(to bottom, rgb(0 0 0 / var(--t, 1)), #000 28px, #000 calc(100% - 28px), rgb(0 0 0 / var(--b, 1)));
+  mask-composite: intersect;
 }
 .zoom * { touch-action: pan-x pan-y; /* beat the global `* { manipulation }`, which would let the tiles pinch the page */
 }
