@@ -1,92 +1,110 @@
-/* Coronet: the round board. Everything else is in shared/core.css. */
+/* Coronet: the round board. Everything else is in shared/core.css.
+   The full-colour game: regions are riso inks laid as tints; its own ink is the key blue. */
 :root {
-  --r0: #f59e85; --r1: #f7c25c; --r2: #e6dc72; --r3: #9fd68b; --r4: #79cfc0;
-  --r5: #8cc2f0; --r6: #a3a2f0; --r7: #dca2e0; --r8: #f6a9bd; --r9: #c8c0b2;
-  --wall: #3b3428; --seam: rgb(255 255 255 / .6); --piece: #1e2230;
+  --brand: var(--ink); --brand-text: var(--ink); --on-brand: var(--paper);
+  /* one ink per region (at most 7), ordered so any first N stay far apart in hue */
+  --r0: #ff48b0; --r1: #ffb511; --r2: #3f8ee6; --r3: #a8cf2a; --r4: #ff6c2f; --r5: #1fb3a8; --r6: #a07de6;
+  --wall: var(--navy); --piece: var(--navy); --seam: rgb(28 42 92 / .22);
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --r0: #b8644f; --r1: #b98a2e; --r2: #9c963c; --r3: #5e9a4f; --r4: #3f9384;
-    --r5: #4b84b5; --r6: #6466c4; --r7: #9a5aa6; --r8: #b8607a; --r9: #7d776c;
-    --wall: #0b0c11; --seam: rgb(0 0 0 / .3); --piece: #f6f2ea;
-  }
+:root[data-theme="dark"] {
+  --r0: #ff5cb8; --r1: #ffc62e; --r2: #5ea2f0; --r3: #b8dc3c; --r4: #ff7a3d; --r5: #2ec4b6; --r6: #b291f0;
+  --wall: #0d1533; --piece: #0d1533; --seam: rgb(13 21 51 / .3);
 }
-.wordmark span { color: var(--accent); }
 
 .board {
   width: min(620px, calc(100vw - 24px), calc(100dvh - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
   fill: initial; stroke: none; stroke-width: 1;
   touch-action: none; user-select: none; -webkit-user-select: none;
-  filter: drop-shadow(0 14px 18px rgb(40 30 10 / .18));
-  animation: spin-in .8s cubic-bezier(.2, .9, .3, 1.15) both;
+  filter: drop-shadow(0 18px 26px rgb(28 42 92 / .2));
+  animation: spin-in .6s var(--ease) both;
 }
+:root[data-theme="dark"] .board { filter: drop-shadow(0 16px 28px rgb(0 0 0 / .45)); }
 .board.mini { width: 132px; filter: none; }
-#logo { animation: spin-in .8s cubic-bezier(.2, .9, .3, 1.15) both, turn 90s linear infinite; }
+#logo { animation: spin-in .6s var(--ease) both, turn 90s linear infinite; }
 #help-board { display: block; margin: 0 auto 8px; width: 120px; }
-@keyframes spin-in { from { opacity: 0; transform: rotate(-50deg) scale(.7); } }
+@keyframes spin-in { from { opacity: 0; transform: rotate(-30deg) scale(.9); } }
 @keyframes turn { to { transform: rotate(360deg); } }
 
-.lip { fill: var(--edge); }
+/* the board's registration shadow: the key drum, a touch down-right */
+.lip { fill: var(--reg); transform: translate(2px, 0); }
+.cells { filter: url(#speck); }
+/* paper under the arcs, so the speckle shows paper rather than the shadow */
+.stock-back { fill: var(--stock); }
 .c {
   stroke: var(--seam); stroke-width: .5; stroke-linejoin: round;
   transform-box: fill-box; transform-origin: center;
-  animation: enter .5s var(--d, 0ms) both cubic-bezier(.2, .9, .3, 1.35);
+  animation: enter .3s var(--d, 0ms) both var(--ease);
 }
-.rg0 { fill: var(--r0); } .rg1 { fill: var(--r1); } .rg2 { fill: var(--r2); } .rg3 { fill: var(--r3); } .rg4 { fill: var(--r4); }
-.rg5 { fill: var(--r5); } .rg6 { fill: var(--r6); } .rg7 { fill: var(--r7); } .rg8 { fill: var(--r8); } .rg9 { fill: var(--r9); }
-.walls, .rim { fill: none; stroke: var(--wall); stroke-width: 1.5; stroke-linecap: round; }
+/* inks toned down: a little darker, much less chroma — muted print colours, not neon */
+.c { --tone-l: .95; --tone-c: .7; }
+:root[data-theme="dark"] .c { --tone-l: .84; --tone-c: .7; }
+.rg0 { fill: var(--r0); }
+.rg1 { fill: var(--r1); }
+.rg2 { fill: var(--r2); }
+.rg3 { fill: var(--r3); }
+.rg4 { fill: var(--r4); }
+.rg5 { fill: var(--r5); }
+.rg6 { fill: var(--r6); }
+/* older browsers without relative colours keep the plain inks */
+@supports (color: oklch(from red l c h)) {
+  .rg0 { fill: oklch(from var(--r0) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+  .rg1 { fill: oklch(from var(--r1) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+  .rg2 { fill: oklch(from var(--r2) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+  .rg3 { fill: oklch(from var(--r3) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+  .rg4 { fill: oklch(from var(--r4) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+  .rg5 { fill: oklch(from var(--r5) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+  .rg6 { fill: oklch(from var(--r6) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
+}
+.walls, .rim { fill: none; stroke: var(--wall); stroke-width: 1.4; stroke-linecap: round; }
 .mini .walls, .mini .rim { stroke-width: 2.2; }
-.hub circle { fill: var(--tile); }
-.hub text { fill: var(--ink); font-weight: 800; text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+.hub circle { fill: var(--stock); stroke: var(--wall); stroke-width: 1.4; }
+.hub text { fill: var(--ink); font-family: var(--display); font-weight: 600; text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
 
 .pc { pointer-events: none; }
-.crown { fill: var(--piece); transform-box: fill-box; transform-origin: center; }
-.x { stroke: var(--piece); stroke-width: 2.4; stroke-linecap: round; opacity: .55; }
-.pc[data-k="a"] .x { opacity: .3; }
-.pc.bad .crown { fill: var(--bad); }
-.pc.hinted .crown { fill: var(--gold-edge); }
-.cursor { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
+/* queens are rubber stamps: inked unevenly, a touch crooked, not quite inside the lines */
+.pieces { filter: url(#stamp); }
+.crown { fill: var(--piece); transform-box: fill-box; transform-origin: center; rotate: var(--rot, 0deg); translate: var(--tx, 0) var(--ty, 0); }
+.x { stroke: var(--piece); stroke-width: 2.2; stroke-linecap: round; opacity: .55; }
+.pc[data-k="a"] .x { opacity: .4; }
+.pc.bad .crown, .pc.hinted .crown { stroke: var(--stock); stroke-width: 2; paint-order: stroke; }
+.pc.bad .crown { fill: var(--red); }
+.pc.hinted .crown { fill: var(--sun-text); }
+:root[data-theme="dark"] .pc.hinted .crown { fill: var(--sun); }
+.cursor { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
 
-.crown.pop { animation: pop .3s cubic-bezier(.2, .9, .3, 1.6); }
+.crown.pop { animation: pop .22s var(--ease); }
 .crown.shake { animation: shake .4s; }
 
 /* solved: a ripple runs out from the hub, ring by ring */
 .board.solved .c { transform-box: view-box; transform-origin: 50% 50%; animation: ripple .7s calc(var(--ring) * 70ms) both; }
-.board.solved .crown { animation: wave .7s .3s both; }
-.board.solved .hub text { fill: var(--gold-edge); }
-@keyframes ripple { 40% { transform: scale(1.035); filter: brightness(1.15); } }
+.board.solved .pc .crown { animation: wave .6s .3s both var(--ease); }
+/* the seal of approval: the hub takes the sunflower drum and a stamped crown thumps down into it */
+.seal { display: none; }
+.board.solved .seal { display: inline; }
+.board.solved .hub circle { fill: var(--sun); filter: url(#speck); transition: fill .2s .25s; }
+.seal-ink { transform-box: fill-box; transform-origin: center; filter: url(#stamp); animation: stamp .32s .3s both cubic-bezier(.3, 0, .2, 1); }
+.seal .crown { fill: var(--navy); }
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(1.5) rotate(-14deg); }
+  60% { opacity: 1; transform: scale(.94) rotate(-5deg); }
+  100% { opacity: 1; transform: rotate(-6deg); }
+}
+@keyframes ripple { 40% { transform: scale(1.03); } }
 
 @media (orientation: landscape) and (max-height: 540px) {
   .board:not(.mini) { width: min(calc(100dvh - 90px), calc(100vw - 380px)); }
 }
 
-/* ---------- polish ---------- */
 /* keep board, tip and tools together in the middle instead of the tools stranded at the bottom */
 #game .board-wrap { flex: 0 0 auto; margin-top: auto; }
 #game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
 #game .tip { margin: 2px 0 0; }
 
-/* tools as chunky tiles, like the menu buttons */
-#game .chip {
-  border: 0; background: var(--tile); box-shadow: 0 3px 0 var(--edge); padding: 10px 18px 10px 14px;
-  transition: transform .12s, box-shadow .12s, opacity .2s;
-}
-#game .chip:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--edge); }
-#game .chip:disabled { box-shadow: none; background: var(--slot); }
-
 /* arcs answer the pointer */
 @media (hover: hover) {
-  .board:not(.mini):not(.solved) .c { transition: filter .12s; }
-  .board:not(.mini):not(.solved) .c:hover { filter: brightness(1.07) saturate(1.1); }
+  .board:not(.mini):not(.solved) .c { transition: opacity .12s; }
+  .board:not(.mini):not(.solved) .c:hover { opacity: .82; }
 }
 
-/* a crisper board: auto marks readable in light, a soft inner shade on the hub */
-.pc[data-k="a"] .x { opacity: .38; }
-.hub circle { stroke: var(--wall); stroke-width: 1.5; }
-.board:not(.mini) .hub circle { filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / .15)); }
-.board { filter: drop-shadow(0 10px 22px rgb(40 30 10 / .16)) drop-shadow(0 2px 3px rgb(40 30 10 / .1)); }
-@media (prefers-color-scheme: dark) {
-  .board { filter: drop-shadow(0 12px 26px rgb(0 0 0 / .55)); }
-  .pc[data-k="a"] .x { opacity: .32; }
-}
-.board.mini { filter: none; }
+/* key-ink buttons would hide a key-ink registration offset: print it in sunflower instead */
+.btn.primary, .daily-btn:not(.done), .lvl.current { box-shadow: 2px 3px 0 var(--sun); }

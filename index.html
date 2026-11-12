@@ -4,156 +4,233 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Puzzle Shelf — daily logic games</title>
-<meta name="description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day, the same for everyone.">
+<meta name="description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Puzzle Shelf">
 <meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/">
 <meta property="og:title" content="Puzzle Shelf — daily logic games">
-<meta property="og:description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day, the same for everyone.">
+<meta property="og:description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day.">
 <meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#13151d" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2333388f'/%3E%3Crect x='14' y='14' width='15' height='15' rx='4' fill='%23fff'/%3E%3Crect x='35' y='14' width='15' height='15' rx='4' fill='%23ff6a3d'/%3E%3Crect x='14' y='35' width='15' height='15' rx='4' fill='%23f2b134'/%3E%3Crect x='35' y='35' width='15' height='15' rx='4' fill='%23fff'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#f3ede1">
+<script src="shared/theme.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ccircle cx='28' cy='36' r='16' fill='%23ff48b0'/%3E%3Ccircle cx='36' cy='28' r='16' fill='%23ffb511' fill-opacity='.88'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared/core.css">
 <style>
-  .games { width: 100%; max-width: 420px; }
-  .games, .games section { display: flex; flex-direction: column; gap: 16px; }
-  .games h3 { margin: 12px 0 -4px 6px; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .cover { max-width: 1040px; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) clamp(16px, 4vw, 40px) max(32px, env(safe-area-inset-bottom)); }
+  /* ---- masthead ---- */
+  .mast-top { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
+  .masthead {
+    margin: 0; padding: clamp(10px, 2vw, 18px) 0 clamp(14px, 2.6vw, 26px); text-align: center;
+    font: 600 clamp(64px, 17vw, 168px)/0.86 var(--display); letter-spacing: -0.045em;
+    font-variation-settings: 'SOFT' 60, 'WONK' 0;
+    text-shadow: .03em .025em 0 color-mix(in srgb, var(--pink) 60%, transparent);
+    animation: enter .5s var(--ease) both;
+  }
+  .masthead span { color: var(--pink-text); text-shadow: .03em .025em 0 color-mix(in srgb, var(--sun) 75%, transparent); }
+  .issue {
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    border-block: 1px solid var(--ink); box-shadow: 0 3px 0 -2px var(--ink); padding: 7px 0; margin-bottom: clamp(20px, 4vw, 40px);
+    font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; font-variant-numeric: tabular-nums;
+  }
+  .issue b { font-weight: 700; }
+  @media (max-width: 560px) { .issue .hide-sm { display: none; } }
+
+  /* ---- contents ---- */
+  .contents { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(16px, 2.6vw, 28px); }
   .game {
-    display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 18px;
-    padding: 18px; border-radius: 24px; background: var(--card); color: inherit; text-decoration: none;
-    box-shadow: 0 4px 0 var(--edge), 0 18px 34px -22px rgb(40 30 10 / .45);
-    transition: transform .12s, box-shadow .12s;
-    animation: rise .5s var(--d) both cubic-bezier(.2, .9, .3, 1.2);
+    --d: 0ms;
+    grid-column: span 3; display: grid; grid-template-rows: auto 1fr; gap: 14px;
+    padding: 0 0 18px; color: inherit; text-decoration: none; border-bottom: 1px solid var(--hair);
+    animation: enter .45s calc(120ms + var(--d)) both var(--ease);
   }
-  .game:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--edge), 0 22px 40px -22px rgb(40 30 10 / .5); }
-  .game:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--edge); }
-  .game svg { width: 96px; height: 96px; }
-  .game h2 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
-  .game h2 span { color: var(--brand); }
-  .game p { margin: 4px 0 10px; color: var(--muted); font-size: 15px; line-height: 1.35; }
-  .today { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
-  .today i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); }
-  .today i.on { border-color: var(--tier); background: var(--tier); }
-  .today i + span { margin-left: 4px; }
-  .art-tile { fill: var(--tile); }
-  .art-op { fill: var(--op); }
-  .art-ink { fill: var(--ink); font: 600 15px Outfit, sans-serif; text-anchor: middle; dominant-baseline: central; }
-  .art-ink.w { fill: #fff; }
-  /* desktop: one column per category */
-  @media (min-width: 960px) {
-    main.screen { max-width: 1200px; }
-    .games { max-width: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; align-items: start; }
+  .game.lead { grid-column: span 4; }
+  .game.side { grid-column: span 2; }
+  .game.wide { grid-column: span 6; grid-template-columns: 1fr 1fr; grid-template-rows: none; align-items: center; }
+  .plate {
+    position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; border-radius: 6px; overflow: hidden;
+    background: var(--grain), var(--plate); box-shadow: inset 0 0 0 1px var(--hair);
   }
+  :root[data-theme="dark"] .plate { --plate: var(--stock) !important; }
+  .game.side .plate { aspect-ratio: auto; height: 100%; min-height: 200px; }
+  .plate svg { width: 62%; height: auto; max-height: 82%; overflow: visible; stroke: none; transition: transform .35s var(--ease); }
+  .game.wide .plate svg { width: 46%; }
+  .game:hover .plate svg { transform: translate(-2px, -2px) rotate(-1deg); }
+  .kicker { display: flex; gap: 10px; align-items: baseline; }
+  .kicker em { font-style: normal; color: var(--brand-text); }
+  .game h2 { margin: 6px 0 0; font: 600 clamp(30px, 4vw, 42px)/1 var(--display); letter-spacing: -0.03em; font-variation-settings: 'SOFT' 60; }
+  .game h2 span { color: var(--brand-text); }
+  .game.lead h2 { font-size: clamp(36px, 5.4vw, 58px); }
+  .game p { margin: 8px 0 12px; color: var(--muted); font-size: 15px; line-height: 1.45; max-width: 36ch; text-wrap: pretty; }
+  .game:hover h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
+  .today { display: flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .today i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .today i.on { background: var(--brand); box-shadow: 1px 1px 0 var(--reg); }
+  .today i + span { margin-left: 5px; }
+  .colophon { margin-top: 36px; text-align: center; font: italic 400 15px var(--display); color: var(--muted); }
+
+  @media (max-width: 760px) {
+    .contents { grid-template-columns: 1fr; gap: 22px; }
+    .game, .game.lead, .game.side, .game.wide { grid-column: auto; grid-template-columns: 112px 1fr; grid-template-rows: none; align-items: center; gap: 16px; }
+    .plate, .game.side .plate { aspect-ratio: 1; height: auto; min-height: 0; }
+    .plate svg, .game.wide .plate svg { width: 76%; }
+    .game h2, .game.lead h2 { font-size: 30px; }
+    .game p { margin: 4px 0 8px; font-size: 14px; }
+  }
+
+  /* art: shapes in the game's inks, overprinted */
+  .art .ov { mix-blend-mode: var(--blend); }
+  .art text { font: 600 15px Inter, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
+  .art .on-ink { fill: var(--navy); }
+  .art .card { fill: var(--stock); stroke: var(--hair); stroke-width: 1; }
 </style>
 </head>
 <body>
-<main class="screen" style="justify-content: center; gap: 6px">
-  <h1 class="wordmark">Puzzle<span>shelf</span></h1>
-  <p class="tagline">Daily logic games. Same puzzles for everyone.</p>
-  <nav class="games">
-    <section>
-    <h3>Math</h3>
-    <a class="game" href="mathquilibrium/" data-store="crossum2" style="--brand: var(--op); --d: 0ms">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <rect class="art-tile" x="4" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="17" y="47">4</text>
-        <rect class="art-op" x="35" y="34" width="26" height="26" rx="7"/><text class="art-ink w" x="48" y="47">+</text>
-        <rect class="art-tile" x="66" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="79" y="47">3</text>
-        <rect class="art-tile" x="35" y="3" width="26" height="26" rx="7"/><text class="art-ink" x="48" y="16">5</text>
-        <rect x="36" y="66" width="24" height="24" rx="7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
-      </svg>
+<main class="cover">
+  <header>
+    <div class="mast-top">
+      <span class="kicker">Daily logic games</span>
+      <button class="icon js-theme" aria-label="Theme"></button>
+    </div>
+    <h1 class="masthead">Puzzle <span>Shelf</span></h1>
+    <p class="issue"><span><b id="issue-no">No. 1</b></span><span id="issue-date"></span><span class="hide-sm">Price: one coffee break</span></p>
+  </header>
+
+  <nav class="contents" aria-label="Games">
+    <a class="game lead" href="mathquilibrium/" data-store="crossum2" style="--brand: var(--pink); --brand-text: var(--pink-text); --plate: #f7e0e8">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 120 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <rect class="card" x="4" y="36" width="26" height="26" rx="5"/><text x="17" y="49">4</text>
+            <rect x="37" y="38" width="26" height="26" rx="5" fill="var(--reg)" opacity=".9"/>
+            <rect x="35" y="36" width="26" height="26" rx="5" fill="var(--pink)"/><text class="on-ink" x="48" y="49">+</text>
+            <rect class="card" x="66" y="36" width="26" height="26" rx="5"/><text x="79" y="49">3</text>
+            <rect class="card" x="35" y="5" width="26" height="26" rx="5"/><text x="48" y="18">5</text>
+            <rect x="35" y="67" width="26" height="26" rx="5" fill="none" stroke="var(--pink)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle class="ov" cx="98" cy="20" r="14" fill="var(--sun)"/>
+            <text x="104" y="76" style="font: italic 600 22px Fraunces, serif">=</text>
+          </g>
+        </svg>
+      </div>
       <div>
+        <span class="kicker">01 <em>Math</em></span>
         <h2>Math<span>quilibrium</span></h2>
         <p>The numbers are given. Fill in the operators so every line is true.</p>
         <div class="today"></div>
       </div>
     </a>
-    <a class="game" href="biggr/" data-store="biggr" style="--brand: var(--accent); --d: 80ms">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <rect x="6" y="34" width="38" height="38" rx="9" fill="var(--op)"/>
-        <rect x="52" y="14" width="38" height="58" rx="9" fill="var(--accent)"/>
-        <text class="art-ink w" x="25" y="53" style="font-size: 13px; stroke: none">7×8</text>
-        <text class="art-ink w" x="71" y="43" style="font-size: 13px; stroke: none">9×6</text>
-      </svg>
+    <a class="game side" href="biggr/" data-store="biggr" style="--brand: var(--orange); --brand-text: var(--orange-text); --plate: #f8e2d5; --d: 70ms">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <rect class="ov" x="10" y="38" width="40" height="44" rx="6" fill="var(--pink)"/>
+            <rect class="ov" x="36" y="12" width="44" height="70" rx="6" fill="var(--orange)"/>
+            <text x="58" y="34" class="on-ink" style="font-size: 13px">9×6</text>
+            <text x="23" y="60" class="on-ink" style="font-size: 13px">7×8</text>
+          </g>
+        </svg>
+      </div>
       <div>
+        <span class="kicker">02 <em>Math</em></span>
         <h2>Bigg<span>r</span></h2>
         <p>Two sums, no answers. Pick the bigger one, fast.</p>
         <div class="today"></div>
       </div>
     </a>
-    </section>
-    <section>
-    <h3>Trivia</h3>
-    <a class="game" href="wordswipe/" data-store="wordswipe" data-one style="--brand: var(--ok); --d: 160ms">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <rect x="18" y="16" width="44" height="60" rx="10" fill="var(--bad)" transform="rotate(-14 40 46)"/>
-        <rect x="34" y="14" width="44" height="60" rx="10" fill="var(--ok)" transform="rotate(12 56 44)"/>
-        <rect x="24" y="22" width="44" height="60" rx="10" class="art-tile" stroke="var(--edge)" stroke-width="2"/>
-        <text class="art-ink" x="46" y="52" style="font-size: 13px">Owl?</text>
-      </svg>
+    <a class="game" href="wordswipe/" data-store="wordswipe" data-one style="--brand: var(--teal); --brand-text: var(--teal-text); --plate: #d8ebe6; --d: 140ms">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <rect class="ov" x="14" y="16" width="44" height="60" rx="8" fill="var(--pink)" transform="rotate(-14 36 46)"/>
+            <rect class="ov" x="38" y="14" width="44" height="60" rx="8" fill="var(--teal)" transform="rotate(12 60 44)"/>
+            <rect class="card" x="26" y="22" width="44" height="60" rx="8"/>
+            <text x="48" y="52" style="font: italic 600 15px Fraunces, serif">Owl?</text>
+          </g>
+        </svg>
+      </div>
       <div>
+        <span class="kicker">03 <em>Words</em></span>
         <h2>Word<span>swipe</span></h2>
         <p>A subject, 24 words, 60 seconds. Swipe right if it fits.</p>
         <div class="today"></div>
       </div>
     </a>
-    <a class="game" href="orderly/" data-store="orderly" data-one style="--brand: var(--accent); --d: 240ms">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <rect x="14" y="16" width="38" height="16" rx="6" fill="var(--op)"/>
-        <rect x="14" y="40" width="54" height="16" rx="6" fill="var(--accent)"/>
-        <rect x="14" y="64" width="70" height="16" rx="6" fill="var(--gold)"/>
-      </svg>
+    <a class="game" href="orderly/" data-store="orderly" data-one style="--brand: var(--sun); --brand-text: var(--sun-text); --plate: #f7eac6; --d: 210ms">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <rect class="card" x="12" y="14" width="40" height="16" rx="4"/>
+            <rect x="14" y="40" width="56" height="16" rx="4" fill="var(--reg)"/>
+            <rect x="12" y="38" width="56" height="16" rx="4" fill="var(--sun)"/>
+            <rect x="14" y="64" width="72" height="16" rx="4" fill="var(--sun)"/>
+            <rect x="12" y="62" width="72" height="16" rx="4" fill="var(--ink)"/>
+          </g>
+        </svg>
+      </div>
       <div>
+        <span class="kicker">04 <em>Trivia</em></span>
         <h2>Order<span>ly</span></h2>
         <p>Ten cards, one subject. Drag them into order.</p>
         <div class="today"></div>
       </div>
     </a>
-    </section>
-    <section>
-    <h3>Logic</h3>
-    <a class="game" href="coronet/" data-store="coronet" style="--brand: var(--accent); --d: 320ms">
-      <svg viewBox="-50 -50 100 100" aria-hidden="true">
-        <circle r="46" cy="2" fill="var(--edge)"/>
-        <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="#f59e85"/>
-        <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="#8cc2f0"/>
-        <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="#9fd68b"/>
-        <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="#f7c25c"/>
-        <g fill="none" stroke="#3b3428" stroke-width="2"><circle r="45"/><circle r="27.5" stroke-width=".8" opacity=".5"/><circle r="10"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
-        <path transform="translate(22 -22) scale(.85)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
-        <path transform="translate(-14 14) scale(.6)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
-        <circle r="10" fill="var(--tile)" stroke="#3b3428" stroke-width="2"/>
-      </svg>
+    <a class="game wide" href="coronet/" data-store="coronet" style="--brand: var(--ink); --brand-text: var(--ink); --plate: #e2e4ee; --d: 280ms">
+      <div class="plate">
+        <svg class="art" viewBox="-50 -50 100 100" aria-hidden="true">
+          <circle r="46" cx="2" cy="3" fill="var(--reg)"/>
+          <g filter="url(#speck)">
+            <circle r="45" fill="var(--stock)"/>
+            <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="var(--pink)"/>
+            <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="var(--teal)"/>
+            <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="var(--sun)"/>
+            <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="var(--orange)"/>
+          </g>
+          <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle r="45"/><circle r="27.5" stroke-width=".7" opacity=".5"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
+          <path transform="translate(22 -22) scale(.85)" fill="var(--ink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+          <path transform="translate(-14 14) scale(.6)" fill="var(--ink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+          <circle r="10" fill="var(--stock)" stroke="var(--ink)" stroke-width="1.6"/>
+        </svg>
+      </div>
       <div>
+        <span class="kicker">05 <em>Logic</em></span>
         <h2>Coro<span>net</span></h2>
-        <p>Queens in the round: one per ring, slice and color.</p>
+        <p>Queens in the round: one per ring, one per slice, one per color.</p>
         <div class="today"></div>
       </div>
     </a>
-    </section>
   </nav>
+  <p class="colophon">Printed fresh every morning.</p>
 </main>
+<!-- riso speckle: the ink misses the paper in tiny spots -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="speck" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+  <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
+  <feComposite in="SourceGraphic" operator="out"/>
+</filter></svg>
 <script>
-  // Today's dailies, read from each game's saved progress.
   const d = new Date(), today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // The issue number counts days since the first issue (2026-11-12). Reset this to relaunch.
+  const ISSUE0 = Date.UTC(2026, 10, 12);
+  const no = Math.max(1, Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - ISSUE0) / 864e5) + 1);
+  document.getElementById('issue-no').textContent = `No. ${no.toLocaleString()}`;
+  document.getElementById('issue-date').textContent = d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Today's dailies, read from each game's saved progress.
   for (const a of document.querySelectorAll('.game')) {
     let done = {};
     try { done = JSON.parse(localStorage.getItem(a.dataset.store))?.daily?.[today] || {}; } catch {}
     if ('one' in a.dataset) { // one daily round, not three tiers
-      a.querySelector('.today').innerHTML = `<i class="tier-E${done.r ? ' on' : ''}"></i><span>${done.r ? `Today: ${done.r.c ? `${done.r.c} check${done.r.c > 1 ? 's' : ''}` : `${done.r.s} points`}` : 'New round today'}</span>`;
-      a.setAttribute('aria-label', `${a.querySelector('h2').textContent}. ${a.querySelector('.today span').textContent}`);
+      a.querySelector('.today').innerHTML = `<i class="${done.r ? 'on' : ''}"></i><span>${done.r ? `Today: ${done.r.c ? `${done.r.c} check${done.r.c > 1 ? 's' : ''}` : `${done.r.s} points`}` : 'New round today'}</span>`;
       continue;
     }
     const n = Object.keys(done).length;
-    a.querySelector('.today').innerHTML = ['E', 'M', 'H'].map((k) => `<i class="tier-${k}${done[k] ? ' on' : ''}"></i>`).join('') +
+    a.querySelector('.today').innerHTML = ['E', 'M', 'H'].map((k) => `<i class="${done[k] ? 'on' : ''}"></i>`).join('') +
       `<span>${n === 3 ? 'All dailies done' : n ? `${n} of 3 dailies today` : '3 new dailies today'}</span>`;
-    a.setAttribute('aria-label', `${a.querySelector('h2').textContent}. ${a.querySelector('.today span').textContent}`);
   }
 </script>
 </body>

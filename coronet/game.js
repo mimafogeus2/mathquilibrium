@@ -24,7 +24,7 @@ function drawBoard(el, p, { mini = false } = {}) {
   const g = geo(p.N), { N, pt, ang, rad } = g, f = (n) => +n.toFixed(2);
   el.replaceChildren();
   el.setAttribute('viewBox', '-100 -100 200 200');
-  el.append(svg('circle', { class: 'lip', r: R + 1, cy: 3 }));
+  el.append(svg('circle', { class: 'lip', r: R + 1, cy: 3 }), svg('circle', { class: 'stock-back', r: R }));
   const cellsG = svg('g', { class: 'cells' }), wallsG = svg('path', { class: 'walls' }), piecesG = svg('g', { class: 'pieces' });
   const els = [], pieces = [];
   let walls = '';
@@ -32,7 +32,7 @@ function drawBoard(el, p, { mini = false } = {}) {
     const r = Math.floor(i / N), s = i % N, a0 = ang(s), a1 = ang(s + 1), ri = rad(r), ro = rad(r + 1);
     const [x0, y0] = pt(ro, a0), [x1, y1] = pt(ro, a1), [x2, y2] = pt(ri, a1), [x3, y3] = pt(ri, a0);
     const d = `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}A${f(ri)} ${f(ri)} 0 0 0 ${f(x3)} ${f(y3)}Z`;
-    const c = svg('path', { d, class: 'c rg' + Math.floor((p.region[i] * 10) / N) });
+    const c = svg('path', { d, class: 'c rg' + p.region[i] });
     c.style.setProperty('--d', r * 45 + s * 8 + 'ms');
     c.style.setProperty('--ring', r);
     cellsG.append(c);
@@ -43,12 +43,20 @@ function drawBoard(el, p, { mini = false } = {}) {
     if (r < N - 1 && p.region[i + N] !== p.region[i]) walls += `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}`;
     const [cx, cy] = pt((ri + ro) / 2, (a0 + a1) / 2), size = Math.min(g.w, ((ri + ro) / 2) * (a1 - a0));
     const pc = svg('g', { class: 'pc', transform: `translate(${f(cx)} ${f(cy)}) scale(${f(size / 22)})` });
+    // each arc's stamp lands a little crooked and off-centre; seeded by the cell so it never jitters on redraw
+    const rand = rng(i * 7919 + N);
+    pc.style.setProperty('--rot', (rand() * 2 - 1) * 12 + 'deg');
+    pc.style.setProperty('--tx', (rand() * 2 - 1) * 3 + 'px');
+    pc.style.setProperty('--ty', (rand() * 2 - 1) * 3 + 'px');
     piecesG.append(pc);
     pieces.push(pc);
   }
   wallsG.setAttribute('d', walls);
   const hub = svg('g', { class: 'hub' });
-  hub.append(svg('circle', { r: g.hub }), svg('text', { y: g.hub * 0.05, 'font-size': g.hub * 0.9 }));
+  // the seal: a stamped crown that lands in the hub when the board is solved (CSS shows it)
+  const seal = svg('g', { class: 'seal', transform: `scale(${f(g.hub / 19)})` });
+  seal.innerHTML = `<g class="seal-ink">${CROWN}</g>`;
+  hub.append(svg('circle', { r: g.hub }), seal, svg('text', { y: g.hub * 0.05, 'font-size': g.hub * 0.9 }));
   el.append(cellsG, wallsG, svg('circle', { class: 'rim', r: R }), svg('circle', { class: 'rim', r: g.hub }), piecesG, hub);
   const cursor = svg('path', { class: 'cursor' });
   el.append(cursor);
@@ -77,7 +85,7 @@ function startLevel(G, save) {
   Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
   $('#g-sub').textContent = `${N} queens`;
-  $('#tip').innerHTML = G.date ? `One ${TIERS[G.pack].toLowerCase()} puzzle a day — the same for everyone.` : G.n === 1 ? FIRST_TIP : '';
+  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : G.n === 1 ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -101,13 +109,26 @@ function refresh(sound, placed = null) {
     else if (placed !== null) sfx.good(G.queens.size - 1);
   }
   const left = N - G.queens.size;
-  view.hubText.textContent = left > 0 ? left : '♛';
+  view.hubText.textContent = left || ''; // at zero the hub clears for the seal
   // keyboard cursor: outline the selected arc
   view.cursor.setAttribute('d', G.kbd && !G.done ? view.els[G.sel].getAttribute('d') : '');
-  $('#board').setAttribute('aria-label', `${left} of ${N} queens left`);
+  $('#board').setAttribute('aria-label', `Coronet board, ${N} rings. ${left} of ${N} queens left`);
+  // screen readers hear the arc under the keyboard cursor, and what just changed there
+  if (G.kbd && !G.done) $('#sr').textContent = describe(G.sel, left, conflicts);
   if (!G.done && G.queens.size === N && !conflicts.size) win();
   $('#btn-undo').disabled = !G.history.length || G.done;
 }
+
+// Region names follow the inks in style.css (--r0 … --r6), so a sighted helper and a screen reader agree.
+const REGION = ['pink', 'yellow', 'blue', 'lime', 'orange', 'teal', 'violet'];
+function describe(i, left, conflicts) {
+  const N = N_(), k = shown(i);
+  const what = k === 'q' ? (G.hinted.has(i) ? 'queen, from a hint' : 'queen') + (conflicts.has(i) ? ', clashes with another queen' : '')
+    : k === 'm' ? 'marked' : k === 'a' ? 'ruled out' : 'empty';
+  return `Ring ${Math.floor(i / N) + 1} of ${N} from the centre, slice ${(i % N) + 1}, ${REGION[G.p.region[i]]}: ${what}. ${left} queens left.`;
+}
+// Keyboard focus on the board shows the cursor and starts describing it (a mouse click focuses it too, but quietly).
+$('#board').addEventListener('focus', () => { if (playing() && $('#board').matches(':focus-visible')) { G.kbd = true; refresh(false); } });
 
 // ---------- undo ----------
 // A snapshot of queens + marks; act() records one only if fn actually changed something.

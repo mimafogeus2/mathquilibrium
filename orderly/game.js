@@ -62,7 +62,7 @@ function screen(id) {
 
 function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
-  $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (st ? `  ·  🔥 ${st}` : '');
+  $('#daily-meta').textContent = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
   $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · see result` : store.saves['D' + t] ? 'Resume' : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
   $('#lv-meta').textContent = `${solved} / ${LEVELS.length} solved`;
@@ -223,6 +223,7 @@ function giveUp() {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-stars').innerHTML = '';
+  $('#res-stars').removeAttribute('aria-label');
   $('#res-text').textContent = "Here's the right order.";
   $('#res-next').hidden = true;
 }
@@ -232,7 +233,8 @@ function showResult(fresh) {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
-  $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date && streak() ? ` · 🔥 ${streak()}-day streak` : '');
+  $('#res-stars').setAttribute('aria-label', `${s} of 3 stars`);
+  $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date && streak() ? ` · ${streak()}-day streak` : '');
   $('#res-next').hidden = false;
   $('#res-next b').textContent = P.date ? 'Share result' : 'Another puzzle  →';
   $('#res-next').onclick = P.date ? () => share() : () => playRandom(true, P.lv.d);

@@ -35,7 +35,7 @@ function screen(id) {
 
 function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
-  $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (st ? `  ·  🔥 ${st}` : '');
+  $('#daily-meta').textContent = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
   $('#btn-daily small').textContent = rec ? `✓ ${rec.s} points · see result` : store.cur?.key === 'D' + t ? 'Resume' : sp ? sp.occasion : '24 words · 60 seconds';
   $('#btn-unlimited small').textContent = `Round ${store.n + 1}` + (store.best ? ` · best ${store.best}` : '') +

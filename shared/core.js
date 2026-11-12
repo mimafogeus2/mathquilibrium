@@ -18,6 +18,8 @@ const persist = () => { try { localStorage.setItem(game.storeKey, JSON.stringify
 
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+// The Today header: "Thu 12 Nov · 4-day streak"
+const todayLine = (st) => new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + (st ? ` · ${st}-day streak` : '');
 function streak() {
   const d = new Date();
   const any = () => Object.keys(store.daily[ymd(d)] || {}).length > 0; // any difficulty counts
@@ -83,11 +85,11 @@ function show(id) {
 
 function renderHome() {
   const t = ymd(new Date()), recs = store.daily[t] || {}, st = streak();
-  $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
-    (st ? `  ·  🔥 ${st}` : '');
-  $('#daily-btns').replaceChildren(...Object.entries(TIERS).map(([k, name]) => {
+  $('#daily-meta').textContent = todayLine(st);
+  $('#daily-btns').replaceChildren(...Object.entries(TIERS).map(([k, name], i) => {
     const b = document.createElement('button'), r = recs[k];
     b.className = `daily-btn tier-${k}${r ? ' done' : ''}`;
+    b.style.setProperty('--i', i);
     b.innerHTML = `<b>${name}</b><small>${r ? '✓ ' + fmt(r.t) : store.saves['D' + k + t] ? 'Resume' : 'Play'}</small>`;
     b.onclick = () => start(k, null, t);
     return b;
@@ -99,7 +101,6 @@ function renderHome() {
     b.innerHTML = `<span class="pack-name">${name}</span>
       <span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span>
       <span class="pack-count">${done}/${PACK_SIZE}</span>`;
-    b.setAttribute('aria-label', `${name} pack, ${done} of ${PACK_SIZE} solved`);
     const next = firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
@@ -167,10 +168,11 @@ function win() {
   setTimeout(() => {
     if (G !== g) return;
     $('#win-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < stars ? 'on' : ''}" style="--i:${i}">★</span>`).join('');
+    $('#win-stars').setAttribute('aria-label', `${stars} of 3 stars`);
     $('#win-title').textContent = ['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)];
     const st = streak();
     $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b> · ${h ? `${h} hint${h > 1 ? 's' : ''}` : 'no hints'}` +
-      (g.date && st ? ` · 🔥 ${st}-day streak` : '');
+      (g.date && st ? ` · ${st}-day streak` : '');
     const last = !g.date && g.n === PACK_SIZE;
     if (last) $('#win-title').textContent = `${TIERS[g.pack]} pack complete!`;
     $('#win-next').hidden = last;
@@ -200,31 +202,35 @@ async function share() {
   } catch {}
 }
 
+// Cut paper in the page's inks, overprinted (multiply on cream, screen on blue stock).
 function confetti() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const cv = $('#fx'), ctx = cv.getContext('2d'), dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const css = getComputedStyle(document.documentElement);
-  const colors = ['--op', '--accent', '--gold', '--ok'].map((v) => css.getPropertyValue(v).trim());
+  const colors = ['--brand', '--brand', '--sun', '--teal', '--ink'].map((v) => css.getPropertyValue(v).trim());
+  ctx.globalCompositeOperation = css.getPropertyValue('--blend').trim() || 'multiply';
   const glyphs = game.glyphs;
-  const parts = Array.from({ length: 150 }, (_, i) => ({
+  const parts = Array.from({ length: 120 }, (_, i) => ({
     x: W / 2 + (Math.random() - 0.5) * 80, y: H * 0.42,
-    vx: (Math.random() - 0.5) * 16, vy: -Math.random() * 15 - 5,
-    s: 6 + Math.random() * 7, a: Math.random() * 6, va: (Math.random() - 0.5) * 0.4,
-    c: colors[i % colors.length], g: i % 3 === 0 ? glyphs[i % glyphs.length] : null,
+    vx: (Math.random() - 0.5) * 15, vy: -Math.random() * 14 - 5,
+    s: 7 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - 0.5) * 0.3, f: Math.random() * 6,
+    c: colors[i % colors.length], g: i % 4 === 0 ? glyphs[i % glyphs.length] : null,
   }));
   const t0 = performance.now();
   (function frame(now) {
     ctx.clearRect(0, 0, W, H);
     for (const p of parts) {
-      p.vy += 0.38; p.vx *= 0.985; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      p.vy += 0.34; p.vx *= 0.982; p.vy *= 0.992; p.x += p.vx; p.y += p.vy; p.a += p.va; p.f += 0.12;
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.a);
+      ctx.scale(1, Math.cos(p.f)); // paper flutters: its face turns toward and away from you
       ctx.fillStyle = p.c;
-      if (p.g) { ctx.font = `700 ${p.s * 2.6}px Outfit, sans-serif`; ctx.fillText(p.g, 0, 0); }
-      else ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+      ctx.globalAlpha = 0.9;
+      if (p.g) { ctx.font = `600 ${p.s * 2.4}px Fraunces, Georgia, serif`; ctx.fillText(p.g, 0, 0); }
+      else ctx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s / 1.5);
       ctx.restore();
     }
     if (now - t0 < 3500) requestAnimationFrame(frame);
@@ -260,7 +266,7 @@ function openLevels(pack = store.lastPack || 'E', page) {
     const b = document.createElement('button'), s = pp.stars[n] || 0;
     b.className = 'lvl' + (n === pp.unlocked && !s ? ' current' : '');
     b.disabled = n > pp.unlocked;
-    b.innerHTML = `<span>${n}</span><small>${b.disabled ? '🔒' : s ? '★'.repeat(s) + '☆'.repeat(3 - s) : ''}</small>`;
+    b.innerHTML = `<span>${n}</span><small>${b.disabled ? '' : s ? '★'.repeat(s) + '☆'.repeat(3 - s) : ''}</small>`;
     b.setAttribute('aria-label', `Level ${n}${b.disabled ? ', locked' : s ? `, ${s} stars` : ''}`);
     b.onclick = () => { $('#dlg-levels').close(); start(pack, n); };
     grid.append(b);
