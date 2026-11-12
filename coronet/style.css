@@ -4,22 +4,23 @@
   --brand: var(--ink); --brand-text: var(--ink); --on-brand: var(--paper);
   /* one ink per region (at most 7), ordered so any first N stay far apart in hue */
   --r0: #ff48b0; --r1: #ffb511; --r2: #3f8ee6; --r3: #a8cf2a; --r4: #ff6c2f; --r5: #1fb3a8; --r6: #a07de6;
-  --wall: var(--navy); --piece: var(--navy); --seam: rgb(28 42 92 / .22);
+  --wall: var(--navy); --piece: var(--navy); --seam: rgb(28 42 92 / .45);
 }
 :root[data-theme="dark"] {
   --r0: #ff5cb8; --r1: #ffc62e; --r2: #5ea2f0; --r3: #b8dc3c; --r4: #ff7a3d; --r5: #2ec4b6; --r6: #b291f0;
-  --wall: #0d1533; --piece: #0d1533; --seam: rgb(13 21 51 / .3);
+  --wall: #0d1533; --piece: #0d1533; --seam: rgb(13 21 51 / .55);
 }
 
 .board {
   width: min(620px, calc(100vw - 24px), calc(100dvh - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
   fill: initial; stroke: none; stroke-width: 1;
   touch-action: none; user-select: none; -webkit-user-select: none;
-  filter: drop-shadow(0 18px 26px rgb(28 42 92 / .2));
+  /* box-shadow, not filter: drop-shadow — a filter on the <svg> makes WebKit redraw every speck and stamp on each tap (~10x slower on iPhone) */
+  border-radius: 50%; box-shadow: 0 18px 26px -6px rgb(28 42 92 / .2);
   animation: spin-in .6s var(--ease) both;
 }
-:root[data-theme="dark"] .board { filter: drop-shadow(0 16px 28px rgb(0 0 0 / .45)); }
-.board.mini { width: 132px; filter: none; }
+:root[data-theme="dark"] .board { box-shadow: 0 16px 28px -6px rgb(0 0 0 / .45); }
+.board.mini { width: 132px; box-shadow: none; }
 #logo { animation: spin-in .6s var(--ease) both, turn 90s linear infinite; }
 #help-board { display: block; margin: 0 auto 8px; width: 120px; }
 @keyframes spin-in { from { opacity: 0; transform: rotate(-30deg) scale(.9); } }
@@ -31,7 +32,6 @@
 /* paper under the arcs, so the speckle shows paper rather than the shadow */
 .stock-back { fill: var(--stock); }
 .c {
-  stroke: var(--seam); stroke-width: .5; stroke-linejoin: round;
   transform-box: fill-box; transform-origin: center;
   animation: enter .3s var(--d, 0ms) both var(--ease);
 }
@@ -55,6 +55,10 @@
   .rg5 { fill: oklch(from var(--r5) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
   .rg6 { fill: oklch(from var(--r6) calc(l * var(--tone-l)) calc(c * var(--tone-c)) h); }
 }
+.seams { fill: none; stroke: var(--seam); stroke-width: .5; }
+.seams.halo { stroke: var(--stock); stroke-width: 1.5; }
+/* dark stock is close to the wall ink: a narrower halo keeps seams reading thinner than walls */
+:root[data-theme="dark"] .seams.halo { stroke-width: .9; }
 .walls, .rim { fill: none; stroke: var(--wall); stroke-width: 1.4; stroke-linecap: round; }
 .mini .walls, .mini .rim { stroke-width: 2.2; }
 .hub circle { fill: var(--stock); stroke: var(--wall); stroke-width: 1.4; }
@@ -62,7 +66,7 @@
 
 .pc { pointer-events: none; }
 /* queens are rubber stamps: inked unevenly, a touch crooked, not quite inside the lines */
-.pieces { filter: url(#stamp); }
+.pc { filter: url(#stamp); }
 .crown { fill: var(--piece); transform-box: fill-box; transform-origin: center; rotate: var(--rot, 0deg); translate: var(--tx, 0) var(--ty, 0); }
 .x { stroke: var(--piece); stroke-width: 2.2; stroke-linecap: round; opacity: .55; }
 .pc[data-k="a"] .x { opacity: .4; }
@@ -120,9 +124,10 @@
 /* ---------- print ---------- */
 /* regions as greys and textures, all light enough that pen shows on them */
 .p-ring { width: 165mm; height: 165mm; fill: initial; stroke: none; stroke-width: 1; overflow: visible; margin-top: 4mm; }
-.p-ring .cells, .p-ring .pieces { filter: none; }
+.p-ring .cells, .p-ring .pc { filter: none; }
 .p-ring .lip, .p-ring .cursor, .p-ring .seal { display: none; }
-.p-ring .c { stroke: #000; stroke-width: .3; }
+.p-ring .seams { stroke: #000; stroke-width: .3; }
+.p-ring .seams.halo { display: none; }
 .p-ring .walls, .p-ring .rim, .p-ring .hub circle { stroke: #000; stroke-width: 1.6; }
 .p-ring .hub circle { fill: #fff; }
 #print .rg0 { fill: #fff; }
