@@ -45,7 +45,7 @@ function startLevel(G, save) {
   Object.assign(G, { p, fills: new Map(s.fills), hinted: new Set(s.hinted), sel: null, states: [] });
 
   $('#g-sub').textContent = [...p.ops, ...p.rels].map(sym).join(' ');
-  if (date) $('#tip').textContent = `One ${TIERS[pack].toLowerCase()} puzzle a day — the same for everyone.`;
+  if (date) $('#tip').textContent = `Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.`;
   else if (n === 1) $('#tip').innerHTML = FIRST_TIP;
   else {
     const prev = levelConfig(packDifficulty(pack, n - 1)), had = [...prev.ops, ...prev.rels];
@@ -73,6 +73,8 @@ function buildBoard() {
     el.className = `cell ${cell.op ? 'op' : 'num'}${cell.given ? ' given' : ''}${String(cell.val).length > 2 ? ' long' : ''}`;
     el.style.gridArea = `${cell.r + 1} / ${cell.c + 1}`;
     el.style.setProperty('--d', (cell.r + cell.c) * 28 + 'ms');
+    el.setAttribute('aria-hidden', 'true'); // the board reads out lines instead of loose tiles
+    if (edit) el.tabIndex = -1;
     if (!edit) el.textContent = sym(cell.val);
     cell.el = el;
     b.append(el);
@@ -130,6 +132,11 @@ function refresh(sound) {
     if (fresh('bad')) sfx.bad();
     else if (fresh('ok')) sfx.good(states.filter((s) => s === 'ok').length - 1);
   }
+  // screen readers: lines that just got a verdict, then the selected blank's lines
+  const verdicts = sound ? states.map((s, e) => (s !== 'open' && s !== prev[e] && !G.sel?.eqs.includes(e) ? `${lineText(e)}: ${s === 'ok' ? 'true' : 'false'}.` : '')).filter(Boolean) : []; // the selected tile's lines are read below anyway
+  const blanks = p.cells.filter((c) => editable(c) && !G.fills.has(c.key)).length;
+  $('#board').setAttribute('aria-label', `Puzzle board, ${blanks} blank${blanks === 1 ? '' : 's'} left`);
+  if (!G.done) $('#sr').textContent = [...verdicts, G.sel ? describe(G.sel) : ''].join(' ');
   const selEqs = G.sel ? G.sel.eqs : [];
   for (const cell of p.cells) {
     const st = cell.eqs.map((e) => states[e]), el = cell.el;
@@ -142,12 +149,27 @@ function refresh(sound) {
       el.textContent = v ? sym(v) : '';
       el.classList.toggle('filled', !!v);
       el.classList.toggle('hinted', G.hinted.has(cell.key));
-      el.setAttribute('aria-label', v ? NAMES[v] : 'empty tile');
     }
     if (sound && cell.eqs.some((e) => states[e] === 'bad' && prev[e] !== 'bad')) flash(el, 'shake');
   }
   if (!G.done && states.every((s) => s === 'ok')) win();
 }
+
+// ---------- spoken board ----------
+// A line read as words: "4 plus blank equals 7". The selected blank is "this blank".
+const isAcross = (e) => G.p.cells[G.p.eqs[e][0]].r === G.p.cells[G.p.eqs[e][1]].r;
+function lineText(e, here = null) {
+  const words = G.p.eqs[e].map((i) => {
+    const c = G.p.cells[i], v = valOf(c);
+    if (c === here) return v ? `this tile, ${NAMES[v]}` : 'this blank';
+    return v === undefined ? 'blank' : c.op ? NAMES[v] : sym(v);
+  });
+  return `${isAcross(e) ? 'Across' : 'Down'}: ${words.join(' ')}`;
+}
+const VERDICT = { open: 'not finished', ok: 'true', bad: 'false' };
+const describe = (cell) => cell.eqs.map((e) => `${lineText(e, cell)}, ${VERDICT[G.states[e]]}.`).join(' ');
+// Focusing the board reads the selected blank again (a live region only speaks when its text changes).
+$('#board').addEventListener('focus', () => { if (playing()) { $('#sr').textContent = ''; requestAnimationFrame(() => refresh(false)); } });
 
 function nextEmpty(from) {
   const cells = G.p.cells.filter((c) => editable(c));

@@ -223,6 +223,7 @@ function giveUp() {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-stars').innerHTML = '';
+  $('#res-stars').removeAttribute('aria-label');
   $('#res-text').textContent = "Here's the right order.";
   $('#res-next').hidden = true;
 }
@@ -232,6 +233,7 @@ function showResult(fresh) {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
+  $('#res-stars').setAttribute('aria-label', `${s} of 3 stars`);
   $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date && streak() ? ` · ${streak()}-day streak` : '');
   $('#res-next').hidden = false;
   $('#res-next b').textContent = P.date ? 'Share result' : 'Another puzzle  →';

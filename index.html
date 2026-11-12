@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Puzzle Shelf — daily logic games</title>
-<meta name="description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day, the same for everyone.">
+<meta name="description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Puzzle Shelf">
 <meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/">
 <meta property="og:title" content="Puzzle Shelf — daily logic games">
-<meta property="og:description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day, the same for everyone.">
+<meta property="og:description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly and Biggr. New puzzles every day.">
 <meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -98,7 +98,7 @@
       <button class="icon js-theme" aria-label="Theme"></button>
     </div>
     <h1 class="masthead">Puzzle <span>Shelf</span></h1>
-    <p class="issue"><span><b id="issue-no">No. 1</b></span><span id="issue-date"></span><span class="hide-sm">Same puzzles for everyone</span></p>
+    <p class="issue"><span><b id="issue-no">No. 1</b></span><span id="issue-date"></span><span class="hide-sm">Price: one coffee break</span></p>
   </header>
 
   <nav class="contents" aria-label="Games">
@@ -226,13 +226,11 @@
     try { done = JSON.parse(localStorage.getItem(a.dataset.store))?.daily?.[today] || {}; } catch {}
     if ('one' in a.dataset) { // one daily round, not three tiers
       a.querySelector('.today').innerHTML = `<i class="${done.r ? 'on' : ''}"></i><span>${done.r ? `Today: ${done.r.c ? `${done.r.c} check${done.r.c > 1 ? 's' : ''}` : `${done.r.s} points`}` : 'New round today'}</span>`;
-      a.setAttribute('aria-label', `${a.querySelector('h2').textContent}. ${a.querySelector('.today span').textContent}`);
       continue;
     }
     const n = Object.keys(done).length;
     a.querySelector('.today').innerHTML = ['E', 'M', 'H'].map((k) => `<i class="${done[k] ? 'on' : ''}"></i>`).join('') +
       `<span>${n === 3 ? 'All dailies done' : n ? `${n} of 3 dailies today` : '3 new dailies today'}</span>`;
-    a.setAttribute('aria-label', `${a.querySelector('h2').textContent}. ${a.querySelector('.today span').textContent}`);
   }
 </script>
 </body>

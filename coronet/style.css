@@ -77,7 +77,18 @@
 
 /* solved: a ripple runs out from the hub, ring by ring */
 .board.solved .c { transform-box: view-box; transform-origin: 50% 50%; animation: ripple .7s calc(var(--ring) * 70ms) both; }
-.board.solved .crown { animation: wave .6s .3s both var(--ease); }
+.board.solved .pc .crown { animation: wave .6s .3s both var(--ease); }
+/* the seal of approval: the hub takes the sunflower drum and a stamped crown thumps down into it */
+.seal { display: none; }
+.board.solved .seal { display: inline; }
+.board.solved .hub circle { fill: var(--sun); filter: url(#speck); transition: fill .2s .25s; }
+.seal-ink { transform-box: fill-box; transform-origin: center; filter: url(#stamp); animation: stamp .32s .3s both cubic-bezier(.3, 0, .2, 1); }
+.seal .crown { fill: var(--navy); }
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(1.5) rotate(-14deg); }
+  60% { opacity: 1; transform: scale(.94) rotate(-5deg); }
+  100% { opacity: 1; transform: rotate(-6deg); }
+}
 @keyframes ripple { 40% { transform: scale(1.03); } }
 
 @media (orientation: landscape) and (max-height: 540px) {

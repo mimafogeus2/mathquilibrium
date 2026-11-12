@@ -4,12 +4,12 @@
    (--reg) that snaps into register when pressed. Dark mode is the same job printed on blue stock. */
 :root {
   /* inks */
-  --navy: #1c2a5c;
+  --navy: #141e45;
   --pink: #ff48b0;    --pink-text: #c9157a;   --on-pink: var(--navy);
   --orange: #ff6c2f;  --orange-text: #b8430f; --on-orange: var(--navy);
-  --teal: #00838a;    --teal-text: #00747a;   --on-teal: #f8f3e8;
+  --teal: #00787e;    --teal-text: #00747a;   --on-teal: #f8f3e8;
   --sun: #ffb511;     --sun-text: #8a6200;    --on-sun: var(--navy);
-  --red: #e23b2f;     --red-text: #c4281d;    --on-red: #fff;
+  --red: #d2342a;     --red-text: #c4281d;    --on-red: #fff;
   --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink);
 
   /* stock */
@@ -54,6 +54,8 @@
 }
 
 * { box-sizing: border-box; }
+/* read by screen readers, not shown */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 [hidden] { display: none !important; }
 html, body { margin: 0; min-height: 100dvh; }
 /* no double-tap zoom anywhere on mobile; pinch-zoom still works */
@@ -106,7 +108,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   width: 100%; padding: 15px 20px; border: 0; border-radius: var(--r); text-align: left;
 }
 .btn b { font-size: 17px; font-weight: 650; }
-.btn small { font-size: 13.5px; opacity: .82; }
+.btn small { font-size: 13.5px; }
 .btn.center { align-items: center; text-align: center; }
 .btn.primary { --fill: var(--brand); --on-fill: var(--on-brand); }
 .btn.primary, .btn.daily { background: var(--speck), var(--fill); color: var(--on-fill); box-shadow: 2px 3px 0 var(--reg); transition: transform .14s var(--ease), box-shadow .14s var(--ease); }
@@ -196,7 +198,8 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 
 .stars { font-size: 40px; letter-spacing: 8px; color: var(--line); line-height: 1; margin-bottom: 10px; }
 .stars span { display: inline-block; animation: enter .3s calc(.35s + var(--i) * .12s) both var(--ease); }
-.stars .on { color: var(--sun); text-shadow: 2px 2px 0 color-mix(in srgb, var(--brand) 70%, transparent); }
+/* sunflower stars keyed in navy, so they read on cream and on blue stock */
+.stars .on { color: var(--sun); -webkit-text-stroke: 1.5px var(--navy); paint-order: stroke fill; text-shadow: 2px 2px 0 color-mix(in srgb, var(--brand) 70%, transparent); }
 .stats { color: var(--muted); margin: -4px 0 22px; font-size: 16px; }
 .stats b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .win-actions { display: flex; flex-direction: column; gap: 10px; }
@@ -204,7 +207,7 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition: none !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }
 
 /* phone in landscape: board left, controls right */
@@ -245,7 +248,7 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 }
 .daily-btn::before { content: var(--pips); font-size: 9px; letter-spacing: 2px; opacity: .8; }
 .daily-btn b { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-top: auto; }
-.daily-btn small { font-size: 12.5px; font-weight: 600; opacity: .8; font-variant-numeric: tabular-nums; }
+.daily-btn small { font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .daily-btn:active { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--reg); }
 .daily-btn.done { background: var(--grain), var(--stock); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair), var(--lift); }
 .daily-btn.done::before { color: var(--brand-text); opacity: 1; }
@@ -280,3 +283,10 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 }
 .pause-cover > b { font-size: 40px; font-weight: 500; font-style: italic; letter-spacing: -0.02em; }
 .pause-cover .btn { width: auto; padding: 14px 40px; }
+
+/* small text controls still get a full-size touch target */
+.foot-link, .chip, .give-up { min-height: 44px; }
+/* the pips are decoration (the difficulty is in the name): empty alt text keeps screen readers from reading "black circle…" */
+@supports (content: "x" / "") {
+  .daily-btn::before, .pack-name::after, #new-row .btn b::before { content: var(--pips) / ""; }
+}

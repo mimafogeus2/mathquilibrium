@@ -101,7 +101,6 @@ function renderHome() {
     b.innerHTML = `<span class="pack-name">${name}</span>
       <span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span>
       <span class="pack-count">${done}/${PACK_SIZE}</span>`;
-    b.setAttribute('aria-label', `${name} pack, ${done} of ${PACK_SIZE} solved`);
     const next = firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
@@ -169,6 +168,7 @@ function win() {
   setTimeout(() => {
     if (G !== g) return;
     $('#win-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < stars ? 'on' : ''}" style="--i:${i}">★</span>`).join('');
+    $('#win-stars').setAttribute('aria-label', `${stars} of 3 stars`);
     $('#win-title').textContent = ['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)];
     const st = streak();
     $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b> · ${h ? `${h} hint${h > 1 ? 's' : ''}` : 'no hints'}` +

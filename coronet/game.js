@@ -53,7 +53,10 @@ function drawBoard(el, p, { mini = false } = {}) {
   }
   wallsG.setAttribute('d', walls);
   const hub = svg('g', { class: 'hub' });
-  hub.append(svg('circle', { r: g.hub }), svg('text', { y: g.hub * 0.05, 'font-size': g.hub * 0.9 }));
+  // the seal: a stamped crown that lands in the hub when the board is solved (CSS shows it)
+  const seal = svg('g', { class: 'seal', transform: `scale(${f(g.hub / 19)})` });
+  seal.innerHTML = `<g class="seal-ink">${CROWN}</g>`;
+  hub.append(svg('circle', { r: g.hub }), seal, svg('text', { y: g.hub * 0.05, 'font-size': g.hub * 0.9 }));
   el.append(cellsG, wallsG, svg('circle', { class: 'rim', r: R }), svg('circle', { class: 'rim', r: g.hub }), piecesG, hub);
   const cursor = svg('path', { class: 'cursor' });
   el.append(cursor);
@@ -82,7 +85,7 @@ function startLevel(G, save) {
   Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
   $('#g-sub').textContent = `${N} queens`;
-  $('#tip').innerHTML = G.date ? `One ${TIERS[G.pack].toLowerCase()} puzzle a day — the same for everyone.` : G.n === 1 ? FIRST_TIP : '';
+  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : G.n === 1 ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -106,13 +109,26 @@ function refresh(sound, placed = null) {
     else if (placed !== null) sfx.good(G.queens.size - 1);
   }
   const left = N - G.queens.size;
-  view.hubText.textContent = left > 0 ? left : '♛';
+  view.hubText.textContent = left || ''; // at zero the hub clears for the seal
   // keyboard cursor: outline the selected arc
   view.cursor.setAttribute('d', G.kbd && !G.done ? view.els[G.sel].getAttribute('d') : '');
-  $('#board').setAttribute('aria-label', `${left} of ${N} queens left`);
+  $('#board').setAttribute('aria-label', `Coronet board, ${N} rings. ${left} of ${N} queens left`);
+  // screen readers hear the arc under the keyboard cursor, and what just changed there
+  if (G.kbd && !G.done) $('#sr').textContent = describe(G.sel, left, conflicts);
   if (!G.done && G.queens.size === N && !conflicts.size) win();
   $('#btn-undo').disabled = !G.history.length || G.done;
 }
+
+// Region names follow the inks in style.css (--r0 … --r6), so a sighted helper and a screen reader agree.
+const REGION = ['pink', 'yellow', 'blue', 'lime', 'orange', 'teal', 'violet'];
+function describe(i, left, conflicts) {
+  const N = N_(), k = shown(i);
+  const what = k === 'q' ? (G.hinted.has(i) ? 'queen, from a hint' : 'queen') + (conflicts.has(i) ? ', clashes with another queen' : '')
+    : k === 'm' ? 'marked' : k === 'a' ? 'ruled out' : 'empty';
+  return `Ring ${Math.floor(i / N) + 1} of ${N} from the centre, slice ${(i % N) + 1}, ${REGION[G.p.region[i]]}: ${what}. ${left} queens left.`;
+}
+// Keyboard focus on the board shows the cursor and starts describing it (a mouse click focuses it too, but quietly).
+$('#board').addEventListener('focus', () => { if (playing() && $('#board').matches(':focus-visible')) { G.kbd = true; refresh(false); } });
 
 // ---------- undo ----------
 // A snapshot of queens + marks; act() records one only if fn actually changed something.

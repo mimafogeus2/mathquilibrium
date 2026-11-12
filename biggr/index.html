@@ -43,7 +43,7 @@
   </nav>
 </main>
 
-<section id="game" class="screen" hidden>
+<main id="game" class="screen" hidden>
   <header class="bar">
     <div class="bar-start">
       <button id="btn-back" class="icon" aria-label="Back to menu">
@@ -63,7 +63,7 @@
     <button id="side-r" class="side"><span class="expr"></span><span class="val"></span><kbd>→</kbd></button>
   </div>
   <p class="tally"><b id="progress"></b><small id="score"></small><button id="btn-giveup" class="give-up">Give up</button></p>
-</section>
+</main>
 
 <dialog id="dlg-levels">
   <h2>Levels</h2>
@@ -85,12 +85,12 @@
     <li>The clock runs: <b>45s</b> on Easy, <b>70s</b> on Medium, <b>90s</b> on Hard. A wrong pick costs <b>3 seconds</b>.</li>
     <li><b>10 points</b> per right pick, plus up to <b>5 points</b> for every second left when you finish (scaled by how many you got right).</li>
   </ol>
-  <p class="muted small">Three dailies, the same for everyone, plus 1,000 levels of each difficulty. No mistakes for three stars, up to two for two.</p>
+  <p class="muted small">Three dailies plus 1,000 levels of each difficulty. No mistakes for three stars, up to two for two.</p>
   <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
 </dialog>
 
 <dialog id="dlg-end">
-  <div id="end-stars" class="stars"></div>
+  <div id="end-stars" class="stars" role="img"></div>
   <h2 id="end-title"></h2>
   <p id="end-score" class="big-score"></p>
   <p id="end-stats" class="stats"></p>

@@ -34,7 +34,6 @@ function home() {
     const pp = store.packs[k], done = Object.keys(pp.stars).length, b = document.createElement('button');
     b.className = `pack-btn tier-${k}`;
     b.innerHTML = `<span class="pack-name">${name}</span><span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span><span class="pack-count">${done}/${PACK_SIZE}</span>`;
-    b.setAttribute('aria-label', `${name} pack, ${done} of ${PACK_SIZE} solved`);
     const next = firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
@@ -156,6 +155,7 @@ function finish() {
 function showEnd(rec, { pack, n, date }) {
   const right = [...rec.m].filter((c) => c === '1').length, full = rec.m.length === PAIRS;
   $('#end-stars').innerHTML = date || !full ? '' : [0, 1, 2].map((i) => `<span class="${i < stars(PAIRS - right) ? 'on' : ''}" style="--i:${i}">★</span>`).join('');
+  $('#end-stars').setAttribute('aria-label', `${stars(PAIRS - right)} of 3 stars`);
   $('#end-title').textContent = !full ? "Time's up!" : right === PAIRS ? 'Flawless!' : right >= 8 ? 'Sharp!' : 'Done!';
   $('#end-score').innerHTML = `${rec.s}<small>points</small>`;
   $('#end-stats').innerHTML = `<b>${right}/${PAIRS}</b> right · ` + (full ? `<b>${rec.t}s</b> left (+${bonus(rec.t, right)})` : `${PAIRS - rec.m.length} unanswered`);
