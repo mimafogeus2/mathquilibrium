@@ -1,11 +1,23 @@
 /* Mathquilibrium: the tile board and operator keys. Everything else is in shared/core.css. */
 :root { --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink); }
 
+/* The board pinch-zooms (game.js sets --zoom) inside its own scroller; the page keeps one screen tall so the keys stay put. */
+#game { height: 100dvh; }
+.board-wrap { min-height: 0; grid-template: minmax(0, 1fr) / minmax(0, 1fr); container-type: size; }
+.zoom {
+  place-self: stretch; overflow: auto; overscroll-behavior: contain;
+  display: grid; place-items: safe center;
+  padding: 6px; margin: -6px; /* room for the selection outline and the tile animations, without scrollbars */
+  touch-action: pan-x pan-y; /* pinch is ours, not the page's */
+}
+.zoom * { touch-action: pan-x pan-y; /* beat the global `* { manipulation }`, which would let the tiles pinch the page */
+}
 .board {
   --gap: clamp(3px, 1vw, 6px);
-  --cell: min(62px,
-    calc((100vw - 32px) / var(--cols) - var(--gap)),
-    calc((100dvh - 330px) / var(--rows) - var(--gap)));
+  /* fitted to the board area (the .board-wrap container), times the pinch zoom */
+  --cell: calc(var(--zoom, 1) * min(62px,
+    calc(100cqw / var(--cols) - var(--gap)),
+    calc(100cqh / var(--rows) - var(--gap))));
   display: grid; gap: var(--gap);
   grid-template-columns: repeat(var(--cols), var(--cell));
   grid-template-rows: repeat(var(--rows), var(--cell));
@@ -71,11 +83,8 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 
 @media (orientation: landscape) and (max-height: 540px) {
   .key { width: 52px; height: 52px; font-size: 26px; }
-  .board {
-    --cell: min(62px,
-      calc((100dvh - 90px) / var(--rows) - var(--gap)),
-      calc((100vw - 380px) / var(--cols) - var(--gap)));
-  }
+  /* the controls column can run past the screen; keep the board in view (90px ≈ top bar + padding) */
+  .board-wrap { max-height: calc(100dvh - 90px); align-self: start; }
 }
 
 #logo { --cell: 32px; --gap: 4px; }
