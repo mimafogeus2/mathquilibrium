@@ -273,6 +273,23 @@ function onKey(e) {
   return true;
 }
 
+// ---------- print ----------
+// The grid with its blanks empty, the operators in play listed above it.
+printable(() => {
+  const { p } = G, all = [...p.ops, ...p.rels];
+  const cell = (c) => `<div class="${c.op ? (c.given ? 'p-given' : 'p-blank') : 'p-num'}${String(c.val).length > 2 ? ' long' : ''}" style="grid-area: ${c.r + 1} / ${c.c + 1}">${c.op && !c.given ? '' : esc(sym(c.val))}</div>`;
+  return {
+    rules: [
+      'Write an operator in every empty box so <b>each row and column is a true equation</b>.',
+      'Boxes where lines cross are <b>shared</b>: one symbol has to work both ways.',
+      'Usual math order: <b>× ÷</b> before <b>+ −</b>. Division must come out exact.',
+      ...['^', '.', '%', '<'].filter((o) => all.includes(o)).map((o) => OP_TIPS[o].replace('New: ', '')),
+    ],
+    body: `<p class="p-ops">Use: ${all.map((o) => `<b>${esc(sym(o))}</b>`).join('')}</p>` +
+      `<div class="p-grid" style="--cols: ${p.cols}; --rows: ${p.rows}">${p.cells.map(cell).join('')}</div>`,
+  };
+});
+
 mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);
 // ponytail: storage key keeps the old name so existing saves survive the rename.

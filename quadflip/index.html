@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quadflip — flip the board clear</title>
+<meta name="description" content="Stamp every tetromino once to flip a board of tiles back to blank. New daily puzzles every day.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Puzzle Shelf">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/quadflip/">
+<meta property="og:title" content="Quadflip — flip the board clear">
+<meta property="og:description" content="Stamp every tetromino once to flip a board of tiles back to blank. New daily puzzles every day.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/quadflip/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ccircle cx='28' cy='36' r='16' fill='%2300787e'/%3E%3Ccircle cx='36' cy='28' r='16' fill='%23ffb511' fill-opacity='.88'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="home" class="screen">
+  <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-theme" aria-label="Theme"></button><button class="icon js-sound" aria-label="Sound"></button></div>
+  <div id="logo" class="board mini" aria-hidden="true"></div>
+  <h1 class="wordmark">Quad<span>flip</span></h1>
+  <p class="tagline">Every piece once. Every tile blank.</p>
+  <nav class="menu">
+    <div class="block-head"><h2>Today</h2><span id="daily-meta"></span></div>
+    <div id="daily-btns" class="trio"></div>
+    <div class="block-head"><h2>Level packs</h2><span>1,000 each</span></div>
+    <div id="pack-btns" class="packs"></div>
+    <div class="links">
+      <button id="btn-levels" class="foot-link">All levels</button>
+      <button id="btn-help" class="foot-link">How to play</button>
+    </div>
+  </nav>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button id="btn-pause" class="icon" aria-label="Pause"></button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="timer" aria-label="Time">0:00</span>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="board-wrap">
+    <div id="board" class="board" tabindex="0" role="application" aria-roledescription="board" aria-describedby="board-keys"></div>
+    <p id="board-keys" class="sr-only">Number keys pick a piece. Arrow keys move it over the board. Space or Enter stamps it, flipping the four tiles under it. Backspace or Z takes back the last stamp.</p>
+    <p id="sr" class="sr-only" aria-live="polite"></p>
+    <div id="pause-cover" class="pause-cover" hidden>
+      <b>Paused</b>
+      <button id="btn-resume" class="btn primary center"><b>Resume</b></button>
+    </div>
+  </div>
+  <div id="tray" class="tray" role="toolbar" aria-label="Pieces"></div>
+  <p id="tip" class="tip"></p>
+  <div class="tools">
+    <button id="btn-undo" class="chip" disabled>
+      <svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo
+    </button>
+    <button id="btn-hint" class="chip">
+      <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>Hint
+    </button>
+    <button id="btn-reset" class="chip">
+      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>Restart
+    </button>
+    <button id="btn-giveup" class="give-up">Give up</button>
+  </div>
+</main>
+
+<dialog id="dlg-levels">
+  <h2>Levels</h2>
+  <div id="pack-tabs" class="tabs" role="tablist"></div>
+  <div id="level-grid" class="level-grid"></div>
+  <div class="pager">
+    <button id="pg-prev" class="icon" aria-label="Previous levels"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span id="pg-label"></span>
+    <button id="pg-next" class="icon" aria-label="Next levels"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <form method="dialog"><button class="btn ghost center"><b>Close</b></button></form>
+</dialog>
+
+<dialog id="dlg-help">
+  <h2>How to play</h2>
+  <div id="help-board" class="board mini" aria-hidden="true"></div>
+  <ol class="rules">
+    <li>Turn every tile back to <b>blank paper</b>.</li>
+    <li>Pick a <b>piece</b>, then tap the board: the four tiles under it <b>flip</b>.</li>
+    <li>Use <b>every piece exactly once</b>. There's only one way to do it.</li>
+    <li>Tap a used piece to lift it off again.</li>
+  </ol>
+  <p class="muted small">Keyboard: <kbd>1</kbd>–<kbd>7</kbd> pick a piece, arrows to move it, <kbd>Space</kbd> to stamp, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-win">
+  <div id="win-stars" class="stars" role="img"></div>
+  <h2 id="win-title"></h2>
+  <p id="win-stats" class="stats"></p>
+  <div class="win-actions">
+    <button id="win-next" class="btn primary center"><b></b></button>
+    <button id="win-home" class="btn ghost center"><b>Menu</b></button>
+  </div>
+</dialog>
+
+<!-- riso speckle: the ink misses the paper in tiny spots -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="speck" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+  <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
+  <feComposite in="SourceGraphic" operator="out"/>
+</filter></svg>
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="gen.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
