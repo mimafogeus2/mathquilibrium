@@ -185,6 +185,8 @@ $('#btn-levels').onclick = () => openLevels();
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
 sides().forEach((el, i) => (el.onclick = () => answer(i)));
+// Giving up runs the clock out: the round ends as if time were up.
+$('#btn-giveup').onclick = () => { if (R && !R.over && confirm('Give up? The round ends now, scored as it stands.')) { R.left = 0; hud(); finish(); } };
 $('#end-home').onclick = () => { $('#dlg-end').close(); R = null; screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
 for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };

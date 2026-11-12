@@ -257,4 +257,5 @@ function onKey(e) {
 mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);
 // ponytail: storage key keeps the old name so existing saves survive the rename.
-boot({ name: 'Mathquilibrium', storeKey: 'crossum2', glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey });
+boot({ name: 'Mathquilibrium', storeKey: 'crossum2', glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
+  reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); } });
