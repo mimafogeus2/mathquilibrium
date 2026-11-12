@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Social card source (1200×630). Re-render after edits:
-     for g in home mathquilibrium coronet wordswipe orderly biggr; do
+     for g in home mathquilibrium coronet wordswipe orderly biggr quadflip; do
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
          --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
      done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png)
@@ -95,6 +95,17 @@
           <circle r="10" fill="var(--stock)" stroke="var(--ink)" stroke-width="1.6"/>
         </svg>
 </template>
+<template id="quadflip">
+  <svg class="art" viewBox="0 0 96 96">
+          <g filter="url(#speck)">
+            <path d="M34 6H62V90H34V62H6V34H34Z" fill="var(--sun)" opacity=".5"/>
+            <rect class="card" x="8" y="8" width="24" height="24" rx="5"/><rect x="36" y="8" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="64" y="8" width="24" height="24" rx="5"/>
+            <rect x="8" y="36" width="24" height="24" rx="5" fill="var(--teal)"/><rect x="36" y="36" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="64" y="36" width="24" height="24" rx="5"/>
+            <rect class="card" x="8" y="64" width="24" height="24" rx="5"/><rect x="36" y="64" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="64" y="64" width="24" height="24" rx="5"/>
+          </g>
+          <path d="M34 6H62V90H34V62H6V34H34Z" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4 3"/>
+        </svg>
+</template>
 <svg width="0" height="0" style="position: absolute"><filter id="speck" x="0" y="0" width="100%" height="100%">
   <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
   <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
@@ -107,6 +118,7 @@
     wordswipe: ['Word', 'swipe', 'teal', '#d8ebe6', 'A subject, 24 words, 60 seconds. Swipe right if it fits.'],
     orderly: ['Order', 'ly', 'sun', '#f7eac6', 'Ten cards, one subject. Drag them into order.'],
     biggr: ['Bigg', 'r', 'orange', '#f8e2d5', 'Two sums, no answers. Pick the bigger one, fast.'],
+    quadflip: ['Quad', 'flip', 'teal', '#d8ebe6', 'Stamp every piece once to flip the board back to blank.'],
   };
   const plate = (id, bg) => `<div class="plate" style="--plate: ${bg}">${document.getElementById(id).innerHTML}</div>`;
   const g = new URLSearchParams(location.search).get('g');
@@ -118,7 +130,7 @@
   } else {
     document.body.className = 'home';
     document.body.insertAdjacentHTML('beforeend', `<div class="row">${Object.keys(GAMES).map((k) => plate(k, GAMES[k][3])).join('')}</div>` +
-      `<h1>Puzzle <span>Shelf</span></h1><small>Daily logic games · Five games, new every morning</small>`);
+      `<h1>Puzzle <span>Shelf</span></h1><small>Daily logic games · Six games, new every morning</small>`);
   }
 </script>
 </body>

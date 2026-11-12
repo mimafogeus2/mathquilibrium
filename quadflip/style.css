@@ -1,0 +1,67 @@
+/* Quadflip: the tile board and the piece tray. Everything else is in shared/core.css.
+   Tiles are two-sided: blank stock on one face, teal ink on the other. */
+:root { --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal); }
+
+.board {
+  --n: 4; --gap: clamp(4px, 1.4vw, 8px);
+  display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: var(--gap);
+  width: min(440px, calc(100vw - 32px), calc(100dvh - 360px)); aspect-ratio: 1; padding: var(--gap);
+  border-radius: 16px; background: var(--slot); box-shadow: inset 0 0 0 1px var(--hair);
+  touch-action: none; user-select: none; -webkit-user-select: none; perspective: 900px;
+}
+.board:focus-visible { outline-offset: 4px; }
+.board.mini { width: 104px; --gap: 4px; border-radius: 10px; margin: 0 auto 8px; }
+#help-board { width: 92px; }
+
+.cell { position: relative; animation: enter .3s var(--d, 0ms) both var(--ease); }
+.t { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .42s var(--ease); }
+.t.on { transform: rotateY(180deg); }
+.t::before, .t::after { content: ''; position: absolute; inset: 0; border-radius: 22%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+/* blank face: paper stock */
+.t::before { background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift); }
+/* inked face, printed a hair out of register */
+.t::after { transform: rotateY(180deg); background: var(--speck), var(--brand); box-shadow: -2px 3px 0 var(--reg); }
+.mini .t::after { box-shadow: -1px 1.5px 0 var(--reg); }
+
+/* where the selected piece would land */
+.cell.ghost::after {
+  content: ''; position: absolute; inset: -2px; border-radius: 24%; pointer-events: none; z-index: 1;
+  box-shadow: inset 0 0 0 2.5px var(--ink); background: color-mix(in srgb, var(--sun) 32%, transparent);
+}
+.t.pop { animation: tpop .24s var(--ease); }
+@keyframes tpop { from { scale: .88; } }
+.board.shake { animation: shake .4s; }
+
+/* solved: a wave runs across the blank board */
+.board.solved .cell { animation: wave .6s var(--d, 0ms) both var(--ease); }
+.board.solved .t::before { background: var(--grain), color-mix(in srgb, var(--sun) 35%, var(--stock)); transition: background .3s; }
+
+/* ---------- tray ---------- */
+.tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; max-width: 440px; }
+.piece {
+  width: 56px; height: 56px; padding: 7px; border: 0; border-radius: 12px; display: grid; place-items: center;
+  background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift);
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), opacity .2s;
+}
+.piece svg { width: 100%; height: 100%; stroke: none; fill: var(--brand); }
+.piece[aria-pressed="true"] { background: var(--speck), var(--sun); box-shadow: 2px 3px 0 var(--reg); transform: translate(-1px, -2px); }
+.piece[aria-pressed="true"] svg { fill: var(--navy); }
+/* used: an empty dotted slot with the piece's outline */
+.piece.used { background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px; box-shadow: inset 0 0 0 1px var(--hair); }
+.piece.used svg { fill: none; stroke: var(--muted); stroke-width: .09; stroke-dasharray: .16 .1; }
+.piece.hinted svg { stroke: var(--sun-text); stroke-dasharray: none; }
+.piece:disabled { cursor: default; }
+@media (hover: hover) { .piece:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1px var(--ink), var(--lift); } }
+
+/* keep board, tray, tip and tools together in the middle */
+#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+#game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
+#game .tip { margin: 10px 0 0; }
+#game.paused .tray { visibility: hidden; }
+
+#logo { margin-bottom: 6px; transform: rotate(-4deg); }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .board:not(.mini) { width: min(calc(100dvh - 90px), calc(100vw - 380px)); }
+  .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
+}
