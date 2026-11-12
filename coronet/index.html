@@ -34,12 +34,15 @@
   <nav class="menu">
     <div class="block-head"><h2>Today</h2><span id="daily-meta"></span></div>
     <div id="daily-btns" class="trio"></div>
-    <div class="block-head"><h2>Level packs</h2><span>1,000 each</span></div>
+    <div class="block-head"><h2>Practice</h2><span>1,000 each</span></div>
     <div id="pack-btns" class="packs"></div>
-    <div class="links">
-      <button id="btn-levels" class="foot-link">All levels</button>
-      <button id="btn-help" class="foot-link">How to play</button>
+    <div class="new-head kicker">New puzzle</div>
+    <div id="new-row" class="row">
+      <button class="btn ghost tier-E" data-pack="E"><b>Easy</b></button>
+      <button class="btn ghost tier-M" data-pack="M"><b>Medium</b></button>
+      <button class="btn ghost tier-H" data-pack="H"><b>Hard</b></button>
     </div>
+    <div class="links"><button id="btn-help" class="foot-link">How to play</button></div>
   </nav>
 </main>
 
@@ -54,6 +57,7 @@
     <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
     <div class="bar-end">
       <span id="timer" aria-label="Time">0:00</span>
+      <button id="btn-print" class="icon" aria-label="Print this puzzle"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg></button>
       <button class="icon js-sound" aria-label="Sound"></button>
     </div>
   </header>
@@ -78,20 +82,9 @@
       <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>Restart
     </button>
     <button id="btn-giveup" class="give-up">Give up</button>
+    <button id="btn-result" class="btn primary center" hidden><b>See result</b></button>
   </div>
 </main>
-
-<dialog id="dlg-levels">
-  <h2>Levels</h2>
-  <div id="pack-tabs" class="tabs" role="tablist"></div>
-  <div id="level-grid" class="level-grid"></div>
-  <div class="pager">
-    <button id="pg-prev" class="icon" aria-label="Previous levels"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <span id="pg-label"></span>
-    <button id="pg-next" class="icon" aria-label="Next levels"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-  </div>
-  <form method="dialog"><button class="btn ghost center"><b>Close</b></button></form>
-</dialog>
 
 <dialog id="dlg-help">
   <h2>How to play</h2>
@@ -113,6 +106,7 @@
     <button id="win-next" class="btn primary center"><b></b></button>
     <button id="win-home" class="btn ghost center"><b>Menu</b></button>
   </div>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
 </dialog>
 
 <!-- riso speckle: the ink misses the paper in tiny spots -->

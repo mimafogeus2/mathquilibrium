@@ -70,7 +70,12 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   max-width: 600px; margin: 0 auto; min-height: 100dvh;
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
   display: flex; flex-direction: column; align-items: center;
+  /* every time a screen is shown (display: none -> flex restarts it): the brand drum lands out of register, then snaps in */
+  animation: print .32s var(--ease) backwards;
 }
+@keyframes print { from { opacity: 0; filter: drop-shadow(-8px 5px 0 var(--brand)); } 50% { opacity: 1; } }
+/* hub <-> game page loads: the browser's cross-fade between documents, where supported */
+@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }
 
 /* ---------- type ---------- */
 .wordmark, dialog h2, .title b, .pause-cover > b, .daily-btn b, .pack-name, .btn.daily b, .big-score, .subject b {
@@ -203,6 +208,11 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 .stats { color: var(--muted); margin: -4px 0 22px; font-size: 16px; }
 .stats b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .win-actions { display: flex; flex-direction: column; gap: 10px; }
+/* the win dialog's ×: closing it leaves the solved board on view, with #btn-result to bring the dialog back */
+.dlg-x { position: absolute; top: 8px; right: 8px; margin: 0; }
+/* done (solved or given up): the play controls go, the board stays */
+#game.done :is(.tools > :not(#btn-result), .palette, .give-up, #btn-pause) { display: none; }
+#btn-result { width: auto; padding: 14px 40px; }
 
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
@@ -290,3 +300,31 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 @supports (content: "x" / "") {
   .daily-btn::before, .pack-name::after, #new-row .btn b::before { content: var(--pips) / ""; }
 }
+
+/* ---------- print ---------- */
+/* #print is the paper version of the puzzle on screen, filled by printable() in core.js just before printing.
+   One A4 sheet, black ink on white: no grain, no shadows, no motion. Game sheets style their own body in style.css. */
+#print { display: none; }
+/* phones rarely print and the bar has no room for a third icon there; the browser's own Print still works */
+@media (max-width: 459px) { #btn-print { display: none; } }
+@media print {
+  @page { size: A4; margin: 14mm; }
+  :root, :root[data-theme="dark"] {
+    --ink: #000; --muted: #444; --paper: #fff; --stock: #fff; --line: #000; --hair: #888;
+    color-scheme: light;
+  }
+  html, body { min-height: 0; }
+  body.printing { background: none; }
+  body.printing > :not(#print) { display: none !important; }
+  body.printing #print { display: flex; }
+}
+#print { flex-direction: column; align-items: center; gap: 6mm; color: #000; font-size: 11pt; line-height: 1.4; }
+#print * { animation: none !important; transition: none !important; box-shadow: none; }
+.p-head { width: 100%; display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1.5pt solid #000; padding-bottom: 2mm; }
+.p-head h1 { margin: 0; font: 600 26pt/1 var(--display); letter-spacing: -0.03em; }
+.p-head p { margin: 0; font-size: 9pt; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+#print .rules { width: 100%; margin: 0; font-size: 10.5pt; }
+#print .rules li { margin-bottom: 1mm; }
+#print .rules li::marker { color: #000; }
+/* a box to write in */
+.p-box { flex: none; display: inline-block; width: 6mm; height: 6mm; border: 1pt solid #000; border-radius: 1mm; vertical-align: middle; }

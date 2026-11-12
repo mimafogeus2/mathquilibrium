@@ -72,6 +72,7 @@
 .vote svg { width: 32px; height: 32px; stroke-width: 2.4; }
 .vote.no { background: var(--speck), var(--pink); color: var(--on-pink); }
 .vote.yes { background: var(--speck), var(--teal); color: var(--on-teal); }
+#game.done .vote { visibility: hidden; }
 .vote:active { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--reg); }
 .tally { margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 6ch; font-variant-numeric: tabular-nums; }
 .tally b { font-family: var(--display); font-size: 20px; font-weight: 600; }
@@ -94,3 +95,12 @@
   .subject { grid-column: 2; grid-row: 3; align-self: end; max-width: 260px; }
   .answer { grid-column: 2; grid-row: 4; }
 }
+
+/* ---------- print ---------- */
+#print .subject b { font-size: 24pt; }
+#print .subject small { font-size: 9pt; color: #000; }
+.p-words { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 2mm; }
+.p-words ul { list-style: none; margin: 0; padding: 0; }
+.p-words li { display: flex; align-items: center; gap: 2.5mm; min-height: 15mm; border-bottom: .5pt solid #888; font-size: 13pt; line-height: 1.15; font-weight: 600; hyphens: auto; }
+.p-words .p-key { min-height: 7mm; border: 0; font-size: 11pt; }
+.p-key b { width: 6mm; text-align: center; }

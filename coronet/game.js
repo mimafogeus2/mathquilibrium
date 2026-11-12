@@ -85,7 +85,7 @@ function startLevel(G, save) {
   Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
   $('#g-sub').textContent = `${N} queens`;
-  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : G.n === 1 ? FIRST_TIP : '';
+  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -264,7 +264,30 @@ $('#btn-undo').onclick = undo;
 $('#btn-hint').onclick = hint;
 $('#btn-reset').onclick = reset;
 
+// ---------- print ----------
+// Paper version: the empty board in greys and textures (light enough to draw on), region fills in style.css.
+const PRINT_DEFS = '<defs>' +
+  '<pattern id="p-hatch" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#fff"/><path d="M-1 1l2-2M0 4l4-4M3 5l2-2" stroke="#999" stroke-width=".5"/></pattern>' +
+  '<pattern id="p-back" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#fff"/><path d="M-1 3l2 2M0 0l4 4M3-1l2 2" stroke="#999" stroke-width=".5"/></pattern>' +
+  '<pattern id="p-dots" width="3.5" height="3.5" patternUnits="userSpaceOnUse"><rect width="3.5" height="3.5" fill="#fff"/><circle cx="1.75" cy="1.75" r=".6" fill="#888"/></pattern>' +
+  '<pattern id="p-grid" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#fff"/><path d="M0 0h4M0 0v4" stroke="#aaa" stroke-width=".5"/></pattern>' +
+  '<pattern id="p-greydots" width="3.5" height="3.5" patternUnits="userSpaceOnUse"><rect width="3.5" height="3.5" fill="#e4e4e4"/><circle cx="1.75" cy="1.75" r=".6" fill="#fff"/></pattern>' +
+  '</defs>';
+printable(() => {
+  const el = svg('svg', { class: 'p-ring', 'aria-hidden': 'true' });
+  drawBoard(el, G.p);
+  el.insertAdjacentHTML('afterbegin', PRINT_DEFS);
+  return {
+    rules: [
+      `Place <b>${G.p.N} queens</b>: one in every <b>ring</b>, every <b>slice</b> and every <b>shade</b>.`,
+      'Draw a <b>crown</b> or <b>Q</b> for a queen, and an <b>×</b> on arcs that can\'t hold one.',
+      'Each queen rules out the rest of its ring, its slice and its shade.',
+    ],
+    body: el.outerHTML,
+  };
+});
+
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
-boot({ name: 'Coronet', storeKey: 'coronet', winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+boot({ name: 'Coronet', storeKey: 'coronet', random: true, winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });

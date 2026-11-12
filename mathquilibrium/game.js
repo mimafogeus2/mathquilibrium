@@ -42,14 +42,15 @@ function startLevel(G, save) {
   const diff = date ? PACKS[pack].daily : packDifficulty(pack, n);
   const p = generate(hash(key), levelConfig(diff));
   const s = saveFits(p, save) ? save : {};
-  Object.assign(G, { p, fills: new Map(s.fills), hinted: new Set(s.hinted), sel: null, states: [] });
+  Object.assign(G, { p, fills: new Map(s.fills), hinted: new Set(s.hinted), sel: null, states: [], history: [] });
 
   $('#g-sub').textContent = [...p.ops, ...p.rels].map(sym).join(' ');
   if (date) $('#tip').textContent = `Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.`;
   else if (n === 1) $('#tip').innerHTML = FIRST_TIP;
   else {
-    const prev = levelConfig(packDifficulty(pack, n - 1)), had = [...prev.ops, ...prev.rels];
-    const fresh = [...p.ops, ...p.rels].filter((o) => !had.includes(o) && OP_TIPS[o]);
+    const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val));
+    const syms = (o) => (o === '<' ? '<>' : o); // one tip covers both inequalities
+    const fresh = Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)) && firstUse(pack, syms(o), n) === n);
     $('#tip').innerHTML = fresh.map((o) => OP_TIPS[o]).join('<br>');
   }
 
@@ -153,6 +154,7 @@ function refresh(sound) {
     if (sound && cell.eqs.some((e) => states[e] === 'bad' && prev[e] !== 'bad')) flash(el, 'shake');
   }
   if (!G.done && states.every((s) => s === 'ok')) win();
+  $('#btn-undo').disabled = !G.history.length || G.done;
 }
 
 // ---------- spoken board ----------
@@ -187,6 +189,7 @@ function place(op) {
   const cell = G.sel;
   if (!cell) return;
   if (op) {
+    if (G.fills.get(cell.key) !== op) remember();
     G.fills.set(cell.key, op);
     sfx.place();
     flash(cell.el, 'pop');
@@ -194,10 +197,27 @@ function place(op) {
     G.eq = next ? next.eq : null;
     G.sel = next ? next.cell : nextEmpty(cell) || cell;
   } else {
-    if (!G.fills.delete(cell.key)) return;
+    if (!G.fills.has(cell.key)) return;
+    remember();
+    G.fills.delete(cell.key);
     sfx.erase();
   }
   refresh(true);
+  saveGame();
+}
+
+// ---------- undo ----------
+// A snapshot of the fills and the selected tile, taken before each change.
+// ponytail: history lives in memory only, a reload starts it fresh.
+const remember = () => G.history.push([[...G.fills], G.sel]);
+function undo() {
+  if (!playing() || !G.history.length) return;
+  const [fills, sel] = G.history.pop();
+  G.fills = new Map(fills);
+  G.sel = sel;
+  G.eq = null;
+  sfx.erase();
+  refresh(false);
   saveGame();
 }
 
@@ -222,6 +242,7 @@ function hint() {
   if (!c) return;
   G.fills.set(c.key, c.val);
   G.hinted.add(c.key);
+  G.history = []; // a hint is final: undoing past it could bring back the wrong tile it replaced
   sfx.hint();
   flash(c.el, 'pop');
   G.sel = nextEmpty(c);
@@ -233,6 +254,7 @@ function hint() {
 function reset() {
   if (!playing() || G.fills.size === G.hinted.size) return;
   if (!confirm('Restart this level? Your tiles are cleared; the clock keeps running.')) return;
+  remember();
   for (const k of [...G.fills.keys()]) if (!G.hinted.has(k)) G.fills.delete(k);
   sfx.erase();
   G.sel = nextEmpty(null);
@@ -257,6 +279,7 @@ $('.board-wrap').addEventListener('click', (e) => {
   }
   if (best && bd < 1.6 && best !== G.sel) { G.sel = best; G.eq = null; sfx.tap(); refresh(false); }
 });
+$('#btn-undo').onclick = undo;
 $('#btn-hint').onclick = hint;
 $('#btn-reset').onclick = reset;
 
@@ -269,9 +292,27 @@ function onKey(e) {
     if (k) { k.classList.add('press'); setTimeout(() => k.classList.remove('press'), 100); }
   } else if (e.key === 'Backspace' || e.key === 'Delete') place(null);
   else if (arrows[e.key]) move(...arrows[e.key]);
+  else if (e.key === 'z' || e.key === 'Z' || e.key === 'u' || e.key === 'U') undo();
   else return false;
   return true;
 }
+
+// ---------- print ----------
+// The grid with its blanks empty, the operators in play listed above it.
+printable(() => {
+  const { p } = G, all = [...p.ops, ...p.rels];
+  const cell = (c) => `<div class="${c.op ? (c.given ? 'p-given' : 'p-blank') : 'p-num'}${String(c.val).length > 2 ? ' long' : ''}" style="grid-area: ${c.r + 1} / ${c.c + 1}">${c.op && !c.given ? '' : esc(sym(c.val))}</div>`;
+  return {
+    rules: [
+      'Write an operator in every empty box so <b>each row and column is a true equation</b>.',
+      'Boxes where lines cross are <b>shared</b>: one symbol has to work both ways.',
+      'Usual math order: <b>× ÷</b> before <b>+ −</b>. Division must come out exact.',
+      ...['^', '.', '%', '<'].filter((o) => all.includes(o)).map((o) => OP_TIPS[o].replace('New: ', '')),
+    ],
+    body: `<p class="p-ops">Use: ${all.map((o) => `<b>${esc(sym(o))}</b>`).join('')}</p>` +
+      `<div class="p-grid" style="--cols: ${p.cols}; --rows: ${p.rows}">${p.cells.map(cell).join('')}</div>`,
+  };
+});
 
 mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);
