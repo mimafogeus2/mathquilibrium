@@ -52,7 +52,10 @@ function intro(ops) {
     sec.innerHTML = `<div class="intro-keys" aria-hidden="true">${keys}</div><div class="board mini" style="--cols:${line.length};--rows:1" role="img" aria-label="${line.map((v) => NAMES[v] || v).join(' ')}">${cells}</div><p>${text}</p>`;
     body.append(sec);
   }
-  $('#dlg-intro').showModal();
+  // first visit: How to play opens at boot too; show this after it instead of on top (skip if the level changed meanwhile)
+  const g = G, show = () => G === g && $('#dlg-intro').showModal();
+  if (store.seenHelp) show();
+  else $('#dlg-help').addEventListener('close', show, { once: true });
 }
 
 // ---------- game ----------
