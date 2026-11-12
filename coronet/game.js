@@ -42,7 +42,9 @@ function drawBoard(el, p, { mini = false } = {}) {
     if (p.region[next] !== p.region[i]) walls += `M${f(x2)} ${f(y2)}L${f(x1)} ${f(y1)}`;
     if (r < N - 1 && p.region[i + N] !== p.region[i]) walls += `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}`;
     const [cx, cy] = pt((ri + ro) / 2, (a0 + a1) / 2), size = Math.min(g.w, ((ri + ro) / 2) * (a1 - a0));
-    const pc = svg('g', { class: 'pc', transform: `translate(${f(cx)} ${f(cy)}) scale(${f(size / 22)})` });
+    // the stamp filter sits on each piece (only a changed piece re-renders it), outside the scale so its noise stays in board units
+    const pc = svg('g', { class: 'pc', transform: `translate(${f(cx)} ${f(cy)})` });
+    pc.append(svg('g', { transform: `scale(${f(size / 22)})` }));
     // each arc's stamp lands a little crooked and off-centre; seeded by the cell so it never jitters on redraw
     const rand = rng(i * 7919 + N);
     pc.style.setProperty('--rot', (rand() * 2 - 1) * 12 + 'deg');
@@ -67,7 +69,7 @@ function drawBoard(el, p, { mini = false } = {}) {
 function setPiece(pc, kind) {
   if (pc.dataset.k === kind) return false;
   pc.dataset.k = kind; // q queen, m manual mark, a auto mark
-  pc.innerHTML = kind === 'q' ? CROWN : kind ? CROSS : '';
+  pc.firstChild.innerHTML = kind === 'q' ? CROWN : kind ? CROSS : '';
   return true;
 }
 
@@ -100,12 +102,12 @@ function refresh(sound, placed = null) {
   G.conflicts = conflicts;
   for (let i = 0; i < N * N; i++) {
     const k = shown(i), pc = view.pieces[i];
-    if (setPiece(pc, k) && k === 'q' && sound) flash(pc.firstChild, 'pop');
+    if (setPiece(pc, k) && k === 'q' && sound) flash(pc.firstChild.firstChild, 'pop');
     pc.classList.toggle('bad', conflicts.has(i));
     pc.classList.toggle('hinted', G.hinted.has(i));
   }
   if (sound) {
-    if (fresh.length) { sfx.bad(); fresh.forEach((q) => flash(view.pieces[q].firstChild, 'shake')); }
+    if (fresh.length) { sfx.bad(); fresh.forEach((q) => flash(view.pieces[q].firstChild.firstChild, 'shake')); }
     else if (placed !== null) sfx.good(G.queens.size - 1);
   }
   const left = N - G.queens.size;
@@ -178,7 +180,7 @@ function hint() {
   G.history = []; // a hint is final: undoing past it could bring back the queens it removed
   sfx.hint();
   refresh(false);
-  flash(G.view.pieces[q].firstChild, 'pop');
+  flash(G.view.pieces[q].firstChild.firstChild, 'pop');
   saveGame();
 }
 

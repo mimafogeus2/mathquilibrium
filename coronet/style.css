@@ -15,11 +15,12 @@
   width: min(620px, calc(100vw - 24px), calc(100dvh - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
   fill: initial; stroke: none; stroke-width: 1;
   touch-action: none; user-select: none; -webkit-user-select: none;
-  filter: drop-shadow(0 18px 26px rgb(28 42 92 / .2));
+  /* box-shadow, not filter: drop-shadow — a filter on the <svg> makes WebKit redraw every speck and stamp on each tap (~10x slower on iPhone) */
+  border-radius: 50%; box-shadow: 0 18px 26px -6px rgb(28 42 92 / .2);
   animation: spin-in .6s var(--ease) both;
 }
-:root[data-theme="dark"] .board { filter: drop-shadow(0 16px 28px rgb(0 0 0 / .45)); }
-.board.mini { width: 132px; filter: none; }
+:root[data-theme="dark"] .board { box-shadow: 0 16px 28px -6px rgb(0 0 0 / .45); }
+.board.mini { width: 132px; box-shadow: none; }
 #logo { animation: spin-in .6s var(--ease) both, turn 90s linear infinite; }
 #help-board { display: block; margin: 0 auto 8px; width: 120px; }
 @keyframes spin-in { from { opacity: 0; transform: rotate(-30deg) scale(.9); } }
@@ -62,7 +63,7 @@
 
 .pc { pointer-events: none; }
 /* queens are rubber stamps: inked unevenly, a touch crooked, not quite inside the lines */
-.pieces { filter: url(#stamp); }
+.pc { filter: url(#stamp); }
 .crown { fill: var(--piece); transform-box: fill-box; transform-origin: center; rotate: var(--rot, 0deg); translate: var(--tx, 0) var(--ty, 0); }
 .x { stroke: var(--piece); stroke-width: 2.2; stroke-linecap: round; opacity: .55; }
 .pc[data-k="a"] .x { opacity: .4; }
@@ -120,7 +121,7 @@
 /* ---------- print ---------- */
 /* regions as greys and textures, all light enough that pen shows on them */
 .p-ring { width: 165mm; height: 165mm; fill: initial; stroke: none; stroke-width: 1; overflow: visible; margin-top: 4mm; }
-.p-ring .cells, .p-ring .pieces { filter: none; }
+.p-ring .cells, .p-ring .pc { filter: none; }
 .p-ring .lip, .p-ring .cursor, .p-ring .seal { display: none; }
 .p-ring .c { stroke: #000; stroke-width: .3; }
 .p-ring .walls, .p-ring .rim, .p-ring .hub circle { stroke: #000; stroke-width: 1.6; }
