@@ -11,9 +11,9 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 | WordSwipe | `wordswipe/` | A subject and 24 words against a 60-second fuse: swipe right if the word fits, left if not. One daily round plus unlimited, from 5,000 hand-written rounds. |
 | Orderly | `orderly/` | A subject and 10 cards: drag them into order (oldest→newest, mildest→hottest…). Check joins runs of cards in the right order into groups that move as one. One daily plus 2,030 levels. |
 | Biggr | `biggr/` | Two sums side by side, no answers: pick the bigger one. 10 pairs against the clock (45/70/90s), wrong picks cost 3s, leftover seconds score. Three dailies plus 1,000 seeded levels per difficulty. |
-| Quadflip | `quadflip/` | A board of two-sided tiles and a tray of tetrominoes: stamp each piece once, flipping the four tiles under it, until every tile is blank. One answer, and no smaller set of pieces works. Easy 3×3 with 3–4 pieces, Medium 4×4 with 4–5, Hard 5×5 with 6–7. |
+| Quadflip | `quadflip/` | A board of two-sided tiles and a tray of tetrominoes: stamp each piece once, flipping the four tiles under it, until every tile is blank. One answer, and no smaller set of pieces works. Easy 3×3 with 3–4 pieces, Hard 4×4 with 4–5. |
 
-Mathquilibrium, Coronet and Quadflip have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies, with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard. Coronet deals its levels at random (each with its own link, `#easy-k3f`) instead of unlocking them in order.
+Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (Quadflip: Easy and Hard, two dailies), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard. Coronet deals its levels at random (each with its own link, `#easy-k3f`) instead of unlocking them in order.
 
 ## Layout
 

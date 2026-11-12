@@ -203,7 +203,7 @@
         <div class="today"></div>
       </div>
     </a>
-    <a class="game" href="quadflip/" data-store="quadflip" style="--brand: var(--teal); --brand-text: var(--teal-text); --plate: #d8ebe6; --d: 350ms">
+    <a class="game" href="quadflip/" data-store="quadflip" data-tiers="EH" style="--brand: var(--teal); --brand-text: var(--teal-text); --plate: #d8ebe6; --d: 350ms">
       <div class="plate">
         <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
           <g filter="url(#speck)">
@@ -243,13 +243,13 @@
   for (const a of document.querySelectorAll('.game')) {
     let done = {};
     try { done = JSON.parse(localStorage.getItem(a.dataset.store))?.daily?.[today] || {}; } catch {}
-    if ('one' in a.dataset) { // one daily round, not three tiers
+    if ('one' in a.dataset) { // one daily round, not tiers
       a.querySelector('.today').innerHTML = `<i class="${done.r ? 'on' : ''}"></i><span>${done.r ? `Today: ${done.r.c ? `${done.r.c} check${done.r.c > 1 ? 's' : ''}` : `${done.r.s} points`}` : 'New round today'}</span>`;
       continue;
     }
-    const n = Object.keys(done).length;
-    a.querySelector('.today').innerHTML = ['E', 'M', 'H'].map((k) => `<i class="${done[k] ? 'on' : ''}"></i>`).join('') +
-      `<span>${n === 3 ? 'All dailies done' : n ? `${n} of 3 dailies today` : '3 new dailies today'}</span>`;
+    const tiers = [...(a.dataset.tiers || 'EMH')], n = tiers.filter((k) => done[k]).length;
+    a.querySelector('.today').innerHTML = tiers.map((k) => `<i class="${done[k] ? 'on' : ''}"></i>`).join('') +
+      `<span>${n === tiers.length ? 'All dailies done' : n ? `${n} of ${tiers.length} dailies today` : `${tiers.length} new dailies today`}</span>`;
   }
 </script>
 </body>

@@ -16,8 +16,10 @@ const SHAPES = [
 ];
 const dims = (s) => [Math.max(...SHAPES[s].map((c) => c[0])) + 1, Math.max(...SHAPES[s].map((c) => c[1])) + 1];
 
-// Board size and how many pieces, per difficulty.
-const TIER = { E: { N: 3, K: [3, 4] }, M: { N: 4, K: [4, 5] }, H: { N: 5, K: [6, 7] } };
+// Board size and how many pieces, per difficulty. (A 5×5 Hard with 6–7 pieces was dropped: far too hard.)
+const TIER = { E: { N: 3, K: [3, 4] }, H: { N: 4, K: [4, 5] } };
+// The level/daily key's seed. Hard is the old Medium renamed, so it keeps Medium's seeds: same puzzles, old saves still fit.
+const seedOf = (key) => hash(key.replace('H', 'M'));
 
 // Every placement of shape s on an N board: [{ pos, mask }].
 function placements(N, s) {
@@ -75,4 +77,4 @@ function generate(seed, tier) {
   }
 }
 
-if (typeof module === 'object') module.exports = { SHAPES, TIER, dims, placements, flip, count, swaps, valid, generate };
+if (typeof module === 'object') module.exports = { SHAPES, TIER, seedOf, dims, placements, flip, count, swaps, valid, generate };
