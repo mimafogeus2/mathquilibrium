@@ -144,12 +144,12 @@
     const [a, b, ink, bg, line] = GAMES[g];
     document.body.style.setProperty('--brand', `var(--${ink})`);
     document.body.style.setProperty('--brand-text', ink === 'ink' ? 'var(--ink)' : `var(--${ink}-text)`);
-    document.body.insertAdjacentHTML('beforeend', `${plate(g, bg)}<div><h1>${a}${b && `<span>${b}</span>`}</h1><p>${line}</p><small>${he ? 'חידה יומית · מדף החידות' : 'A daily puzzle · Puzzle Shelf'}</small></div>`);
+    document.body.insertAdjacentHTML('beforeend', `${plate(g, bg)}<div><h1>${a}${b && `<span>${b}</span>`}</h1><p>${line}</p><small>${he ? 'חידה יומית · מדף המשחקים של מיקי' : 'A daily puzzle · Games by Miki'}</small></div>`);
   } else {
     document.body.className = 'home';
     document.body.insertAdjacentHTML('beforeend', `<div class="row">${Object.keys(GAMES).map((k) => plate(k, GAMES[k][3])).join('')}</div>` +
-      (he ? '<h1>מדף <span>החידות</span></h1><small>משחקי היגיון יומיים · שישה משחקים, חדשים בכל בוקר</small>'
-        : '<h1>Puzzle <span>Shelf</span></h1><small>Daily logic games · Six games, new every morning</small>'));
+      (he ? '<h1>מדף המשחקים<br><span>של מיקי</span></h1><small>משחקי היגיון יומיים · שישה משחקים, חדשים בכל בוקר</small>'
+        : '<h1>Games by <span>Miki</span></h1><small>Daily logic games · Six games, new every morning</small>'));
   }
 </script>
 </body>

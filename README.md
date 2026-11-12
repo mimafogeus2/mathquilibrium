@@ -1,4 +1,4 @@
-# Puzzle Shelf
+# Games by Miki
 
 Small daily logic games. The root page is a portal; each game lives at its own URL.
 
