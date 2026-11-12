@@ -91,12 +91,13 @@ function balancePalette() {
   if (!n || $('#game').hidden) return;
   pal.style.maxWidth = '';
   const cs = getComputedStyle(pal), host = getComputedStyle(pal.parentElement);
-  const key = pal.children[0].getBoundingClientRect().width, gap = parseFloat(cs.columnGap) || 0;
+  // computed width is in CSS px like clientWidth; getBoundingClientRect is post-zoom and would undercount
+  const key = parseFloat(getComputedStyle(pal.children[0]).width), gap = parseFloat(cs.columnGap) || 0;
   const avail = Math.min(
     pal.parentElement.clientWidth - parseFloat(host.paddingLeft) - parseFloat(host.paddingRight),
     parseFloat(cs.maxWidth) || Infinity,
   );
-  const fit = Math.max(1, Math.floor((avail + gap) / (key + gap)));
+  const fit = Math.max(1, Math.floor((avail + gap + 1) / (key + gap))); // +1: subpixel slack, else 5.999 -> 5
   const perRow = Math.ceil(n / Math.ceil(n / fit));
   pal.style.maxWidth = perRow * key + (perRow - 1) * gap + 1 + 'px'; // +1 absorbs subpixel rounding
 }

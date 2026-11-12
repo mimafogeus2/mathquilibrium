@@ -2,7 +2,7 @@
 :root { --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink); }
 
 /* The board pinch-zooms (game.js sets --zoom) inside its own scroller; the page keeps one screen tall so the keys stay put. */
-#game { height: 100dvh; }
+#game { height: 100dvh; container-type: inline-size; } /* keys size from cqw, not vw */
 .board-wrap { min-height: 0; grid-template: minmax(0, 1fr) / minmax(0, 1fr); container-type: size; }
 .zoom {
   place-self: stretch; overflow: auto; overscroll-behavior: contain;
@@ -71,9 +71,12 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 .board.solved .cell { animation: wave .6s calc(var(--d) * 1.6) both var(--ease); }
 
 .palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-/* the widest palette is 11 keys (7 ops, 3 relations, erase): size for 6 per row so it never takes more than 2 */
+/* the widest palette is 11 keys (7 ops, 3 relations, erase): size for 6 per row so it never takes more than 2.
+   cqw is #game's content box, i.e. the width the palette really gets (100vw drifts under zoom/text scaling);
+   the 1px is slack so subpixel rounding can't push the 6th key onto a new row. */
 .key {
-  width: min(52px, calc((100vw - 32px - 5 * 6px) / 6)); height: min(48px, calc((100vw - 32px - 5 * 6px) / 6));
+  --fit: calc((100cqw - 5 * 6px - 1px) / 6);
+  width: min(52px, var(--fit)); height: min(48px, var(--fit));
   border: 0; border-radius: 12px; font-size: 24px; font-weight: 400;
   background: var(--speck), var(--brand); color: var(--on-brand); box-shadow: 2px 3px 0 var(--reg);
   transition: transform .1s var(--ease), box-shadow .1s var(--ease);
