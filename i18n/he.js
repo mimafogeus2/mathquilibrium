@@ -249,7 +249,9 @@ module.exports = {
       ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr and Quadflip. New puzzles every day."',
         'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה ומהפכים. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
-      ['<h1 class="masthead">Games by <span>Miki</span></h1>', '<h1 class="masthead">מדף המשחקים <span>של מיקי</span></h1>'],
+      // The Hebrew title is ~7.5em wide: size it to the header's width so it stays on one line (13cqi ≈ 100% / 7.6em, shadow included)
+      ['<header>', '<header style="container-type: inline-size">'],
+      ['<h1 class="masthead">Games by <span>Miki</span></h1>', '<h1 class="masthead" style="font-size: min(168px, 13cqi); white-space: nowrap">מדף המשחקים <span>של מיקי</span></h1>'],
       ['<b id="issue-no">No. 1</b>', '<b id="issue-no">גיליון 1</b>'],
       ['<span class="hide-sm">Price: one coffee break</span>', '<span class="hide-sm">מחיר: הפסקת קפה אחת</span>'],
       ['aria-label="Games"', 'aria-label="משחקים"'],
