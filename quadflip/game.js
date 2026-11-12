@@ -38,7 +38,7 @@ const nextFree = (from = 0) => {
 };
 
 function startLevel(G, save) {
-  const p = generate(hash(G.key), G.pack), K = p.pieces.length, N = p.N;
+  const p = generate(seedOf(G.key), G.pack), K = p.pieces.length, N = p.N;
   const okPos = (k, v) => v === -1 || placements(N, p.pieces[k]).some((q) => q.pos === v);
   const fits = Array.isArray(save.placed) && save.placed.length === K && save.placed.every((v, k) => okPos(k, v)) &&
     Array.isArray(save.order) && save.order.every((k) => save.placed[k] >= 0) &&
@@ -246,6 +246,21 @@ for (const [id, key] of [['#logo', 'logo'], ['#help-board', 'help']]) {
   const p = generate(hash(key), 'E');
   paint(drawBoard($(id), p.N), p.board);
 }
+// Quadflip has two difficulties: the old Hard was dropped and Medium renamed Hard. Each game page has its own TIERS.
+delete TIERS.M;
+// One-time move of a pre-rename store: Medium's progress, saves and dailies become Hard's; old Hard's are dropped
+// (a past day with only an old Hard daily keeps it, so streaks survive).
+try {
+  const s = JSON.parse(localStorage.getItem('quadflip'));
+  if (s?.packs?.M) {
+    s.packs.H = s.packs.M;
+    delete s.packs.M;
+    for (const d of Object.values(s.daily || {})) if (d.M) { d.H = d.M; delete d.M; }
+    s.saves = Object.fromEntries(Object.entries(s.saves || {}).filter(([k]) => !/^D?H/.test(k)).map(([k, v]) => [k.replace(/^(D?)M/, '$1H'), v]));
+    if (s.lastPack === 'M') s.lastPack = 'H';
+    localStorage.setItem('quadflip', JSON.stringify(s));
+  }
+} catch {}
 boot({ name: 'Quadflip', storeKey: 'quadflip', winDelay: 1600, glyphs: ['■', '▚'], start: startLevel,
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.placed = [...G.p.sol]; G.order = []; G.hinted = new Set(); refresh(); } });

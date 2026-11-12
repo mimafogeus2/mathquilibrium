@@ -1,6 +1,7 @@
 /* Quadflip: the tile board and the piece tray. Everything else is in shared/core.css.
    Tiles are two-sided: blank stock on one face, teal ink on the other. */
 :root { --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal); }
+.trio { grid-template-columns: repeat(2, 1fr); } /* two dailies: Easy and Hard */
 
 .board {
   --n: 4; --gap: clamp(4px, 1.4vw, 8px);
