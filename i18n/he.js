@@ -157,7 +157,7 @@ module.exports = {
       'true': 'נכון',
       'false': 'לא נכון',
       'Restart this level? Your tiles are cleared; the clock keeps running.': 'להתחיל את השלב מחדש? המשבצות שמילאתם יימחקו; השעון ממשיך לרוץ.',
-      'Write an operator in every empty box so <b>each row and column is a true equation</b>.': 'כתבו פעולה בכל משבצת ריקה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>.',
+      'Write an operator in every empty box so <b>each row and column is a true equation</b>. Equations read <b>left to right</b> or <b>top to bottom</b> only.': 'כתבו פעולה בכל משבצת ריקה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>. משוואות נקראות רק <b>משמאל לימין</b> או <b>מלמעלה למטה</b>.',
       'Boxes where lines cross are <b>shared</b>: one symbol has to work both ways.': 'משבצות שבהן קווים נחתכים הן <b>משותפות</b>: סימן אחד צריך לעבוד בשני הכיוונים.',
       'Usual math order: <b>× ÷</b> before <b>+ −</b>. Division must come out exact.': 'סדר פעולות רגיל: <b>× ÷</b> לפני <b>+ −</b>. החילוק חייב לצאת שלם.',
       'Use:': 'פעולות:',
@@ -293,11 +293,11 @@ module.exports = {
       ["<b>Let's go</b>", '<b>יאללה</b>'],
       ['<p id="board-keys" class="sr-only">Each blank sits on an across line, a down line, or both. Type an operator to fill the selected blank: plus, minus, star for times, slash for divide, equals. Arrow keys move between blanks, Backspace clears, Z undoes.</p>',
         '<p id="board-keys" class="sr-only">כל משבצת ריקה נמצאת על שורה מאוזנת, על עמודה מאונכת או על שתיהן. הקלידו פעולה כדי למלא את המשבצת הנבחרת: פלוס, מינוס, כוכבית לכפל, לוכסן לחילוק, שווה. החצים עוברים בין המשבצות, Backspace מנקה, Z מבטל.</p>'],
-      [`<li>Fill every blank tile with an operator so <b>each row and column is a true equation</b>.</li>
+      [`<li>Fill every blank tile with an operator so <b>each row and column is a true equation</b>. Equations read <b>left to right</b> or <b>top to bottom</b> only.</li>
     <li>Tiles where lines cross are <b>shared</b> — one symbol has to work both ways.</li>
     <li>Usual math order: <b>×  ÷</b> before <b>+  −</b>. Division must come out exact.</li>
     <li>Harder levels add <b>^</b> power, <b>.</b> decimal point (3 . 5 is 3.5), <b>%</b> remainder, and <b>&lt;  &gt;</b> for lines that are inequalities.</li>`,
-      `<li>מלאו כל משבצת ריקה בפעולה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>.</li>
+      `<li>מלאו כל משבצת ריקה בפעולה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>. משוואות נקראות רק <b>משמאל לימין</b> או <b>מלמעלה למטה</b>.</li>
     <li>משבצות שבהן קווים נחתכים הן <b>משותפות</b> — סימן אחד צריך לעבוד בשני הכיוונים.</li>
     <li>סדר פעולות רגיל: <b>×  ÷</b> לפני <b>+  −</b>. החילוק חייב לצאת שלם.</li>
     <li>בשלבים הקשים יותר מצטרפות <b>^</b> חזקה, <b>.</b> נקודה עשרונית (<span dir="ltr">3 . 5</span> הוא 3.5), <b>%</b> שארית, ו־<b dir="ltr">&lt;  &gt;</b> לשורות של אי־שוויון.</li>`],

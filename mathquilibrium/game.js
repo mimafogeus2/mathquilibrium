@@ -383,7 +383,7 @@ printable(() => {
   const cell = (c) => `<div class="${c.op ? (c.given ? 'p-given' : 'p-blank') : 'p-num'}${String(c.val).length > 2 ? ' long' : ''}" style="grid-area: ${c.r + 1} / ${c.c + 1}">${c.op && !c.given ? '' : esc(sym(c.val))}</div>`;
   return {
     rules: [
-      T('Write an operator in every empty box so <b>each row and column is a true equation</b>.'),
+      T('Write an operator in every empty box so <b>each row and column is a true equation</b>. Equations read <b>left to right</b> or <b>top to bottom</b> only.'),
       T('Boxes where lines cross are <b>shared</b>: one symbol has to work both ways.'),
       T('Usual math order: <b>× ÷</b> before <b>+ −</b>. Division must come out exact.'),
       ...['^', '.', '%', '<'].filter((o) => all.includes(o)).map((o) => `${[...syms(o)].map((x) => `<b dir="ltr">${esc(x)}</b>`).join(' ')} ${OP_TIPS[o][1]}`),
