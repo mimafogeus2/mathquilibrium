@@ -68,6 +68,7 @@ function buildBoard() {
   b.className = 'board';
   b.style.setProperty('--cols', G.p.cols);
   b.style.setProperty('--rows', G.p.rows);
+  setZoom(1);
   for (const cell of G.p.cells) {
     const edit = cell.op && !cell.given;
     const el = document.createElement(edit ? 'button' : 'div');
@@ -154,6 +155,41 @@ function refresh(sound) {
     if (sound && cell.eqs.some((e) => states[e] === 'bad' && prev[e] !== 'bad')) flash(el, 'shake');
   }
   if (!G.done && states.every((s) => s === 'ok')) win();
+  follow();
+}
+
+// ---------- zoom ----------
+// Pinch the board up to ~60px tiles (never below the fitted size); drag to pan once it overflows.
+const zoomer = $('.zoom');
+let zoom = 1, pinch = null;
+function setZoom(z) { zoom = z; $('#board').style.setProperty('--zoom', z); }
+const touchMid = (t) => [(t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2];
+const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+zoomer.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 2) return;
+  const [mx, my] = touchMid(e.touches), r = zoomer.getBoundingClientRect(), tile = $('#board').firstChild.offsetWidth / zoom;
+  // the board point under the fingers, so it stays under them while zooming
+  pinch = { d: touchDist(e.touches), z: zoom, max: Math.max(1, 60 / tile), x: zoomer.scrollLeft + mx - r.left, y: zoomer.scrollTop + my - r.top };
+}, { passive: true });
+zoomer.addEventListener('touchmove', (e) => {
+  if (!pinch || e.touches.length !== 2) return;
+  e.preventDefault();
+  const z = Math.min(pinch.max, Math.max(1, pinch.z * touchDist(e.touches) / pinch.d)), k = z / pinch.z;
+  const [mx, my] = touchMid(e.touches), r = zoomer.getBoundingClientRect();
+  setZoom(z);
+  zoomer.scrollLeft = pinch.x * k - (mx - r.left); // ponytail: ignores padding/gaps, close enough under a finger
+  zoomer.scrollTop = pinch.y * k - (my - r.top);
+}, { passive: false });
+zoomer.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = null; });
+
+// Glide the selected tile into view (with a tile of margin) when it's off the zoomed board's visible part.
+function follow() {
+  const el = G.sel?.el;
+  if (!el || pinch) return;
+  const a = zoomer.getBoundingClientRect(), b = el.getBoundingClientRect(), m = Math.min(b.width, a.width / 4);
+  const off = (lo, hi, min, max) => (lo < min + m ? lo - min - m : hi > max - m ? Math.min(hi - max + m, lo - min - m) : 0);
+  const left = off(b.left, b.right, a.left, a.right), top = off(b.top, b.bottom, a.top, a.bottom);
+  if (left || top) zoomer.scrollBy({ left, top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
 // ---------- spoken board ----------
