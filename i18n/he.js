@@ -207,7 +207,7 @@ module.exports = {
   // so a changed English page can't silently keep a stale translation. '*' pairs apply to every page and must be found in at least one.
   html: {
     '*': [
-      ['<meta property="og:site_name" content="Puzzle Shelf">', '<meta property="og:site_name" content="מדף החידות">'],
+      ['<meta property="og:site_name" content="Games by Miki">', '<meta property="og:site_name" content="מדף המשחקים של מיקי">'],
       ['aria-label="All games"', 'aria-label="כל המשחקים"'],
       ['aria-label="Theme"', 'aria-label="ערכת צבע"'],
       ['aria-label="Sound"', 'aria-label="צליל"'],
@@ -244,12 +244,12 @@ module.exports = {
     ],
 
     'index.html': [
-      ['<title>Puzzle Shelf — daily logic games</title>', '<title>מדף החידות — משחקי היגיון יומיים</title>'],
-      ['content="Puzzle Shelf — daily logic games"', 'content="מדף החידות — משחקי היגיון יומיים"'],
+      ['<title>Games by Miki — daily logic games</title>', '<title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>'],
+      ['content="Games by Miki — daily logic games"', 'content="מדף המשחקים של מיקי — משחקי היגיון יומיים"'],
       ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr and Quadflip. New puzzles every day."',
         'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה ומהפכים. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
-      ['<h1 class="masthead">Puzzle <span>Shelf</span></h1>', '<h1 class="masthead">מדף <span>החידות</span></h1>'],
+      ['<h1 class="masthead">Games by <span>Miki</span></h1>', '<h1 class="masthead">מדף המשחקים <span>של מיקי</span></h1>'],
       ['<b id="issue-no">No. 1</b>', '<b id="issue-no">גיליון 1</b>'],
       ['<span class="hide-sm">Price: one coffee break</span>', '<span class="hide-sm">מחיר: הפסקת קפה אחת</span>'],
       ['aria-label="Games"', 'aria-label="משחקים"'],
