@@ -22,18 +22,18 @@ function screen(id) {
 function home() {
   const t = today(), recs = store.daily[t] || {}, st = streak();
   $('#daily-meta').textContent = todayLine(st);
-  $('#daily-btns').replaceChildren(...Object.entries(TIERS).map(([k, name], i) => {
+  $('#daily-btns').replaceChildren(...Object.keys(TIERS).map((k, i) => {
     const b = document.createElement('button'), r = recs[k];
     b.className = `daily-btn tier-${k}${r ? ' done' : ''}`;
     b.style.setProperty('--i', i);
-    b.innerHTML = `<b>${name}</b><small>${r ? `✓ ${r.s} pts` : store.saves['D' + k + t] ? 'Resume' : `${TIME[k]}s`}</small>`;
+    b.innerHTML = `<b>${tierName(k)}</b><small>${r ? '✓ ' + T('{n} pts', { n: r.s }) : store.saves['D' + k + t] ? T('Resume') : T('{n}s', { n: TIME[k] })}</small>`;
     b.onclick = () => start(k, null, t);
     return b;
   }));
-  $('#pack-btns').replaceChildren(...Object.entries(TIERS).map(([k, name]) => {
+  $('#pack-btns').replaceChildren(...Object.keys(TIERS).map((k) => {
     const pp = store.packs[k], done = Object.keys(pp.stars).length, b = document.createElement('button');
     b.className = `pack-btn tier-${k}`;
-    b.innerHTML = `<span class="pack-name">${name}</span><span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span><span class="pack-count">${done}/${PACK_SIZE}</span>`;
+    b.innerHTML = `<span class="pack-name">${tierName(k)}</span><span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span><span class="pack-count">${done}/${PACK_SIZE}</span>`;
     const next = firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
@@ -47,8 +47,8 @@ function start(pack, n, date = null) {
   if (date && store.daily[date]?.[pack]) { toMenu(false); screen('home'); return showEnd(store.daily[date][pack], { pack, date }); }
   const sv = store.saves[key];
   R = { key, pack, n, date, pairs: generate(hash(key), pack), marks: sv?.marks || [], left: sv?.left ?? TIME[pack] * 1000, hold: false, over: false };
-  $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
-  $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+  $('#g-title').textContent = date ? T('Daily · {tier}', { tier: tierName(pack) }) : `${tierName(pack)} · ${n}`;
+  $('#g-sub').textContent = date ? shortDate(date) : '';
   $('#game').className = `screen tier-${pack}`;
   $('#btn-result').hidden = true;
   screen('game');
@@ -82,8 +82,8 @@ function hud() {
   $('#clock').textContent = secs;
   $('#fuse').style.width = (R.left / (TIME[R.pack] * 1000)) * 100 + '%';
   $('#game').classList.toggle('hurry', secs <= 5);
-  $('#progress').textContent = `${Math.min(R.marks.length + 1, PAIRS)} / ${PAIRS}`;
-  $('#score').textContent = `${R.marks.filter(Boolean).length * PER_RIGHT} pts`;
+  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, PAIRS), total: PAIRS });
+  $('#score').textContent = T('{n} pts', { n: R.marks.filter(Boolean).length * PER_RIGHT });
 }
 
 // ---------- pairs ----------
@@ -96,7 +96,7 @@ function deal() {
     el.querySelector('.expr').textContent = text;
     el.querySelector('.val').textContent = '';
     el.style.setProperty('--len', text.length);
-    el.setAttribute('aria-label', `${text}${i ? ' (right arrow)' : ' (left arrow)'}`);
+    el.setAttribute('aria-label', T(i ? '{sum} (right arrow)' : '{sum} (left arrow)', { sum: text }));
     flash(el, 'pop');
   });
 }
@@ -119,7 +119,7 @@ function answer(side) {
     flash($('#clock'), 'shake');
     const m = document.createElement('span');
     m.className = 'minus';
-    m.textContent = `−${PENALTY / 1000}s`;
+    m.textContent = T('−{n}s', { n: PENALTY / 1000 });
     $('.bar-end').append(m);
     setTimeout(() => m.remove(), 900);
   }
@@ -159,30 +159,31 @@ function finish() {
 function showEnd(rec, { pack, n, date }) {
   const right = [...rec.m].filter((c) => c === '1').length, full = rec.m.length === PAIRS;
   $('#end-stars').innerHTML = date || !full ? '' : [0, 1, 2].map((i) => `<span class="${i < stars(PAIRS - right) ? 'on' : ''}" style="--i:${i}">★</span>`).join('');
-  $('#end-stars').setAttribute('aria-label', `${stars(PAIRS - right)} of 3 stars`);
-  $('#end-title').textContent = !full ? "Time's up!" : right === PAIRS ? 'Flawless!' : right >= 8 ? 'Sharp!' : 'Done!';
-  $('#end-score').innerHTML = `${rec.s}<small>points</small>`;
-  $('#end-stats').innerHTML = `<b>${right}/${PAIRS}</b> right · ` + (full ? `<b>${rec.t}s</b> left (+${bonus(rec.t, right)})` : `${PAIRS - rec.m.length} unanswered`);
+  $('#end-stars').setAttribute('aria-label', T('{n} of 3 stars', { n: stars(PAIRS - right) }));
+  $('#end-title').textContent = T(!full ? "Time's up!" : right === PAIRS ? 'Flawless!' : right >= 8 ? 'Sharp!' : 'Done!');
+  $('#end-score').innerHTML = `${rec.s}<small>${T('points')}</small>`;
+  $('#end-stats').innerHTML = T('<b>{n}/{total}</b> right', { n: right, total: PAIRS }) + ' · ' +
+    (full ? T('<b>{n}s</b> left (+{bonus})', { n: rec.t, bonus: bonus(rec.t, right) }) : T('{n} unanswered', { n: PAIRS - rec.m.length }));
   const next = $('#end-next');
   next.hidden = !date && full && n === PACK_SIZE;
-  if (date) { next.querySelector('b').textContent = 'Share result'; next.onclick = () => share(rec, pack, date); }
-  else if (!full) { next.querySelector('b').textContent = 'Try again'; next.onclick = () => { $('#dlg-end').close(); start(pack, n); }; }
-  else { next.querySelector('b').textContent = `Level ${n + 1}  →`; next.onclick = () => { $('#dlg-end').close(); start(pack, n + 1); }; }
+  if (date) { next.querySelector('b').textContent = T('Share result'); next.onclick = () => share(rec, pack, date); }
+  else if (!full) { next.querySelector('b').textContent = T('Try again'); next.onclick = () => { $('#dlg-end').close(); start(pack, n); }; }
+  else { next.querySelector('b').textContent = T('Level {n}  →', { n: n + 1 }); next.onclick = () => { $('#dlg-end').close(); start(pack, n + 1); }; }
   $('#btn-result').hidden = false;
   $('#dlg-end').showModal();
 }
 
 async function share(rec, pack, date) {
-  const text = `Biggr daily · ${date} · ${TIERS[pack]}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
-    `${rec.s} points${rec.t ? ` · ${rec.t}s left` : ' · ⏰ out of time'}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
+  const text = `${T('{game} daily', { game: game.name })} · ${date} · ${tierName(pack)}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
+    T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
   try {
     if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = 'Copied ✓'; }
+    else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = T('Copied ✓'); }
   } catch {}
 }
 
 // ---------- wiring ----------
-game = { name: 'Biggr', storeKey: 'biggr', glyphs: ['>', '<', '+', '×'] };
+game = { name: T('Biggr'), storeKey: 'biggr', glyphs: ['>', '<', '+', '×'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...store };
 for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
@@ -193,7 +194,7 @@ const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home
 $('#btn-back').onclick = goHome;
 sides().forEach((el, i) => (el.onclick = () => answer(i)));
 // Giving up runs the clock out: the round ends as if time were up.
-$('#btn-giveup').onclick = () => { if (R && !R.over && confirm('Give up? The round ends now, scored as it stands.')) { R.left = 0; hud(); finish(); } };
+$('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The round ends now, scored as it stands.'))) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); R = null; screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
@@ -211,8 +212,8 @@ document.addEventListener('keydown', (e) => {
 // Paper version: the 10 pairs as lines with a gap for < or >. No clock on paper.
 printable(() => R && {
   rules: [
-    'Each line has <b>two sums</b>. Work them out in your head, no answers given.',
-    'Write <b>&lt;</b> or <b>&gt;</b> in the gap so the line is true: the open side faces the <b>bigger</b> sum.',
+    T('Each line has <b>two sums</b>. Work them out in your head, no answers given.'),
+    T('Write <b>&lt;</b> or <b>&gt;</b> in the gap so the line is true: the open side faces the <b>bigger</b> sum.'),
   ],
   body: `<ol class="p-pairs">${R.pairs.map(([lt, , rt]) => `<li><span>${esc(lt)}</span><i></i><span>${esc(rt)}</span></li>`).join('')}</ol>`,
 });

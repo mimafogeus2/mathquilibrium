@@ -3,6 +3,8 @@
 :root { --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal); }
 .trio { grid-template-columns: repeat(2, 1fr); } /* two dailies: Easy and Hard */
 
+/* The board is hit-tested by pointer position, left to right: it never mirrors */
+.board { direction: ltr; }
 .board {
   --n: 4; --gap: clamp(4px, 1.4vw, 8px);
   display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: var(--gap);

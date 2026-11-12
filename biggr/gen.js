@@ -6,7 +6,7 @@ const TIME = { E: 45, M: 70, H: 90 }; // seconds per level
 const GAP = { E: 4, M: 5, H: 6 };
 
 // Each template makes [text, value]. Templates are mixed freely within a tier, so ranges overlap on purpose.
-const T = {
+const SUMS = {
   E: [
     (r) => { const a = int(r, 2, 20), b = int(r, 2, 20); return [`${a} + ${b}`, a + b]; },
     (r) => { const a = int(r, 12, 40), b = int(r, 2, a - 3); return [`${a} − ${b}`, a - b]; },
@@ -30,7 +30,7 @@ const T = {
 function generate(seed, tier) {
   const r = rng(seed), pairs = [], seen = new Set();
   while (pairs.length < PAIRS) {
-    const [lt, lv] = pick(r, T[tier])(r), [rt, rv] = pick(r, T[tier])(r), d = Math.abs(lv - rv);
+    const [lt, lv] = pick(r, SUMS[tier])(r), [rt, rv] = pick(r, SUMS[tier])(r), d = Math.abs(lv - rv);
     if (lv < 0 || rv < 0 || d === 0 || d > GAP[tier] || seen.has(lt) || seen.has(rt)) continue;
     seen.add(lt).add(rt);
     pairs.push([lt, lv, rt, rv]);

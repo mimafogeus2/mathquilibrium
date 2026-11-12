@@ -4,19 +4,20 @@
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
          --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
      done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png)
+     Hebrew: the same with "?g=$g&lang=he", moved to he/og.png and he/<game>/og.png (build.js points the Hebrew pages at them).
      The art is copied from the portal (index.html): keep the two in step. -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&family=Frank+Ruhl+Libre:wght@300..900&family=Heebo:wght@400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="core.css">
 <style>
   html, body { width: 1200px; height: 630px; min-height: 0; overflow: hidden; }
   body { display: flex; align-items: center; gap: 64px; padding: 0 84px; }
   .plate { flex: none; width: 400px; height: 400px; display: grid; place-items: center; border-radius: 10px; background: var(--grain), var(--plate); box-shadow: inset 0 0 0 1px var(--hair), 6px 8px 0 var(--reg); }
-  .art { width: 300px; height: 300px; overflow: visible; stroke: none; }
+  .art { width: 300px; height: 300px; overflow: visible; stroke: none; direction: ltr; } /* sums read left to right in every language */
   .art .ov { mix-blend-mode: multiply; }
-  .art text { font: 600 15px Inter, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
+  .art text { font: 600 15px Inter, Heebo, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
   .art .on-ink { fill: var(--navy); }
   .art .card { fill: var(--stock); stroke: var(--hair); stroke-width: 1; }
   h1 { margin: 0; font: 600 104px/0.95 var(--display); letter-spacing: -0.045em; font-variation-settings: 'SOFT' 60, 'WONK' 0;
@@ -24,6 +25,7 @@
   h1 span { color: var(--brand-text); text-shadow: none; }
   p { margin: 24px 0 0; font-size: 34px; line-height: 1.3; color: var(--muted); max-width: 600px; }
   small { display: block; margin-top: 36px; padding-top: 14px; border-top: 2px solid var(--ink); font-size: 20px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  :lang(he) small { letter-spacing: normal; } /* Hebrew isn't tracked out */
   body.home { flex-direction: column; justify-content: center; gap: 0; text-align: center; }
   body.home .row { display: flex; gap: 26px; margin-bottom: 40px; }
   body.home .plate { width: 170px; height: 170px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); }
@@ -64,7 +66,7 @@
             <rect class="ov" x="14" y="16" width="44" height="60" rx="8" fill="var(--pink)" transform="rotate(-14 36 46)"/>
             <rect class="ov" x="38" y="14" width="44" height="60" rx="8" fill="var(--teal)" transform="rotate(12 60 44)"/>
             <rect class="card" x="26" y="22" width="44" height="60" rx="8"/>
-            <text x="48" y="52" style="font: italic 600 15px Fraunces, serif">Owl?</text>
+            <text x="48" y="52" class="owl" style="font: italic 600 15px var(--display)">Owl?</text>
           </g>
         </svg>
 </template>
@@ -120,17 +122,34 @@
     biggr: ['Bigg', 'r', 'orange', '#f8e2d5', 'Two sums, no answers. Pick the bigger one, fast.'],
     quadflip: ['Quad', 'flip', 'teal', '#d8ebe6', 'Stamp every piece once to flip the board back to blank.'],
   };
+  // Hebrew (?lang=he): the names, lines and footers of the Hebrew pages (i18n/he.js)
+  const HE = { // [wordmark, line]: the accented letters are in <span>, as on the pages
+    mathquilibrium: ['מאו<span>זן</span>', 'המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.'],
+    coronet: ['<span>ה</span>כתרה', 'מלכות במעגל: אחת בכל טבעת, אחת בכל פלח, אחת בכל צבע.'],
+    wordswipe: ['שמאל <span>ימין</span> שמאל', 'נושא אחד, 24 מילים, 60 שניות. מתאים? החליקו ימינה.'],
+    orderly: ['ב<span>סדר</span>', 'עשרה קלפים, נושא אחד. גררו אותם לסדר הנכון.'],
+    biggr: ['<span>כ</span>מה <span>כ</span>מה', 'שני תרגילים, בלי תשובות. בחרו את הגדול יותר, מהר.'],
+    quadflip: ['מ<span>הפכים</span>', 'החתימו כל צורה פעם אחת והפכו את הלוח בחזרה ללבן.'],
+  };
+  const he = new URLSearchParams(location.search).get('lang') === 'he';
+  if (he) {
+    Object.assign(document.documentElement, { lang: 'he', dir: 'rtl' });
+    for (const k in GAMES) [GAMES[k][0], GAMES[k][1], GAMES[k][4]] = [HE[k][0], '', HE[k][1]]; // the whole wordmark in the first part
+    document.getElementById('wordswipe').content.querySelector('.owl').textContent = 'ינשוף?';
+    document.getElementById('wordswipe').content.querySelector('.owl').style.direction = 'rtl';
+  }
   const plate = (id, bg) => `<div class="plate" style="--plate: ${bg}">${document.getElementById(id).innerHTML}</div>`;
   const g = new URLSearchParams(location.search).get('g');
   if (GAMES[g]) {
     const [a, b, ink, bg, line] = GAMES[g];
     document.body.style.setProperty('--brand', `var(--${ink})`);
     document.body.style.setProperty('--brand-text', ink === 'ink' ? 'var(--ink)' : `var(--${ink}-text)`);
-    document.body.insertAdjacentHTML('beforeend', `${plate(g, bg)}<div><h1>${a}<span>${b}</span></h1><p>${line}</p><small>A daily puzzle · Puzzle Shelf</small></div>`);
+    document.body.insertAdjacentHTML('beforeend', `${plate(g, bg)}<div><h1>${a}${b && `<span>${b}</span>`}</h1><p>${line}</p><small>${he ? 'חידה יומית · מדף החידות' : 'A daily puzzle · Puzzle Shelf'}</small></div>`);
   } else {
     document.body.className = 'home';
     document.body.insertAdjacentHTML('beforeend', `<div class="row">${Object.keys(GAMES).map((k) => plate(k, GAMES[k][3])).join('')}</div>` +
-      `<h1>Puzzle <span>Shelf</span></h1><small>Daily logic games · Six games, new every morning</small>`);
+      (he ? '<h1>מדף <span>החידות</span></h1><small>משחקי היגיון יומיים · שישה משחקים, חדשים בכל בוקר</small>'
+        : '<h1>Puzzle <span>Shelf</span></h1><small>Daily logic games · Six games, new every morning</small>'));
   }
 </script>
 </body>

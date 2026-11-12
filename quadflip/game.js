@@ -1,6 +1,6 @@
 'use strict';
 // Quadflip: pick a piece from the tray, stamp it on the board, its four tiles flip. Every piece once, every tile blank.
-const FIRST_TIP = 'Pick a <b>piece</b>, tap the board to <b>flip</b> the tiles under it. Use <b>every piece</b> once to clear the board.';
+const FIRST_TIP = T('Pick a <b>piece</b>, tap the board to <b>flip</b> the tiles under it. Use <b>every piece</b> once to clear the board.');
 
 // A board of N×N two-sided tiles into `el`. Returns the cells (for the ghost) and tiles (for the flip).
 function drawBoard(el, N) {
@@ -69,9 +69,9 @@ function startLevel(G, save) {
   });
   G.sel = Math.max(0, nextFree());
 
-  $('#g-sub').textContent = `${N}×${N} · ${K} pieces`;
+  $('#g-sub').textContent = `${N}×${N} · ${T('{n} pieces', { n: K })}`;
   delete $('#tip').dataset.warn;
-  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : G.n === 1 ? FIRST_TIP : '';
+  $('#tip').innerHTML = G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : G.n === 1 ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, N);
@@ -107,12 +107,12 @@ function refresh() {
     t.classList.toggle('hinted', G.hinted.has(k));
     t.setAttribute('aria-pressed', String(k === G.sel && !G.done));
     t.disabled = G.done || G.hinted.has(k);
-    t.setAttribute('aria-label', `Piece ${k + 1}` + (G.hinted.has(k) ? ', placed by a hint' : G.placed[k] >= 0 ? ', used: tap to lift it' : ''));
+    t.setAttribute('aria-label', T(G.hinted.has(k) ? 'Piece {n}, placed by a hint' : G.placed[k] >= 0 ? 'Piece {n}, used: tap to lift it' : 'Piece {n}', { n: k + 1 }));
   });
   const dark = board.toString(2).split('1').length - 1;
-  $('#board').setAttribute('aria-label', `Quadflip board, ${N} by ${N}. ${dark} dark tiles, ${free} of ${p.pieces.length} pieces left`);
-  if (G.kbd && !G.done) $('#sr').textContent = G.placed[G.sel] >= 0 ? `Piece ${G.sel + 1} is used.`
-    : `Piece ${G.sel + 1} at row ${Math.floor((G.at ?? 0) / N) + 1}, column ${((G.at ?? 0) % N) + 1}. ${dark} dark tiles, ${free} pieces left.`;
+  $('#board').setAttribute('aria-label', T('Quadflip board, {n} by {n}. {dark} dark tiles, {free} of {k} pieces left', { n: N, dark, free, k: p.pieces.length }));
+  if (G.kbd && !G.done) $('#sr').textContent = G.placed[G.sel] >= 0 ? T('Piece {n} is used.', { n: G.sel + 1 })
+    : T('Piece {n} at row {r}, column {c}. {dark} dark tiles, {free} pieces left.', { n: G.sel + 1, r: Math.floor((G.at ?? 0) / N) + 1, c: ((G.at ?? 0) % N) + 1, dark, free });
   $('#btn-undo').disabled = !G.order.length || G.done;
   if (!G.done && !free && !board) win();
 }
@@ -135,7 +135,7 @@ function stamp(pos) {
   SHAPES[G.p.pieces[k]].forEach(([r, c]) => flash(G.view.tiles[pos + r * G.p.N + c], 'pop'));
   const nf = nextFree(k + 1);
   if (nf >= 0) G.sel = nf;
-  else if (current()) { sfx.bad(); flash($('#board'), 'shake'); $('#tip').innerHTML = 'Not clear yet. <b>Tap a used piece</b> to lift it, or undo.'; $('#tip').dataset.warn = 1; }
+  else if (current()) { sfx.bad(); flash($('#board'), 'shake'); $('#tip').innerHTML = T('Not clear yet. <b>Tap a used piece</b> to lift it, or undo.'); $('#tip').dataset.warn = 1; }
   G.at = G.kbd ? G.at : null;
   refresh();
   saveGame();
@@ -184,7 +184,7 @@ function hint() {
 
 function reset() {
   if (!playing() || !G.order.length) return;
-  if (!confirm('Restart this level? Your pieces come back off the board; the clock keeps running.')) return;
+  if (!confirm(T('Restart this level? Your pieces come back off the board; the clock keeps running.'))) return;
   for (const k of G.order) G.placed[k] = -1;
   G.order = [];
   G.sel = Math.max(0, nextFree());
@@ -283,6 +283,6 @@ try {
     localStorage.setItem('quadflip', JSON.stringify(s));
   }
 } catch {}
-boot({ name: 'Quadflip', storeKey: 'quadflip', winDelay: 1600, glyphs: ['■', '▚'], start: startLevel,
+boot({ name: T('Quadflip'), storeKey: 'quadflip', winDelay: 1600, glyphs: ['■', '▚'], start: startLevel,
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.placed = [...G.p.sol]; G.order = []; G.hinted = new Set(); refresh(); } });

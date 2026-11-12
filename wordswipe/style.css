@@ -17,10 +17,10 @@
 
 /* ---------- game ---------- */
 #game { gap: 10px; }
-#clock { font-family: var(--display); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; display: inline-block; }
+#clock { font-family: var(--display); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: end; display: inline-block; }
 .bar-end { position: relative; }
 .minus {
-  position: absolute; right: 52px; top: 100%; font-weight: 700; color: var(--red-text);
+  position: absolute; inset-inline-end: 52px; top: 100%; font-weight: 700; color: var(--red-text);
   animation: drop .9s ease-out both; pointer-events: none;
 }
 @keyframes drop { from { opacity: 1; transform: translateY(-6px); } to { opacity: 0; transform: translateY(14px); } }
@@ -54,17 +54,18 @@
 .card.held { transition: none; cursor: grabbing; }
 .card::before, .card::after {
   position: absolute; top: 22px; padding: 5px 12px; border: 2px solid; border-radius: 8px;
-  font: 700 15px Inter, sans-serif; letter-spacing: .16em; mix-blend-mode: var(--blend);
+  font: 700 15px Inter, Heebo, sans-serif; letter-spacing: .16em; mix-blend-mode: var(--blend);
 }
-/* rubber stamps, inked as you lean */
-.card::before { content: 'NOPE'; right: 20px; color: var(--pink-text); transform: rotate(12deg); opacity: calc(var(--lean) * -1.5); }
-.card::after { content: 'YES'; left: 20px; color: var(--teal-text); transform: rotate(-12deg); opacity: calc(var(--lean) * 1.5); }
+/* rubber stamps, inked as you lean (game.js puts the words, translated, in data-no / data-yes).
+   Swiping is physical in every language, right = fits, so the stamps and vote buttons don't mirror. */
+.card::before { content: attr(data-no); right: 20px; color: var(--pink-text); transform: rotate(12deg); opacity: calc(var(--lean) * -1.5); }
+.card::after { content: attr(data-yes); left: 20px; color: var(--teal-text); transform: rotate(-12deg); opacity: calc(var(--lean) * 1.5); }
 .card.gone { pointer-events: none; animation: fly .45s ease-in forwards; }
 .card.right { background: var(--speck), var(--teal); color: var(--on-teal); }
 .card.wrong { background: var(--speck), var(--red); color: var(--on-red); }
 @keyframes fly { to { transform: translate(calc(var(--dir) * 110vw), -40px) rotate(calc(var(--dir) * 30deg)); opacity: .6; } }
 
-.answer { display: flex; align-items: center; justify-content: center; gap: 28px; width: 100%; }
+.answer { direction: ltr; display: flex; align-items: center; justify-content: center; gap: 28px; width: 100%; }
 .vote {
   display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; border: 0;
   box-shadow: 2px 3px 0 var(--reg); transition: transform .14s var(--ease), box-shadow .14s var(--ease);
@@ -75,12 +76,13 @@
 #game.done .vote { visibility: hidden; }
 .vote:active { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--reg); }
 .tally { margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 6ch; font-variant-numeric: tabular-nums; }
+.tally > * { unicode-bidi: plaintext; } /* .answer is pinned left to right; its text still reads in its own language's direction */
 .tally b { font-family: var(--display); font-size: 20px; font-weight: 600; }
 .tally small { color: var(--muted); font-size: 14px; }
 
 /* ---------- end ---------- */
 .big-score { font-size: 76px; font-weight: 600; letter-spacing: -0.04em; margin: -8px 0 10px; line-height: 1; color: var(--brand-text); text-shadow: .03em .03em 0 color-mix(in srgb, var(--pink) 45%, transparent); }
-.big-score small { display: block; font-family: Inter, sans-serif; font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 600; text-shadow: none; margin-top: 6px; }
+.big-score small { display: block; font-family: Inter, Heebo, sans-serif; font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 600; text-shadow: none; margin-top: 6px; }
 .misses { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: -8px 0 22px; max-height: 30dvh; overflow-y: auto; }
 .misses p { width: 100%; margin: 0 0 4px; }
 .misses span { padding: 4px 10px; border-radius: 99px; font-size: 13.5px; font-weight: 600; }
