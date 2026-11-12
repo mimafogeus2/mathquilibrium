@@ -85,3 +85,11 @@
   .list { min-height: 330px; --gap: 4px; }
   .card { border-radius: 10px; }
 }
+
+/* ---------- print ---------- */
+#print .subject b { font-size: 20pt; }
+.p-strips { width: 100%; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3.5mm; }
+.p-strips li { position: relative; display: flex; align-items: center; gap: 5mm; min-height: 14mm; padding: 1mm 6mm; border: 1pt dashed #000; font-size: 13pt; font-weight: 600; }
+/* scissors on the cut line */
+.p-strips li::before { content: '✂'; position: absolute; left: 3mm; top: -.62em; padding: 0 1mm; background: #fff; font-size: 12pt; line-height: 1; font-weight: 400; }
+.p-strips i { flex: none; width: 12mm; height: 7mm; border-bottom: 1.2pt solid #000; }
