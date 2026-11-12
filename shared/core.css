@@ -208,6 +208,11 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 .stats { color: var(--muted); margin: -4px 0 22px; font-size: 16px; }
 .stats b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .win-actions { display: flex; flex-direction: column; gap: 10px; }
+/* the win dialog's ×: closing it leaves the solved board on view, with #btn-result to bring the dialog back */
+.dlg-x { position: absolute; top: 8px; right: 8px; margin: 0; }
+/* done (solved or given up): the play controls go, the board stays */
+#game.done :is(.tools > :not(#btn-result), .palette, .give-up, #btn-pause) { display: none; }
+#btn-result { width: auto; padding: 14px 40px; }
 
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
