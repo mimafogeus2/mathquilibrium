@@ -58,10 +58,11 @@
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 [hidden] { display: none !important; }
 html, body { margin: 0; min-height: 100dvh; }
-/* no double-tap zoom anywhere on mobile; pinch-zoom still works */
-html { touch-action: manipulation; }
+/* no double-tap zoom anywhere on mobile; pinch-zoom still works. On every element, not just html:
+   touch-action only carries down to the nearest scroll container, and body (overflow-x: hidden) is one */
+* { touch-action: manipulation; }
 body { background: var(--grain), var(--paper); overflow-x: hidden; }
-button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+button { font: inherit; color: inherit; cursor: pointer; }
 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 ::selection { background: var(--brand); color: var(--on-brand); }
