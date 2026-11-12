@@ -224,4 +224,14 @@ function tryGenerate(seed, cfg) {
   };
 }
 
-if (typeof module === 'object') module.exports = { evalExpr, checkEquation, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty };
+// First level of a pack whose puzzle actually uses one of `syms` (being allowed isn't enough: '.' is rare),
+// or undefined if none up to `upto`. Stops at the first hit, usually a few levels after the operator unlocks.
+function firstUse(pack, syms, upto) {
+  for (let n = 1; n <= upto; n++) {
+    const cfg = levelConfig(packDifficulty(pack, n));
+    if (![...cfg.ops, ...cfg.rels].some((o) => syms.includes(o))) continue;
+    if (generate(hash(pack + n), cfg).cells.some((c) => c.op && syms.includes(c.val))) return n;
+  }
+}
+
+if (typeof module === 'object') module.exports = { evalExpr, checkEquation, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty, firstUse };
