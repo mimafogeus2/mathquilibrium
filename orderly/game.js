@@ -31,6 +31,14 @@ function deal(seed) {
 let P = null;
 const today = () => ymd(new Date());
 const nextLevel = () => { let n = 1; while (store.stars[n]) n++; return Math.min(n, LEVELS.length); };
+// A level started off the main path (random, or picked from the grid) and left unfinished gets its own Resume button.
+const sideLevel = () => (store.side && store.side !== 'L' + nextLevel() && store.saves[store.side] ? store.side : null);
+// Random: any unsolved level other than the next one and the side one; once all are solved, any at all.
+function randomLevel() {
+  const skip = [nextLevel(), +sideLevel()?.slice(1)], all = LEVELS.map((_, i) => i + 1).filter((n) => !skip.includes(n));
+  const open = all.filter((n) => !store.stars[n]);
+  return (open.length ? open : all)[Math.floor(Math.random() * (open.length || all.length))];
+}
 const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, links: P.links, rows: P.rows, moved: P.moved }; persist(); };
 // The order split into units: runs of linked cards (groups) and lone cards, top to bottom.
 const units = () => P.order.reduce((u, c, p) => (p && P.links[c - 1] && P.order[p - 1] === c - 1 ? u.at(-1).push(c) : u.push([c]), u), []);
@@ -48,11 +56,15 @@ function home() {
   $('#lv-meta').textContent = `${solved} / ${LEVELS.length}`;
   $('#btn-next b').textContent = `Level ${next}`;
   $('#btn-next small').textContent = store.saves['L' + next] ? 'Resume' : DIFF[parse(LEVELS[next - 1]).d];
+  const side = sideLevel();
+  $('#btn-resume').hidden = !side;
+  if (side) $('#btn-resume b').textContent = `Level ${side.slice(1)}`;
 }
 const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
 
 function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
+  if (n && n !== nextLevel()) store.side = key;
   const lv = parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, done: false };
@@ -170,10 +182,11 @@ function showResult(fresh) {
   $('#result').hidden = false;
   $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
   $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.date && streak() ? ` · 🔥 ${streak()}-day streak` : '');
-  const last = !P.date && P.n === LEVELS.length;
-  $('#res-next').hidden = last;
-  $('#res-next b').textContent = P.date ? 'Share result' : `Level ${P.n + 1}  →`;
-  $('#res-next').onclick = P.date ? () => share() : () => play('L' + (P.n + 1));
+  // After a level off the main path, "next" goes back to the first unsolved level.
+  const to = P.date ? 0 : Math.min(P.n + 1, nextLevel());
+  $('#res-next').hidden = to === P.n;
+  $('#res-next b').textContent = P.date ? 'Share result' : `Level ${to}  →`;
+  $('#res-next').onclick = P.date ? () => share() : () => play('L' + to);
   $('#result').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
@@ -201,7 +214,7 @@ function openLevels(page) {
   for (let n = from; n <= to; n++) {
     const b = document.createElement('button'), s = store.stars[n] || 0;
     b.className = 'lvl' + (n === next && !s ? ' current' : '');
-    b.disabled = n > next;
+    b.disabled = n > next && !s && !store.saves['L' + n];
     b.innerHTML = `<span>${n}</span><small>${b.disabled ? '🔒' : s ? '★'.repeat(s) + '☆'.repeat(3 - s) : ''}</small>`;
     b.setAttribute('aria-label', `Level ${n}${b.disabled ? ', locked' : s ? `, ${s} stars` : ''}`);
     b.onclick = () => { $('#dlg-levels').close(); play('L' + n); };
@@ -218,6 +231,8 @@ store = { daily: {}, stars: {}, saves: {}, muted: false, seenHelp: false, ...sto
 
 $('#btn-daily').onclick = () => play('D' + today());
 $('#btn-next').onclick = () => play('L' + nextLevel());
+$('#btn-resume').onclick = () => play(sideLevel());
+$('#btn-random').onclick = () => play('L' + randomLevel());
 $('#btn-levels').onclick = () => openLevels();
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); P = null; screen('home'); };
