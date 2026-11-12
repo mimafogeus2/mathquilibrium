@@ -6,15 +6,16 @@ Object.assign(globalThis, require('../shared/common.js'));
 
 // the pure helpers the page uses (game.js needs a DOM, so they're lifted out of the source)
 const src = require('fs').readFileSync(__dirname + '/game.js', 'utf8');
-for (const re of [/const N = [^\n]*\n/, /const DAY0[^]*?\n\n/, /function parse[^]*?\n}\n/, /function deal[^]*?\n}\n/, /const code = [^\n]*\n/, /const fromCode = [^\n]*\n/])
+for (const re of [/const N = [^\n]*\n/, /const TOPICS = [^\n]*\n/, /const DAY0[^]*?\n\n/, /function parse[^]*?\n}\n/, /function deal[^]*?\n}\n/, /const code = [^\n]*\n/, /const fromCode = [^\n]*\n/])
   (0, eval)(src.match(re)[0].replace(/^const /gm, 'var '));
 
 const subjects = new Set();
 const CHECK = (line, at) => {
   const f = line.split('|');
-  assert.strictEqual(f.length, 5, at);
+  assert.strictEqual(f.length, 6, at);
   const L = parse(line);
   assert([1, 2, 3].includes(L.d), at);
+  assert(L.topic in TOPICS, 'unknown topic ' + at);
   assert(L.subject && L.top && L.bottom, at);
   assert(!subjects.has(L.subject.toLowerCase()), 'duplicate subject ' + at);
   subjects.add(L.subject.toLowerCase());
@@ -29,6 +30,9 @@ LEVELS.forEach((line, i) => {
   assert.deepStrictEqual([...o].sort((a, b) => a - b), [...Array(N).keys()], at);
   assert(o.filter((v, p) => v === p).length <= 1, 'deal starts too solved ' + at);
 });
+
+// every topic has puzzles at every difficulty, so any ticked topic can deal one
+for (const t in TOPICS) for (const d of [1, 2, 3]) assert(LEVELS.some((l) => parse(l).topic === t && parse(l).d === d), `no ${DIFF[d]} ${t} puzzles`);
 
 // special days: real dates, each used once, in order, with an occasion
 const SPECIAL = require('./special.js'), dates = SPECIAL.map((l) => l.slice(0, 10));

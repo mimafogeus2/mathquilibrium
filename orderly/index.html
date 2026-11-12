@@ -91,6 +91,16 @@
   <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
 </dialog>
 
+<dialog id="dlg-topics">
+  <h2 id="t-title"></h2>
+  <form method="dialog">
+    <div class="row t-all"><button type="button" id="t-all" class="chip">Select all</button><button type="button" id="t-none" class="chip">Select none</button></div>
+    <div id="t-list" class="topics"></div>
+    <button id="t-go" class="btn primary center" value="go" autofocus><b>Play</b></button>
+    <button class="give-up" value="">Cancel</button>
+  </form>
+</dialog>
+
 <canvas id="fx" aria-hidden="true"></canvas>
 <script src="../shared/common.js"></script>
 <script src="../shared/core.js"></script>
