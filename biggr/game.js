@@ -21,10 +21,11 @@ function screen(id) {
 
 function home() {
   const t = today(), recs = store.daily[t] || {}, st = streak();
-  $('#daily-meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + (st ? `  ·  🔥 ${st}` : '');
-  $('#daily-btns').replaceChildren(...Object.entries(TIERS).map(([k, name]) => {
+  $('#daily-meta').textContent = todayLine(st);
+  $('#daily-btns').replaceChildren(...Object.entries(TIERS).map(([k, name], i) => {
     const b = document.createElement('button'), r = recs[k];
     b.className = `daily-btn tier-${k}${r ? ' done' : ''}`;
+    b.style.setProperty('--i', i);
     b.innerHTML = `<b>${name}</b><small>${r ? `✓ ${r.s} pts` : store.saves['D' + k + t] ? 'Resume' : `${TIME[k]}s`}</small>`;
     b.onclick = () => start(k, null, t);
     return b;

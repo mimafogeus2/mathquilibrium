@@ -1,4 +1,6 @@
 /* Mathquilibrium: the tile board and operator keys. Everything else is in shared/core.css. */
+:root { --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink); }
+
 .board {
   --gap: clamp(3px, 1vw, 6px);
   --cell: min(62px,
@@ -12,44 +14,56 @@
 
 .cell {
   display: grid; place-items: center; padding: 0; border: 0;
-  border-radius: calc(var(--cell) * .24);
-  font-size: calc(var(--cell) * .46); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1;
+  border-radius: calc(var(--cell) * .2);
+  font-size: calc(var(--cell) * .44); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1;
   user-select: none;
-  animation: enter .5s var(--d, 0ms) both cubic-bezier(.2, .9, .3, 1.35);
-  transition: background-color .25s, color .25s, box-shadow .25s, border-color .25s, transform .15s;
+  animation: enter .3s var(--d, 0ms) both var(--ease);
+  transition: background-color .2s, color .2s, box-shadow .14s var(--ease), transform .14s var(--ease);
 }
-.cell.long { font-size: calc(var(--cell) * .36); letter-spacing: -0.03em; }
-.cell.num { background: var(--tile); box-shadow: 0 3px 0 var(--edge), 0 8px 16px -10px rgb(0 0 0 / .3); }
-.cell.op { font-size: calc(var(--cell) * .56); font-weight: 500; }
-.cell.op.given { background: var(--slot); color: var(--muted); }
-button.cell.op { background: transparent; border: 2px dashed var(--line); color: var(--op-ink); }
-button.cell.op:hover { border-color: var(--op); }
-button.cell.filled { background: var(--op); border: 0; box-shadow: 0 3px 0 var(--op-edge); }
-button.cell.hinted { background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 var(--gold-edge); }
+.cell.long { font-size: calc(var(--cell) * .34); letter-spacing: -0.03em; }
+/* numbers: printed on card stock */
+.cell.num { background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift); }
+.cell.op { font-size: calc(var(--cell) * .54); font-weight: 400; }
+/* given operators: printed straight onto the page, no tile */
+.cell.op.given { background: none; color: var(--muted); }
+/* blanks: a halftone screen waiting for ink */
+button.cell.op:not(.filled), .cell.slot {
+  background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px;
+  box-shadow: inset 0 0 0 1px var(--line); color: var(--on-brand);
+}
+button.cell.op:not(.filled):hover { box-shadow: inset 0 0 0 1.5px var(--brand); }
+.cell.slot { box-shadow: inset 0 0 0 1.5px var(--brand); }
+/* filled: the brand drum, slightly out of register with the key */
+.cell.filled { background: var(--speck), var(--brand); color: var(--on-brand); box-shadow: 1.5px 2px 0 var(--reg); }
+.cell.hinted { background: var(--speck), var(--sun); color: var(--on-sun); box-shadow: 1.5px 2px 0 var(--reg); }
 
-.cell.hl.num { background: var(--hl); }
-button.cell.hl:not(.filled) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.cell.ok.num { background: var(--ok-bg); color: var(--ok); box-shadow: 0 3px 0 var(--ok-bg-edge); }
-.cell.ok.op.given { color: var(--ok); }
-button.cell.ok.filled { background: var(--ok); box-shadow: 0 3px 0 var(--ok-edge); }
-.cell.bad.num { background: var(--bad-bg); color: var(--bad); box-shadow: 0 3px 0 var(--bad-bg-edge); }
-button.cell.bad.filled { background: var(--bad); box-shadow: 0 3px 0 var(--bad-edge); }
-.cell.sel { outline: 3px solid var(--accent); outline-offset: 2px; transform: translateY(-2px); z-index: 1; }
+.cell.hl.num { background: var(--grain), var(--hl); }
+button.cell.hl:not(.filled) { box-shadow: inset 0 0 0 1.5px var(--brand); background: radial-gradient(circle, color-mix(in srgb, var(--brand) 55%, transparent) .9px, transparent 1.3px) 0 0 / 5px 5px; }
+.cell.ok.num { background: var(--grain), color-mix(in srgb, var(--teal) 16%, var(--stock)); color: var(--teal-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--teal) 40%, transparent), var(--lift); }
+.cell.ok.op.given { color: var(--teal-text); }
+.cell.ok.filled { background: var(--speck), var(--teal); color: var(--on-teal); }
+.cell.bad.num { background: var(--grain), color-mix(in srgb, var(--red) 16%, var(--stock)); color: var(--red-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 45%, transparent), var(--lift); }
+.cell.bad.filled { background: var(--speck), var(--red); color: var(--on-red); }
+/* selected: a crisp key-ink frame; the tile settles into register */
+.cell.sel { outline: 2px solid var(--ink); outline-offset: 2px; z-index: 1; }
+button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var(--reg); }
 
-.cell.pop { animation: pop .3s cubic-bezier(.2, .9, .3, 1.6); }
+.cell.pop { animation: pop .22s var(--ease); }
 .cell.shake { animation: shake .4s; }
-.board.solved .cell { animation: wave .7s calc(var(--d) * 1.6) both; }
+.board.solved .cell { animation: wave .6s calc(var(--d) * 1.6) both var(--ease); }
 
 .palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .key {
-  width: clamp(48px, 13vw, 60px); height: clamp(52px, 14vw, 62px);
-  border: 0; border-radius: 16px; font-size: 30px; font-weight: 500;
-  background: var(--op); color: var(--op-ink); box-shadow: 0 4px 0 var(--op-edge);
-  transition: transform .08s, box-shadow .08s;
+  width: clamp(48px, 13vw, 60px); height: clamp(52px, 14vw, 60px);
+  border: 0; border-radius: 14px; font-size: 28px; font-weight: 400;
+  background: var(--speck), var(--brand); color: var(--on-brand); box-shadow: 2px 3px 0 var(--reg);
+  transition: transform .1s var(--ease), box-shadow .1s var(--ease);
 }
-.key:active, .key.press { transform: translateY(3px); box-shadow: 0 1px 0 var(--op-edge); }
-.key.eq { background: var(--ink); color: var(--bg); box-shadow: 0 4px 0 color-mix(in srgb, var(--ink) 60%, #000); }
-.key.erase { background: var(--slot); color: var(--ink); box-shadow: 0 4px 0 var(--line); display: grid; place-items: center; }
+.key:active, .key.press { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--reg); }
+.key.eq { background: var(--speck), var(--ink); color: var(--paper); box-shadow: 2px 3px 0 var(--brand); }
+.key.eq:active, .key.eq.press { box-shadow: 0 0 0 var(--brand); }
+.key.erase { background: var(--grain), var(--stock); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), 2px 3px 0 var(--hair); display: grid; place-items: center; }
+.key.erase:active { box-shadow: inset 0 0 0 1px var(--line); }
 
 #help-grid { margin: 0 auto 8px; --cell: 34px; }
 

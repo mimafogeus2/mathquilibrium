@@ -24,10 +24,7 @@ function mini(el, rows, blanks = '') {
     if (ch === '.') return;
     const d = document.createElement('div');
     const isOp = '+-×÷='.includes(ch);
-    d.className = 'cell ' + (isOp ? 'op' : 'num');
-    if (isOp) Object.assign(d.style, blanks.includes(r + ',' + c)
-      ? { border: '2px dashed var(--accent)' }
-      : { background: 'var(--op)', color: 'var(--op-ink)', boxShadow: '0 3px 0 var(--op-edge)' });
+    d.className = 'cell ' + (isOp ? (blanks.includes(r + ',' + c) ? 'op slot' : 'op filled') : 'num');
     if (!blanks.includes(r + ',' + c)) d.textContent = sym(ch);
     d.style.gridArea = `${r + 1} / ${c + 1}`;
     d.style.setProperty('--d', (r + c) * 50 + 'ms');

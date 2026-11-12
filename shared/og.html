@@ -3,100 +3,122 @@
      for g in home mathquilibrium coronet wordswipe orderly biggr; do
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
          --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
-     done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png) -->
-<html lang="en">
+     done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png)
+     The art is copied from the portal (index.html): keep the two in step. -->
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="core.css">
 <style>
   html, body { width: 1200px; height: 630px; min-height: 0; overflow: hidden; }
-  body { background-size: 30px 30px; display: flex; align-items: center; gap: 56px; padding: 0 80px; }
-  .art { width: 300px; height: 300px; flex: none; stroke: none; }
-  .art.small { width: 150px; height: 150px; }
-  .row { display: flex; gap: 28px; margin-bottom: 52px; }
-  .card { flex: none; padding: 30px; border-radius: 44px; background: var(--card); box-shadow: 0 6px 0 var(--edge), 0 30px 60px -30px rgb(40 30 10 / .45); }
-  h1 { margin: 0; font-size: 96px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
-  h1 span { color: var(--brand, var(--op)); }
-  p { margin: 22px 0 0; font-size: 38px; line-height: 1.25; color: var(--muted); max-width: 620px; }
-  small { display: block; margin-top: 40px; font-size: 26px; font-weight: 700; color: var(--ink); opacity: .55; letter-spacing: .02em; }
-  body.home { flex-direction: column; justify-content: center; align-items: center; gap: 0; text-align: center; }
-  body.home h1 { font-size: 120px; }
-  body.home p { max-width: none; }
-  .art-tile { fill: var(--tile); }
-  .art-op { fill: var(--op); }
-  .art-ink { fill: var(--ink); font: 600 15px Outfit, sans-serif; text-anchor: middle; dominant-baseline: central; }
-  .art-ink.w { fill: #fff; }
+  body { display: flex; align-items: center; gap: 64px; padding: 0 84px; }
+  .plate { flex: none; width: 400px; height: 400px; display: grid; place-items: center; border-radius: 10px; background: var(--grain), var(--plate); box-shadow: inset 0 0 0 1px var(--hair), 6px 8px 0 var(--reg); }
+  .art { width: 300px; height: 300px; overflow: visible; stroke: none; }
+  .art .ov { mix-blend-mode: multiply; }
+  .art text { font: 600 15px Inter, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
+  .art .on-ink { fill: var(--navy); }
+  .art .card { fill: var(--stock); stroke: var(--hair); stroke-width: 1; }
+  h1 { margin: 0; font: 600 104px/0.95 var(--display); letter-spacing: -0.045em; font-variation-settings: 'SOFT' 60, 'WONK' 0;
+       text-shadow: .03em .025em 0 color-mix(in srgb, var(--brand) 60%, transparent); }
+  h1 span { color: var(--brand-text); text-shadow: none; }
+  p { margin: 24px 0 0; font-size: 34px; line-height: 1.3; color: var(--muted); max-width: 600px; }
+  small { display: block; margin-top: 36px; padding-top: 14px; border-top: 2px solid var(--ink); font-size: 20px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  body.home { flex-direction: column; justify-content: center; gap: 0; text-align: center; }
+  body.home .row { display: flex; gap: 26px; margin-bottom: 40px; }
+  body.home .plate { width: 170px; height: 170px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); }
+  body.home .art { width: 130px; height: 130px; }
+  body.home h1 { font-size: 148px; --brand: var(--pink); }
+  body.home h1 span { color: var(--pink-text); }
+  body.home small { border-top: 0; margin-top: 18px; }
 </style>
 </head>
 <body>
 <template id="mathquilibrium">
-  <svg viewBox="0 0 96 96">
-    <rect class="art-tile" x="4" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="17" y="47">4</text>
-    <rect class="art-op" x="35" y="34" width="26" height="26" rx="7"/><text class="art-ink w" x="48" y="47">+</text>
-    <rect class="art-tile" x="66" y="34" width="26" height="26" rx="7"/><text class="art-ink" x="79" y="47">3</text>
-    <rect class="art-tile" x="35" y="3" width="26" height="26" rx="7"/><text class="art-ink" x="48" y="16">5</text>
-    <rect x="36" y="66" width="24" height="24" rx="7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
-  </svg>
-</template>
-<template id="coronet">
-  <svg viewBox="-50 -50 100 100">
-    <circle r="46" cy="2" fill="var(--edge)"/>
-    <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="#f59e85"/>
-    <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="#8cc2f0"/>
-    <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="#9fd68b"/>
-    <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="#f7c25c"/>
-    <g fill="none" stroke="#3b3428" stroke-width="2"><circle r="45"/><circle r="27.5" stroke-width=".8" opacity=".5"/><circle r="10"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
-    <path transform="translate(22 -22) scale(.85)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
-    <path transform="translate(-14 14) scale(.6)" fill="#1e2230" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
-    <circle r="10" fill="var(--tile)" stroke="#3b3428" stroke-width="2"/>
-  </svg>
-</template>
-<template id="wordswipe">
-  <svg viewBox="0 0 96 96">
-    <rect x="18" y="16" width="44" height="60" rx="10" fill="var(--bad)" transform="rotate(-14 40 46)"/>
-    <rect x="34" y="14" width="44" height="60" rx="10" fill="var(--ok)" transform="rotate(12 56 44)"/>
-    <rect x="24" y="22" width="44" height="60" rx="10" class="art-tile" stroke="var(--edge)" stroke-width="2"/>
-    <text class="art-ink" x="46" y="52" style="font-size: 13px">Owl?</text>
-  </svg>
-</template>
-<template id="orderly">
-  <svg viewBox="0 0 96 96">
-    <rect x="14" y="16" width="38" height="16" rx="6" fill="var(--op)"/>
-    <rect x="14" y="40" width="54" height="16" rx="6" fill="var(--accent)"/>
-    <rect x="14" y="64" width="70" height="16" rx="6" fill="var(--gold)"/>
-  </svg>
+  <svg class="art" viewBox="0 0 120 96">
+          <g filter="url(#speck)">
+            <rect class="card" x="4" y="36" width="26" height="26" rx="5"/><text x="17" y="49">4</text>
+            <rect x="37" y="38" width="26" height="26" rx="5" fill="var(--reg)" opacity=".9"/>
+            <rect x="35" y="36" width="26" height="26" rx="5" fill="var(--pink)"/><text class="on-ink" x="48" y="49">+</text>
+            <rect class="card" x="66" y="36" width="26" height="26" rx="5"/><text x="79" y="49">3</text>
+            <rect class="card" x="35" y="5" width="26" height="26" rx="5"/><text x="48" y="18">5</text>
+            <rect x="35" y="67" width="26" height="26" rx="5" fill="none" stroke="var(--pink)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle class="ov" cx="98" cy="20" r="14" fill="var(--sun)"/>
+            <text x="104" y="76" style="font: italic 600 22px Fraunces, serif">=</text>
+          </g>
+        </svg>
 </template>
 <template id="biggr">
-  <svg viewBox="0 0 96 96">
-    <rect x="6" y="34" width="38" height="38" rx="9" fill="var(--op)"/>
-    <rect x="52" y="14" width="38" height="58" rx="9" fill="var(--accent)"/>
-    <text class="art-ink w" x="25" y="53" style="font-size: 13px">7×8</text>
-    <text class="art-ink w" x="71" y="43" style="font-size: 13px">9×6</text>
-  </svg>
+  <svg class="art" viewBox="0 0 96 96">
+          <g filter="url(#speck)">
+            <rect class="ov" x="10" y="38" width="40" height="44" rx="6" fill="var(--pink)"/>
+            <rect class="ov" x="36" y="12" width="44" height="70" rx="6" fill="var(--orange)"/>
+            <text x="58" y="34" class="on-ink" style="font-size: 13px">9×6</text>
+            <text x="23" y="60" class="on-ink" style="font-size: 13px">7×8</text>
+          </g>
+        </svg>
 </template>
+<template id="wordswipe">
+  <svg class="art" viewBox="0 0 96 96">
+          <g filter="url(#speck)">
+            <rect class="ov" x="14" y="16" width="44" height="60" rx="8" fill="var(--pink)" transform="rotate(-14 36 46)"/>
+            <rect class="ov" x="38" y="14" width="44" height="60" rx="8" fill="var(--teal)" transform="rotate(12 60 44)"/>
+            <rect class="card" x="26" y="22" width="44" height="60" rx="8"/>
+            <text x="48" y="52" style="font: italic 600 15px Fraunces, serif">Owl?</text>
+          </g>
+        </svg>
+</template>
+<template id="orderly">
+  <svg class="art" viewBox="0 0 96 96">
+          <g filter="url(#speck)">
+            <rect class="card" x="12" y="14" width="40" height="16" rx="4"/>
+            <rect x="14" y="40" width="56" height="16" rx="4" fill="var(--reg)"/>
+            <rect x="12" y="38" width="56" height="16" rx="4" fill="var(--sun)"/>
+            <rect x="14" y="64" width="72" height="16" rx="4" fill="var(--sun)"/>
+            <rect x="12" y="62" width="72" height="16" rx="4" fill="var(--ink)"/>
+          </g>
+        </svg>
+</template>
+<template id="coronet">
+  <svg class="art" viewBox="-50 -50 100 100">
+          <circle r="46" cx="2" cy="3" fill="var(--reg)"/>
+          <g filter="url(#speck)">
+            <circle r="45" fill="var(--stock)"/>
+            <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="var(--pink)"/>
+            <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="var(--teal)"/>
+            <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="var(--sun)"/>
+            <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="var(--orange)"/>
+          </g>
+          <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle r="45"/><circle r="27.5" stroke-width=".7" opacity=".5"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
+          <path transform="translate(22 -22) scale(.85)" fill="var(--ink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+          <path transform="translate(-14 14) scale(.6)" fill="var(--ink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+          <circle r="10" fill="var(--stock)" stroke="var(--ink)" stroke-width="1.6"/>
+        </svg>
+</template>
+<svg width="0" height="0" style="position: absolute"><filter id="speck" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+  <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
+  <feComposite in="SourceGraphic" operator="out"/>
+</filter></svg>
 <script>
   const GAMES = {
-    mathquilibrium: ['Math', 'quilibrium', 'var(--op)', 'The numbers are given. Fill in the operators so every line is true.'],
-    coronet: ['Coro', 'net', 'var(--accent)', 'Queens in the round: one per ring, slice and color.'],
-    wordswipe: ['Word', 'swipe', 'var(--ok)', 'A subject, 24 words, 60 seconds. Swipe right if it fits.'],
-    orderly: ['Order', 'ly', 'var(--accent)', 'Ten cards, one subject. Drag them into order.'],
-    biggr: ['Bigg', 'r', 'var(--accent)', 'Two sums, no answers. Pick the bigger one, fast.'],
+    mathquilibrium: ['Math', 'quilibrium', 'pink', '#f7e0e8', 'The numbers are given. Fill in the operators so every line is true.'],
+    coronet: ['Coro', 'net', 'ink', '#e2e4ee', 'Queens in the round: one per ring, slice and color.'],
+    wordswipe: ['Word', 'swipe', 'teal', '#d8ebe6', 'A subject, 24 words, 60 seconds. Swipe right if it fits.'],
+    orderly: ['Order', 'ly', 'sun', '#f7eac6', 'Ten cards, one subject. Drag them into order.'],
+    biggr: ['Bigg', 'r', 'orange', '#f8e2d5', 'Two sums, no answers. Pick the bigger one, fast.'],
   };
-  const art = (id, cls = 'art') => {
-    const svg = document.getElementById(id).content.firstElementChild.cloneNode(true);
-    svg.classList.add(...cls.split(' '));
-    return svg.outerHTML;
-  };
+  const plate = (id, bg) => `<div class="plate" style="--plate: ${bg}">${document.getElementById(id).innerHTML}</div>`;
   const g = new URLSearchParams(location.search).get('g');
   if (GAMES[g]) {
-    const [a, b, brand, line] = GAMES[g];
-    document.body.style.setProperty('--brand', brand);
-    document.body.innerHTML = `${art(g)}<div><h1>${a}<span>${b}</span></h1><p>${line}</p><small>A daily puzzle · Puzzle Shelf</small></div>`;
+    const [a, b, ink, bg, line] = GAMES[g];
+    document.body.style.setProperty('--brand', `var(--${ink})`);
+    document.body.style.setProperty('--brand-text', ink === 'ink' ? 'var(--ink)' : `var(--${ink}-text)`);
+    document.body.insertAdjacentHTML('beforeend', `${plate(g, bg)}<div><h1>${a}<span>${b}</span></h1><p>${line}</p><small>A daily puzzle · Puzzle Shelf</small></div>`);
   } else {
     document.body.className = 'home';
-    document.body.innerHTML = `<div class="row">${Object.keys(GAMES).map((k) => `<div class="card">${art(k, 'art small')}</div>`).join('')}</div>` +
-      `<h1>Puzzle<span>shelf</span></h1><p>Daily logic games. Same puzzles for everyone.</p>`;
+    document.body.insertAdjacentHTML('beforeend', `<div class="row">${Object.keys(GAMES).map((k) => plate(k, GAMES[k][3])).join('')}</div>` +
+      `<h1>Puzzle <span>Shelf</span></h1><small>Daily logic games · Same puzzles for everyone</small>`);
   }
 </script>
 </body>

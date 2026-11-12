@@ -24,7 +24,7 @@ function drawBoard(el, p, { mini = false } = {}) {
   const g = geo(p.N), { N, pt, ang, rad } = g, f = (n) => +n.toFixed(2);
   el.replaceChildren();
   el.setAttribute('viewBox', '-100 -100 200 200');
-  el.append(svg('circle', { class: 'lip', r: R + 1, cy: 3 }));
+  el.append(svg('circle', { class: 'lip', r: R + 1, cy: 3 }), svg('circle', { class: 'stock-back', r: R }));
   const cellsG = svg('g', { class: 'cells' }), wallsG = svg('path', { class: 'walls' }), piecesG = svg('g', { class: 'pieces' });
   const els = [], pieces = [];
   let walls = '';
@@ -32,7 +32,7 @@ function drawBoard(el, p, { mini = false } = {}) {
     const r = Math.floor(i / N), s = i % N, a0 = ang(s), a1 = ang(s + 1), ri = rad(r), ro = rad(r + 1);
     const [x0, y0] = pt(ro, a0), [x1, y1] = pt(ro, a1), [x2, y2] = pt(ri, a1), [x3, y3] = pt(ri, a0);
     const d = `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}A${f(ri)} ${f(ri)} 0 0 0 ${f(x3)} ${f(y3)}Z`;
-    const c = svg('path', { d, class: 'c rg' + Math.floor((p.region[i] * 10) / N) });
+    const c = svg('path', { d, class: 'c rg' + p.region[i] });
     c.style.setProperty('--d', r * 45 + s * 8 + 'ms');
     c.style.setProperty('--ring', r);
     cellsG.append(c);
@@ -43,6 +43,11 @@ function drawBoard(el, p, { mini = false } = {}) {
     if (r < N - 1 && p.region[i + N] !== p.region[i]) walls += `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}`;
     const [cx, cy] = pt((ri + ro) / 2, (a0 + a1) / 2), size = Math.min(g.w, ((ri + ro) / 2) * (a1 - a0));
     const pc = svg('g', { class: 'pc', transform: `translate(${f(cx)} ${f(cy)}) scale(${f(size / 22)})` });
+    // each arc's stamp lands a little crooked and off-centre; seeded by the cell so it never jitters on redraw
+    const rand = rng(i * 7919 + N);
+    pc.style.setProperty('--rot', (rand() * 2 - 1) * 12 + 'deg');
+    pc.style.setProperty('--tx', (rand() * 2 - 1) * 3 + 'px');
+    pc.style.setProperty('--ty', (rand() * 2 - 1) * 3 + 'px');
     piecesG.append(pc);
     pieces.push(pc);
   }

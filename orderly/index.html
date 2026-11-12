@@ -14,12 +14,12 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#13151d" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='28' height='12' rx='4' fill='%2333388f'/%3E%3Crect x='8' y='26' width='40' height='12' rx='4' fill='%23ff6a3d'/%3E%3Crect x='8' y='44' width='50' height='12' rx='4' fill='%23f2b134'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ccircle cx='28' cy='36' r='16' fill='%2326366b'/%3E%3Ccircle cx='36' cy='28' r='16' fill='%23ffb511' fill-opacity='.88'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/core.css">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -27,21 +27,22 @@
 
 <main id="home" class="screen">
   <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
-  <button class="icon js-sound corner" aria-label="Sound"></button>
+  <div class="corner"><button class="icon js-theme" aria-label="Theme"></button><button class="icon js-sound" aria-label="Sound"></button></div>
   <div id="logo" aria-hidden="true"><i></i><i></i><i></i></div>
   <h1 class="wordmark">Order<span>ly</span></h1>
   <p class="tagline">Ten cards, one subject. Put them in order.</p>
   <nav class="menu">
-    <div class="block-head"><h2>Daily</h2><span id="daily-meta"></span></div>
+    <div class="block-head"><h2>Today</h2><span id="daily-meta"></span></div>
     <button id="btn-daily" class="btn daily"><b>Today's puzzle</b><small></small></button>
     <div class="block-head"><h2>Practice</h2><span id="lv-meta"></span></div>
-    <button id="btn-random" class="btn primary"><b></b><small></small></button>
+    <button id="btn-random" class="btn ghost"><b></b><small></small></button>
+    <div class="new-head kicker">New puzzle</div>
     <div id="new-row" class="row">
-      <button class="btn ghost" data-d="1"><b>Easy</b></button>
-      <button class="btn ghost" data-d="2"><b>Medium</b></button>
-      <button class="btn ghost" data-d="3"><b>Hard</b></button>
+      <button class="btn ghost tier-E" data-d="1"><b>Easy</b></button>
+      <button class="btn ghost tier-M" data-d="2"><b>Medium</b></button>
+      <button class="btn ghost tier-H" data-d="3"><b>Hard</b></button>
     </div>
-    <button id="btn-help" class="btn ghost"><b>How to play</b></button>
+    <div class="links"><button id="btn-help" class="foot-link">How to play</button></div>
   </nav>
 </main>
 
