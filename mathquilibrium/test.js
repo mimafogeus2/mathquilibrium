@@ -1,7 +1,7 @@
 // node test.js — checks the evaluator and that the generator produces valid, well-formed puzzles.
 const assert = require('assert');
 Object.assign(globalThis, require('../shared/common.js'));
-const { checkEquation, evalExpr, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty, firstUse } = require('./gen.js');
+const { checkEquation, evalExpr, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty } = require('./gen.js');
 
 assert(checkEquation([2, '+', 3, '×', 4, '=', 14]));
 assert(checkEquation([12, '=', 3, '×', 4]));
@@ -81,5 +81,4 @@ for (const [k, d] of keys) {
   }
 }
 for (const op of ['.', '<', '>', '%', '^']) assert(seen.has(op), 'never generated ' + op);
-assert.strictEqual(firstUse('H', '.', 7), undefined); // H7 allows '.' but doesn't use it: no intro there
 console.log('ok', keys.length, 'puzzles', Date.now() - t0, 'ms');
