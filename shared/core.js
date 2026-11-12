@@ -270,7 +270,6 @@ function confetti() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const cv = $('#fx'), ctx = cv.getContext('2d'), dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const css = getComputedStyle(document.documentElement);
   const colors = ['--brand', '--brand', '--sun', '--teal', '--ink'].map((v) => css.getPropertyValue(v).trim());
   ctx.globalCompositeOperation = css.getPropertyValue('--blend').trim() || 'multiply';
@@ -281,24 +280,29 @@ function confetti() {
     s: 7 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - 0.5) * 0.3, f: Math.random() * 6,
     c: colors[i % colors.length], g: i % 4 === 0 ? glyphs[i % glyphs.length] : null,
   }));
-  const t0 = performance.now();
-  (function frame(now) {
-    ctx.clearRect(0, 0, W, H);
+  ctx.globalAlpha = 0.9;
+  ctx.font = '600 24px Fraunces, Georgia, serif'; // set once: per-particle font strings were the costliest part of a frame
+  // ponytail: steps scale with real frame time, so dropped frames at win time (board restyle, dialog) don't play as slow motion
+  let t0, last;
+  function frame(now) {
+    t0 ??= now;
+    const k = Math.min((now - (last ?? now - 16.7)) / 16.7, 3);
+    last = now;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
     for (const p of parts) {
-      p.vy += 0.34; p.vx *= 0.982; p.vy *= 0.992; p.x += p.vx; p.y += p.vy; p.a += p.va; p.f += 0.12;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.a);
-      ctx.scale(1, Math.cos(p.f)); // paper flutters: its face turns toward and away from you
+      p.vy += 0.34 * k; p.vx *= 0.982 ** k; p.vy *= 0.992 ** k; p.x += p.vx * k; p.y += p.vy * k; p.a += p.va * k; p.f += 0.12 * k;
+      // translate, rotate, then squash y as the paper flutters (its face turns toward and away from you); glyphs scale from the 24px font
+      const z = dpr * (p.g ? p.s / 10 : 1), c = Math.cos(p.a) * z, sn = Math.sin(p.a) * z, fy = Math.cos(p.f);
+      ctx.setTransform(c, sn, -sn * fy, c * fy, p.x * dpr, p.y * dpr);
       ctx.fillStyle = p.c;
-      ctx.globalAlpha = 0.9;
-      if (p.g) { ctx.font = `600 ${p.s * 2.4}px Fraunces, Georgia, serif`; ctx.fillText(p.g, 0, 0); }
+      if (p.g) ctx.fillText(p.g, 0, 0);
       else ctx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s / 1.5);
-      ctx.restore();
     }
     if (now - t0 < 3500) requestAnimationFrame(frame);
-    else ctx.clearRect(0, 0, W, H);
-  })(t0);
+    else { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); }
+  }
+  requestAnimationFrame(frame);
 }
 
 // 50 levels per page; opens on the page holding the first unsolved level.
