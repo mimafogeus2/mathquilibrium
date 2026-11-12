@@ -37,6 +37,9 @@ for (const lang of LANGS) {
     swap('&family=Inter:wght@400..700', '&family=Inter:wght@400..700' + D.fonts, true);
     swap(`<meta property="og:url" content="${SITE}${dir === '.' ? '' : dir + '/'}">`, `<meta property="og:url" content="${SITE}${lang}/${dir === '.' ? '' : dir + '/'}">`, true);
 
+    // Share image: the translation's own, rendered from shared/og.html?lang=<lang>
+    if (fs.existsSync(path.join(ROOT, lang, dir, 'og.png'))) swap(`content="${SITE}${dir === '.' ? '' : dir + '/'}og.png"`, `content="${SITE}${lang}/${dir === '.' ? '' : dir + '/'}og.png"`, true);
+
     // Local files: a page link stays relative (it's the translated page); a file the translation has its own copy of
     // (he/orderly/levels.js) stays too; anything else points back at the English file.
     html = html.replace(/(\b(?:src|href)=")([^"#:]*)"/g, (m, a, url) => {

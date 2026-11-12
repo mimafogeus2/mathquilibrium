@@ -33,6 +33,7 @@ Hebrew lives at `/he/` (`/he/orderly/`…), right to left. The English pages are
 - `he/orderly/levels.js`, `he/orderly/special.js`, `he/wordswipe/rounds.js`, `he/wordswipe/special.js` — the Hebrew puzzles, written for Israeli players (same formats as the English ones). A file here replaces the English one of the same name; every other file is shared
 - Layout uses logical CSS (`inset-inline-start`, `padding-inline`, `text-align: start`), so one stylesheet serves both directions. Math (boards, sums, the swipe buttons) stays left to right: see `direction: ltr` in the game styles
 - Word games keep separate progress per language (`orderly-he`, `wordswipe-he`); the math games share theirs
+- Share images: `he/og.png` and `he/<game>/og.png`, rendered from `shared/og.html?g=<game>&lang=he` (see the comment at its top); `build.js` points a Hebrew page at its image when one exists
 
 ## Run locally
 
