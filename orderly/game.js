@@ -33,6 +33,7 @@ const today = () => ymd(new Date());
 // A random unsolved puzzle (any puzzle once all are solved), never today's daily. store.cur is the one in play, resumed until solved or given up.
 function playRandom(fresh) {
   if (fresh || !store.saves['L' + store.cur]) {
+    delete store.saves['L' + store.cur];
     const skip = dailyIndex(today()) + 1, all = LEVELS.map((_, i) => i + 1).filter((n) => n !== skip), open = all.filter((n) => !store.stars[n]);
     store.cur = pick(Math.random, open.length ? open : all);
   }
@@ -53,7 +54,11 @@ function home() {
   $('#btn-daily').classList.toggle('done', !!rec);
   $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · see result` : store.saves['D' + t] ? 'Resume' : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
   $('#lv-meta').textContent = `${solved} / ${LEVELS.length} solved`;
-  $('#btn-random small').textContent = store.saves['L' + store.cur] ? 'Resume' : 'From the whole collection';
+  // A random puzzle in progress: the main button resumes it, and a second one deals a new one.
+  const cur = store.saves['L' + store.cur];
+  $('#btn-random b').textContent = cur ? 'Resume puzzle' : 'Random puzzle';
+  $('#btn-random small').textContent = cur ? parse(LEVELS[store.cur - 1]).subject : 'From the whole collection';
+  $('#btn-new').hidden = !cur;
 }
 const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
 const hintsText = (h) => `${h} hint${h > 1 ? 's' : ''}`;
@@ -239,6 +244,7 @@ store = { daily: {}, stars: {}, saves: {}, muted: false, seenHelp: false, ...sto
 
 $('#btn-daily').onclick = () => play('D' + today());
 $('#btn-random').onclick = () => playRandom();
+$('#btn-new').onclick = () => playRandom(true);
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); P = null; screen('home'); };
 $('#btn-check').onclick = check;
