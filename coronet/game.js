@@ -27,7 +27,7 @@ function drawBoard(el, p, { mini = false } = {}) {
   el.append(svg('circle', { class: 'lip', r: R + 1, cy: 3 }), svg('circle', { class: 'stock-back', r: R }));
   const cellsG = svg('g', { class: 'cells' }), wallsG = svg('path', { class: 'walls' }), piecesG = svg('g', { class: 'pieces' });
   const els = [], pieces = [];
-  let walls = '';
+  let walls = '', seams = '';
   for (let i = 0; i < N * N; i++) {
     const r = Math.floor(i / N), s = i % N, a0 = ang(s), a1 = ang(s + 1), ri = rad(r), ro = rad(r + 1);
     const [x0, y0] = pt(ro, a0), [x1, y1] = pt(ro, a1), [x2, y2] = pt(ri, a1), [x3, y3] = pt(ri, a0);
@@ -39,8 +39,10 @@ function drawBoard(el, p, { mini = false } = {}) {
     els.push(c);
     // walls: between this cell and the next slice, and between this ring and the next one out
     const next = r * N + (s + 1) % N;
-    if (p.region[next] !== p.region[i]) walls += `M${f(x2)} ${f(y2)}L${f(x1)} ${f(y1)}`;
-    if (r < N - 1 && p.region[i + N] !== p.region[i]) walls += `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}`;
+    // seams: the same edges inside a region, drawn thin
+    const side = `M${f(x2)} ${f(y2)}L${f(x1)} ${f(y1)}`, arc = `M${f(x0)} ${f(y0)}A${f(ro)} ${f(ro)} 0 0 1 ${f(x1)} ${f(y1)}`;
+    if (p.region[next] !== p.region[i]) walls += side; else seams += side;
+    if (r < N - 1) { if (p.region[i + N] !== p.region[i]) walls += arc; else seams += arc; }
     const [cx, cy] = pt((ri + ro) / 2, (a0 + a1) / 2), size = Math.min(g.w, ((ri + ro) / 2) * (a1 - a0));
     // the stamp filter sits on each piece (only a changed piece re-renders it), outside the scale so its noise stays in board units
     const pc = svg('g', { class: 'pc', transform: `translate(${f(cx)} ${f(cy)})` });
@@ -54,12 +56,14 @@ function drawBoard(el, p, { mini = false } = {}) {
     pieces.push(pc);
   }
   wallsG.setAttribute('d', walls);
+  // a paper-coloured halo under each seam, so the thin line reads against any ink
+  const seamsG = [svg('path', { class: 'seams halo', d: seams }), svg('path', { class: 'seams', d: seams })];
   const hub = svg('g', { class: 'hub' });
   // the seal: a stamped crown that lands in the hub when the board is solved (CSS shows it)
   const seal = svg('g', { class: 'seal', transform: `scale(${f(g.hub / 19)})` });
   seal.innerHTML = `<g class="seal-ink">${CROWN}</g>`;
   hub.append(svg('circle', { r: g.hub }), seal, svg('text', { y: g.hub * 0.05, 'font-size': g.hub * 0.9 }));
-  el.append(cellsG, wallsG, svg('circle', { class: 'rim', r: R }), svg('circle', { class: 'rim', r: g.hub }), piecesG, hub);
+  el.append(cellsG, ...seamsG, wallsG, svg('circle', { class: 'rim', r: R }), svg('circle', { class: 'rim', r: g.hub }), piecesG, hub);
   const cursor = svg('path', { class: 'cursor' });
   el.append(cursor);
   if (mini) for (const q of p.queens) setPiece(pieces[q], 'q');
