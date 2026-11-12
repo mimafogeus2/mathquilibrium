@@ -10,6 +10,8 @@
   padding: 6px; margin: -6px; /* room for the selection outline and the tile animations, without scrollbars */
   touch-action: pan-x pan-y; /* pinch is ours, not the page's */
 }
+.zoom * { touch-action: pan-x pan-y; /* beat the global `* { manipulation }`, which would let the tiles pinch the page */
+}
 .board {
   --gap: clamp(3px, 1vw, 6px);
   /* fitted to the board area (the .board-wrap container), times the pinch zoom */
