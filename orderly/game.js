@@ -1,8 +1,9 @@
 'use strict';
 // Orderly: a subject and 10 cards; drag them into order. Check joins runs of cards already in the right order into groups that move as one.
 // Borrows storage, sound, confetti and helpers from shared/core.js (but not its level-pack shell: no boot()).
-// Levels come from levels.js: LEVELS[i] = "difficulty|Subject|top label|bottom label|Name=Value;..." in the right order.
+// Levels come from levels.js: LEVELS[i] = "difficulty|topic|Subject|top label|bottom label|Name=Value;..." in the right order.
 const N = 10, HINTS = 3, DIFF = ['', 'Easy', 'Medium', 'Hard'];
+const TOPICS = { history: 'History', science: 'Science', nature: 'Nature', places: 'Places', screen: 'Film & TV', music: 'Music', words: 'Books & Art', sport: 'Sport & Games', food: 'Food & Drink', tech: 'Tech & Inventions' };
 const stars = (checks) => (checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
 
 // The daily walks the pool by day number; the multiplier is coprime with the pool size, so no repeats until it's all been used.
@@ -12,8 +13,8 @@ const dailyIndex = (date) => ((Math.round((Date.parse(date) - DAY0) / 864e5) * 1
 const dailyLine = (date) => special(SPECIAL, date)?.line ?? LEVELS[dailyIndex(date)];
 
 function parse(line) {
-  const [d, subject, top, bottom, items] = line.split('|');
-  return { d: +d, subject, top, bottom, items: items.split(';').map((s) => { const [name, val] = s.split('='); return { name, val }; }) };
+  const [d, topic, subject, top, bottom, items] = line.split('|');
+  return { d: +d, topic, subject, top, bottom, items: items.split(';').map((s) => { const [name, val] = s.split('='); return { name, val }; }) };
 }
 
 // order[pos] = index of the card at pos; card i belongs at pos i. Deal so at most one card starts in place.
@@ -30,11 +31,11 @@ function deal(seed) {
 // links[c] = a check found card c directly above card c + 1. Linked cards always move together, so links never break.
 let P = null;
 const today = () => ymd(new Date());
-// A random unsolved puzzle (any puzzle once all are solved), never today's daily, of difficulty d if given. store.cur is the one in play, resumed until solved or given up.
+// A random unsolved puzzle (any puzzle once all are solved), never today's daily, of difficulty d if given (and then only from the topics not in store.off). store.cur is the one in play, resumed until solved or given up.
 function playRandom(fresh, d) {
   if (fresh || !store.saves['L' + store.cur]) {
     delete store.saves['L' + store.cur];
-    const skip = dailyIndex(today()) + 1, all = LEVELS.map((_, i) => i + 1).filter((n) => n !== skip && (!d || parse(LEVELS[n - 1]).d === d)), open = all.filter((n) => !store.stars[n]);
+    const skip = dailyIndex(today()) + 1, all = LEVELS.map((_, i) => i + 1).filter((n) => { const L = parse(LEVELS[n - 1]); return n !== skip && (!d || (L.d === d && !store.off.includes(L.topic))); }), open = all.filter((n) => !store.stars[n]);
     store.cur = pick(Math.random, open.length ? open : all);
   }
   play('L' + store.cur);
@@ -260,11 +261,36 @@ async function shareLink() {
 // ---------- wiring ----------
 game = { name: 'Orderly', storeKey: 'orderly', glyphs: ['↑', '↓'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
-store = { daily: {}, stars: {}, saves: {}, muted: false, seenHelp: false, ...store };
+store = { daily: {}, stars: {}, saves: {}, off: [], muted: false, seenHelp: false, ...store };
 
 $('#btn-daily').onclick = () => play('D' + today());
 $('#btn-random').onclick = () => playRandom();
-for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(true, +b.dataset.d);
+// Easy / Medium / Hard ask which topics first; the choice is kept (as store.off, the unticked ones) for next time and for "Another puzzle".
+$('#t-list').replaceChildren(...Object.entries(TOPICS).map(([k, name]) => {
+  const l = document.createElement('label');
+  l.innerHTML = `<input type="checkbox" value="${k}"> ${name}`;
+  return l;
+}));
+const boxes = [...document.querySelectorAll('#t-list input')], dlgTopics = $('#dlg-topics');
+const syncGo = () => { $('#t-go').disabled = !boxes.some((b) => b.checked); };
+const tickAll = (on) => { for (const b of boxes) b.checked = on; syncGo(); };
+$('#t-list').onchange = syncGo;
+$('#t-all').onclick = () => tickAll(true);
+$('#t-none').onclick = () => tickAll(false);
+for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => {
+  dlgTopics.dataset.d = b.dataset.d;
+  $('#t-title').textContent = DIFF[b.dataset.d] + ' puzzle';
+  for (const x of boxes) x.checked = !store.off.includes(x.value);
+  syncGo();
+  dlgTopics.returnValue = '';
+  dlgTopics.showModal();
+};
+dlgTopics.addEventListener('close', () => {
+  if (dlgTopics.returnValue !== 'go') return;
+  store.off = boxes.filter((b) => !b.checked).map((b) => b.value);
+  persist();
+  playRandom(true, +dlgTopics.dataset.d);
+});
 $('#btn-link').onclick = shareLink;
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); P = null; screen('home'); };
