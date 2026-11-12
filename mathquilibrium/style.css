@@ -95,6 +95,14 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
   .board-wrap { max-height: calc(100dvh - 90px); align-self: start; }
 }
 
+/* level intro modal */
+.intro section + section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair); }
+.intro .board { margin: 0 auto; --cell: 34px; justify-content: center; }
+.intro p { margin: 12px 0 0; line-height: 1.45; text-wrap: balance; }
+.intro p b { font-weight: 600; }
+.intro-keys { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
+.intro-keys .key { display: grid; place-items: center; width: 52px; height: 48px; animation: pop .4s .15s both var(--ease); }
+
 #logo { --cell: 32px; --gap: 4px; }
 
 /* ---------- print ---------- */

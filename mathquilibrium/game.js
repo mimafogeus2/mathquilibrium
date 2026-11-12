@@ -6,13 +6,13 @@ const NAMES = {
   '=': 'equals', '<': 'less than', '>': 'greater than',
 };
 const FIRST_TIP = 'Tap a blank tile, then pick an operator. Every row and column must be <b>true</b>. Where lines cross, <b>one symbol</b> has to work both ways.';
-const OP_TIPS = { // shown on the level where an operator first appears
-  '×': 'New: <b>×</b> — it happens before + and −.',
-  '÷': 'New: <b>÷</b> — division has to come out exact.',
-  '^': 'New: <b>^</b> power — 2 ^ 3 = 8, worked out before × and +.',
-  '.': 'New: <b>.</b> decimal point — 3 . 5 is 3.5, so 7 ÷ 2 = 3 . 5',
-  '%': 'New: <b>%</b> remainder — 7 % 3 = 1.',
-  '<': 'New: <b>&lt;</b> and <b>&gt;</b> — some lines are inequalities, like 3 + 4 &lt; 9.',
+const OP_TIPS = { // shown on the level where an operator first appears: [example line, text]
+  '×': [[2, '+', 3, '×', 4, '=', 14], 'Times. It happens before + and −.'],
+  '÷': [[8, '÷', 2, '=', 4], 'Divided by. Division has to come out exact.'],
+  '^': [[2, '^', 3, '=', 8], 'Power. Worked out before × and +.'],
+  '.': [[7, '÷', 2, '=', 3, '.', 5], 'Decimal point: 3 . 5 is 3.5.'],
+  '%': [[7, '%', 3, '=', 1], 'Remainder: what\'s left over after dividing.'],
+  '<': [[3, '+', 4, '<', 9], 'Less than and greater than: some lines are <b>inequalities</b>.'],
 };
 const ICON_ERASE = '<svg viewBox="0 0 24 24"><path d="M9 5h11v14H9l-6-7 6-7zM12 9l5 6M17 9l-5 6"/></svg>';
 
@@ -32,6 +32,40 @@ function mini(el, rows, blanks = '') {
   }));
 }
 
+const syms = (o) => (o === '<' ? '<>' : o); // one intro covers both inequalities
+
+// Intro modal for unseen intro ids: 'first' (how to play) and/or operators, each with its key and an example line.
+function intro(ids) {
+  const ops = ids.filter((k) => k !== 'first').map(syms);
+  const h = (v) => sym(v).replace('<', '&lt;').replace('>', '&gt;'), body = $('#intro-body');
+  body.replaceChildren();
+  $('#intro-title').textContent = ids[0] === 'first' ? 'Fill in the math' : ops.length > 1 ? 'New operators' : 'New operator';
+  if (ids[0] === 'first') {
+    const sec = document.createElement('section'), b = document.createElement('div');
+    b.className = 'board mini';
+    mini(b, ['.2...', '3+5=8', '.4...', '.=...', '.6...']);
+    sec.append(b);
+    sec.insertAdjacentHTML('beforeend', `<p>${FIRST_TIP}</p>`);
+    body.append(sec);
+  }
+  for (const o of ops) {
+    const [line, text] = OP_TIPS[o[0]], sec = document.createElement('section');
+    const keys = [...o].map((x) => `<span class="key${'=<>'.includes(x) ? ' eq' : ''}">${h(x)}</span>`).join('');
+    const cells = line.map((v, c) => `<div class="cell ${typeof v === 'number' ? 'num' : o.includes(v) ? 'op filled' : 'op given'}" style="grid-area:1/${c + 1};--d:${c * 50}ms">${h(v)}</div>`).join('');
+    sec.innerHTML = `<div class="intro-keys" aria-hidden="true">${keys}</div><div class="board mini" style="--cols:${line.length};--rows:1" role="img" aria-label="${line.map((v) => NAMES[v] || v).join(' ')}">${cells}</div><p>${text}</p>`;
+    body.append(sec);
+  }
+  // first visit: How to play opens at boot too; show this after it instead of on top (skip if the level changed meanwhile)
+  const g = G, show = () => {
+    if (G !== g) return;
+    $('#dlg-intro').showModal();
+    store.intros = [...new Set([...(store.intros || []), ...ids])];
+    persist();
+  };
+  if (store.seenHelp) show();
+  else $('#dlg-help').addEventListener('close', show, { once: true });
+}
+
 // ---------- game ----------
 const editable = (c) => c.op && !c.given && !G.hinted.has(c.key);
 const valOf = (c) => (c.op && !c.given ? G.fills.get(c.key) : c.val);
@@ -45,15 +79,11 @@ function startLevel(G, save) {
   Object.assign(G, { p, fills: new Map(s.fills), hinted: new Set(s.hinted), sel: null, states: [], history: [] });
 
   $('#g-sub').textContent = [...p.ops, ...p.rels].map(sym).join(' ');
-  if (date) $('#tip').textContent = `Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.`;
-  else if (n === 1) $('#tip').innerHTML = FIRST_TIP;
-  else {
-    const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val));
-    const syms = (o) => (o === '<' ? '<>' : o); // one tip covers both inequalities
-    const fresh = Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)) && firstUse(pack, syms(o), n) === n);
-    $('#tip').innerHTML = fresh.map((o) => OP_TIPS[o]).join('<br>');
-  }
-
+  $('#tip').textContent = date ? `Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.` : '';
+  // intros (how to play, then each operator) show once ever, on the first level that uses them
+  const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val)), seen = store.intros || [];
+  const todo = ['first', ...Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)))].filter((k) => !seen.includes(k));
+  if (todo.length) intro(todo);
   buildBoard();
   buildPalette();
   balancePalette();
