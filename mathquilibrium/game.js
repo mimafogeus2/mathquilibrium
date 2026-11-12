@@ -48,8 +48,9 @@ function startLevel(G, save) {
   if (date) $('#tip').textContent = `Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.`;
   else if (n === 1) $('#tip').innerHTML = FIRST_TIP;
   else {
-    const prev = levelConfig(packDifficulty(pack, n - 1)), had = [...prev.ops, ...prev.rels];
-    const fresh = [...p.ops, ...p.rels].filter((o) => !had.includes(o) && OP_TIPS[o]);
+    const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val));
+    const syms = (o) => (o === '<' ? '<>' : o); // one tip covers both inequalities
+    const fresh = Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)) && firstUse(pack, syms(o), n) === n);
     $('#tip').innerHTML = fresh.map((o) => OP_TIPS[o]).join('<br>');
   }
 
