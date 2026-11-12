@@ -38,6 +38,7 @@
   cursor: grab; outline: none;
 }
 .card:focus-visible { border-color: var(--op); }
+.list.hinting .card { transition-duration: .55s; }
 .card.held { transition: none; cursor: grabbing; z-index: 2; scale: 1.03; box-shadow: 0 14px 28px -10px rgb(40 30 10 / .45); }
 .grip { flex: none; width: 20px; height: 20px; stroke: var(--line); stroke-width: 2.5; }
 .name { flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }

@@ -2,7 +2,7 @@
 // Orderly: a subject and 10 cards; drag them into order. Check joins runs of cards already in the right order into groups that move as one.
 // Borrows storage, sound, confetti and helpers from shared/core.js (but not its level-pack shell: no boot()).
 // Levels come from levels.js: LEVELS[i] = "difficulty|Subject|top label|bottom label|Name=Value;..." in the right order.
-const N = 10, DIFF = ['', 'Easy', 'Medium', 'Hard'];
+const N = 10, HINTS = 3, DIFF = ['', 'Easy', 'Medium', 'Hard'];
 const stars = (checks) => (checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
 
 // The daily walks the pool by day number; the multiplier is coprime with the pool size, so no repeats until it's all been used.
@@ -26,7 +26,7 @@ function deal(seed) {
 }
 
 // ---------- state ----------
-// P = the puzzle on screen: { key, date?, n?, lv, order, links, rows: ['0110…' per check, 1 = grouped], moved, done }
+// P = the puzzle on screen: { key, date?, n?, lv, order, links, rows: ['0110…' per check, 1 = grouped], moved, hints, done }
 // links[c] = a check found card c directly above card c + 1. Linked cards always move together, so links never break.
 let P = null;
 const today = () => ymd(new Date());
@@ -38,7 +38,7 @@ function playRandom(fresh) {
   }
   play('L' + store.cur);
 }
-const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, links: P.links, rows: P.rows, moved: P.moved }; persist(); };
+const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, links: P.links, rows: P.rows, moved: P.moved, hints: P.hints }; persist(); };
 // The order split into units: runs of linked cards (groups) and lone cards, top to bottom.
 const units = () => P.order.reduce((u, c, p) => (p && P.links[c - 1] && P.order[p - 1] === c - 1 ? u.at(-1).push(c) : u.push([c]), u), []);
 
@@ -56,12 +56,13 @@ function home() {
   $('#btn-random small').textContent = store.saves['L' + store.cur] ? 'Resume' : 'From the whole collection';
 }
 const checksText = (c) => `${c} check${c > 1 ? 's' : ''}`;
+const hintsText = (h) => `${h} hint${h > 1 ? 's' : ''}`;
 
 function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
   const lv = parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
-  P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, done: true }
-    : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, done: false };
+  P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, done: true }
+    : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, hints: sv?.hints || 0, done: false };
   $('#g-title').textContent = date ? 'Daily' : 'Random';
   $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + (sp ? sp.occasion : DIFF[lv.d]);
   $('#subject').textContent = lv.subject;
@@ -105,6 +106,8 @@ function status() {
   const r = P.rows.at(-1), grouped = r ? [...r].filter((c) => c === '1').length : 0;
   $('#status').textContent = !r ? 'Drag the cards into order, then check.' : `${grouped} of ${N} grouped · ${checksText(P.rows.length)} so far`;
   $('#btn-check').disabled = !P.moved;
+  $('#btn-hint b').textContent = `Hint (${HINTS - P.hints} left)`;
+  $('#btn-hint').disabled = P.hints >= HINTS || P.links.slice(0, N - 1).every(Boolean);
 }
 
 // Rebuild the order with `unit` inserted at index j among the other units.
@@ -157,10 +160,30 @@ function check() {
   save();
 }
 
+// Hint: pick two cards that belong next to each other but aren't joined, slide the lower one's unit up under the upper one's, and join them.
+// Prefers a pair that isn't already adjacent, so a hint is never wasted on a pair the player got right.
+function hint() {
+  if (!P || P.done || P.hints >= HINTS) return;
+  const open = [...Array(N - 1).keys()].filter((c) => !P.links[c]), apart = open.filter((c) => P.order[P.order.indexOf(c) + 1] !== c + 1);
+  if (!open.length) return;
+  const c = pick(Math.random, apart.length ? apart : open), all = units(), lower = all.find((u) => u[0] === c + 1), rest = all.filter((u) => u !== lower);
+  place(rest, lower, rest.findIndex((u) => u.at(-1) === c) + 1);
+  P.links[c] = true;
+  P.hints++;
+  $('#list').classList.add('hinting');
+  layout(false); // keep DOM order until the slide ends: re-inserting a card mid-transition kills its animation
+  setTimeout(() => { $('#list').classList.remove('hinting'); if (P && !P.done && !$('.card.held')) layout(); }, 600);
+  const cards = cardEls();
+  flash(cards[c], 'pop'); flash(cards[c + 1], 'pop');
+  sfx.hint();
+  status();
+  save();
+}
+
 function win() {
   P.done = true;
   delete store.saves[P.key];
-  const rec = { c: P.rows.length, rows: P.rows };
+  const rec = { c: P.rows.length, rows: P.rows, h: P.hints };
   if (P.date) (store.daily[P.date] ??= {}).r = rec;
   else store.stars[P.n] = Math.max(store.stars[P.n] || 0, stars(rec.c));
   persist();
@@ -192,7 +215,7 @@ function showResult(fresh) {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
-  $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.date && streak() ? ` · 🔥 ${streak()}-day streak` : '');
+  $('#res-text').innerHTML = `Solved in <b>${checksText(c)}</b>` + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date && streak() ? ` · 🔥 ${streak()}-day streak` : '');
   $('#res-next').hidden = false;
   $('#res-next b').textContent = P.date ? 'Share result' : 'Another puzzle  →';
   $('#res-next').onclick = P.date ? () => share() : () => playRandom(true);
@@ -202,7 +225,7 @@ function showResult(fresh) {
 async function share() {
   const r = store.daily[P.date].r;
   const sp = special(SPECIAL, P.date), text = `Orderly daily · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
-    `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
+    `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); $('#res-next b').textContent = 'Copied ✓'; }
@@ -220,6 +243,7 @@ $('#btn-help').onclick = () => $('#dlg-help').showModal();
 $('#btn-back').onclick = () => { save(); P = null; screen('home'); };
 $('#btn-check').onclick = check;
 $('#btn-giveup').onclick = giveUp;
+$('#btn-hint').onclick = hint;
 $('#res-home').onclick = () => { P = null; screen('home'); };
 $('#list').addEventListener('pointerdown', drag);
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
