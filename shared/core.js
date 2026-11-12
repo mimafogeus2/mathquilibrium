@@ -376,7 +376,14 @@ function boot(g) {
   for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
 
   document.addEventListener('keydown', (e) => {
-    if (!G || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!G || $('#game').hidden || document.querySelector('dialog[open]')) return;
+    // Ctrl+Z / Cmd+Z clicks the game's undo button, if it has one and it's enabled.
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 'z' || e.key === 'Z') && !e.target.closest('input, textarea')) {
+      const u = $('#btn-undo');
+      if (u && !u.disabled && !G.paused) { u.click(); e.preventDefault(); }
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'p' || e.key === 'P') { setPaused(!G.paused); return e.preventDefault(); }
     if (e.key === 'Escape') return $('#btn-back').click();
     if (G.paused) return;
