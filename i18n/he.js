@@ -63,7 +63,7 @@ module.exports = {
       'Give up? The round ends now, scored as it stands.': 'לוותר? הסבב ייגמר עכשיו, עם הניקוד שצברתם עד כה.',
     },
     'orderly/game.js': {
-      'Orderly': 'סדרן',
+      'Orderly': 'בסדר',
       'Daily': 'יומית',
       'Random': 'אקראית',
       '{n} / {total} solved': '{n} מתוך {total} נפתרו',
@@ -98,7 +98,7 @@ module.exports = {
       'Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.': 'מרוצים מהסדר? מספרו את הקלפים <b>1 עד 10</b> על הקווים, מלמעלה למטה.',
     },
     'wordswipe/game.js': {
-      'WordSwipe': 'סוויפ מילים',
+      'WordSwipe': 'שמאל ימין שמאל',
       'Daily': 'יומי',
       '24 words · 60 seconds': '24 מילים · 60 שניות',
       'Round {n}': 'סבב {n}',
@@ -114,7 +114,7 @@ module.exports = {
       "Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn't. One box per word.": 'סמנו <b>✓</b> אם המילה מתאימה ו־<b>✗</b> אם לא. משבצת אחת לכל מילה.',
     },
     'biggr/game.js': {
-      'Biggr': 'מי גדול',
+      'Biggr': 'כמה כמה',
       '{n}s': '{n} שנ׳',
       '{sum} (left arrow)': '{sum} (חץ שמאלה)',
       '{sum} (right arrow)': '{sum} (חץ ימינה)',
@@ -123,7 +123,7 @@ module.exports = {
       'Write <b>&lt;</b> or <b>&gt;</b> in the gap so the line is true: the open side faces the <b>bigger</b> sum.': 'כתבו <b dir="ltr">&lt;</b> או <b dir="ltr">&gt;</b> ברווח כך שהשורה תהיה נכונה: הצד הפתוח פונה לתרגיל ה<b>גדול</b> יותר.',
     },
     'mathquilibrium/game.js': {
-      'Mathquilibrium': 'חשבון שווה',
+      'Mathquilibrium': 'מאוזן',
       'plus': 'פלוס',
       'minus': 'מינוס',
       'times': 'כפול',
@@ -163,12 +163,12 @@ module.exports = {
       'Use:': 'פעולות:',
     },
     'coronet/game.js': {
-      'Coronet': 'כתרית',
+      'Coronet': 'הכתרה',
       'Tap an arc to mark it <b>×</b>, again for a <b>queen</b>. One queen per <b>ring</b>, <b>slice</b> and <b>color</b>.':
         'הקישו על קשת כדי לסמן בה <b>×</b>, ושוב כדי להציב <b>מלכה</b>. מלכה אחת בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b>.',
       '{n} queens': '{n} מלכות',
       'Restart this level? Your queens and marks are cleared; the clock keeps running.': 'להתחיל את השלב מחדש? המלכות והסימונים יימחקו; השעון ממשיך לרוץ.',
-      'Coronet board, {n} rings. {left} of {n} queens left': 'לוח כתרית, {n} טבעות. נשארו {left} מתוך {n} מלכות',
+      'Coronet board, {n} rings. {left} of {n} queens left': 'לוח הכתרה, {n} טבעות. נשארו {left} מתוך {n} מלכות',
       'queen': 'מלכה',
       'queen, from a hint': 'מלכה, מרמז',
       ', clashes with another queen': ', מתנגשת במלכה אחרת',
@@ -188,14 +188,14 @@ module.exports = {
       'Each queen rules out the rest of its ring, its slice and its shade.': 'כל מלכה פוסלת את שאר הטבעת, הפלח והגוון שלה.',
     },
     'quadflip/game.js': {
-      'Quadflip': 'היפוכון',
+      'Quadflip': 'מהפכים',
       'Pick a <b>piece</b>, tap the board to <b>flip</b> the tiles under it. Use <b>every piece</b> once to clear the board.':
         'בחרו <b>צורה</b> והקישו על הלוח כדי <b>להפוך</b> את המשבצות שמתחתיה. השתמשו ב<b>כל צורה</b> פעם אחת כדי לנקות את הלוח.',
       '{n} pieces': '{n} צורות',
       'Piece {n}': 'צורה {n}',
       'Piece {n}, placed by a hint': 'צורה {n}, הונחה ברמז',
       'Piece {n}, used: tap to lift it': 'צורה {n}, בשימוש: הקישו כדי להרים אותה',
-      'Quadflip board, {n} by {n}. {dark} dark tiles, {free} of {k} pieces left': 'לוח היפוכון, {n} על {n}. {dark} משבצות כהות, נשארו {free} מתוך {k} צורות',
+      'Quadflip board, {n} by {n}. {dark} dark tiles, {free} of {k} pieces left': 'לוח מהפכים, {n} על {n}. {dark} משבצות כהות, נשארו {free} מתוך {k} צורות',
       'Piece {n} is used.': 'צורה {n} כבר בשימוש.',
       'Piece {n} at row {r}, column {c}. {dark} dark tiles, {free} pieces left.': 'צורה {n} בשורה {r}, עמודה {c}. {dark} משבצות כהות, נשארו {free} צורות.',
       'Not clear yet. <b>Tap a used piece</b> to lift it, or undo.': 'הלוח עוד לא נקי. <b>הקישו על צורה משומשת</b> כדי להרים אותה, או בטלו.',
@@ -247,32 +247,32 @@ module.exports = {
       ['<title>Puzzle Shelf — daily logic games</title>', '<title>מדף החידות — משחקי היגיון יומיים</title>'],
       ['content="Puzzle Shelf — daily logic games"', 'content="מדף החידות — משחקי היגיון יומיים"'],
       ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr and Quadflip. New puzzles every day."',
-        'content="חידות היגיון יומיות קטנות: חשבון שווה, כתרית, סוויפ מילים, סדרן, מי גדול והיפוכון. חידות חדשות בכל יום."'],
+        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה ומהפכים. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
       ['<h1 class="masthead">Puzzle <span>Shelf</span></h1>', '<h1 class="masthead">מדף <span>החידות</span></h1>'],
       ['<b id="issue-no">No. 1</b>', '<b id="issue-no">גיליון 1</b>'],
       ['<span class="hide-sm">Price: one coffee break</span>', '<span class="hide-sm">מחיר: הפסקת קפה אחת</span>'],
       ['aria-label="Games"', 'aria-label="משחקים"'],
       ['<span class="kicker">01 <em>Math</em></span>', '<span class="kicker">01 <em>חשבון</em></span>'],
-      ['<h2>Math<span>quilibrium</span></h2>', '<h2>חשבון <span>שווה</span></h2>'],
+      ['<h2>Math<span>quilibrium</span></h2>', '<h2><span>מ</span>אוזן</h2>'],
       ['<p>The numbers are given. Fill in the operators so every line is true.</p>', '<p>המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.</p>'],
       ['<span class="kicker">02 <em>Math</em></span>', '<span class="kicker">02 <em>חשבון</em></span>'],
-      ['<h2>Bigg<span>r</span></h2>', '<h2>מי <span>גדול</span></h2>'],
+      ['<h2>Bigg<span>r</span></h2>', '<h2><span>כ</span>מה <span>כ</span>מה</h2>'],
       ['<p>Two sums, no answers. Pick the bigger one, fast.</p>', '<p>שני תרגילים, בלי תשובות. בחרו את הגדול יותר, מהר.</p>'],
       ['style="font: italic 600 15px var(--display)">Owl?</text>', 'style="font: italic 600 15px var(--display); direction: rtl">ינשוף?</text>'],
       ['data-store="wordswipe"', 'data-store="wordswipe-he"'],
       ['<span class="kicker">03 <em>Words</em></span>', '<span class="kicker">03 <em>מילים</em></span>'],
-      ['<h2>Word<span>swipe</span></h2>', '<h2>סוויפ <span>מילים</span></h2>'],
+      ['<h2>Word<span>swipe</span></h2>', '<h2>שמאל <span>ימין</span> שמאל</h2>'],
       ['<p>A subject, 24 words, 60 seconds. Swipe right if it fits.</p>', '<p>נושא אחד, 24 מילים, 60 שניות. מתאים? החליקו ימינה.</p>'],
       ['data-store="orderly"', 'data-store="orderly-he"'],
       ['<span class="kicker">04 <em>Trivia</em></span>', '<span class="kicker">04 <em>טריוויה</em></span>'],
-      ['<h2>Order<span>ly</span></h2>', '<h2>סדר<span>ן</span></h2>'],
+      ['<h2>Order<span>ly</span></h2>', '<h2><span>ב</span>סדר</h2>'],
       ['<p>Ten cards, one subject. Drag them into order.</p>', '<p>עשרה קלפים, נושא אחד. גררו אותם לסדר הנכון.</p>'],
       ['<span class="kicker">05 <em>Logic</em></span>', '<span class="kicker">05 <em>היגיון</em></span>'],
-      ['<h2>Coro<span>net</span></h2>', '<h2>כתר<span>ית</span></h2>'],
+      ['<h2>Coro<span>net</span></h2>', '<h2><span>ה</span>כתרה</h2>'],
       ['<p>Queens in the round: one per ring, one per slice, one per color.</p>', '<p>מלכות במעגל: אחת בכל טבעת, אחת בכל פלח, אחת בכל צבע.</p>'],
       ['<span class="kicker">06 <em>Logic</em></span>', '<span class="kicker">06 <em>היגיון</em></span>'],
-      ['<h2>Quad<span>flip</span></h2>', '<h2>היפוכ<span>ון</span></h2>'],
+      ['<h2>Quad<span>flip</span></h2>', '<h2><span>מ</span>הפכים</h2>'],
       ['<p>Stamp every piece once to flip the board back to blank.</p>', '<p>החתימו כל צורה פעם אחת והפכו את הלוח בחזרה ללבן.</p>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
       // the inline script
@@ -285,9 +285,9 @@ module.exports = {
     ],
 
     'mathquilibrium/index.html': [
-      ['Mathquilibrium — the operator crossword', 'חשבון שווה — תשבץ הפעולות'],
+      ['Mathquilibrium — the operator crossword', 'מאוזן — תשבץ הפעולות'],
       ['A crossword where the numbers are given and you fill in the math. New daily puzzle every day.', 'תשבץ שבו המספרים נתונים ואתם משלימים את החשבון. חידה יומית חדשה בכל יום.'],
-      ['<h1 class="wordmark">Math<span>quilibrium</span></h1>', '<h1 class="wordmark">חשבון <span>שווה</span></h1>'],
+      ['<h1 class="wordmark">Math<span>quilibrium</span></h1>', '<h1 class="wordmark"><span>מ</span>אוזן</h1>'],
       ['<p class="tagline">The numbers are given. The math is yours.</p>', '<p class="tagline">המספרים נתונים. החשבון עליכם.</p>'],
       ['aria-label="Operators"', 'aria-label="פעולות"'],
       ["<b>Let's go</b>", '<b>יאללה</b>'],
@@ -306,11 +306,11 @@ module.exports = {
     ],
 
     'biggr/index.html': [
-      ['Biggr — which is bigger?', 'מי גדול — איזה תרגיל גדול יותר?'],
+      ['Biggr — which is bigger?', 'כמה כמה — איזה תרגיל גדול יותר?'],
       ['Two sums, no answers. Pick the bigger one, ten pairs against the clock. Three new dailies every day plus 3,000 levels.', 'שני תרגילים, בלי תשובות. בחרו את הגדול מביניהם, עשרה זוגות נגד השעון. שלוש חידות יומיות חדשות בכל יום, ועוד 3,000 שלבים.'],
-      ['<h1 class="wordmark">Bigg<span>r</span></h1>', '<h1 class="wordmark">מי <span>גדול</span></h1>'],
+      ['<h1 class="wordmark">Bigg<span>r</span></h1>', '<h1 class="wordmark"><span>כ</span>מה <span>כ</span>מה</h1>'],
       ['<p class="tagline">Two sums. Pick the bigger one. Fast.</p>', '<p class="tagline">שני תרגילים. בחרו את הגדול. מהר.</p>'],
-      ['<p class="ask">Which is bigger?</p>', '<p class="ask">מי גדול יותר?</p>'],
+      ['<p class="ask">Which is bigger?</p>', '<p class="ask">כמה כמה יותר?</p>'],
       [`<li>Each level shows <b>10 pairs</b> of sums, without their answers.</li>
     <li>Tap the <b>bigger</b> one, or press <kbd>←</kbd> / <kbd>→</kbd>.</li>
     <li>The clock runs: <b>45s</b> on Easy, <b>70s</b> on Medium, <b>90s</b> on Hard. A wrong pick costs <b>3 seconds</b>.</li>
@@ -324,10 +324,10 @@ module.exports = {
     ],
 
     'wordswipe/index.html': [
-      ['WordSwipe — does it fit?', 'סוויפ מילים — מתאים או לא?'],
+      ['WordSwipe — does it fit?', 'שמאל ימין שמאל — מתאים או לא?'],
       ["A subject, 24 words, 60 seconds. Swipe right if the word fits, left if it doesn't. A new daily round every day.", 'נושא אחד, 24 מילים, 60 שניות. מתאים? החליקו ימינה. לא מתאים? שמאלה. סבב יומי חדש בכל יום.'],
       ['<div id="logo" aria-hidden="true"><i></i><i></i><i>Owl?</i></div>', '<div id="logo" aria-hidden="true"><i></i><i></i><i>ינשוף?</i></div>'],
-      ['<h1 class="wordmark">Word<span>swipe</span></h1>', '<h1 class="wordmark">סוויפ <span>מילים</span></h1>'],
+      ['<h1 class="wordmark">Word<span>swipe</span></h1>', '<h1 class="wordmark">שמאל <span>ימין</span> שמאל</h1>'],
       ["<p class=\"tagline\">Does it fit? Swipe right. Doesn't? Swipe left.</p>", '<p class="tagline">מתאים? החליקו ימינה. לא מתאים? שמאלה.</p>'],
       ["<b>Today's round</b>", '<b>הסבב של היום</b>'],
       ['<h2>Unlimited</h2>', '<h2>בלי הגבלה</h2>'],
@@ -347,10 +347,10 @@ module.exports = {
     ],
 
     'orderly/index.html': [
-      ['Orderly — put ten things in order', 'סדרן — עשרה דברים, סדר אחד'],
+      ['Orderly — put ten things in order', 'בסדר — עשרה דברים, סדר אחד'],
       ['A subject and ten cards. Drag them into order: oldest to newest, smallest to largest, mildest to hottest. A new daily puzzle every day.',
         'נושא אחד ועשרה קלפים. גררו אותם לסדר הנכון: מהישן לחדש, מהקטן לגדול, מהעדין לחריף. חידה יומית חדשה בכל יום.'],
-      ['<h1 class="wordmark">Order<span>ly</span></h1>', '<h1 class="wordmark">סדר<span>ן</span></h1>'],
+      ['<h1 class="wordmark">Order<span>ly</span></h1>', '<h1 class="wordmark"><span>ב</span>סדר</h1>'],
       ['<p class="tagline">Ten cards, one subject. Put them in order.</p>', '<p class="tagline">עשרה קלפים, נושא אחד. סדרו אותם.</p>'],
       ["<b>Today's puzzle</b>", '<b>החידה של היום</b>'],
       ['aria-label="Share link to this puzzle"', 'aria-label="שיתוף קישור לחידה"'],
@@ -374,9 +374,9 @@ module.exports = {
     ],
 
     'coronet/index.html': [
-      ['Coronet — queens in the round', 'כתרית — מלכות במעגל'],
+      ['Coronet — queens in the round', 'הכתרה — מלכות במעגל'],
       ['Crown one queen in every ring, every slice and every color of a circular board. New daily puzzle every day.', 'הכתירו מלכה אחת בכל טבעת, בכל פלח ובכל צבע של לוח עגול. חידה יומית חדשה בכל יום.'],
-      ['<h1 class="wordmark">Coro<span>net</span></h1>', '<h1 class="wordmark">כתר<span>ית</span></h1>'],
+      ['<h1 class="wordmark">Coro<span>net</span></h1>', '<h1 class="wordmark"><span>ה</span>כתרה</h1>'],
       ['<p class="tagline">One crown per ring, slice and color.</p>', '<p class="tagline">כתר אחד בכל טבעת, פלח וצבע.</p>'],
       ['<p id="board-keys" class="sr-only">Slice 1 is at the top, counting clockwise. Arrow keys move: left and right go round a ring, up and down go between rings. Space cycles empty, mark, queen. Q places a queen, X marks, Backspace clears, Z undoes.</p>',
         '<p id="board-keys" class="sr-only">פלח 1 נמצא למעלה, והספירה עם כיוון השעון. החצים מזיזים: ימינה ושמאלה מסביב לטבעת, למעלה ולמטה בין הטבעות. רווח עובר בין ריק, סימון ומלכה. Q מציב מלכה, X מסמן, Backspace מנקה, Z מבטל.</p>'],
@@ -391,9 +391,9 @@ module.exports = {
     ],
 
     'quadflip/index.html': [
-      ['Quadflip — flip the board clear', 'היפוכון — הפכו את הלוח ללבן'],
+      ['Quadflip — flip the board clear', 'מהפכים — הפכו את הלוח ללבן'],
       ['Stamp every tetromino once to flip a board of tiles back to blank. New daily puzzles every day.', 'החתימו כל צורת טטרומינו פעם אחת כדי להפוך לוח של משבצות בחזרה ללבן. חידות יומיות חדשות בכל יום.'],
-      ['<h1 class="wordmark">Quad<span>flip</span></h1>', '<h1 class="wordmark">היפוכ<span>ון</span></h1>'],
+      ['<h1 class="wordmark">Quad<span>flip</span></h1>', '<h1 class="wordmark"><span>מ</span>הפכים</h1>'],
       ['<p class="tagline">Every piece once. Every tile blank.</p>', '<p class="tagline">כל צורה פעם אחת. כל משבצת לבנה.</p>'],
       ['aria-label="Pieces"', 'aria-label="צורות"'],
       ['<p id="board-keys" class="sr-only">Number keys pick a piece. Arrow keys move it over the board. Space or Enter stamps it, flipping the four tiles under it. Backspace or Z takes back the last stamp.</p>',
