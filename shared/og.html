@@ -124,12 +124,12 @@
   };
   // Hebrew (?lang=he): the names, lines and footers of the Hebrew pages (i18n/he.js)
   const HE = { // [wordmark, line]: the accented letters are in <span>, as on the pages
-    mathquilibrium: ['<span>מ</span>אוזן', 'המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.'],
+    mathquilibrium: ['מ<span>אוזן</span>', 'המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.'],
     coronet: ['<span>ה</span>כתרה', 'מלכות במעגל: אחת בכל טבעת, אחת בכל פלח, אחת בכל צבע.'],
     wordswipe: ['שמאל <span>ימין</span> שמאל', 'נושא אחד, 24 מילים, 60 שניות. מתאים? החליקו ימינה.'],
-    orderly: ['<span>ב</span>סדר', 'עשרה קלפים, נושא אחד. גררו אותם לסדר הנכון.'],
+    orderly: ['ב<span>סדר</span>', 'עשרה קלפים, נושא אחד. גררו אותם לסדר הנכון.'],
     biggr: ['<span>כ</span>מה <span>כ</span>מה', 'שני תרגילים, בלי תשובות. בחרו את הגדול יותר, מהר.'],
-    quadflip: ['<span>מ</span>הפכים', 'החתימו כל צורה פעם אחת והפכו את הלוח בחזרה ללבן.'],
+    quadflip: ['מ<span>הפכים</span>', 'החתימו כל צורה פעם אחת והפכו את הלוח בחזרה ללבן.'],
   };
   const he = new URLSearchParams(location.search).get('lang') === 'he';
   if (he) {
