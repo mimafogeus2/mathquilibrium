@@ -85,7 +85,7 @@ function startLevel(G, save) {
   Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
   $('#g-sub').textContent = `${N} queens`;
-  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : G.n === 1 ? FIRST_TIP : '';
+  $('#tip').innerHTML = G.date ? `Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.` : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -289,5 +289,5 @@ printable(() => {
 
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
-boot({ name: 'Coronet', storeKey: 'coronet', winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+boot({ name: 'Coronet', storeKey: 'coronet', random: true, winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });
