@@ -254,7 +254,7 @@ module.exports = {
       ['<span class="hide-sm">Price: one coffee break</span>', '<span class="hide-sm">מחיר: הפסקת קפה אחת</span>'],
       ['aria-label="Games"', 'aria-label="משחקים"'],
       ['<span class="kicker">01 <em>Math</em></span>', '<span class="kicker">01 <em>חשבון</em></span>'],
-      ['<h2>Math<span>quilibrium</span></h2>', '<h2>מ<span>אוזן</span></h2>'],
+      ['<h2>Math<span>quilibrium</span></h2>', '<h2>מאו<span>זן</span></h2>'],
       ['<p>The numbers are given. Fill in the operators so every line is true.</p>', '<p>המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.</p>'],
       ['<span class="kicker">02 <em>Math</em></span>', '<span class="kicker">02 <em>חשבון</em></span>'],
       ['<h2>Bigg<span>r</span></h2>', '<h2><span>כ</span>מה <span>כ</span>מה</h2>'],
@@ -287,7 +287,7 @@ module.exports = {
     'mathquilibrium/index.html': [
       ['Mathquilibrium — the operator crossword', 'מאוזן — תשבץ הפעולות'],
       ['A crossword where the numbers are given and you fill in the math. New daily puzzle every day.', 'תשבץ שבו המספרים נתונים ואתם משלימים את החשבון. חידה יומית חדשה בכל יום.'],
-      ['<h1 class="wordmark">Math<span>quilibrium</span></h1>', '<h1 class="wordmark">מ<span>אוזן</span></h1>'],
+      ['<h1 class="wordmark">Math<span>quilibrium</span></h1>', '<h1 class="wordmark">מאו<span>זן</span></h1>'],
       ['<p class="tagline">The numbers are given. The math is yours.</p>', '<p class="tagline">המספרים נתונים. החשבון עליכם.</p>'],
       ['aria-label="Operators"', 'aria-label="פעולות"'],
       ["<b>Let's go</b>", '<b>יאללה</b>'],
