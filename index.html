@@ -233,12 +233,12 @@
   <feComposite in="SourceGraphic" operator="out"/>
 </filter></svg>
 <script>
-  const d = new Date(), today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const d = new Date(), today = d.toISOString().slice(0, 10); // UTC, like the games
   // The issue number counts days since the first issue (2026-11-12). Reset this to relaunch.
   const ISSUE0 = Date.UTC(2026, 10, 12);
-  const no = Math.max(1, Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - ISSUE0) / 864e5) + 1);
+  const no = Math.max(1, Math.round((Date.parse(today) - ISSUE0) / 864e5) + 1);
   document.getElementById('issue-no').textContent = `No. ${no.toLocaleString()}`;
-  document.getElementById('issue-date').textContent = d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('issue-date').textContent = d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
   // Today's dailies, read from each game's saved progress.
   for (const a of document.querySelectorAll('.game')) {

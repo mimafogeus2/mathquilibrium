@@ -23,19 +23,19 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 let game, store, G = null, timer = null;
 const persist = () => { try { localStorage.setItem(game.storeKey, JSON.stringify(store)); } catch {} };
 
-const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const ymd = (d) => d.toISOString().slice(0, 10); // UTC: the daily rolls over at midnight UTC, the same moment everywhere
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 // The Today header: "Thu 12 Nov · 4-day streak"
 const streakText = (st) => (st ? ' · ' + T('{n}-day streak', { n: st }) : '');
-const todayLine = (st) => new Date().toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short' }) + streakText(st);
+const todayLine = (st) => new Date().toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) + streakText(st);
 const shortDate = (date) => new Date(date + 'T12:00').toLocaleDateString(LOCALE, { month: 'short', day: 'numeric' });
 const hintsText = (h) => (h === 1 ? T('1 hint') : T('{n} hints', { n: h }));
 function streak() {
   const d = new Date();
   const any = () => Object.keys(store.daily[ymd(d)] || {}).length > 0; // any difficulty counts
-  if (!any()) d.setDate(d.getDate() - 1);
+  if (!any()) d.setUTCDate(d.getUTCDate() - 1);
   let n = 0;
-  for (; any(); d.setDate(d.getDate() - 1)) n++;
+  for (; any(); d.setUTCDate(d.getUTCDate() - 1)) n++;
   return n;
 }
 
