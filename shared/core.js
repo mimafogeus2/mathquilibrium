@@ -6,12 +6,14 @@
 //   save(G)        -> what to persist besides elapsed
 //   key(e)         -> handle a keydown during play; return true if used
 //   reveal(G)      -> show the answer on the board (after giving up)
+//   random         -> optional: random levels per difficulty with share codes (playRandom), no unlocks or levels grid
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
 const ICON_ON = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
 const ICON_OFF = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9l5 6M22 9l-5 6"/></svg>';
 const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>';
 const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 let game, store, G = null, timer = null;
 const persist = () => { try { localStorage.setItem(game.storeKey, JSON.stringify(store)); } catch {} };
@@ -77,10 +79,59 @@ function flash(el, cls) {
   el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
 }
 
+// ---------- URLs ----------
+// Each puzzle has its own hash (#daily-easy, #easy-12, ...); the menu has none. Menu -> puzzle pushes a history entry,
+// puzzle -> puzzle replaces it, so Back returns to the menu and Forward to the last puzzle played from it.
+function toGame(h) {
+  if (location.hash) history.replaceState(history.state, '', '#' + h);
+  else history.pushState('game', '', '#' + h);
+}
+// Back to the menu: onto the menu's own entry when this one was pushed from it (so Forward still works), else turn this entry into the menu.
+function toMenu(back = true) {
+  if (!location.hash) return;
+  if (back && history.state === 'game') history.back();
+  else history.replaceState(null, '', location.pathname + location.search);
+}
+// Show what the hash names on load and on Back/Forward: open(hash) returns true if it opened something, else home() runs.
+function router(open, home) {
+  const go = () => {
+    for (const d of document.querySelectorAll('dialog[open]')) d.close();
+    if (!open(decodeURIComponent(location.hash.slice(1)))) home();
+  };
+  addEventListener('hashchange', go);
+  go();
+}
+// Pack games: #daily-easy is today's Easy daily, #easy-12 is Easy level 12 (if unlocked).
+// Random games (game.random) use an opaque 3-char code instead (#easy-k3f), and any level opens, unlocked or not.
+// n * 9973 mod 36^3 is a bijection (9973 is coprime with 36^3), so codes don't follow level order (as in Orderly).
+const levelCode = (n) => ((n * 9973) % 46656).toString(36).padStart(3, '0');
+const levelHash = (pack, n) => (n ? '' : 'daily-') + TIERS[pack].toLowerCase() + (n ? '-' + (game.random ? levelCode(n) : n) : '');
+function openLevel(h, start) {
+  const [a, b] = h.split('-'), tier = (s) => Object.keys(TIERS).find((k) => TIERS[k].toLowerCase() === s), p = tier(a);
+  const n = game.random ? Array.from({ length: PACK_SIZE }, (_, i) => i + 1).find((i) => levelCode(i) === b) : +b;
+  if (a === 'daily' && tier(b)) start(tier(b), null, ymd(new Date()));
+  else if (p && game.random && n) { store.cur[p] = n; persist(); start(p, n); }
+  else if (p && Number.isInteger(n) && n >= 1 && n <= store.packs[p].unlocked) start(p, n);
+  else return false;
+  return true;
+}
+// Random games: store.cur[pack] is that difficulty's puzzle in play, resumed until solved or given up (or a new one is dealt).
+// A new one is a random unsolved level of the pack (any level once all are solved).
+function playRandom(pack, fresh) {
+  const cur = store.cur[pack];
+  if (fresh || !store.saves[pack + cur]) {
+    delete store.saves[pack + cur];
+    const all = Array.from({ length: PACK_SIZE }, (_, i) => i + 1), open = all.filter((n) => !store.packs[pack].stars[n]);
+    store.cur[pack] = pick(Math.random, open.length ? open : all);
+    persist();
+  }
+  start(pack, store.cur[pack]);
+}
+
 // ---------- screens ----------
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') renderHome();
+  if (id === 'home') { renderHome(); toMenu(); }
 }
 
 function renderHome() {
@@ -101,6 +152,12 @@ function renderHome() {
     b.innerHTML = `<span class="pack-name">${name}</span>
       <span class="pack-bar"><i style="width:${(done / PACK_SIZE) * 100}%"></i></span>
       <span class="pack-count">${done}/${PACK_SIZE}</span>`;
+    if (game.random) {
+      const resume = !!store.saves[k + store.cur[k]];
+      b.querySelector('.pack-count').insertAdjacentHTML('beforeend', `<small>${resume ? 'Resume' : 'New puzzle'}</small>`);
+      b.onclick = () => playRandom(k);
+      return b;
+    }
     const next = firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
@@ -112,8 +169,9 @@ function renderHome() {
 function start(pack, n, date = null) {
   const key = date ? 'D' + pack + date : pack + n, save = store.saves[key] || {};
   G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: false, paused: false };
-  $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
+  $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${game.random ? levelCode(n) : n}`;
   show('game');
+  toGame(levelHash(pack, n));
   if (game.start(G, save)) G.elapsed = save.elapsed || 0;
   setPaused(false);
   $('#timer').textContent = fmt(G.elapsed);
@@ -173,10 +231,10 @@ function win() {
     const st = streak();
     $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b> · ${h ? `${h} hint${h > 1 ? 's' : ''}` : 'no hints'}` +
       (g.date && st ? ` · ${st}-day streak` : '');
-    const last = !g.date && g.n === PACK_SIZE;
+    const last = !g.date && !game.random && g.n === PACK_SIZE;
     if (last) $('#win-title').textContent = `${TIERS[g.pack]} pack complete!`;
     $('#win-next').hidden = last;
-    $('#win-next b').textContent = g.date ? 'Share result' : `Level ${g.n + 1}  →`;
+    $('#win-next b').textContent = g.date ? 'Share result' : game.random ? 'Another puzzle  →' : `Level ${g.n + 1}  →`;
     $('#dlg-win').showModal();
   }, game.winDelay ?? 1100);
 }
@@ -195,7 +253,7 @@ function giveUp() {
 async function share() {
   const r = store.daily[G.date][G.pack];
   const text = `${game.name} daily · ${G.date} · ${TIERS[G.pack]}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ no hints'}` +
-    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
+    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(G.pack) : '');
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); $('#win-next b').textContent = 'Copied ✓'; }
@@ -275,22 +333,44 @@ function openLevels(pack = store.lastPack || 'E', page) {
   grid.querySelector('.current')?.scrollIntoView({ block: 'center' });
 }
 
+// ---------- print ----------
+// Paper version of the puzzle on screen, unsolved. build() returns { top?: html (above the rules), rules: [html], body: html }.
+// It fills #print right before printing (the #btn-print button or Ctrl+P); in print, core.css shows only #print, on one A4 page.
+// From the menu nothing is filled, so the page prints as it looks.
+function printable(build) {
+  const out = document.createElement('section');
+  out.id = 'print';
+  document.body.append(out);
+  addEventListener('beforeprint', () => {
+    const s = !$('#game').hidden && build();
+    out.innerHTML = s ? `<header class="p-head"><h1>${esc(game.name)}</h1><p>${esc([$('#g-title').textContent, $('#g-sub').textContent].filter(Boolean).join(' · '))}</p></header>${s.top || ''}` +
+      `<ol class="rules">${s.rules.map((r) => `<li>${r}</li>`).join('')}</ol>${s.body}` : '';
+    document.body.classList.toggle('printing', !!s);
+  });
+  $('#btn-print').onclick = () => print();
+}
+
 // ---------- boot ----------
 function boot(g) {
   game = g;
   try { store = JSON.parse(localStorage.getItem(g.storeKey)) || {}; } catch { store = {}; }
   store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...store };
   for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
-
-  $('#btn-levels').onclick = () => openLevels();
+  if (g.random) {
+    store.cur ??= {};
+    // a level left mid-way under the old fixed progression becomes that difficulty's puzzle to resume
+    for (const k in TIERS) store.cur[k] ??= +Object.keys(store.saves).find((s) => s[0] === k && /^\d+$/.test(s.slice(1)))?.slice(1) || undefined;
+    for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(b.dataset.pack, true);
+  } else $('#btn-levels').onclick = () => openLevels();
   $('#btn-help').onclick = () => $('#dlg-help').showModal();
-  $('#btn-back').onclick = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
+  const home = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
+  $('#btn-back').onclick = home;
   $('#btn-pause').onclick = () => setPaused(!G.paused);
   $('#btn-resume').onclick = () => setPaused(false);
   $('#btn-giveup').onclick = giveUp;
   $('#win-home').onclick = () => { $('#dlg-win').close(); show('home'); };
   $('#win-next').onclick = () => {
-    if (G.date) share(); else { $('#dlg-win').close(); start(G.pack, G.n + 1); }
+    if (G.date) share(); else { $('#dlg-win').close(); game.random ? playRandom(G.pack, true) : start(G.pack, G.n + 1); }
   };
   $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
   for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
@@ -304,6 +384,6 @@ function boot(g) {
   });
 
   syncSound();
-  show('home');
+  router((h) => openLevel(h, start), home);
   if (!store.seenHelp) $('#dlg-help').showModal();
 }

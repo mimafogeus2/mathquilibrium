@@ -48,8 +48,9 @@ function startLevel(G, save) {
   if (date) $('#tip').textContent = `Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.`;
   else if (n === 1) $('#tip').innerHTML = FIRST_TIP;
   else {
-    const prev = levelConfig(packDifficulty(pack, n - 1)), had = [...prev.ops, ...prev.rels];
-    const fresh = [...p.ops, ...p.rels].filter((o) => !had.includes(o) && OP_TIPS[o]);
+    const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val));
+    const syms = (o) => (o === '<' ? '<>' : o); // one tip covers both inequalities
+    const fresh = Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)) && firstUse(pack, syms(o), n) === n);
     $('#tip').innerHTML = fresh.map((o) => OP_TIPS[o]).join('<br>');
   }
 
@@ -272,6 +273,23 @@ function onKey(e) {
   else return false;
   return true;
 }
+
+// ---------- print ----------
+// The grid with its blanks empty, the operators in play listed above it.
+printable(() => {
+  const { p } = G, all = [...p.ops, ...p.rels];
+  const cell = (c) => `<div class="${c.op ? (c.given ? 'p-given' : 'p-blank') : 'p-num'}${String(c.val).length > 2 ? ' long' : ''}" style="grid-area: ${c.r + 1} / ${c.c + 1}">${c.op && !c.given ? '' : esc(sym(c.val))}</div>`;
+  return {
+    rules: [
+      'Write an operator in every empty box so <b>each row and column is a true equation</b>.',
+      'Boxes where lines cross are <b>shared</b>: one symbol has to work both ways.',
+      'Usual math order: <b>× ÷</b> before <b>+ −</b>. Division must come out exact.',
+      ...['^', '.', '%', '<'].filter((o) => all.includes(o)).map((o) => OP_TIPS[o].replace('New: ', '')),
+    ],
+    body: `<p class="p-ops">Use: ${all.map((o) => `<b>${esc(sym(o))}</b>`).join('')}</p>` +
+      `<div class="p-grid" style="--cols: ${p.cols}; --rows: ${p.rows}">${p.cells.map(cell).join('')}</div>`,
+  };
+});
 
 mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);

@@ -27,6 +27,24 @@ function pieceSvg(s) {
     SHAPES[s].map(([r, c]) => `<rect x="${c + .06}" y="${r + .06}" width=".88" height=".88" rx=".14"/>`).join('') + '</g></svg>';
 }
 
+// Where each used piece sits: its outline, one colour per piece, inset a little more per piece so overlaps stay apart.
+// In board units (one per cell, cell edges mid-gap), traced clockwise; each corner moves `d` along both inward normals.
+const MARKS = ['--pink', '--sun', '--ink', '--orange', '--muted', '--red', '--teal-text'];
+function outline(s, pos, N, d) {
+  const has = new Set(SHAPES[s].map(String)), next = new Map();
+  for (const [r, c] of SHAPES[s]) for (const [dr, dc, x0, y0, x1, y1] of [[-1, 0, 0, 0, 1, 0], [0, 1, 1, 0, 1, 1], [1, 0, 1, 1, 0, 1], [0, -1, 0, 1, 0, 0]])
+    if (!has.has([r + dr, c + dc] + '')) next.set([c + x0, r + y0] + '', [c + x1, r + y1]);
+  const pts = [];
+  for (let p = next.values().next().value; !pts.length || p + '' !== pts[0] + ''; p = next.get(p + '')) pts.push(p);
+  const x0 = pos % N, y0 = Math.floor(pos / N), corners = [];
+  pts.forEach(([x, y], i) => {
+    const [px, py] = pts.at(i - 1), [nx, ny] = pts[(i + 1) % pts.length];
+    const a = [x - px, y - py], b = [nx - x, ny - y]; // edge in, edge out; inward normal of (dx, dy) is (-dy, dx)
+    if (a + '' !== b + '') corners.push(`${x0 + x + d * (-a[1] - b[1])} ${y0 + y + d * (a[0] + b[0])}`);
+  });
+  return 'M' + corners.join('L') + 'Z';
+}
+
 // ---------- state ----------
 // G.placed[k] = where piece k is stamped (top-left of its box), or -1. G.order = stamps the player can undo, oldest first.
 // G.hinted = pieces a hint put down: correct, and locked.
@@ -56,10 +74,12 @@ function startLevel(G, save) {
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, N);
+  b.insertAdjacentHTML('beforeend', `<svg class="marks" viewBox="0 0 ${N} ${N}" aria-hidden="true"></svg>`);
   $('#tray').style.setProperty('--k', K);
   $('#tray').replaceChildren(...p.pieces.map((sh, k) => {
     const t = document.createElement('button');
     t.className = 'piece';
+    t.style.setProperty('--c', `var(${MARKS[k]})`);
     t.innerHTML = pieceSvg(sh);
     t.onclick = () => pickPiece(k);
     return t;
@@ -80,6 +100,7 @@ function refresh() {
   paint(view, board);
   const ghost = !G.done && G.at !== null && G.placed[G.sel] < 0 ? flip(N, p.pieces[G.sel], G.at) : 0;
   view.cells.forEach((c, i) => c.classList.toggle('ghost', !!(ghost >> i & 1)));
+  $('#board .marks').innerHTML = G.placed.map((v, k) => v < 0 ? '' : ((d) => `<g style="--c: var(${MARKS[k]})"><path class="halo" d="${d}"/><path d="${d}"/></g>`)(outline(p.pieces[k], v, N, .1 + k * .045))).join('');
   $('#tray').querySelectorAll('.piece').forEach((t, k) => {
     t.classList.toggle('used', G.placed[k] >= 0);
     t.classList.toggle('hinted', G.hinted.has(k));
