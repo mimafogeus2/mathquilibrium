@@ -6,7 +6,7 @@ Object.assign(globalThis, require('../shared/common.js'));
 
 // the pure helpers the page uses (game.js needs a DOM, so they're lifted out of the source)
 const src = require('fs').readFileSync(__dirname + '/game.js', 'utf8');
-for (const re of [/const N = [^\n]*\n/, /const DAY0[^]*?\n\n/, /function parse[^]*?\n}\n/, /function deal[^]*?\n}\n/])
+for (const re of [/const N = [^\n]*\n/, /const DAY0[^]*?\n\n/, /function parse[^]*?\n}\n/, /function deal[^]*?\n}\n/, /const code = [^\n]*\n/, /const fromCode = [^\n]*\n/])
   (0, eval)(src.match(re)[0].replace(/^const /gm, 'var '));
 
 const subjects = new Set();
@@ -39,6 +39,10 @@ SPECIAL.forEach((l, i) => {
   assert(sp.occasion.trim() && !sp.occasion.includes('|'), 'no occasion ' + l);
   CHECK(sp.line, 'special ' + l);
 });
+
+// share codes: 3 chars, distinct, and each leads back to its level
+const codes = LEVELS.map((_, i) => code(i + 1));
+assert(codes.every((c, i) => /^[0-9a-z]{3}$/.test(c) && fromCode(c) === i + 1) && new Set(codes).size === LEVELS.length && !codes.includes('daily'), 'bad share codes');
 
 const days = new Set();
 for (let d = 0; d < LEVELS.length; d++) days.add(dailyIndex(new Date(DAY0 + d * 864e5 + 12 * 36e5).toISOString().slice(0, 10)));
