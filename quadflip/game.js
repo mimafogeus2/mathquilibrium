@@ -11,6 +11,7 @@ function drawBoard(el, N) {
     c.className = 'cell';
     t.className = 't';
     c.style.setProperty('--d', (Math.floor(i / N) + (i % N)) * 40 + 'ms');
+    t.append(document.createElement('b')); // edge strips, for thickness
     c.append(t);
     cells.push(c);
     tiles.push(t);
