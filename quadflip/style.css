@@ -70,3 +70,7 @@
   .board:not(.mini) { width: min(calc(100dvh - 90px), calc(100vw - 380px)); }
   .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
 }
+
+/* help text per input: touch aims by press-and-drag, mouse/keyboard by hover/click */
+.touch { display: none; }
+@media (hover: none) { .touch { display: list-item; } .no-touch { display: none; } }
