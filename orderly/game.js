@@ -43,13 +43,13 @@ function playRandom(fresh, d) {
 // Share links: #daily, or a 3-char code per level. n * 9973 mod 36^3 is a bijection (9973 is coprime with 36^3), so codes don't follow level order.
 const code = (n) => ((n * 9973) % 46656).toString(36).padStart(3, '0');
 const fromCode = (c) => LEVELS.findIndex((_, i) => code(i + 1) === c) + 1; // 0 = no such level
-const setHash = (h) => history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
-// Open whatever the URL names; an unknown hash just shows home.
-function route() {
-  const h = location.hash.slice(1), n = fromCode(h);
+// Open whatever the URL names (#daily or a level code); anything else is home.
+function route(h) {
+  const n = fromCode(h);
   if (h === 'daily') play('D' + today());
   else if (n) { if (store.cur !== n) { store.cur = n; persist(); } play('L' + n); }
-  else { setHash(''); P = null; screen('home'); }
+  else return false;
+  return true;
 }
 const save = () => { if (P && !P.done) store.saves[P.key] = { order: P.order, links: P.links, rows: P.rows, moved: P.moved, hints: P.hints }; persist(); };
 // The order split into units: runs of linked cards (groups) and lone cards, top to bottom.
@@ -57,7 +57,7 @@ const units = () => P.order.reduce((u, c, p) => (p && P.links[c - 1] && P.order[
 
 function screen(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') { home(); setHash(''); }
+  if (id === 'home') { home(); toMenu(); }
 }
 
 function home() {
@@ -79,7 +79,7 @@ function play(key) {
   const lv = parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, hints: sv?.hints || 0, done: false };
-  setHash(date ? 'daily' : code(n));
+  toGame(date ? 'daily' : code(n));
   $('#g-title').textContent = date ? 'Daily' : 'Random';
   $('#g-sub').textContent = (date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' : '') + (sp ? sp.occasion : DIFF[lv.d]);
   $('#subject').textContent = lv.subject;
@@ -295,7 +295,8 @@ dlgTopics.addEventListener('close', () => {
 });
 $('#btn-link').onclick = shareLink;
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
-$('#btn-back').onclick = () => { save(); P = null; screen('home'); };
+const goHome = () => { save(); P = null; screen('home'); };
+$('#btn-back').onclick = goHome;
 $('#btn-check').onclick = check;
 $('#btn-giveup').onclick = giveUp;
 $('#btn-hint').onclick = hint;
@@ -316,6 +317,5 @@ document.addEventListener('keydown', (e) => {
 });
 
 syncSound();
-route();
-addEventListener('hashchange', route);
+router(route, goHome);
 if (!store.seenHelp) $('#dlg-help').showModal();

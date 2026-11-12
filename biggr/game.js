@@ -16,7 +16,7 @@ const save = () => { if (R && !R.over) store.saves[R.key] = { marks: R.marks, le
 
 function screen(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') home();
+  if (id === 'home') { home(); toMenu(); }
 }
 
 function home() {
@@ -43,13 +43,15 @@ function home() {
 // Same name and signature as core.js's start(), which this replaces, so core's openLevels() lands here.
 function start(pack, n, date = null) {
   const key = date ? 'D' + pack + date : pack + n;
-  if (date && store.daily[date]?.[pack]) return showEnd(store.daily[date][pack], { pack, date });
+  // A finished daily shows its result over the menu.
+  if (date && store.daily[date]?.[pack]) { toMenu(false); screen('home'); return showEnd(store.daily[date][pack], { pack, date }); }
   const sv = store.saves[key];
   R = { key, pack, n, date, pairs: generate(hash(key), pack), marks: sv?.marks || [], left: sv?.left ?? TIME[pack] * 1000, hold: false, over: false };
   $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
   $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
   $('#game').className = `screen tier-${pack}`;
   screen('game');
+  toGame(levelHash(pack, n));
   if (R.marks.length === PAIRS || R.left <= 0) return finish(); // left mid-reveal of the last answer
   deal();
   hud();
@@ -169,7 +171,7 @@ function showEnd(rec, { pack, n, date }) {
 
 async function share(rec, pack, date) {
   const text = `Biggr daily · ${date} · ${TIERS[pack]}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
-    `${rec.s} points${rec.t ? ` · ${rec.t}s left` : ' · ⏰ out of time'}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
+    `${rec.s} points${rec.t ? ` · ${rec.t}s left` : ' · ⏰ out of time'}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = 'Copied ✓'; }
@@ -184,7 +186,8 @@ for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
 
 $('#btn-levels').onclick = () => openLevels();
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
-$('#btn-back').onclick = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
+const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
+$('#btn-back').onclick = goHome;
 sides().forEach((el, i) => (el.onclick = () => answer(i)));
 // Giving up runs the clock out: the round ends as if time were up.
 $('#btn-giveup').onclick = () => { if (R && !R.over && confirm('Give up? The round ends now, scored as it stands.')) { R.left = 0; hud(); finish(); } };
@@ -202,5 +205,5 @@ document.addEventListener('keydown', (e) => {
 });
 
 syncSound();
-screen('home');
+router((h) => openLevel(h, start), goHome);
 if (!store.seenHelp) $('#dlg-help').showModal();
