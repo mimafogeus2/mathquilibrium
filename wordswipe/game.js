@@ -30,7 +30,7 @@ const save = () => { if (R && !R.over) store.cur = R; persist(); };
 
 function screen(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') home();
+  if (id === 'home') { home(); toMenu(); }
 }
 
 function home() {
@@ -44,7 +44,8 @@ function home() {
 
 function play(key) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
-  if (date && store.daily[date]?.r) return showEnd(store.daily[date].r, true);
+  // A finished daily shows its result over the menu.
+  if (date && store.daily[date]?.r) { toMenu(false); screen('home'); return showEnd(store.daily[date].r, true); }
   R = store.cur?.key === key ? store.cur
     : { key, date, n, ...deal(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)], hash(key)), marks: [], left: TIME, over: false };
   $('#g-title').textContent = date ? 'Daily' : `Round ${n + 1}`;
@@ -52,6 +53,7 @@ function play(key) {
   $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
+  toGame(date ? 'daily' : `round-${n + 1}`);
   $('#stack').replaceChildren();
   refill();
   hud();
@@ -164,7 +166,7 @@ function finish() {
   const rec = { s: score(R), m: R.marks.map(Number).join(''), t: R.marks.length === 24 ? Math.ceil(R.left / 1000) : 0, subject: R.subject,
     misses: R.cards.map((c, i) => (R.marks[i] === false ? (c.yes ? '+' : '-') + c.w : null)).filter(Boolean) };
   if (R.date) (store.daily[R.date] ??= {}).r = rec;
-  else { store.n = R.n + 1; store.best = Math.max(store.best, rec.s); }
+  else { store.n = Math.max(store.n, R.n + 1); store.best = Math.max(store.best, rec.s); }
   persist();
   if (rec.t) { sfx.win(); confetti(); }
   setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
@@ -183,13 +185,12 @@ function showEnd(rec, daily) {
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); play('U' + store.n); };
   $('#dlg-end').showModal();
 }
-const esc = (s) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 async function shareDaily(rec) {
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
   const sp = special(SPECIAL, date), text = `WordSwipe daily · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
     `${rec.s} points${rec.t ? ` · ${rec.t}s left` : ' · ⏰ out of time'}` +
-    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
+    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = 'Copied ✓'; }
@@ -204,7 +205,8 @@ store = { daily: {}, n: 0, best: 0, muted: false, seenHelp: false, ...store };
 $('#btn-daily').onclick = () => play('D' + today());
 $('#btn-unlimited').onclick = () => play('U' + store.n);
 $('#btn-help').onclick = () => $('#dlg-help').showModal();
-$('#btn-back').onclick = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
+const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
+$('#btn-back').onclick = goHome;
 $('#btn-yes').onclick = () => answer(true);
 $('#btn-no').onclick = () => answer(false);
 $('#stack').addEventListener('pointerdown', drag);
@@ -223,6 +225,23 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
 });
 
+// Paper version: the 24 words in three columns of 8, each with a fits / doesn't box. No clock on paper.
+printable(() => R && {
+  top: `<p class="subject"><small>Does it fit?</small><b>${esc(R.subject)}</b></p>`,
+  rules: [
+    'Each of these <b>24 words</b> either fits the subject above or it doesn\'t.',
+    'Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn\'t. One box per word.',
+  ],
+  body: `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>
+    `<li><span class="p-box"></span><span class="p-box"></span>${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`,
+});
 syncSound();
-screen('home');
+// #daily is today's round; #round-7 is unlimited round 7, open once reached (so Forward can replay the last one).
+router((h) => {
+  const n = h === 'daily' ? -1 : /^round-\d+$/.test(h) ? +h.slice(6) - 1 : NaN;
+  if (n === -1) play('D' + today());
+  else if (n >= 0 && n <= store.n) play('U' + n);
+  else return false;
+  return true;
+}, goHome);
 if (!store.seenHelp) $('#dlg-help').showModal();
