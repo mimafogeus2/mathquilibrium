@@ -77,10 +77,42 @@ function flash(el, cls) {
   el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
 }
 
+// ---------- URLs ----------
+// Each puzzle has its own hash (#daily-easy, #easy-12, ...); the menu has none. Menu -> puzzle pushes a history entry,
+// puzzle -> puzzle replaces it, so Back returns to the menu and Forward to the last puzzle played from it.
+function toGame(h) {
+  if (location.hash) history.replaceState(history.state, '', '#' + h);
+  else history.pushState('game', '', '#' + h);
+}
+// Back to the menu: onto the menu's own entry when this one was pushed from it (so Forward still works), else turn this entry into the menu.
+function toMenu(back = true) {
+  if (!location.hash) return;
+  if (back && history.state === 'game') history.back();
+  else history.replaceState(null, '', location.pathname + location.search);
+}
+// Show what the hash names on load and on Back/Forward: open(hash) returns true if it opened something, else home() runs.
+function router(open, home) {
+  const go = () => {
+    for (const d of document.querySelectorAll('dialog[open]')) d.close();
+    if (!open(decodeURIComponent(location.hash.slice(1)))) home();
+  };
+  addEventListener('hashchange', go);
+  go();
+}
+// Pack games: #daily-easy is today's Easy daily, #easy-12 is Easy level 12 (if unlocked).
+const levelHash = (pack, n) => (n ? '' : 'daily-') + TIERS[pack].toLowerCase() + (n ? '-' + n : '');
+function openLevel(h, start) {
+  const [a, b] = h.split('-'), tier = (s) => Object.keys(TIERS).find((k) => TIERS[k].toLowerCase() === s), p = tier(a), n = +b;
+  if (a === 'daily' && tier(b)) start(tier(b), null, ymd(new Date()));
+  else if (p && Number.isInteger(n) && n >= 1 && n <= store.packs[p].unlocked) start(p, n);
+  else return false;
+  return true;
+}
+
 // ---------- screens ----------
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') renderHome();
+  if (id === 'home') { renderHome(); toMenu(); }
 }
 
 function renderHome() {
@@ -114,6 +146,7 @@ function start(pack, n, date = null) {
   G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: false, paused: false };
   $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
   show('game');
+  toGame(levelHash(pack, n));
   if (game.start(G, save)) G.elapsed = save.elapsed || 0;
   setPaused(false);
   $('#timer').textContent = fmt(G.elapsed);
@@ -195,7 +228,7 @@ function giveUp() {
 async function share() {
   const r = store.daily[G.date][G.pack];
   const text = `${game.name} daily · ${G.date} · ${TIERS[G.pack]}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ no hints'}` +
-    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
+    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(G.pack) : '');
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); $('#win-next b').textContent = 'Copied ✓'; }
@@ -284,7 +317,8 @@ function boot(g) {
 
   $('#btn-levels').onclick = () => openLevels();
   $('#btn-help').onclick = () => $('#dlg-help').showModal();
-  $('#btn-back').onclick = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
+  const home = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
+  $('#btn-back').onclick = home;
   $('#btn-pause').onclick = () => setPaused(!G.paused);
   $('#btn-resume').onclick = () => setPaused(false);
   $('#btn-giveup').onclick = giveUp;
@@ -304,6 +338,6 @@ function boot(g) {
   });
 
   syncSound();
-  show('home');
+  router((h) => openLevel(h, start), home);
   if (!store.seenHelp) $('#dlg-help').showModal();
 }
