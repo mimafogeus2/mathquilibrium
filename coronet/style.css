@@ -108,3 +108,20 @@
 
 /* key-ink buttons would hide a key-ink registration offset: print it in sunflower instead */
 .btn.primary, .daily-btn:not(.done), .lvl.current { box-shadow: 2px 3px 0 var(--sun); }
+
+/* ---------- print ---------- */
+/* regions as greys and textures, all light enough that pen shows on them */
+.p-ring { width: 165mm; height: 165mm; fill: initial; stroke: none; stroke-width: 1; overflow: visible; margin-top: 4mm; }
+.p-ring .cells, .p-ring .pieces { filter: none; }
+.p-ring .lip, .p-ring .cursor, .p-ring .seal { display: none; }
+.p-ring .c { stroke: #000; stroke-width: .3; }
+.p-ring .walls, .p-ring .rim, .p-ring .hub circle { stroke: #000; stroke-width: 1.6; }
+.p-ring .hub circle { fill: #fff; }
+#print .rg0 { fill: #fff; }
+#print .rg1 { fill: #d2d2d2; }
+#print .rg2 { fill: url(#p-hatch); }
+#print .rg3 { fill: url(#p-dots); }
+#print .rg4 { fill: url(#p-grid); }
+#print .rg5 { fill: url(#p-back); }
+#print .rg6 { fill: url(#p-greydots); }
+#print { print-color-adjust: exact; -webkit-print-color-adjust: exact; }

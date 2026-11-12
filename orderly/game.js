@@ -315,6 +315,16 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
 });
 
+// Paper version: the 10 cards as cut-out strips, in the dealt order (never the player's progress or the answer).
+printable(() => P && {
+  top: `<p class="subject"><b>${esc(P.lv.subject)}</b></p>`,
+  rules: [
+    '<b>Cut out</b> the 10 cards along the dashed lines.',
+    `<b>Sort them on the table</b>, from <b>${esc(P.lv.top)}</b> at the top to <b>${esc(P.lv.bottom)}</b> at the bottom.`,
+    'Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.',
+  ],
+  body: `<ul class="p-strips">${deal(hash(P.key)).map((i) => `<li><i></i>${esc(P.lv.items[i].name)}</li>`).join('')}</ul>`,
+});
 syncSound();
 route();
 addEventListener('hashchange', route);

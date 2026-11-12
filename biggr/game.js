@@ -201,6 +201,14 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
 });
 
+// Paper version: the 10 pairs as lines with a gap for < or >. No clock on paper.
+printable(() => R && {
+  rules: [
+    'Each line has <b>two sums</b>. Work them out in your head, no answers given.',
+    'Write <b>&lt;</b> or <b>&gt;</b> in the gap so the line is true: the open side faces the <b>bigger</b> sum.',
+  ],
+  body: `<ol class="p-pairs">${R.pairs.map(([lt, , rt]) => `<li><span>${esc(lt)}</span><i></i><span>${esc(rt)}</span></li>`).join('')}</ol>`,
+});
 syncSound();
 screen('home');
 if (!store.seenHelp) $('#dlg-help').showModal();

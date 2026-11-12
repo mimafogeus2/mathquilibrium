@@ -94,3 +94,12 @@
   .subject { grid-column: 2; grid-row: 3; align-self: end; max-width: 260px; }
   .answer { grid-column: 2; grid-row: 4; }
 }
+
+/* ---------- print ---------- */
+#print .subject b { font-size: 24pt; }
+#print .subject small { font-size: 9pt; color: #000; }
+.p-words { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 2mm; }
+.p-words ul { list-style: none; margin: 0; padding: 0; }
+.p-words li { display: flex; align-items: center; gap: 2.5mm; min-height: 15mm; border-bottom: .5pt solid #888; font-size: 13pt; line-height: 1.15; font-weight: 600; hyphens: auto; }
+.p-words .p-key { min-height: 7mm; border: 0; font-size: 11pt; }
+.p-key b { width: 6mm; text-align: center; }

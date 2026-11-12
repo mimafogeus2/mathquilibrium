@@ -12,6 +12,7 @@ const ICON_ON = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.
 const ICON_OFF = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9l5 6M22 9l-5 6"/></svg>';
 const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>';
 const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 let game, store, G = null, timer = null;
 const persist = () => { try { localStorage.setItem(game.storeKey, JSON.stringify(store)); } catch {} };
@@ -273,6 +274,23 @@ function openLevels(pack = store.lastPack || 'E', page) {
   }
   if (!$('#dlg-levels').open) $('#dlg-levels').showModal();
   grid.querySelector('.current')?.scrollIntoView({ block: 'center' });
+}
+
+// ---------- print ----------
+// Paper version of the puzzle on screen, unsolved. build() returns { top?: html (above the rules), rules: [html], body: html }.
+// It fills #print right before printing (the #btn-print button or Ctrl+P); in print, core.css shows only #print, on one A4 page.
+// From the menu nothing is filled, so the page prints as it looks.
+function printable(build) {
+  const out = document.createElement('section');
+  out.id = 'print';
+  document.body.append(out);
+  addEventListener('beforeprint', () => {
+    const s = !$('#game').hidden && build();
+    out.innerHTML = s ? `<header class="p-head"><h1>${esc(game.name)}</h1><p>${esc([$('#g-title').textContent, $('#g-sub').textContent].filter(Boolean).join(' · '))}</p></header>${s.top || ''}` +
+      `<ol class="rules">${s.rules.map((r) => `<li>${r}</li>`).join('')}</ol>${s.body}` : '';
+    document.body.classList.toggle('printing', !!s);
+  });
+  $('#btn-print').onclick = () => print();
 }
 
 // ---------- boot ----------
