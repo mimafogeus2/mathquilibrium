@@ -52,6 +52,8 @@ function play(key) {
   $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
+  $('#game').classList.remove('done');
+  $('#btn-result').hidden = true;
   $('#stack').replaceChildren();
   refill();
   hud();
@@ -166,6 +168,7 @@ function finish() {
   if (R.date) (store.daily[R.date] ??= {}).r = rec;
   else { store.n = R.n + 1; store.best = Math.max(store.best, rec.s); }
   persist();
+  $('#game').classList.add('done');
   if (rec.t) { sfx.win(); confetti(); }
   setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
 }
@@ -181,6 +184,7 @@ function showEnd(rec, daily) {
     : '';
   $('#end-next b').textContent = daily ? 'Share result' : `Round ${store.n + 1}  →`;
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); play('U' + store.n); };
+  $('#btn-result').hidden = false;
   $('#dlg-end').showModal();
 }
 const esc = (s) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -210,6 +214,7 @@ $('#btn-no').onclick = () => answer(false);
 $('#stack').addEventListener('pointerdown', drag);
 // Giving up runs the clock out: the round ends as if time were up.
 $('#btn-giveup').onclick = () => { if (R && !R.over && confirm('Give up? The round ends now, scored as it stands.')) { R.left = 0; hud(); finish(); } };
+$('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
 for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };

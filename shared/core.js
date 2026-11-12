@@ -114,6 +114,8 @@ function start(pack, n, date = null) {
   G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: false, paused: false };
   $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
   show('game');
+  $('#game').classList.remove('done');
+  $('#btn-result').hidden = true;
   if (game.start(G, save)) G.elapsed = save.elapsed || 0;
   setPaused(false);
   $('#timer').textContent = fmt(G.elapsed);
@@ -161,6 +163,7 @@ function win() {
   }
   persist();
   $('#board').classList.add('solved');
+  $('#game').classList.add('done');
   sfx.win();
   confetti();
 
@@ -177,6 +180,7 @@ function win() {
     if (last) $('#win-title').textContent = `${TIERS[g.pack]} pack complete!`;
     $('#win-next').hidden = last;
     $('#win-next b').textContent = g.date ? 'Share result' : `Level ${g.n + 1}  →`;
+    $('#btn-result').hidden = false; // the dialog can be closed to look at the board; this brings it back
     $('#dlg-win').showModal();
   }, game.winDelay ?? 1100);
 }
@@ -188,6 +192,7 @@ function giveUp() {
   clearInterval(timer);
   delete store.saves[G.key];
   persist();
+  $('#game').classList.add('done');
   game.reveal(G);
   sfx.erase();
 }
@@ -288,6 +293,7 @@ function boot(g) {
   $('#btn-pause').onclick = () => setPaused(!G.paused);
   $('#btn-resume').onclick = () => setPaused(false);
   $('#btn-giveup').onclick = giveUp;
+  $('#btn-result').onclick = () => $('#dlg-win').showModal();
   $('#win-home').onclick = () => { $('#dlg-win').close(); show('home'); };
   $('#win-next').onclick = () => {
     if (G.date) share(); else { $('#dlg-win').close(); start(G.pack, G.n + 1); }

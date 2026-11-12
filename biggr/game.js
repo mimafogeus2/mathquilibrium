@@ -49,6 +49,7 @@ function start(pack, n, date = null) {
   $('#g-title').textContent = date ? `Daily · ${TIERS[pack]}` : `${TIERS[pack]} · ${n}`;
   $('#g-sub').textContent = date ? new Date(date + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
   $('#game').className = `screen tier-${pack}`;
+  $('#btn-result').hidden = true;
   screen('game');
   if (R.marks.length === PAIRS || R.left <= 0) return finish(); // left mid-reveal of the last answer
   deal();
@@ -147,6 +148,7 @@ function finish() {
     pp.unlocked = Math.max(pp.unlocked, Math.min(R.n + 1, PACK_SIZE));
   }
   persist();
+  $('#game').classList.add('done');
   if (full) { sfx.win(); confetti(); }
   const r = R;
   setTimeout(() => showEnd(rec, r), full ? 700 : 300);
@@ -164,6 +166,7 @@ function showEnd(rec, { pack, n, date }) {
   if (date) { next.querySelector('b').textContent = 'Share result'; next.onclick = () => share(rec, pack, date); }
   else if (!full) { next.querySelector('b').textContent = 'Try again'; next.onclick = () => { $('#dlg-end').close(); start(pack, n); }; }
   else { next.querySelector('b').textContent = `Level ${n + 1}  →`; next.onclick = () => { $('#dlg-end').close(); start(pack, n + 1); }; }
+  $('#btn-result').hidden = false;
   $('#dlg-end').showModal();
 }
 
@@ -188,6 +191,7 @@ $('#btn-back').onclick = () => { save(); cancelAnimationFrame(raf); R = null; sc
 sides().forEach((el, i) => (el.onclick = () => answer(i)));
 // Giving up runs the clock out: the round ends as if time were up.
 $('#btn-giveup').onclick = () => { if (R && !R.over && confirm('Give up? The round ends now, scored as it stands.')) { R.left = 0; hud(); finish(); } };
+$('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); R = null; screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
 for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
