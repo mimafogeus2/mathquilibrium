@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alien Chess — strange pieces, small boards</title>
+<meta name="description" content="Chess puzzles with pieces from another planet: new ones every level, each with a card. Read them, then take the enemy king. New daily puzzles every day.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Games by Miki">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/alienchess/">
+<meta property="og:title" content="Alien Chess — strange pieces, small boards">
+<meta property="og:description" content="Chess puzzles with pieces from another planet: new ones every level, each with a card. Read them, then take the enemy king. New daily puzzles every day.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/alienchess/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<script data-goatcounter="https://goatcounter-production-28ca10cd.up.railway.app/count" async src="https://goatcounter-production-28ca10cd.up.railway.app/count.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Cpath d='M22 50h20l-2-5H24zM26 45l2-10h8l2 10zM20 35c-2-7 0-11 3-14 2-8 16-8 18 0 3 3 5 7 3 14z' fill='%23d2342a'/%3E%3Ccircle cx='32' cy='24' r='5' fill='%23f3ede1'/%3E%3Ccircle cx='33' cy='25' r='2.3' fill='%23141e45'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="home" class="screen">
+  <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-fav" aria-label="Add to favorites"></button><button class="icon js-theme" aria-label="Theme"></button><button class="icon js-sound" aria-label="Sound"></button></div>
+  <div id="logo" aria-hidden="true"></div>
+  <h1 class="wordmark">Alien <span>Chess</span></h1>
+  <p class="tagline">Chess, as they play it out there.</p>
+  <nav class="menu">
+    <div class="block-head"><h2>Today</h2><span id="daily-meta"></span></div>
+    <div id="daily-btns" class="trio"></div>
+    <div class="block-head"><h2>Practice</h2><span>1,000 each</span></div>
+    <div id="pack-btns" class="packs"></div>
+    <div class="new-head kicker">New puzzle</div>
+    <div id="new-row" class="row">
+      <button class="btn ghost tier-E" data-pack="E"><b>Easy</b></button>
+      <button class="btn ghost tier-M" data-pack="M"><b>Medium</b></button>
+      <button class="btn ghost tier-H" data-pack="H"><b>Hard</b></button>
+    </div>
+    <div class="links"><button id="btn-help" class="foot-link">How to play</button></div>
+  </nav>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button id="btn-pause" class="icon" aria-label="Pause"></button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="timer" aria-label="Time">0:00</span>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="board-wrap">
+    <div id="board" class="board" tabindex="0" role="application" aria-roledescription="board" aria-describedby="board-keys"></div>
+    <p id="board-keys" class="sr-only">Your pieces start at the bottom. Arrow keys move around the board. Space or Enter picks up one of your pieces, then puts it down on a square it can reach. Z takes back your last move.</p>
+    <p id="sr" class="sr-only" aria-live="polite"></p>
+    <div id="pause-cover" class="pause-cover" hidden>
+      <b>Paused</b>
+      <button id="btn-resume" class="btn primary center"><b>Resume</b></button>
+    </div>
+  </div>
+  <p id="tip" class="tip"></p>
+  <div id="cards" class="cards"></div>
+  <div class="tools">
+    <button id="btn-undo" class="chip" disabled>
+      <svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo
+    </button>
+    <button id="btn-reset" class="chip" disabled>
+      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>Restart
+    </button>
+    <button id="btn-giveup" class="give-up">Give up</button>
+    <button id="btn-result" class="btn primary center" hidden><b>See result</b></button>
+  </div>
+</main>
+
+<dialog id="dlg-help">
+  <h2>How to play</h2>
+  <div id="help-card" aria-hidden="true"></div>
+  <ol class="rules">
+    <li>Every level brings <b>new pieces</b>. Each one's <b>card</b> shows how it moves.</li>
+    <li>On a card, a <b>line</b> slides until something blocks it; an arrow runs to the edge. A <b>lone dot</b> jumps straight there. <b>●</b> moves or takes, <b>○</b> only moves, <b>×</b> only takes.</li>
+    <li>Cards point up the board. The enemy's pieces move the same way, <b>upside down</b>.</li>
+    <li>Take the enemy's <b>king</b> (the crowned piece), or <b>all</b> of its pieces. Lose yours and you lose. A side with no move skips its turn.</li>
+    <li>You move first. There's always a <b>win</b> in the moves shown on top: undo, restart and try again.</li>
+    <li>Win fast for <b>three stars</b>.</li>
+  </ol>
+  <p class="muted small">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-win">
+  <div id="win-stars" class="stars" role="img"></div>
+  <h2 id="win-title"></h2>
+  <p id="win-stats" class="stats"></p>
+  <div class="win-actions">
+    <button id="win-next" class="btn primary center"><b></b></button>
+    <button id="win-home" class="btn ghost center"><b>Menu</b></button>
+  </div>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="gen.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

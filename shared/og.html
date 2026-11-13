@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Social card source (1200×630). Re-render after edits:
-     for g in home mathquilibrium coronet wordswipe orderly biggr quadflip; do
+     for g in home mathquilibrium coronet wordswipe orderly biggr quadflip alienchess; do
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
          --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
      done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png)
@@ -27,9 +27,9 @@
   small { display: block; margin-top: 36px; padding-top: 14px; border-top: 2px solid var(--ink); font-size: 20px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
   :lang(he) small { letter-spacing: normal; } /* Hebrew isn't tracked out */
   body.home { flex-direction: column; justify-content: center; gap: 0; text-align: center; }
-  body.home .row { display: flex; gap: 26px; margin-bottom: 40px; }
-  body.home .plate { width: 170px; height: 170px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); }
-  body.home .art { width: 130px; height: 130px; }
+  body.home .row { display: flex; gap: 22px; margin-bottom: 40px; }
+  body.home .plate { width: 142px; height: 142px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); }
+  body.home .art { width: 108px; height: 108px; }
   body.home h1 { font-size: 148px; --brand: var(--pink); }
   body.home h1 span { color: var(--pink-text); }
   body.home small { border-top: 0; margin-top: 18px; }
@@ -108,6 +108,17 @@
           <path d="M34 6H62V90H34V62H6V34H34Z" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4 3"/>
         </svg>
 </template>
+<template id="alienchess">
+  <svg class="art" viewBox="0 0 96 96">
+          <g filter="url(#speck)">
+            <rect class="card" x="6" y="6" width="84" height="84" rx="6"/>
+            <path d="M34 6h28v28H34zM6 34h28v28H6zM62 34h28v28H62zM34 62h28v28H34z" fill="var(--red)" opacity=".2"/>
+            <g transform="translate(64 34) scale(.6)" fill="var(--red)" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"><path d="M8 45h24l-2-5H10zM14 40l2-11h8l2 11zM12 29h16v-3.5H12zM9 26c-2-6 0-10 3-13 2-7 14-7 16 0 3 3 5 7 3 13z"/><circle cx="20" cy="15" r="4.6" fill="var(--stock)"/><circle cx="20.8" cy="15.6" r="2.1" fill="var(--navy)" stroke="none"/><path d="M1 12L0 3l4.5 3.5L8 0l3.5 6.5L16 3l-1 9z" fill="var(--sun)"/></g>
+            <g transform="translate(8 62) scale(.6)" fill="var(--stock)" stroke="var(--ink)" stroke-width="2.4" stroke-linejoin="round"><path d="M20 10V5" fill="none"/><circle cx="20" cy="4" r="2.2"/><path d="M8 45h24l-2-5H10zM14 40l2-11h8l2 11zM12 29h16v-3.5H12zM12 26V10h16v16z"/><path d="M14.5 14h11v5h-11z" fill="var(--ink)" stroke="none"/></g>
+          </g>
+          <path d="M24 64Q30 40 62 48" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/><path d="M56 43l7 5-8 3" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+</template>
 <svg width="0" height="0" style="position: absolute"><filter id="speck" x="0" y="0" width="100%" height="100%">
   <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
   <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
@@ -121,6 +132,7 @@
     orderly: ['Order', 'ly', 'sun', '#f7eac6', 'Ten cards, one subject. Drag them into order.'],
     biggr: ['Bigg', 'r', 'orange', '#f8e2d5', 'Two sums, no answers. Pick the bigger one, fast.'],
     quadflip: ['Quad', 'flip', 'teal', '#d8ebe6', 'Stamp every piece once to flip the board back to blank.'],
+    alienchess: ['Alien ', 'Chess', 'red', '#f6dcd6', 'Pieces from another planet, new every level. Read their cards, then take the king.'],
   };
   // Hebrew (?lang=he): the names, lines and footers of the Hebrew pages (i18n/he.js)
   const HE = { // [wordmark, line]: the accented letters are in <span>, as on the pages
@@ -130,6 +142,7 @@
     orderly: ['ב<span>סדר</span>', 'עשרה קלפים, נושא אחד. גררו אותם לסדר הנכון.'],
     biggr: ['<span>כ</span>מה <span>כ</span>מה', 'שני תרגילים, בלי תשובות. בחרו את הגדול יותר, מהר.'],
     quadflip: ['מ<span>הפכים</span>', 'החתימו כל צורה פעם אחת והפכו את הלוח בחזרה ללבן.'],
+    alienchess: ['שח<span>מאדים</span>', 'כלים מכוכב אחר, חדשים בכל שלב. קראו את הקלפים שלהם, ואז אכלו את המלך.'],
   };
   const he = new URLSearchParams(location.search).get('lang') === 'he';
   if (he) {
@@ -148,8 +161,8 @@
   } else {
     document.body.className = 'home';
     document.body.insertAdjacentHTML('beforeend', `<div class="row">${Object.keys(GAMES).map((k) => plate(k, GAMES[k][3])).join('')}</div>` +
-      (he ? '<h1>מדף המשחקים<br><span>של מיקי</span></h1><small>משחקי היגיון יומיים · שישה משחקים, חדשים בכל בוקר</small>'
-        : '<h1>Games by <span>Miki</span></h1><small>Daily logic games · Six games, new every morning</small>'));
+      (he ? '<h1>מדף המשחקים<br><span>של מיקי</span></h1><small>משחקי היגיון יומיים · שבעה משחקים, חדשים בכל בוקר</small>'
+        : '<h1>Games by <span>Miki</span></h1><small>Daily logic games · Seven games, new every morning</small>'));
   }
 </script>
 </body>
