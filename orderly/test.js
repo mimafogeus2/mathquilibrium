@@ -50,7 +50,12 @@ SPECIAL.forEach((l, i) => {
 const codes = LEVELS.map((_, i) => code(i + 1));
 assert(codes.every((c, i) => /^[0-9a-z]{3}$/.test(c) && fromCode(c) === i + 1) && new Set(codes).size === LEVELS.length && !codes.includes('daily'), 'bad share codes');
 
-const days = new Set();
-for (let d = 0; d < LEVELS.length; d++) days.add(dailyIndex(new Date(DAY0 + d * 864e5 + 12 * 36e5).toISOString().slice(0, 10)));
-assert.strictEqual(days.size, LEVELS.length, 'dailies repeat before the pool runs out');
+// the daily follows the weekly curve, and each difficulty's days cover its whole pool before repeating
+const seen = { 1: new Set(), 2: new Set(), 3: new Set() }, count = { 1: 0, 2: 0, 3: 0 };
+for (let day = 0; day < LEVELS.length * 7; day++) {
+  const date = new Date(DAY0 + day * 864e5 + 12 * 36e5), want = [3, 1, 1, 2, 2, 2, 3][date.getUTCDay()], i = dailyIndex(date.toISOString().slice(0, 10));
+  assert.strictEqual(parse(LEVELS[i]).d, want, 'wrong daily difficulty on ' + date);
+  if (count[want]++ < pool(want).length) seen[want].add(i);
+}
+for (const d of [1, 2, 3]) assert.strictEqual(seen[d].size, pool(d).length, `${DIFF[d]} dailies repeat before the pool runs out`);
 console.log('ok', LEVELS.length, 'levels,', SPECIAL.length, 'special days; today is', parse(LEVELS[dailyIndex(new Date().toISOString().slice(0, 10))]).subject);
