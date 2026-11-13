@@ -221,6 +221,7 @@ printable(() => R && {
     T('Write <b>&lt;</b> or <b>&gt;</b> in the gap so the line is true: the open side faces the <b>bigger</b> sum.'),
   ],
   body: `<ol class="p-pairs">${R.pairs.map(([lt, , rt]) => `<li><span>${esc(lt)}</span><i></i><span>${esc(rt)}</span></li>`).join('')}</ol>`,
+  answer: `<ol class="p-pairs">${R.pairs.map(([lt, lv, rt, rv]) => `<li><span>${esc(lt)} <small>(${lv})</small></span><i>${lv > rv ? '&gt;' : '&lt;'}</i><span><small>(${rv})</small> ${esc(rt)}</span></li>`).join('')}</ol>`,
 });
 syncSound();
 router((h) => openLevel(h, start), goHome);

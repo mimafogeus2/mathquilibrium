@@ -428,8 +428,9 @@ function openLevels(pack = store.lastPack || 'E', page) {
 }
 
 // ---------- print ----------
-// Paper version of the puzzle on screen, unsolved. build() returns { top?: html (above the rules), rules: [html], body: html }.
-// It fills #print right before printing (the #btn-print button or Ctrl+P); in print, core.css shows only #print, on one A4 page.
+// Paper version of the puzzle on screen, unsolved. build() returns { top?: html (above the rules), rules: [html], body: html, answer?: html }.
+// answer is the solved puzzle, printed on a page of its own after the puzzle.
+// It fills #print right before printing (the #btn-print button or Ctrl+P); in print, core.css shows only #print, on one A4 page plus the answer page.
 // From the menu nothing is filled, so the page prints as it looks.
 function printable(build) {
   const out = document.createElement('section');
@@ -437,8 +438,9 @@ function printable(build) {
   document.body.append(out);
   addEventListener('beforeprint', () => {
     const s = !$('#game').hidden && build();
-    out.innerHTML = s ? `<header class="p-head"><h1>${esc(game.name)}</h1><p>${esc([$('#g-title').textContent, $('#g-sub').textContent].filter(Boolean).join(' · '))}</p></header>${s.top || ''}` +
-      `<ol class="rules">${s.rules.map((r) => `<li>${r}</li>`).join('')}</ol>${s.body}` : '';
+    const head = (name) => `<header class="p-head"><h1>${esc(name)}</h1><p>${esc([$('#g-title').textContent, $('#g-sub').textContent].filter(Boolean).join(' · '))}</p></header>`;
+    out.innerHTML = s ? `${head(game.name)}${s.top || ''}<ol class="rules">${s.rules.map((r) => `<li>${r}</li>`).join('')}</ol>${s.body}` +
+      (s.answer ? `<div class="p-answer">${head(T('{game}: the answer', { game: game.name }))}${s.top || ''}${s.answer}</div>` : '') : '';
     document.body.classList.toggle('printing', !!s);
   });
   $('#btn-print').onclick = () => print();

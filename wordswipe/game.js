@@ -250,9 +250,14 @@ printable(() => R && {
     T('Each of these <b>24 words</b> either fits the subject above or it doesn\'t.'),
     T('Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn\'t. One box per word.'),
   ],
-  body: `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>
-    `<li><span class="p-box"></span><span class="p-box"></span>${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`,
+  body: words(false),
+  answer: words(true),
 });
+function words(solved) {
+  const box = (mark) => `<span class="p-box">${solved ? mark : ''}</span>`;
+  return `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>
+    `<li>${box(c.yes ? '✓' : '')}${box(c.yes ? '' : '✗')}${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`;
+}
 syncSound();
 // The rest is the game's own page (index.html), with its menu: editor.html and play.html have no #home.
 if ($('#home')) {

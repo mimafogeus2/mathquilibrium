@@ -377,7 +377,7 @@ span[dir="ltr"] { white-space: nowrap; }
 
 /* ---------- print ---------- */
 /* #print is the paper version of the puzzle on screen, filled by printable() in core.js just before printing.
-   One A4 sheet, black ink on white: no grain, no shadows, no motion. Game sheets style their own body in style.css. */
+   One A4 sheet (plus one for the answer), black ink on white: no grain, no shadows, no motion. Game sheets style their own body in style.css. */
 #print { display: none; }
 /* phones rarely print and the bar has no room for a third icon there; the browser's own Print still works */
 @media (max-width: 459px) { #btn-print { display: none; } }
@@ -400,5 +400,7 @@ span[dir="ltr"] { white-space: nowrap; }
 #print .rules { width: 100%; margin: 0; font-size: 10.5pt; }
 #print .rules li { margin-bottom: 1mm; }
 #print .rules li::marker { color: #000; }
+/* the answer: its own page after the puzzle */
+.p-answer { width: 100%; break-before: page; display: flex; flex-direction: column; align-items: center; gap: 6mm; }
 /* a box to write in */
 .p-box { flex: none; display: inline-block; width: 6mm; height: 6mm; border: 1pt solid #000; border-radius: 1mm; vertical-align: middle; }

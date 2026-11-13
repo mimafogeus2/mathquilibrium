@@ -381,7 +381,8 @@ function onKey(e) {
 // The grid with its blanks empty, the operators in play listed above it.
 printable(() => {
   const { p } = G, all = [...p.ops, ...p.rels];
-  const cell = (c) => `<div class="${c.op ? (c.given ? 'p-given' : 'p-blank') : 'p-num'}${String(c.val).length > 2 ? ' long' : ''}" style="grid-area: ${c.r + 1} / ${c.c + 1}">${c.op && !c.given ? '' : esc(sym(c.val))}</div>`;
+  const cell = (c, solved) => `<div class="${c.op ? (c.given ? 'p-given' : 'p-blank') : 'p-num'}${String(c.val).length > 2 ? ' long' : ''}" style="grid-area: ${c.r + 1} / ${c.c + 1}">${c.op && !c.given && !solved ? '' : esc(sym(c.val))}</div>`;
+  const grid = (solved) => `<div class="p-grid" style="--cols: ${p.cols}; --rows: ${p.rows}">${p.cells.map((c) => cell(c, solved)).join('')}</div>`;
   return {
     rules: [
       T('Write an operator in every empty box so <b>each row and column is a true equation</b>. Equations read <b>left to right</b> or <b>top to bottom</b> only.'),
@@ -390,7 +391,8 @@ printable(() => {
       ...['^', '.', '%', '<'].filter((o) => all.includes(o)).map((o) => `${[...syms(o)].map((x) => `<b dir="ltr">${esc(x)}</b>`).join(' ')} ${OP_TIPS[o][1]}`),
     ],
     body: `<p class="p-ops">${T('Use:')} ${all.map((o) => `<b>${esc(sym(o))}</b>`).join('')}</p>` +
-      `<div class="p-grid" style="--cols: ${p.cols}; --rows: ${p.rows}">${p.cells.map(cell).join('')}</div>`,
+      grid(false),
+    answer: grid(true),
   };
 });
 

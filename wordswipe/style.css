@@ -118,6 +118,7 @@
 .p-words li { display: flex; align-items: center; gap: 2.5mm; min-height: 15mm; border-bottom: .5pt solid #888; font-size: 13pt; line-height: 1.15; font-weight: 600; hyphens: auto; }
 .p-words .p-key { min-height: 7mm; border: 0; font-size: 11pt; }
 .p-key b { width: 6mm; text-align: center; }
+.p-words .p-box { text-align: center; line-height: 6mm; font-size: 12pt; }
 
 /* ---------- made-up rounds: play.html and editor.html ---------- */
 a.btn { text-decoration: none; color: inherit; }

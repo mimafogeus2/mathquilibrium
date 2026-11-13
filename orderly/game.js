@@ -376,6 +376,7 @@ printable(() => P && {
     T('Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.'),
   ],
   body: `<ul class="p-strips">${deal(hash(P.key)).map((i) => `<li><i></i>${esc(P.lv.items[i].name)}</li>`).join('')}</ul>`,
+  answer: `<ol class="p-order">${P.lv.items.map((it) => `<li><b>${esc(it.name)}</b> <span>${esc(it.val)}</span></li>`).join('')}</ol>`,
 });
 syncSound();
 nudge(() => P && !P.done && !$('#game').hidden);
