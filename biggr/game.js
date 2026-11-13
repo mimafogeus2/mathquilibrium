@@ -21,7 +21,7 @@ function screen(id) {
 
 function home() {
   const t = today(), recs = store.daily[t] || {}, st = streak();
-  $('#daily-meta').textContent = todayLine(st);
+  $('#daily-meta').innerHTML = todayLine(st);
   $('#daily-btns').replaceChildren(...Object.keys(TIERS).map((k, i) => {
     const b = document.createElement('button'), r = recs[k];
     b.className = `daily-btn tier-${k}${r ? ' done' : ''}`;
@@ -139,6 +139,7 @@ function answer(side) {
 
 // ---------- end ----------
 function finish() {
+  const st = streak();
   R.over = true;
   cancelAnimationFrame(raf);
   delete store.saves[R.key];
@@ -151,6 +152,7 @@ function finish() {
     pp.unlocked = Math.max(pp.unlocked, Math.min(R.n + 1, PACK_SIZE));
   }
   persist();
+  bump(st);
   $('#game').classList.add('done');
   if (full) { sfx.win(); confetti(); }
   track(full ? 'finish' : 'timeout', mode(R.date, TIERS[R.pack]));
@@ -160,8 +162,8 @@ function finish() {
 
 function showEnd(rec, { pack, n, date }) {
   const right = [...rec.m].filter((c) => c === '1').length, full = rec.m.length === PAIRS;
-  $('#end-stars').innerHTML = date || !full ? '' : [0, 1, 2].map((i) => `<span class="${i < stars(PAIRS - right) ? 'on' : ''}" style="--i:${i}">★</span>`).join('');
-  $('#end-stars').setAttribute('aria-label', T('{n} of 3 stars', { n: stars(PAIRS - right) }));
+  if (date || !full) { $('#end-stars').innerHTML = ''; $('#end-stars').removeAttribute('aria-label'); }
+  else starRow($('#end-stars'), stars(PAIRS - right));
   $('#end-title').textContent = T(!full ? "Time's up!" : right === PAIRS ? 'Flawless!' : right >= 8 ? 'Sharp!' : 'Done!');
   $('#end-score').innerHTML = `${rec.s}<small>${T('points')}</small>`;
   $('#end-stats').innerHTML = T('<b>{n}/{total}</b> right', { n: right, total: PAIRS }) + ' · ' +
@@ -181,7 +183,7 @@ async function share(rec, pack, date) {
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
   try {
     if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = T('Copied ✓'); }
+    else { await navigator.clipboard.writeText(text); copied($('#end-next b')); }
   } catch {}
 }
 
@@ -201,7 +203,7 @@ $('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The r
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); R = null; screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
-for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
+for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
   if (!R || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;

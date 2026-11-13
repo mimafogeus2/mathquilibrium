@@ -67,7 +67,7 @@ function drawBoard(el, p, { mini = false } = {}) {
   const cursor = svg('path', { class: 'cursor' });
   el.append(cursor);
   if (mini) for (const q of p.queens) setPiece(pieces[q], 'q');
-  return { g, els, pieces, hubText: hub.lastChild, cursor };
+  return { g, els, pieces, hubText: hub.lastChild, cursor, piecesG };
 }
 
 function setPiece(pc, kind) {
@@ -112,7 +112,7 @@ function refresh(sound, placed = null) {
   }
   if (sound) {
     if (fresh.length) { sfx.bad(); fresh.forEach((q) => flash(view.pieces[q].firstChild.firstChild, 'shake')); }
-    else if (placed !== null) sfx.good(G.queens.size - 1);
+    else if (placed !== null) { sfx.good(G.queens.size - 1); if (!conflicts.has(placed)) shimmer(Math.floor(placed / N)); }
   }
   const left = N - G.queens.size;
   view.hubText.textContent = left || ''; // at zero the hub clears for the seal
@@ -123,6 +123,13 @@ function refresh(sound, placed = null) {
   if (G.kbd && !G.done) $('#sr').textContent = describe(G.sel, left, conflicts);
   if (!G.done && G.queens.size === N && !conflicts.size) win();
   $('#btn-undo').disabled = !G.history.length || G.done;
+}
+
+// A ring that just got its queen: one slow glint runs round it, under the pieces. Removes itself when done.
+function shimmer(r) {
+  const { g, piecesG } = G.view, c = svg('circle', { class: 'shimmer', r: g.rad(r + 0.5), 'stroke-width': g.w, pathLength: 100 });
+  c.addEventListener('animationend', () => c.remove());
+  piecesG.before(c);
 }
 
 // Region names follow the inks in style.css (--r0 … --r6), so a sighted helper and a screen reader agree.

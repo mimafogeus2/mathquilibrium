@@ -6,7 +6,8 @@
   const ICONS = {
     auto: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>',
     light: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',
-    dark: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
+    // the stars sit in the moon's bite; core.css scales them in when the moon rises
+    dark: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/><path class="star" style="--i:0" d="M17 3v3M15.5 4.5h3"/><path class="star" style="--i:1" d="M20.6 9.2h.01"/><path class="star" style="--i:2" d="M14.6 8.4h.01"/></svg>',
   };
   const pref = () => { try { return localStorage.getItem('theme') || 'auto'; } catch { return 'auto'; } };
   function apply() {
@@ -26,7 +27,20 @@
     for (const b of document.querySelectorAll('.js-theme')) b.addEventListener('click', () => {
       const next = { auto: 'light', light: 'dark', dark: 'auto' }[pref()];
       try { next === 'auto' ? localStorage.removeItem('theme') : localStorage.setItem('theme', next); } catch {}
-      apply();
+      // the old icon sets like a sun as the new one rises, and the new stock wipes out from the button like a fresh sheet laid over
+      const old = b.querySelector('svg:not(.set)'), swap = () => {
+        apply();
+        b.firstElementChild.classList.add('rise');
+        if (old) { old.classList.remove('rise'); old.classList.add('set'); b.prepend(old); old.addEventListener('animationend', () => old.remove(), { once: true }); setTimeout(() => old.remove(), 600); }
+      };
+      if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return swap();
+      const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const far = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      root.classList.add('paper-swap');
+      const vt = document.startViewTransition(swap);
+      vt.ready.then(() => root.animate({ clipPath: [`circle(0 at ${x}px ${y}px)`, `circle(${far}px at ${x}px ${y}px)`] },
+        { duration: 450, easing: 'cubic-bezier(.2, .8, .2, 1)', pseudoElement: '::view-transition-new(root)' })).catch(() => {});
+      vt.finished.finally(() => root.classList.remove('paper-swap'));
     });
     apply();
 

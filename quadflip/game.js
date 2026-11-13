@@ -132,7 +132,7 @@ function stamp(pos) {
   G.placed[k] = pos;
   G.order.push(k);
   sfx.place();
-  SHAPES[G.p.pieces[k]].forEach(([r, c]) => flash(G.view.tiles[pos + r * G.p.N + c], 'pop'));
+  ripple(k, pos);
   const nf = nextFree(k + 1);
   if (nf >= 0) G.sel = nf;
   else if (current()) { sfx.bad(); flash($('#board'), 'shake'); $('#tip').innerHTML = T('Not clear yet. <b>Tap a used piece</b> to lift it, or undo.'); $('#tip').dataset.warn = 1; }
@@ -141,8 +141,21 @@ function stamp(pos) {
   saveGame();
 }
 
+// Piece k's tiles at pos pop and flip in a ripple, each delayed by its distance from the piece's first cell (where it landed first).
+// Other tiles lose any delay left from an earlier ripple. Call before refresh(), which starts the flips.
+function ripple(k, pos) {
+  const cells = SHAPES[G.p.pieces[k]], [r0, c0] = cells[0];
+  for (const t of G.view.tiles) t.style.removeProperty('--fd');
+  for (const [r, c] of cells) {
+    const t = G.view.tiles[pos + r * G.p.N + c];
+    t.style.setProperty('--fd', Math.round(Math.hypot(r - r0, c - c0) * 55) + 'ms');
+    flash(t, 'pop');
+  }
+}
+
 function lift(k) {
   if (G.placed[k] < 0 || G.hinted.has(k)) return;
+  ripple(k, G.placed[k]);
   G.placed[k] = -1;
   G.order = G.order.filter((j) => j !== k);
   G.sel = k;
@@ -178,8 +191,8 @@ function hint() {
   if (G.sel === k || G.placed[G.sel] >= 0) G.sel = Math.max(0, nextFree());
   sfx.hint();
   track('hint');
+  ripple(k, sol[i]);
   refresh();
-  SHAPES[pieces[k]].forEach(([r, c]) => flash(G.view.tiles[sol[i] + r * G.p.N + c], 'pop'));
   saveGame();
 }
 

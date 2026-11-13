@@ -35,7 +35,7 @@ function screen(id) {
 
 function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
-  $('#daily-meta').textContent = todayLine(st);
+  $('#daily-meta').innerHTML = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
   $('#btn-daily small').textContent = rec ? `✓ ${T('{n} points', { n: rec.s })} · ${T('see result')}` : store.cur?.key === 'D' + t ? T('Resume') : sp ? sp.occasion : T('24 words · 60 seconds');
   $('#btn-unlimited small').textContent = T('Round {n}', { n: store.n + 1 }) + (store.best ? ' · ' + T('best {n}', { n: store.best }) : '') +
@@ -105,6 +105,7 @@ function refill() {
   }
   st.querySelectorAll('.card:not(.gone)').forEach((c, i, all) => c.style.setProperty('--depth', all.length - 1 - i));
   const top = topCard();
+  if (top && R.marks.length) top.classList.add('up'); // not the first card: it was dealt, not uncovered
   if (top) { top.setAttribute('role', 'img'); top.setAttribute('aria-label', T('{word}: does it fit {subject}?', { word: top.textContent, subject: R.subject })); }
 }
 const topCard = () => [...$('#stack').querySelectorAll('.card:not(.gone)')].pop();
@@ -165,6 +166,7 @@ function drag(e) {
 
 // ---------- end ----------
 function finish() {
+  const st = streak(), sp = R.date && special(SPECIAL, R.date);
   R.over = true;
   cancelAnimationFrame(raf);
   delete store.cur;
@@ -173,8 +175,9 @@ function finish() {
   if (R.date) (store.daily[R.date] ??= {}).r = rec;
   else { store.n = Math.max(store.n, R.n + 1); store.best = Math.max(store.best, rec.s); }
   persist();
+  bump(st);
   $('#game').classList.add('done');
-  if (rec.t) { sfx.win(); confetti(); }
+  if (rec.t) { sfx.win(); confetti(sp ? sp.occasion.split(' ', 1) : undefined); } // a special day throws its own emoji
   track(R.marks.length === 24 ? 'finish' : 'timeout', mode(R.date));
   setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
 }
@@ -203,7 +206,7 @@ async function shareDaily(rec) {
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
   try {
     if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $('#end-next b').textContent = T('Copied ✓'); }
+    else { await navigator.clipboard.writeText(text); copied($('#end-next b')); }
   } catch {}
 }
 
@@ -226,7 +229,7 @@ $('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The r
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
-for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
+for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
   if (!R || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;

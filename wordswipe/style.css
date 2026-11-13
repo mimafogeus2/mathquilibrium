@@ -25,9 +25,18 @@
 }
 @keyframes drop { from { opacity: 1; transform: translateY(-6px); } to { opacity: 0; transform: translateY(14px); } }
 
-.fuse { width: 100%; height: 6px; background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 4px 4px; overflow: hidden; }
-.fuse i { display: block; height: 100%; background: var(--speck), var(--brand); transition: background-color .3s; }
+.fuse { width: 100%; height: 6px; background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 4px 4px; }
+.fuse i { position: relative; display: block; height: 100%; background: var(--speck), var(--brand); transition: background-color .3s; }
 .hurry .fuse i { background: var(--red); }
+/* time running low: the burning end of the fuse spits sparks */
+.hurry .fuse i::after {
+  content: ''; position: absolute; inset-inline-end: -4px; top: -3px; width: 12px; height: 12px; border-radius: 50%;
+  background: radial-gradient(circle, var(--sun) 0 2px, transparent 2.5px),
+    conic-gradient(from 20deg, var(--sun) 0 8%, transparent 0 25%, var(--orange) 0 31%, transparent 0 50%, var(--sun) 0 56%, transparent 0 75%, var(--orange) 0 81%, transparent 0);
+  mask: radial-gradient(circle, #000 55%, transparent 72%);
+  animation: spark .28s steps(3) infinite;
+}
+@keyframes spark { 0% { transform: scale(.7) rotate(0); } 50% { transform: scale(1.25) rotate(50deg); } 100% { transform: scale(.85) rotate(110deg); } }
 .hurry #clock { color: var(--red-text); }
 
 .subject { margin: 8px 0 0; text-align: center; display: flex; flex-direction: column; gap: 2px; }
@@ -52,6 +61,9 @@
   cursor: grab;
 }
 .card.held { transition: none; cursor: grabbing; }
+/* the next card nudges up off the deck as the one on top flies (translate, so it adds to the depth transform) */
+.card.up { animation: nudge .26s var(--ease); }
+@keyframes nudge { 45% { translate: 0 -7px; } }
 .card::before, .card::after {
   position: absolute; top: 22px; padding: 5px 12px; border: 2px solid; border-radius: 8px;
   font: 700 15px Inter, Heebo, sans-serif; letter-spacing: .16em; mix-blend-mode: var(--blend);

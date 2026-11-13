@@ -20,10 +20,17 @@
 #clock { font-family: var(--display); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: end; display: inline-block; }
 .bar-end { position: relative; }
 .minus {
+  --away: -1; /* towards the board's middle: left here, right on a right-to-left page */
   position: absolute; inset-inline-end: 52px; top: 100%; font-weight: 700; color: var(--red-text);
-  animation: drop .9s ease-out both; pointer-events: none;
+  animation: drop .9s both; pointer-events: none;
 }
-@keyframes drop { from { opacity: 1; transform: translateY(-6px); } to { opacity: 0; transform: translateY(14px); } }
+.minus:dir(rtl) { --away: 1; }
+/* the −3s is knocked off the clock: it pops out big, then tumbles away and fades */
+@keyframes drop {
+  from { opacity: 0; transform: translate(0, -22px) scale(.6); animation-timing-function: cubic-bezier(.3, 1.6, .5, 1); }
+  18% { opacity: 1; transform: translate(calc(var(--away) * 10px), -16px) scale(1.25) rotate(calc(var(--away) * 8deg)); animation-timing-function: ease-in; }
+  to { opacity: 0; transform: translate(calc(var(--away) * 46px), 22px) scale(.9) rotate(calc(var(--away) * 28deg)); }
+}
 
 .fuse { width: 100%; height: 6px; background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 4px 4px; overflow: hidden; }
 .fuse i { display: block; height: 100%; background: var(--speck), var(--brand); transition: background-color .3s; }

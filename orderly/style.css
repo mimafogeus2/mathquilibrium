@@ -76,6 +76,9 @@
 .card.ok .grip { stroke: currentColor; opacity: .6; }
 .card.ok .val { display: block; }
 .card.pop .val { animation: enter .3s var(--ease); }
+/* joined on Check: the card snaps into its group with a little squash (scale, so it stacks on the --pos transform) */
+.card.pop { animation: squash .28s var(--ease); }
+@keyframes squash { 35% { scale: 1.03 .9; } 70% { scale: .99 1.03; } }
 
 .play, .result { width: min(420px, 100%); display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 8px; }
 .status { margin: 0; color: var(--muted); font-size: 14.5px; text-align: center; min-height: 1.3em; }
