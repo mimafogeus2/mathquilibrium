@@ -174,6 +174,7 @@ function finish() {
   persist();
   $('#game').classList.add('done');
   if (rec.t) { sfx.win(); confetti(); }
+  track('finish', R.date);
   setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
 }
 
@@ -194,6 +195,7 @@ function showEnd(rec, daily) {
 }
 
 async function shareDaily(rec) {
+  track('share', true);
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
   const sp = special(SPECIAL, date), text = `${T('{game} daily', { game: game.name })} · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) +

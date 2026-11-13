@@ -90,7 +90,14 @@ function flash(el, cls) {
 // ---------- URLs ----------
 // Each puzzle has its own hash (#daily-easy, #easy-12, ...); the menu has none. Menu -> puzzle pushes a history entry,
 // puzzle -> puzzle replaces it, so Back returns to the menu and Forward to the last puzzle played from it.
+// Anonymous GoatCounter event, e.g. "orderly/finish/daily": no cookies, nothing personal, same data as a page view.
+// A no-op when count.js is blocked or not loaded (localhost, file://).
+function track(what, daily) {
+  const g = location.pathname.replace(/index\.html$/, '').split('/').filter(Boolean).pop();
+  window.goatcounter?.count?.({ path: `${g}/${what}/${daily ? 'daily' : 'level'}`, event: true });
+}
 function toGame(h) {
+  track('start', h.startsWith('daily'));
   if (location.hash) history.replaceState(history.state, '', '#' + h);
   else history.pushState('game', '', '#' + h);
 }
@@ -232,6 +239,7 @@ function win() {
   $('#game').classList.add('done');
   sfx.win();
   confetti();
+  track('finish', G.date);
 
   const g = G;
   setTimeout(() => {
@@ -262,6 +270,7 @@ function giveUp() {
 }
 
 async function share() {
+  track('share', true);
   const r = store.daily[G.date][G.pack];
   const text = `${T('{game} daily', { game: game.name })} · ${G.date} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ ' + T('no hints')}` +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(G.pack) : '');

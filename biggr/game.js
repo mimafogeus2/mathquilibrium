@@ -152,6 +152,7 @@ function finish() {
   persist();
   $('#game').classList.add('done');
   if (full) { sfx.win(); confetti(); }
+  track('finish', R.date);
   const r = R;
   setTimeout(() => showEnd(rec, r), full ? 700 : 300);
 }
@@ -174,6 +175,7 @@ function showEnd(rec, { pack, n, date }) {
 }
 
 async function share(rec, pack, date) {
+  track('share', true);
   const text = `${T('{game} daily', { game: game.name })} · ${date} · ${tierName(pack)}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
   try {

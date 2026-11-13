@@ -206,6 +206,7 @@ function win() {
   layout();
   sfx.win();
   confetti();
+  track('finish', P.date);
   showResult(true);
 }
 
@@ -241,6 +242,7 @@ function showResult(fresh) {
 }
 
 async function share() {
+  track('share', true);
   const r = store.daily[P.date].r;
   const sp = special(SPECIAL, P.date), text = `${T('{game} daily', { game: game.name })} · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
     `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
@@ -252,6 +254,7 @@ async function share() {
 
 // The link to the puzzle on screen: a random one's own code, or the daily (which is a different puzzle tomorrow).
 async function shareLink() {
+  track('share-link', P.date);
   const url = location.href;
   try {
     if (navigator.share) await navigator.share({ title: game.name, url });
