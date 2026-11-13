@@ -125,15 +125,6 @@ async function link(test) {
   const o = { s: D.s.trim(), t: D.t.trim(), b: D.b.trim(), c: D.c.map((c) => c.map((x) => x.trim())) };
   return new URL('play.html#' + (test ? 't=' : 'l=') + await packLink(o), location.href).href;
 }
-function toast(msg) {
-  const el = $('#toast');
-  el.classList.remove('show'); // flash() restarts it
-  el.textContent = msg;
-  flash(el, 'show');
-}
-async function copy(url) {
-  try { await navigator.clipboard.writeText(url); toast(T('Copied!')); } catch { prompt(T('Copy this link:'), url); }
-}
 $('#e-form').onsubmit = async (e) => {
   e.preventDefault();
   const url = await link(true);
@@ -143,12 +134,12 @@ $('#e-share').onclick = async () => {
   const url = await link();
   if (!url) return;
   track('make', 'share');
-  if (!navigator.share) return copy(url);
-  try { await navigator.share({ title: `${T('Orderly')}: ${D.s.trim()}`, url }); } catch (e) { if (e.name !== 'AbortError') copy(url); }
+  if (!navigator.share) return copyLink(url, $('#e-share'));
+  try { await navigator.share({ title: `${T('Orderly')}: ${D.s.trim()}`, url }); } catch (e) { if (e.name !== 'AbortError') copyLink(url, $('#e-share')); }
 };
 $('#e-copy').onclick = async () => {
   const url = await link();
-  if (url) { track('make', 'copy'); copy(url); }
+  if (url) { track('make', 'copy'); copyLink(url, $('#e-copy')); }
 };
 $('#e-clear').onclick = () => {
   if (!confirm(T('Clear every field and start over?'))) return;

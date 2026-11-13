@@ -99,35 +99,13 @@ async function makeLink() {
   const d = JSON.stringify(draft), url = new URL('play.html#r=' + (await packLink(draft)), location.href).href;
   if (d === JSON.stringify(draft)) shareUrl = url; // an older draft's link, finished late, doesn't win
 }
-let toastTimer;
-function toast(text) {
-  const t = $('#toast');
-  t.textContent = text;
-  t.classList.add('on');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('on'), 2000);
-}
-// navigator.clipboard needs https (not there on a plain-http page, a phone testing over the LAN): then the old
-// select-and-copy, and if even that's refused, the link in a box to copy by hand.
-function copy(url) {
-  const done = () => toast(T('Copied!')), old = () => {
-    const ta = Object.assign(document.createElement('textarea'), { value: url, readOnly: true });
-    document.body.append(ta);
-    ta.select();
-    const ok = document.execCommand('copy');
-    ta.remove();
-    if (ok) done(); else prompt(T('Copy this link:'), url);
-  };
-  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url).then(done, old);
-  else old();
-}
-$('#ed-copy').onclick = () => { if (!shareUrl) return; track('copy-link', 'custom'); copy(shareUrl); };
+$('#ed-copy').onclick = () => { if (!shareUrl) return; track('copy-link', 'custom'); copyLink(shareUrl, $('#ed-copy')); };
 $('#ed-share').onclick = () => {
   if (!shareUrl) return;
   track('share', 'custom');
-  if (!navigator.share) return copy(shareUrl);
+  if (!navigator.share) return copyLink(shareUrl, $('#ed-share'));
   navigator.share({ title: T('A WordSwipe round: {subject}', { subject: draft.s }), url: shareUrl })
-    .catch((e) => { if (e.name !== 'AbortError') copy(shareUrl); });
+    .catch((e) => { if (e.name !== 'AbortError') copyLink(shareUrl, $('#ed-share')); });
 };
 
 render();

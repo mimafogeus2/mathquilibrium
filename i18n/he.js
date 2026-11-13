@@ -76,6 +76,7 @@ module.exports = {
       "Give up and see the answer? This puzzle won't count as solved.": 'לוותר ולראות את הפתרון? החידה לא תיחשב כפתורה.',
       '{game} daily': '{game} · יומי',
       'Copied ✓': 'הועתק ✓',
+      'Copy this link:': 'העתיקו את הקישור:',
       'Level {n}': 'שלב {n}',
       'Level {n}, locked': 'שלב {n}, נעול',
       'Level {n}, {s} stars': 'שלב {n}, {s} כוכבים',
@@ -159,8 +160,6 @@ module.exports = {
       'Cards {a} and {b} have the same name.': 'לקלפים {a} ו־{b} יש אותו שם.',
       'Card {n} needs a value.': 'לקלף {n} חסר ערך.',
       '(+{n} more)': '(ועוד {n})',
-      'Copied!': 'הועתק!',
-      'Copy this link:': 'העתיקו את הקישור:',
       'Clear every field and start over?': 'לנקות את כל השדות ולהתחיל מחדש?',
     },
     'wordswipe/game.js': {
@@ -197,8 +196,6 @@ module.exports = {
       'Remove {word}': 'הסרת {word}',
       'Ready: test it or send it.': 'מוכן: נסו אותו או שלחו אותו.',
       'Start over? The subject and all the words are cleared.': 'להתחיל מחדש? הנושא וכל המילים יימחקו.',
-      'Copied!': 'הועתק!',
-      'Copy this link:': 'העתיקו את הקישור:',
       'A WordSwipe round: {subject}': 'סבב שמאל ימין שמאל: {subject}',
     },
     'biggr/game.js': {
