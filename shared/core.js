@@ -256,6 +256,25 @@ function starRow(el, n, fresh = true) {
 }
 // "Copied ✓" into a button label, its tick drawn in
 const copied = (el) => { el.innerHTML = esc(T('Copied ✓')).replace('✓', TICK); };
+// Copy a link from a button (the editors' Copy link), its label saying "Copied ✓" for a moment. Call it straight from the click:
+// Safari refuses a copy after an await. navigator.clipboard needs https; without it (plain http) the old select-and-copy,
+// and if even that's refused, the link in a box to copy by hand.
+function copyLink(url, btn) {
+  const b = btn.querySelector('b') || btn;
+  b.dataset.label ??= b.innerHTML;
+  b.setAttribute('aria-live', 'polite'); // so a screen reader hears "Copied" too
+  const done = () => { copied(b); clearTimeout(btn.copiedTimer); btn.copiedTimer = setTimeout(() => { b.innerHTML = b.dataset.label; }, 1800); };
+  const old = () => {
+    const ta = Object.assign(document.createElement('textarea'), { value: url, readOnly: true });
+    document.body.append(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    if (ok) done(); else prompt(T('Copy this link:'), url);
+  };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url).then(done, old);
+  else old();
+}
 
 function win() {
   const st = streak();

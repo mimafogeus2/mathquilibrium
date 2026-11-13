@@ -5,7 +5,8 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const LANGS = ['he'];
-const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip', 'alienchess'].map((g) => g + '/index.html'), 'orderly/play.html', 'orderly/editor.html'];
+const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip', 'alienchess'].map((g) => g + '/index.html'), 'orderly/play.html', 'orderly/editor.html',
+  'wordswipe/editor.html', 'wordswipe/play.html'];
 const SITE = 'https://mimafogeus2.github.io/mathquilibrium/';
 const ROOT = __dirname, read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const check = process.argv.includes('--check'), errors = [];
@@ -21,7 +22,7 @@ for (const lang of LANGS) {
   }
 
   for (const page of PAGES) {
-    const out = path.join(lang, page), dir = path.dirname(page);
+    const out = path.join(lang, page), dir = path.dirname(page)
     let html = read(page);
     const swap = (en, tr, where) => {
       if (!html.includes(en)) return where && errors.push(`${lang} ${page}: not found: ${en.slice(0, 120)}`);
@@ -41,10 +42,10 @@ for (const lang of LANGS) {
     // Share image: the translation's own, rendered from shared/og.html?lang=<lang>
     if (fs.existsSync(path.join(ROOT, lang, dir, 'og.png'))) swap(`content="${SITE}${dir === '.' ? '' : dir + '/'}og.png"`, `content="${SITE}${lang}/${dir === '.' ? '' : dir + '/'}og.png"`, true);
 
-    // Local files: a page link stays relative (it's the translated page); a file the translation has its own copy of
+    // Local files: a page link stays relative (it's the translated page, a folder or one of PAGES); a file the translation has its own copy of
     // (he/orderly/levels.js) stays too; anything else points back at the English file.
     html = html.replace(/(\b(?:src|href)=")([^"#:]*)"/g, (m, a, url) => {
-      if (url === '' || url.endsWith('/') || fs.existsSync(path.join(ROOT, lang, dir, url))) return m;
+      if (url === '' || url.endsWith('/') || PAGES.includes(path.join(dir, url)) || fs.existsSync(path.join(ROOT, lang, dir, url))) return m;
       return a + path.relative(path.join(lang, dir), path.join(dir, url)).split(path.sep).join('/') + '"';
     });
 

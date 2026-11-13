@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make a WordSwipe round</title>
+<meta name="description" content="Make your own WordSwipe round: a subject and 24 words, some that fit and some that don't. Test it, then send the link to a friend.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Games by Miki">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/wordswipe/editor.html">
+<meta property="og:title" content="Make a WordSwipe round">
+<meta property="og:description" content="Make your own WordSwipe round: a subject and 24 words, some that fit and some that don't. Test it, then send the link to a friend.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/wordswipe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<script data-goatcounter="https://goatcounter-production-28ca10cd.up.railway.app/count" async src="https://goatcounter-production-28ca10cd.up.railway.app/count.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ccircle cx='28' cy='36' r='16' fill='%2326366b'/%3E%3Ccircle cx='36' cy='28' r='16' fill='%2300838a' fill-opacity='.88'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- The round editor: a subject and two lists of words, saved as a draft; Test it plays it here, Share sends a play.html link. -->
+<main id="editor" class="screen">
+  <a class="icon corner-start" href="./" aria-label="WordSwipe menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-theme" aria-label="Theme"></button></div>
+  <h1 class="wordmark ed-title">Make a <span>round</span></h1>
+  <p class="tagline">A subject and 24 words. Test it, then send it to a friend.</p>
+  <label class="ed-field"><span class="kicker">Subject</span><input id="ed-subject" maxlength="48" autocomplete="off" placeholder="Things that are yellow"></label>
+  <div class="ed-lists">
+    <section class="ed-list yes" data-side="y">
+      <h2 class="kicker">Fits <b class="ed-n"></b></h2>
+      <div class="ed-words"></div>
+      <input class="ed-add" autocomplete="off" enterkeyhint="enter" aria-label="Add a word that fits" placeholder="Banana, Sun…">
+    </section>
+    <section class="ed-list no" data-side="n">
+      <h2 class="kicker">Doesn't fit <b class="ed-n"></b></h2>
+      <div class="ed-words"></div>
+      <input class="ed-add" autocomplete="off" enterkeyhint="enter" aria-label="Add a word that doesn't fit" placeholder="Grass, Snow…">
+    </section>
+  </div>
+  <p class="ed-hint">Type a word and press Enter, or paste a list split by commas or lines. Tap a word to move it to the other list.</p>
+  <div class="ed-meter" aria-hidden="true"><i id="ed-bar"></i></div>
+  <ul id="ed-problems" class="ed-problems" aria-live="polite"></ul>
+  <div class="ed-actions">
+    <button id="ed-test" class="btn primary center"><b>Test it</b></button>
+    <div class="row">
+      <button id="ed-share" class="btn ghost center"><b>Share</b></button>
+      <button id="ed-copy" class="btn ghost center"><b>Copy link</b></button>
+    </div>
+    <div class="links"><button id="ed-clear" class="foot-link">Start over</button></div>
+  </div>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="clock" aria-label="Seconds left">60</span>
+      <button id="btn-print" class="icon" aria-label="Print this puzzle"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg></button>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="fuse"><i id="fuse"></i></div>
+  <p class="subject"><small>Swipe right for</small><b id="subject"></b></p>
+  <div id="stack" class="stack" aria-live="polite"></div>
+  <div class="answer">
+    <button id="btn-no" class="vote no" aria-label="Doesn't fit (left arrow)"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <p class="tally"><b id="progress"></b><small id="score"></small><button id="btn-giveup" class="give-up">Give up</button></p>
+    <button id="btn-yes" class="vote yes" aria-label="Fits (right arrow)"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></button>
+  </div>
+  <button id="btn-result" class="btn primary center" hidden><b>See result</b></button>
+  <div class="links"><button id="btn-edit" class="foot-link">Back to editing</button></div>
+</main>
+
+<dialog id="dlg-end">
+  <h2 id="end-title"></h2>
+  <p id="end-score" class="big-score"></p>
+  <p id="end-stats" class="stats"></p>
+  <div id="end-misses" class="misses"></div>
+  <div class="win-actions">
+    <button id="end-next" class="btn primary center" autofocus><b></b></button>
+    <button id="end-home" class="btn ghost center"><b>Back to editing</b></button>
+  </div>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/link.js"></script>
+<script src="custom.js"></script>
+<script src="game.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>
