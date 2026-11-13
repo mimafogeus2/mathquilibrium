@@ -18,7 +18,7 @@
 
 /* preserve-3d on the cell so the board's perspective reaches the tile; without it the flip renders as a flat squash */
 .cell { position: relative; transform-style: preserve-3d; animation: enter .3s var(--d, 0ms) both var(--ease); }
-.t { --th: 5px; position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .5s var(--ease); }
+.t { --th: 5px; position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .5s var(--fd, 0ms) var(--ease); }
 .mini .t { --th: 2px; }
 .t.on { transform: rotateY(180deg); }
 .t::before, .t::after { content: ''; position: absolute; inset: 0; border-radius: 22%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
@@ -44,7 +44,7 @@
 .marks { position: absolute; inset: calc(var(--gap) / 2); width: calc(100% - var(--gap)); height: calc(100% - var(--gap)); pointer-events: none; z-index: 2; overflow: visible; }
 .marks path { fill: none; stroke: var(--c); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .marks .halo { stroke: var(--stock); stroke-width: 6px; }
-.t.pop { animation: tpop .24s var(--ease); }
+.t.pop { animation: tpop .24s var(--fd, 0ms) var(--ease) backwards; }
 @keyframes tpop { from { scale: .88; } }
 .board.shake { animation: shake .4s; }
 
@@ -73,7 +73,6 @@
 #game .board-wrap { flex: 0 0 auto; margin-top: auto; }
 #game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
 #game .tip { margin: 10px 0 0; }
-#game.paused .tray { visibility: hidden; }
 
 #logo { margin-bottom: 6px; transform: rotate(-4deg); }
 

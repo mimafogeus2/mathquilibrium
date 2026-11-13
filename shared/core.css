@@ -154,6 +154,51 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 @keyframes shake { 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); } }
 @keyframes wave { 40% { transform: translateY(-6px); } }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+/* a rubber stamp thumping down: big and crooked, a squash on impact, then it settles at --tilt */
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(1.5) rotate(calc(var(--tilt, -6deg) - 8deg)); }
+  60% { opacity: 1; transform: scale(.94) rotate(calc(var(--tilt, -6deg) + 1deg)); }
+  100% { opacity: 1; transform: rotate(var(--tilt, -6deg)); }
+}
+
+/* ---------- small delights ---------- */
+/* theme: the old icon sets below the horizon, the new one rises; the moon brings its stars */
+.js-theme { overflow: hidden; }
+.js-theme > svg { grid-area: 1 / 1; }
+.js-theme .set { animation: sun-set .3s ease-in forwards; }
+.js-theme .rise { animation: sun-rise .38s .08s var(--ease) backwards; }
+@keyframes sun-set { to { opacity: 0; transform: translateY(60%) scale(.8); } }
+@keyframes sun-rise { from { opacity: 0; transform: translateY(60%) scale(.8); } }
+.js-theme .star { transform-box: fill-box; transform-origin: center; }
+.js-theme .rise .star { animation: pop-in .26s calc(.34s + var(--i) * .09s) cubic-bezier(.3, 1.6, .5, 1) backwards; }
+@keyframes pop-in { from { opacity: 0; transform: scale(0); } }
+/* the new stock wipes over from the button (theme.js animates the clip): no cross-fade under it */
+.paper-swap::view-transition-old(root), .paper-swap::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* letterpress: anything pressed sinks a hair and its shadow goes */
+.icon, .btn.ghost, .chip, .lvl { transition-property: background-color, box-shadow, opacity, translate; transition-duration: .15s; }
+:is(.icon, .btn.ghost, .chip, .lvl, .foot-link):active:not(:disabled) { translate: 0 1.5px; }
+.lvl:active:not(:disabled) { box-shadow: inset 0 0 0 1px var(--hair); }
+
+/* sound: the waves ripple out when it comes on, and are drawn back in when it's muted */
+.js-sound .go .w { transform-box: fill-box; transform-origin: left center; }
+.js-sound .go.on .w { animation: wave-out .3s calc(var(--i) * .08s) var(--ease) backwards; }
+.js-sound .go.off .w { animation: wave-out .2s calc((1 - var(--i)) * .06s) ease-in reverse forwards; }
+.js-sound .go.off .x { animation: pop-in .2s .14s var(--ease) backwards; }
+@keyframes wave-out { from { opacity: 0; transform: translateX(-3px) scale(.4); } }
+
+/* "Copied ✓": the tick draws itself */
+svg.tick { width: 1.1em; height: 1.1em; vertical-align: -.2em; stroke-width: 2.6; }
+.tick path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .32s .05s var(--ease) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* a streak that just grew is stamped in; a milestone (7, 30, 100) runs a lap first */
+.tick-n { display: inline-block; font-weight: 700; color: var(--brand-text); animation: stamp .32s .4s both cubic-bezier(.3, 0, .2, 1); }
+.tick-n.lap { animation: stamp .32s .4s both cubic-bezier(.3, 0, .2, 1), lap .7s .75s var(--ease); }
+@keyframes lap { to { rotate: 1turn; } }
+
+/* idle for a while: the hint button hops, once */
+.psst { animation: wave .45s var(--ease); }
 
 .tip { color: var(--muted); text-align: center; min-height: 1.4em; margin: 4px 0 14px; max-width: 420px; font-size: 14.5px; line-height: 1.45; text-wrap: balance; }
 .tip b { color: var(--ink); font-weight: 600; }
@@ -205,7 +250,7 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 .lvl:disabled small { color: var(--muted); }
 
 .stars { font-size: 40px; letter-spacing: 8px; color: var(--line); line-height: 1; margin-bottom: 10px; }
-.stars span { display: inline-block; animation: enter .3s calc(.35s + var(--i) * .12s) both var(--ease); }
+.stars span { --tilt: 0deg; display: inline-block; animation: stamp .3s calc(.35s + var(--i) * .16s) both cubic-bezier(.3, 0, .2, 1); }
 /* sunflower stars keyed in navy, so they read on cream and on blue stock */
 .stars .on { color: var(--sun); -webkit-text-stroke: 1.5px var(--navy); paint-order: stroke fill; text-shadow: 2px 2px 0 color-mix(in srgb, var(--brand) 70%, transparent); }
 .stats { color: var(--muted); margin: -4px 0 22px; font-size: 16px; }
@@ -290,9 +335,23 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 
 /* paused: board and controls hidden (layout kept), cover shown */
 .board-wrap { position: relative; }
-#game.paused .board, #game.paused .palette, #game.paused .tools, #game.paused .tip { visibility: hidden; }
+#game.paused :is(.board, .palette, .tools, .tip, .tray) { visibility: hidden; }
+/* Pause turns the board over like a card: it tips away to edge-on, then its back (.pause-cover: a blank sheet the board's size and
+   shape, set by setPaused) comes round to face you. Resume turns it back the same way. Each half is .2s; visibility flips at the
+   edge-on moment, so the hidden face never takes clicks and the board can't be read while paused. */
+:is(.board-wrap, .board-wrap > .zoom) { perspective: 900px; }
+#game .board { transition: rotate .22s var(--ease) .2s, visibility 0s .2s; }
+#game.paused .board { rotate: x 90deg; transition: rotate .2s ease-in, visibility 0s .2s; }
+#game :is(.palette, .tools, .tip, .tray) { transition: opacity .2s .2s, visibility 0s .2s; }
+#game.paused :is(.palette, .tools, .tip, .tray) { opacity: 0; transition: opacity .2s, visibility 0s .2s; }
+.pause-cover { visibility: hidden; rotate: x -90deg; transition: rotate .2s ease-in, visibility 0s .2s; }
+#game.paused .pause-cover { visibility: visible; rotate: none; transition: rotate .22s var(--ease) .2s, visibility 0s .2s; }
+.pause-cover::before {
+  content: ''; position: absolute; z-index: -1; width: min(var(--sheet-w, 100%), 100%); height: min(var(--sheet-h, 100%), 100%); border-radius: var(--sheet-r, 16px);
+  background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift);
+}
 .pause-cover {
-  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  position: absolute; inset: 0; z-index: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
 }
 .pause-cover > b { font-size: 40px; font-weight: 500; font-style: italic; letter-spacing: -0.02em; }
 .pause-cover .btn { width: auto; padding: 14px 40px; }

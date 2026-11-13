@@ -75,7 +75,7 @@ function screen(id) {
 
 function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
-  $('#daily-meta').textContent = todayLine(st);
+  $('#daily-meta').innerHTML = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
   $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · ${T('see result')}` : store.saves['D' + t] ? T('Resume') : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
   $('#lv-meta').textContent = T('{n} / {total} solved', { n: solved, total: LEVELS.length });
@@ -212,15 +212,17 @@ function hint() {
 }
 
 function win() {
+  const st = streak(), sp = P.date && special(SPECIAL, P.date);
   P.done = true;
   delete store.saves[P.key];
   const rec = { c: P.rows.length, rows: P.rows, h: P.hints };
   if (P.date) (store.daily[P.date] ??= {}).r = rec;
   else store.stars[P.n] = Math.max(store.stars[P.n] || 0, stars(rec.c));
   persist();
+  bump(st);
   layout();
   sfx.win();
-  confetti();
+  confetti(sp ? sp.occasion.split(' ', 1) : undefined); // a special day throws its own emoji
   track('finish', mode(P.date, DIFF[P.lv.d]));
   showResult(true);
 }
@@ -248,8 +250,7 @@ function showResult(fresh) {
   const c = P.rows.length, s = stars(c);
   $('#play').hidden = true;
   $('#result').hidden = false;
-  $('#res-stars').innerHTML = [0, 1, 2].map((i) => `<span class="${i < s ? 'on' : ''}" style="--i:${fresh ? i : -3}">★</span>`).join('');
-  $('#res-stars').setAttribute('aria-label', T('{n} of 3 stars', { n: s }));
+  starRow($('#res-stars'), s, fresh);
   $('#res-text').innerHTML = T('Solved in <b>{checks}</b>', { checks: checksText(c) }) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
   $('#res-next').hidden = false;
   $('#res-next b').textContent = T(P.date ? 'Share result' : 'Another puzzle  →');
@@ -264,7 +265,7 @@ async function share() {
     `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
   try {
     if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $('#res-next b').textContent = T('Copied ✓'); }
+    else { await navigator.clipboard.writeText(text); copied($('#res-next b')); }
   } catch {}
 }
 
@@ -322,7 +323,7 @@ $('#btn-hint').onclick = hint;
 $('#res-home').onclick = () => { P = null; screen('home'); };
 $('#list').addEventListener('pointerdown', drag);
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
-for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(); sfx.tap(); };
+for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
   if (!P || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -346,5 +347,6 @@ printable(() => P && {
   body: `<ul class="p-strips">${deal(hash(P.key)).map((i) => `<li><i></i>${esc(P.lv.items[i].name)}</li>`).join('')}</ul>`,
 });
 syncSound();
+nudge(() => P && !P.done && !$('#game').hidden);
 router(route, goHome);
 if (!store.seenHelp) $('#dlg-help').showModal();
