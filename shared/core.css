@@ -135,6 +135,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   border-radius: 50%; border: 0; background: transparent; transition: background-color .15s;
 }
 .icon:hover { background: var(--slot); }
+.fav-tip { inset: max(64px, env(safe-area-inset-top)) 16px auto; margin: 0 auto; max-width: 320px; padding: 12px 16px; border: 1px solid var(--hair); border-radius: 12px; background: var(--stock); color: var(--ink); box-shadow: var(--lift); font-size: 15px; text-align: center; }
 
 /* ---------- game ---------- */
 .bar { width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--hair); }

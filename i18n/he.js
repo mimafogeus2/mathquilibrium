@@ -12,6 +12,10 @@ module.exports = {
       'Theme: auto': 'ערכת צבע: אוטומטית',
       'Theme: light': 'ערכת צבע: בהירה',
       'Theme: dark': 'ערכת צבע: כהה',
+      'Tap Share, then Add to Home Screen': 'הקישו על שיתוף ואז על „הוספה למסך הבית״',
+      'Open the browser menu and tap ☆ or Add to Home screen': 'פתחו את תפריט הדפדפן והקישו על ☆ או על „הוספה למסך הבית״',
+      'Press ⌘D to bookmark this page': 'הקישו ⌘D כדי להוסיף את הדף למועדפים',
+      'Press Ctrl+D to bookmark this page': 'הקישו Ctrl+D כדי להוסיף את הדף למועדפים',
     },
     // also the strings several games share
     'shared/core.js': {
@@ -209,6 +213,7 @@ module.exports = {
     '*': [
       ['<meta property="og:site_name" content="Games by Miki">', '<meta property="og:site_name" content="מדף המשחקים של מיקי">'],
       ['aria-label="All games"', 'aria-label="כל המשחקים"'],
+      ['aria-label="Add to favorites"', 'aria-label="הוספה למועדפים"'],
       ['aria-label="Theme"', 'aria-label="ערכת צבע"'],
       ['aria-label="Sound"', 'aria-label="צליל"'],
       ['aria-label="Back to menu"', 'aria-label="חזרה לתפריט"'],
