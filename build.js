@@ -5,7 +5,7 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const LANGS = ['he'];
-const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip', 'alienchess'].map((g) => g + '/index.html')];
+const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip', 'alienchess'].map((g) => g + '/index.html'), 'orderly/play.html', 'orderly/editor.html'];
 const SITE = 'https://mimafogeus2.github.io/mathquilibrium/';
 const ROOT = __dirname, read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const check = process.argv.includes('--check'), errors = [];
@@ -35,7 +35,8 @@ for (const lang of LANGS) {
 
     swap('<html lang="en">', `<html lang="${lang}" dir="${D.dir}">`, true);
     swap('&family=Inter:wght@400..700', '&family=Inter:wght@400..700' + D.fonts, true);
-    swap(`<meta property="og:url" content="${SITE}${dir === '.' ? '' : dir + '/'}">`, `<meta property="og:url" content="${SITE}${lang}/${dir === '.' ? '' : dir + '/'}">`, true);
+    const at = page.replace(/index\.html$/, ''); // the page's URL under SITE: orderly/, orderly/play.html
+    swap(`<meta property="og:url" content="${SITE}${at}">`, `<meta property="og:url" content="${SITE}${lang}/${at}">`, true);
 
     // Share image: the translation's own, rendered from shared/og.html?lang=<lang>
     if (fs.existsSync(path.join(ROOT, lang, dir, 'og.png'))) swap(`content="${SITE}${dir === '.' ? '' : dir + '/'}og.png"`, `content="${SITE}${lang}/${dir === '.' ? '' : dir + '/'}og.png"`, true);

@@ -1,4 +1,21 @@
 // Hebrew. build.js turns this and the English pages into he/**/index.html; the Hebrew puzzles live in he/orderly and he/wordswipe.
+// Orderly's game screen and help, on both orderly/index.html and orderly/play.html
+const ORDERLY_GAME = [
+      ['<h1 class="wordmark">Order<span>ly</span></h1>', '<h1 class="wordmark">ב<span>סדר</span></h1>'],
+      ['<b>Check</b>', '<b>בדיקה</b>'],
+      ['<button id="btn-hint" class="btn ghost center"><b>Hint</b>', '<button id="btn-hint" class="btn ghost center"><b>רמז</b>'],
+      [`<li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>
+    <li><b>Drag</b> the cards into order, top to bottom. Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</li>
+    <li>Press <b>Check</b>. Cards that sit next to each other in the right order turn green, show their value, and join into a group &mdash; even if the group isn't in its final spot yet. Drag a group to move it as one.</li>
+    <li>Stuck? Use up to <b>3 hints</b>. Each one slides two cards that belong together into place and joins them.</li>
+    <li>Solve it in <b>2 checks</b> for three stars, <b>4</b> for two.</li>`,
+      `<li>בכל חידה יש <b>נושא</b> ו־<b>10 קלפים</b>.</li>
+    <li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה. במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</li>
+    <li>לחצו <b>בדיקה</b>. קלפים שעומדים זה ליד זה בסדר הנכון נצבעים בירוק, חושפים את הערך שלהם ומתחברים לקבוצה &mdash; גם אם הקבוצה עוד לא במקומה הסופי. גררו קבוצה כדי להזיז אותה כיחידה אחת.</li>
+    <li>תקועים? יש לכם עד <b>3 רמזים</b>. כל רמז מחליק למקומם שני קלפים ששייכים זה לזה ומחבר אותם.</li>
+    <li>פתרון ב־<b>2 בדיקות</b> שווה שלושה כוכבים, ב־<b>4</b> — שניים.</li>`],
+];
+
 module.exports = {
   dir: 'rtl',
   // Added to each page's Google Fonts request: Fraunces and Inter have no Hebrew, so those glyphs fall through to these (see --display in core.css)
@@ -69,6 +86,8 @@ module.exports = {
     'orderly/game.js': {
       'Orderly': 'בסדר',
       'Daily': 'יומית',
+      'Custom level': 'חידה אישית',
+      'Back to editing': 'חזרה לעריכה',
       'Random': 'אקראית',
       '{n} / {total} solved': '{n} מתוך {total} נפתרו',
       'Resume puzzle': 'המשך חידה',
@@ -100,6 +119,33 @@ module.exports = {
       '<b>Cut out</b> the 10 cards along the dashed lines.': '<b>גזרו</b> את 10 הקלפים לאורך הקווים המקווקווים.',
       '<b>Sort them on the table</b>, from <b>{top}</b> at the top to <b>{bottom}</b> at the bottom.': '<b>סדרו אותם על השולחן</b>: <b>{top}</b> למעלה, <b>{bottom}</b> למטה.',
       'Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.': 'מרוצים מהסדר? מספרו את הקלפים <b>1 עד 10</b> על הקווים, מלמעלה למטה.',
+    },
+    'orderly/editor.js': {
+      'Orderly': 'בסדר',
+      '{top} → {bottom}': '{top} ← {bottom}',
+      'Earliest': 'המוקדם ביותר', 'Latest': 'המאוחר ביותר',
+      'First': 'ראשון', 'Last': 'אחרון',
+      'Smallest': 'הקטן ביותר', 'Largest': 'הגדול ביותר',
+      'Fewest': 'הכי מעט', 'Most': 'הכי הרבה',
+      'Shortest': 'הקצר ביותר', 'Longest': 'הארוך ביותר',
+      'Lowest': 'הנמוך ביותר', 'Highest': 'הגבוה ביותר',
+      'Slowest': 'האיטי ביותר', 'Fastest': 'המהיר ביותר',
+      'Card {n}': 'קלף {n}',
+      'Value': 'ערך',
+      'Card {n} name': 'השם של קלף {n}',
+      'Card {n} value': 'הערך של קלף {n}',
+      'Move card {n} up': 'הזזת קלף {n} למעלה',
+      'Move card {n} down': 'הזזת קלף {n} למטה',
+      'Give the level a subject.': 'תנו לחידה נושא.',
+      'Name the top of the order.': 'כתבו מה בראש הסדר.',
+      'Name the bottom of the order.': 'כתבו מה בתחתית הסדר.',
+      'Card {n} needs a name.': 'לקלף {n} חסר שם.',
+      'Cards {a} and {b} have the same name.': 'לקלפים {a} ו־{b} יש אותו שם.',
+      'Card {n} needs a value.': 'לקלף {n} חסר ערך.',
+      '(+{n} more)': '(ועוד {n})',
+      'Copied!': 'הועתק!',
+      'Copy this link:': 'העתיקו את הקישור:',
+      'Clear every field and start over?': 'לנקות את כל השדות ולהתחיל מחדש?',
     },
     'wordswipe/game.js': {
       'WordSwipe': 'שמאל ימין שמאל',
@@ -393,30 +439,52 @@ module.exports = {
     ],
 
     'orderly/index.html': [
+      ...ORDERLY_GAME,
+      ['href="editor.html">Make a level</a>', 'href="editor.html">הכינו חידה</a>'],
       ['Orderly — put ten things in order', 'בסדר — עשרה דברים, סדר אחד'],
       ['A subject and ten cards. Drag them into order: oldest to newest, smallest to largest, mildest to hottest. A new daily puzzle every day.',
         'נושא אחד ועשרה קלפים. גררו אותם לסדר הנכון: מהישן לחדש, מהקטן לגדול, מהעדין לחריף. חידה יומית חדשה בכל יום.'],
-      ['<h1 class="wordmark">Order<span>ly</span></h1>', '<h1 class="wordmark">ב<span>סדר</span></h1>'],
       ['<p class="tagline">Ten cards, one subject. Put them in order.</p>', '<p class="tagline">עשרה קלפים, נושא אחד. סדרו אותם.</p>'],
       ["<b>Today's puzzle</b>", '<b>החידה של היום</b>'],
       ['aria-label="Share link to this puzzle"', 'aria-label="שיתוף קישור לחידה"'],
-      ['<b>Check</b>', '<b>בדיקה</b>'],
-      ['<button id="btn-hint" class="btn ghost center"><b>Hint</b>', '<button id="btn-hint" class="btn ghost center"><b>רמז</b>'],
-      [`<li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>
-    <li><b>Drag</b> the cards into order, top to bottom. Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</li>
-    <li>Press <b>Check</b>. Cards that sit next to each other in the right order turn green, show their value, and join into a group &mdash; even if the group isn't in its final spot yet. Drag a group to move it as one.</li>
-    <li>Stuck? Use up to <b>3 hints</b>. Each one slides two cards that belong together into place and joins them.</li>
-    <li>Solve it in <b>2 checks</b> for three stars, <b>4</b> for two.</li>`,
-      `<li>בכל חידה יש <b>נושא</b> ו־<b>10 קלפים</b>.</li>
-    <li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה. במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</li>
-    <li>לחצו <b>בדיקה</b>. קלפים שעומדים זה ליד זה בסדר הנכון נצבעים בירוק, חושפים את הערך שלהם ומתחברים לקבוצה &mdash; גם אם הקבוצה עוד לא במקומה הסופי. גררו קבוצה כדי להזיז אותה כיחידה אחת.</li>
-    <li>תקועים? יש לכם עד <b>3 רמזים</b>. כל רמז מחליק למקומם שני קלפים ששייכים זה לזה ומחבר אותם.</li>
-    <li>פתרון ב־<b>2 בדיקות</b> שווה שלושה כוכבים, ב־<b>4</b> — שניים.</li>`],
       ['<p class="muted small">One daily puzzle plus random puzzles from the whole collection.</p>', '<p class="muted small">חידה יומית אחת, ועוד חידות אקראיות מכל האוסף.</p>'],
       ['<button type="button" id="t-all" class="chip">Select all</button><button type="button" id="t-none" class="chip">Select none</button>',
         '<button type="button" id="t-all" class="chip">בחרו הכול</button><button type="button" id="t-none" class="chip">נקו הכול</button>'],
       ['<b>Play</b></button>', '<b>שחקו</b></button>'],
       ['<button class="give-up" value="">Cancel</button>', '<button class="give-up" value="">ביטול</button>'],
+    ],
+
+    'orderly/play.html': [
+      ...ORDERLY_GAME,
+      ['Orderly — a level made for you', 'בסדר — חידה שהוכנה בשבילכם'],
+      ['Someone made an Orderly level and sent it to you: ten cards, one subject. Can you put them in order?',
+        'מישהו הכין חידת בסדר ושלח אותה אליכם: עשרה קלפים, נושא אחד. תצליחו לסדר אותם?'],
+      ["<p class=\"tagline\">This link is broken. It may have been cut short when it was copied: ask for it again, or try today's puzzle.</p>",
+        '<p class="tagline">הקישור הזה שבור. אולי הוא נקטע כשהעתיקו אותו: בקשו אותו שוב, או נסו את החידה של היום.</p>'],
+      ['<b>Play Orderly</b>', '<b>לחידה של היום</b>'],
+      ['href="editor.html">Make your own level</a>', 'href="editor.html">הכינו חידה משלכם</a>'],
+    ],
+
+    'orderly/editor.html': [
+      ['Orderly — make your own level', 'בסדר — הכינו חידה משלכם'],
+      ['Make your own Orderly level: a subject and ten cards in the right order. Send the link to a friend and see if they can sort it.',
+        'הכינו חידת בסדר משלכם: נושא ועשרה קלפים בסדר הנכון. שלחו את הקישור לחברים ובדקו אם יצליחו לסדר.'],
+      ['<div class="title"><b>Make a level</b><small>Orderly</small></div>', '<div class="title"><b>הכנת חידה</b><small>בסדר</small></div>'],
+      ['Pick a subject, write ten cards in the right order, and send the link to a friend.', 'בחרו נושא, כתבו עשרה קלפים בסדר הנכון, ושלחו את הקישור לחברים.'],
+      ['<span class="kicker">Subject</span>', '<span class="kicker">נושא</span>'],
+      ['placeholder="The planets, by distance from the Sun"', 'placeholder="כוכבי הלכת, לפי המרחק מהשמש"'],
+      ['<legend class="kicker">Order, from top to bottom</legend>', '<legend class="kicker">הסדר, מלמעלה למטה</legend>'],
+      ['<span class="sr-only">Top label</span>', '<span class="sr-only">התווית העליונה</span>'],
+      ['<span class="sr-only">Bottom label</span>', '<span class="sr-only">התווית התחתונה</span>'],
+      ['aria-label="Swap top and bottom"', 'aria-label="החלפה בין למעלה ולמטה"'],
+      ['The labels above the first card and below the last.', 'התוויות שמעל הקלף הראשון ומתחת לאחרון.'],
+      ['<span class="kicker">Cards, in the right order</span>', '<span class="kicker">הקלפים, בסדר הנכון</span>'],
+      ["Players sort the names. A card's value is revealed once it's placed right.", 'השחקנים מסדרים את השמות. הערך של קלף נחשף כשהוא מונח נכון.'],
+      ['<span class="kicker">Preview</span>', '<span class="kicker">תצוגה מקדימה</span>'],
+      ['<b>Test it</b>', '<b>נסו אותה</b>'],
+      ['<b>Share</b>', '<b>שיתוף</b>'],
+      ['<b>Copy link</b>', '<b>העתקת קישור</b>'],
+      ['class="give-up">Start over</button>', 'class="give-up">להתחיל מחדש</button>'],
     ],
 
     'coronet/index.html': [

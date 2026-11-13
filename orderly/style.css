@@ -99,3 +99,74 @@
 /* scissors on the cut line */
 .p-strips li::before { content: '✂'; position: absolute; inset-inline-start: 3mm; top: -.62em; padding: 0 1mm; background: #fff; font-size: 12pt; line-height: 1; font-weight: 400; }
 .p-strips i { flex: none; width: 12mm; height: 7mm; border-bottom: 1.2pt solid #000; }
+
+/* ---------- play.html: a shared level ---------- */
+.broken { margin: auto 0; width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.broken .btn { text-decoration: none; }
+#res-make { margin-top: 2px; }
+
+/* ---------- editor ---------- */
+#editor { max-width: 560px; }
+.e-intro { margin: 4px 0 20px; font-size: 15px; }
+.e-form { width: 100%; display: flex; flex-direction: column; gap: 22px; }
+.e-field { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.e-field > .kicker, .e-field legend { padding: 0; margin-bottom: 2px; }
+.e-hint { color: var(--muted); font-size: 13.5px; line-height: 1.35; margin-top: -4px; }
+.e-form input {
+  width: 100%; min-width: 0; height: 46px; padding: 0 12px; border: 0; border-radius: 10px;
+  background: var(--grain), var(--stock); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line);
+  font: inherit; font-size: 16px; /* 16px: iOS zooms into anything smaller */ transition: box-shadow .15s;
+}
+.e-form input::placeholder { color: var(--muted); opacity: .75; }
+.e-form input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+.e-form input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--red); }
+#e-subject { height: 52px; font: 600 19px var(--display); letter-spacing: -0.01em; }
+
+.e-presets { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding: 2px 16px; }
+.e-presets .chip { flex: none; padding-inline: 14px; font-size: 13.5px; }
+.e-presets .chip[aria-pressed="true"] { background: var(--grain), var(--hl); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 70%, transparent); }
+.e-ends { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 4px; }
+.e-ends label { position: relative; }
+.e-ends label > span[aria-hidden] { position: absolute; inset-inline-start: 12px; top: 50%; translate: 0 -50%; font-size: 11px; color: var(--muted); pointer-events: none; }
+.e-ends input { padding-inline-start: 28px; }
+
+.e-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; row-gap: 6px; }
+.e-row {
+  position: relative; display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 6px;
+  padding-block: 6px; padding-inline: 2px 4px; border-radius: 12px; background: var(--grain), var(--stock);
+  border: 1px solid var(--hair); box-shadow: var(--lift); transition: translate .18s var(--ease);
+}
+.e-list.settling .e-row { transition: none; }
+.e-row.held { transition: none; z-index: 2; scale: 1.02; box-shadow: var(--float); }
+/* the handle alone starts a drag: none on it and everything in it (the #48 lesson), so the rest still scrolls the page */
+.e-grip, .e-grip * { touch-action: none; }
+.e-grip { display: grid; place-items: center; width: 32px; align-self: stretch; cursor: grab; color: var(--line); }
+.e-row.held .e-grip { cursor: grabbing; }
+.e-n { min-width: 1.4em; text-align: center; font: italic 600 15px var(--display); color: var(--brand-text); font-variant-numeric: tabular-nums; }
+.e-fields { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.e-fields .e-name { flex: 1 1 190px; height: 42px; font-weight: 550; }
+.e-fields .e-val { flex: 1 1 110px; height: 42px; font: italic 600 15px var(--display); }
+.e-move { display: flex; flex-direction: column; }
+.e-move .icon { width: 36px; height: 30px; border-radius: 8px; }
+.e-move .icon svg { width: 18px; height: 18px; }
+.e-move .icon:disabled { opacity: .25; cursor: default; }
+#editor .end-label { text-align: center; }
+
+.e-preview { display: grid; gap: 6px; }
+.e-preview .card { position: relative; transform: none; height: 54px; cursor: default; }
+.e-preview .name.empty { color: var(--muted); }
+.e-preview .card.ok .name.empty { color: inherit; opacity: .7; }
+
+.e-msg { margin: -6px 0 -8px; min-height: 1.4em; text-align: center; font-size: 14.5px; color: var(--muted); }
+.e-msg.bad { color: var(--red-text); font-weight: 550; }
+.e-msg.shake { animation: shake .4s; }
+.e-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.e-actions .row { width: 100%; }
+
+.toast {
+  position: fixed; inset-inline: 0; bottom: max(24px, env(safe-area-inset-bottom)); width: fit-content; margin: 0 auto; z-index: 10;
+  padding: 10px 18px; border-radius: 999px; background: var(--speck), var(--ink); color: var(--paper); font-weight: 600; font-size: 14.5px;
+  box-shadow: var(--float); opacity: 0; pointer-events: none;
+}
+.toast.show { animation: toast 1.8s var(--ease); }
+@keyframes toast { 0% { opacity: 0; translate: 0 12px; } 10%, 85% { opacity: 1; translate: 0 0; } 100% { opacity: 0; } }
