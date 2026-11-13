@@ -492,6 +492,7 @@ module.exports = {
       ['<b>Copy link</b>', '<b>העתקת קישור</b>'],
       ['class="foot-link">Start over</button>', 'class="foot-link">להתחיל מחדש</button>'],
       ['<b>Back to editing</b>', '<b>חזרה לעריכה</b>'],
+      ['class="foot-link">Back to editing</button>', 'class="foot-link">חזרה לעריכה</button>'],
       ...WORDSWIPE_GAME,
     ],
 

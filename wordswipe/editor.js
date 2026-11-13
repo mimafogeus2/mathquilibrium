@@ -40,6 +40,7 @@ function render() {
   $('#ed-problems').replaceChildren(...problems.map((p) => Object.assign(document.createElement('li'), { textContent: PROBLEM[p](total) })));
   if (!problems.length) $('#ed-problems').append(Object.assign(document.createElement('li'), { className: 'ok', textContent: T('Ready: test it or send it.') }));
   for (const b of ['#ed-test', '#ed-share', '#ed-copy']) $(b).disabled = problems.length > 0;
+  if (!problems.length) makeLink();
 }
 const changed = () => { saveDraft(); render(); };
 
@@ -88,9 +89,16 @@ const back = () => { $('#dlg-end').close(); cancelAnimationFrame(raf); R = null;
 $('#ed-test').onclick = () => play('C', structuredClone(draft));
 $('#btn-back').onclick = back;
 $('#end-home').onclick = back;
+$('#btn-edit').onclick = back;
 
 // ---------- share ----------
-const link = async () => new URL('play.html#r=' + (await packLink(draft)), location.href).href;
+// The link is made as the draft changes, not on click: Safari only lets a tap copy or share if it does so at once,
+// with no await (the gzip) in between. A click before it's ready (a few ms after an edit) just misses.
+let shareUrl = '';
+async function makeLink() {
+  const d = JSON.stringify(draft), url = new URL('play.html#r=' + (await packLink(draft)), location.href).href;
+  if (d === JSON.stringify(draft)) shareUrl = url; // an older draft's link, finished late, doesn't win
+}
 let toastTimer;
 function toast(text) {
   const t = $('#toast');
@@ -99,16 +107,27 @@ function toast(text) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('on'), 2000);
 }
-async function copy(url) {
-  try { await navigator.clipboard.writeText(url); toast(T('Copied!')); } catch { prompt(T('Copy this link:'), url); }
+// navigator.clipboard needs https (not there on a plain-http page, a phone testing over the LAN): then the old
+// select-and-copy, and if even that's refused, the link in a box to copy by hand.
+function copy(url) {
+  const done = () => toast(T('Copied!')), old = () => {
+    const ta = Object.assign(document.createElement('textarea'), { value: url, readOnly: true });
+    document.body.append(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    if (ok) done(); else prompt(T('Copy this link:'), url);
+  };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url).then(done, old);
+  else old();
 }
-$('#ed-copy').onclick = async () => { track('copy-link', 'custom'); copy(await link()); };
-$('#ed-share').onclick = async () => {
+$('#ed-copy').onclick = () => { if (!shareUrl) return; track('copy-link', 'custom'); copy(shareUrl); };
+$('#ed-share').onclick = () => {
+  if (!shareUrl) return;
   track('share', 'custom');
-  const url = await link();
-  if (!navigator.share) return copy(url);
-  try { await navigator.share({ title: T('A WordSwipe round: {subject}', { subject: draft.s }), url }); }
-  catch (e) { if (e.name !== 'AbortError') copy(url); }
+  if (!navigator.share) return copy(shareUrl);
+  navigator.share({ title: T('A WordSwipe round: {subject}', { subject: draft.s }), url: shareUrl })
+    .catch((e) => { if (e.name !== 'AbortError') copy(shareUrl); });
 };
 
 render();
