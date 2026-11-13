@@ -234,6 +234,7 @@
   <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
   <feComposite in="SourceGraphic" operator="out"/>
 </filter></svg>
+<script src="wordswipe/special.js"></script>
 <script>
   const d = new Date(), today = d.toISOString().slice(0, 10); // UTC, like the games
   // The issue number counts days since the first issue (2026-11-12). Reset this to relaunch.
@@ -253,6 +254,15 @@
     const tiers = [...(a.dataset.tiers || 'EMH')], n = tiers.filter((k) => done[k]).length;
     a.querySelector('.today').innerHTML = tiers.map((k) => `<i class="${done[k] ? 'on' : ''}"></i>`).join('') +
       `<span>${n === tiers.length ? 'כל היומיות נפתרו' : n ? `${n} מתוך ${tiers.length} יומיות היום` : `${tiers.length} יומיות חדשות היום`}</span>`;
+  }
+
+  // On a WordSwipe special day (holidays, see wordswipe/special.js) its card shows a word that fits that day's subject:
+  // the first short one (the lists lead with the most iconic), else the shortest, shrunk if still too wide for the card.
+  const sp = SPECIAL.find((l) => l.startsWith(today + '|'));
+  if (sp) {
+    const fits = sp.split('|')[3].split(','), t = document.querySelector('a[href="wordswipe/"] text');
+    t.textContent = (fits.find((w) => w.length <= 7) ?? fits.reduce((a, b) => (b.length < a.length ? b : a))) + '?';
+    document.fonts.ready.then(() => { const w = t.getComputedTextLength(); if (w > 38) t.style.fontSize = 15 * 38 / w + 'px'; });
   }
 </script>
 </body>
