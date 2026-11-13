@@ -6,9 +6,22 @@ const N = 10, HINTS = 3, DIFF = ['', 'Easy', 'Medium', 'Hard'];
 const TOPICS = { history: 'History', science: 'Science', nature: 'Nature', places: 'Places', screen: 'Film & TV', music: 'Music', words: 'Books & Art', sport: 'Sport & Games', food: 'Food & Drink', tech: 'Tech & Inventions' };
 const stars = (checks) => (checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
 
-// The daily walks the pool by day number; the multiplier is coprime with the pool size, so no repeats until it's all been used.
-const DAY0 = Date.UTC(2026, 0, 1);
-const dailyIndex = (date) => ((Math.round((Date.parse(date) - DAY0) / 864e5) * 1237 + 811) % LEVELS.length + LEVELS.length) % LEVELS.length;
+// The daily's difficulty climbs through the (UTC) week: Easy Mon–Tue, Medium Wed–Fri, Hard Sat–Sun (Hebrew: the Israeli week, Sun–Sat).
+// Each difficulty's days walk a fixed shuffle of that difficulty's levels, so no repeats until its pool has all been used.
+const DAY0 = Date.UTC(2025, 11, LANG === 'he' ? 28 : 29); // the first day of a week: Sunday or Monday
+const WEEK = [1, 1, 2, 2, 2, 3, 3]; // from the week's first day
+const POOLS = {};
+function pool(d) {
+  if (POOLS[d]) return POOLS[d];
+  const p = LEVELS.flatMap((l, i) => (+l[0] === d ? [i] : [])), rand = rng(d);
+  for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+  return (POOLS[d] = p);
+}
+function dailyIndex(date) {
+  const day = Math.round((Date.parse(date) - DAY0) / 864e5), k = ((day % 7) + 7) % 7, d = WEEK[k], p = pool(d);
+  const n = Math.floor(day / 7) * WEEK.filter((x) => x === d).length + WEEK.slice(0, k).filter((x) => x === d).length;
+  return p[((n % p.length) + p.length) % p.length];
+}
 // On a special day (special.js) its themed level replaces the pool's.
 const dailyLine = (date) => special(SPECIAL, date)?.line ?? LEVELS[dailyIndex(date)];
 
