@@ -22,6 +22,7 @@ Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded leve
 - `shared/core.js`, `shared/core.css` — the shell: home menu, dailies, levels, timer, pause, win, share, sound, confetti
 - `orderly/levels.js` — the level pool, one `difficulty|Subject|top|bottom|Name=Value;...` line each, cards in the right order
 - `wordswipe/rounds.js` — the round pool, one `Subject|fits,...|doesn't,...` line each; `wordswipe/game.js` uses core.js helpers but not `boot()`
+- `wordswipe/editor.html` — make your own round and share it; `wordswipe/play.html#r=…` plays a shared one (nothing saved, no streaks). The round travels in the link: `shared/link.js` gzips JSON into base64url, `wordswipe/custom.js` checks it
 - `orderly/special.js`, `wordswipe/special.js` — special days: `YYYY-MM-DD|Occasion|puzzle line` replaces that date's daily with a themed one. Each date is used once ever: a small day gets one line, a big holiday one per year, and small days sharing a date take turns by year
 - `orderly/editor.html` — make a level (draft kept in localStorage); its link opens `orderly/play.html#l=…`, a play-only page that records nothing. `orderly/custom.js` checks a level's shape; `shared/link.js` packs any JSON into a URL hash (gzip + base64url)
 - `<game>/gen.js` — the generator; `<game>/game.js` — the board, calling `boot({ ... })`

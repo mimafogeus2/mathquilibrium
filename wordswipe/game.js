@@ -1,7 +1,8 @@
 'use strict';
 // WordSwipe: a subject, 24 words, a 60-second fuse. Right = fits, left = doesn't.
 // Borrows storage, sound, confetti and helpers from shared/core.js (but not its level-pack shell: no boot()).
-// Rounds come from rounds.js: ROUNDS[i] = "Subject|yes,yes,...|no,no,...".
+// Rounds come from rounds.js: ROUNDS[i] = "Subject|yes,yes,...|no,no,...", or are made up ({ s, y, n }, see custom.js):
+// editor.html tests one and play.html plays one from a link, as key 'C', which nothing saves or counts.
 const TIME = 60000, PENALTY = 3000, PER_RIGHT = 10, PER_SEC = 5;
 
 // Which round: the daily walks the pool by day number, unlimited by a counter; the multipliers are
@@ -12,9 +13,9 @@ const unlimitedIndex = (n) => (n * 2903 + 1777) % ROUNDS.length;
 // On a special day (special.js) its themed round replaces the pool's.
 const dailyLine = (date) => special(SPECIAL, date)?.line ?? ROUNDS[dailyIndex(date)];
 
-function deal(line, seed) {
-  const [subject, yes, no] = line.split('|');
-  const cards = [...yes.split(',').map((w) => ({ w, yes: true })), ...no.split(',').map((w) => ({ w, yes: false }))];
+const parse = (line) => { const [s, y, n] = line.split('|'); return { s, y: y.split(','), n: n.split(',') }; };
+function deal({ s: subject, y, n }, seed) {
+  const cards = [...y.map((w) => ({ w, yes: true })), ...n.map((w) => ({ w, yes: false }))];
   const rand = rng(seed);
   for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
   return { subject, cards };
@@ -26,7 +27,7 @@ const score = (r) => r.marks.filter(Boolean).length * PER_RIGHT + (r.marks.lengt
 // R = the round being played: { key, date?, n?, subject, cards, marks: [right?], left: ms, over }
 let R = null, raf = 0, last = 0;
 const today = () => ymd(new Date());
-const save = () => { if (R && !R.over) store.cur = R; persist(); };
+const save = () => { if (R && !R.over && R.key !== 'C') { store.cur = R; persist(); } };
 
 function screen(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
@@ -42,21 +43,23 @@ function home() {
     (store.cur?.key === 'U' + store.n ? ' · ' + T('resume') : '');
 }
 
-function play(key) {
-  const date = key[0] === 'D' ? key.slice(1) : null, n = date ? null : +key.slice(1);
+// play(key): 'D<date>' the daily, 'U<n>' unlimited round n; play('C', round) a made-up round.
+function play(key, round) {
+  const custom = key === 'C', date = key[0] === 'D' ? key.slice(1) : null, n = date || custom ? null : +key.slice(1);
   // A finished daily shows its result over the menu.
   if (date && store.daily[date]?.r) { toMenu(false); screen('home'); return showEnd(store.daily[date].r, true); }
   R = store.cur?.key === key ? store.cur
-    : { key, date, n, ...deal(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)], hash(key)), marks: [], left: TIME, over: false };
-  $('#g-title').textContent = date ? T('Daily') : T('Round {n}', { n: n + 1 });
+    : custom ? { key, round, ...deal(round, Math.random() * 2 ** 32), marks: [], left: TIME, over: false }
+    : { key, date, n, ...deal(parse(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)]), hash(key)), marks: [], left: TIME, over: false };
+  $('#g-title').textContent = custom ? T('Custom round') : date ? T('Daily') : T('Round {n}', { n: n + 1 });
   const sp = date && special(SPECIAL, date);
   $('#g-sub').textContent = date ? shortDate(date) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
   $('#game').classList.remove('done');
   $('#btn-result').hidden = true;
-  toGame(date ? 'daily' : `round-${n + 1}`);
-  track('start', mode(date));
+  if (!custom) toGame(date ? 'daily' : `round-${n + 1}`); // a custom round's page keeps its own hash (play.html: the round)
+  track('start', custom ? 'custom' : mode(date));
   $('#stack').replaceChildren();
   refill();
   hud();
@@ -166,19 +169,21 @@ function drag(e) {
 
 // ---------- end ----------
 function finish() {
-  const st = streak(), sp = R.date && special(SPECIAL, R.date);
+  const custom = R.key === 'C', st = custom ? 0 : streak(), sp = R.date && special(SPECIAL, R.date);
   R.over = true;
   cancelAnimationFrame(raf);
-  delete store.cur;
   const rec = { s: score(R), m: R.marks.map(Number).join(''), t: R.marks.length === 24 ? Math.ceil(R.left / 1000) : 0, subject: R.subject,
     misses: R.cards.map((c, i) => (R.marks[i] === false ? (c.yes ? '+' : '-') + c.w : null)).filter(Boolean) };
-  if (R.date) (store.daily[R.date] ??= {}).r = rec;
-  else { store.n = Math.max(store.n, R.n + 1); store.best = Math.max(store.best, rec.s); }
-  persist();
-  bump(st);
+  if (!custom) {
+    delete store.cur;
+    if (R.date) (store.daily[R.date] ??= {}).r = rec;
+    else { store.n = Math.max(store.n, R.n + 1); store.best = Math.max(store.best, rec.s); }
+    persist();
+    bump(st);
+  }
   $('#game').classList.add('done');
   if (rec.t) { sfx.win(); confetti(sp ? sp.occasion.split(' ', 1) : undefined); } // a special day throws its own emoji
-  track(R.marks.length === 24 ? 'finish' : 'timeout', mode(R.date));
+  track(R.marks.length === 24 ? 'finish' : 'timeout', custom ? 'custom' : mode(R.date));
   setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
 }
 
@@ -192,8 +197,9 @@ function showEnd(rec, daily) {
     ? `<p class="muted small">${T('{subject} — you missed:', { subject: esc(rec.subject) })}</p>` +
       rec.misses.map((w) => `<span class="${w[0] === '+' ? 'yes' : 'no'}">${w[0] === '+' ? '✓' : '✗'} ${esc(w.slice(1))}</span>`).join('')
     : '';
-  $('#end-next b').textContent = daily ? T('Share result') : T('Round {n}  →', { n: store.n + 1 });
-  $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); play('U' + store.n); };
+  const round = !daily && R?.key === 'C' && R.round;
+  $('#end-next b').textContent = daily ? T('Share result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
+  $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); round ? play('C', round) : play('U' + store.n); };
   $('#btn-result').hidden = false;
   $('#dlg-end').showModal();
 }
@@ -216,9 +222,7 @@ game = { name: T('WordSwipe'), storeKey: LANG === 'en' ? 'wordswipe' : 'wordswip
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { daily: {}, n: 0, best: 0, muted: false, seenHelp: false, ...store };
 
-$('#btn-daily').onclick = () => play('D' + today());
-$('#btn-unlimited').onclick = () => play('U' + store.n);
-$('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
+// Leave the round: the menu here; editor.html and play.html set their own.
 const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
 $('#btn-back').onclick = goHome;
 $('#btn-yes').onclick = () => answer(true);
@@ -227,8 +231,7 @@ $('#stack').addEventListener('pointerdown', drag);
 // Giving up runs the clock out: the round ends as if time were up.
 $('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The round ends now, scored as it stands.'))) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
-$('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
-$('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
+$('#dlg-help')?.addEventListener('close', () => { store.seenHelp = true; persist(); });
 for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
@@ -251,12 +254,19 @@ printable(() => R && {
     `<li><span class="p-box"></span><span class="p-box"></span>${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`,
 });
 syncSound();
-// #daily is today's round; #round-7 is unlimited round 7, open once reached (so Forward can replay the last one).
-router((h) => {
-  const n = h === 'daily' ? -1 : /^round-\d+$/.test(h) ? +h.slice(6) - 1 : NaN;
-  if (n === -1) play('D' + today());
-  else if (n >= 0 && n <= store.n) play('U' + n);
-  else return false;
-  return true;
-}, goHome);
-if (!store.seenHelp) $('#dlg-help').showModal();
+// The rest is the game's own page (index.html), with its menu: editor.html and play.html have no #home.
+if ($('#home')) {
+  $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
+  $('#btn-daily').onclick = () => play('D' + today());
+  $('#btn-unlimited').onclick = () => play('U' + store.n);
+  $('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
+  // #daily is today's round; #round-7 is unlimited round 7, open once reached (so Forward can replay the last one).
+  router((h) => {
+    const n = h === 'daily' ? -1 : /^round-\d+$/.test(h) ? +h.slice(6) - 1 : NaN;
+    if (n === -1) play('D' + today());
+    else if (n >= 0 && n <= store.n) play('U' + n);
+    else return false;
+    return true;
+  }, goHome);
+  if (!store.seenHelp) $('#dlg-help').showModal();
+}

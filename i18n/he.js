@@ -15,6 +15,22 @@ const ORDERLY_GAME = [
     <li>תקועים? יש לכם עד <b>3 רמזים</b>. כל רמז מחליק למקומם שני קלפים ששייכים זה לזה ומחבר אותם.</li>
     <li>פתרון ב־<b>2 בדיקות</b> שווה שלושה כוכבים, ב־<b>4</b> — שניים.</li>`],
 ];
+// Pieces the WordSwipe pages share (index, editor, play): the game screen, the logo and the How to play dialog
+const WORDSWIPE_GAME = [
+  ['<small>Swipe right for</small>', '<small>ימינה אם זה</small>'],
+  [`aria-label="Doesn't fit (left arrow)"`, 'aria-label="לא מתאים (חץ שמאלה)"'],
+  ['aria-label="Fits (right arrow)"', 'aria-label="מתאים (חץ ימינה)"'],
+];
+const WORDSWIPE_LOGO = ['<div id="logo" aria-hidden="true"><i></i><i></i><i>Owl?</i></div>', '<div id="logo" aria-hidden="true"><i></i><i></i><i>ינשוף?</i></div>'];
+const WORDSWIPE_HELP_FOOT = ['<p class="muted small">One daily round plus unlimited rounds.</p>', '<p class="muted small">סבב יומי אחד, ועוד סבבים בלי הגבלה.</p>'];
+const WORDSWIPE_HELP = [`<li>Each round has a <b>subject</b> and <b>24 words</b>.</li>
+    <li>Swipe <b>right</b> (or <kbd>→</kbd>) if the word fits the subject, <b>left</b> (or <kbd>←</kbd>) if it doesn't.</li>
+    <li>You have <b>60 seconds</b>. A wrong swipe costs <b>3 seconds</b>. Run out and it's game over.</li>
+    <li><b>10 points</b> per right answer, plus <b>5 points</b> for every second left when you finish.</li>`,
+      `<li>בכל סבב יש <b>נושא</b> ו־<b>24 מילים</b>.</li>
+    <li>החליקו <b>ימינה</b> (או <kbd>→</kbd>) אם המילה מתאימה לנושא, ו<b>שמאלה</b> (או <kbd>←</kbd>) אם לא.</li>
+    <li>יש לכם <b>60 שניות</b>. החלקה שגויה עולה <b>3 שניות</b>. נגמר הזמן — נגמר המשחק.</li>
+    <li><b>10 נקודות</b> על כל תשובה נכונה, ועוד <b>5 נקודות</b> על כל שנייה שנשארה בסוף.</li>`];
 
 module.exports = {
   dir: 'rtl',
@@ -162,6 +178,28 @@ module.exports = {
       'Does it fit?': 'מתאים?',
       "Each of these <b>24 words</b> either fits the subject above or it doesn't.": 'כל אחת מ־<b>24 המילים</b> האלה מתאימה לנושא שלמעלה, או שלא.',
       "Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn't. One box per word.": 'סמנו <b>✓</b> אם המילה מתאימה ו־<b>✗</b> אם לא. משבצת אחת לכל מילה.',
+      'Custom round': 'סבב אישי',
+      'Play again': 'לשחק שוב',
+    },
+    'wordswipe/editor.js': {
+      'Too long for a card ({n} letters at most)': 'ארוך מדי לקלף (עד {n} אותיות)',
+      'Already in this list': 'כבר ברשימה הזו',
+      'In both lists': 'מופיע בשתי הרשימות',
+      'Give the round a subject.': 'תנו לסבב נושא.',
+      '{n} more to go: a round has 24 words.': 'עוד {n}: בסבב יש 24 מילים.',
+      '{n} too many: a round has 24 words.': '{n} יותר מדי: בסבב יש 24 מילים.',
+      'Each list needs at least {n} words.': 'בכל רשימה צריכות להיות לפחות {n} מילים.',
+      'Fix the words marked in red.': 'תקנו את המילים שמסומנות באדום.',
+      'Fits': 'מתאים',
+      "Doesn't fit": 'לא מתאים',
+      'Move to “{list}”': 'העברה ל„{list}״',
+      '{word}, move to “{list}”': '{word}, העברה ל„{list}״',
+      'Remove {word}': 'הסרת {word}',
+      'Ready: test it or send it.': 'מוכן: נסו אותו או שלחו אותו.',
+      'Start over? The subject and all the words are cleared.': 'להתחיל מחדש? הנושא וכל המילים יימחקו.',
+      'Copied!': 'הועתק!',
+      'Copy this link:': 'העתיקו את הקישור:',
+      'A WordSwipe round: {subject}': 'סבב שמאל ימין שמאל: {subject}',
     },
     'biggr/game.js': {
       'Biggr': 'כמה כמה',
@@ -328,6 +366,9 @@ module.exports = {
       ['</svg>Hint', '</svg>רמז'],
       ['</svg>Restart', '</svg>מההתחלה'],
       ['class="give-up">Give up</button>', 'class="give-up">לוותר</button>'],
+      ['aria-label="WordSwipe menu"', 'aria-label="לתפריט של שמאל ימין שמאל"'],
+      ['<b>Play WordSwipe</b>', '<b>לשחק שמאל ימין שמאל</b>'],
+      ['>Make your own round</a>', '>צרו סבב משלכם</a>'],
     ],
 
     'index.html': [
@@ -418,24 +459,56 @@ module.exports = {
     'wordswipe/index.html': [
       ['WordSwipe — does it fit?', 'שמאל ימין שמאל — מתאים או לא?'],
       ["A subject, 24 words, 60 seconds. Swipe right if the word fits, left if it doesn't. A new daily round every day.", 'נושא אחד, 24 מילים, 60 שניות. מתאים? החליקו ימינה. לא מתאים? שמאלה. סבב יומי חדש בכל יום.'],
-      ['<div id="logo" aria-hidden="true"><i></i><i></i><i>Owl?</i></div>', '<div id="logo" aria-hidden="true"><i></i><i></i><i>ינשוף?</i></div>'],
+      WORDSWIPE_LOGO,
       ['<h1 class="wordmark">Word<span>swipe</span></h1>', '<h1 class="wordmark">שמאל <span>ימין</span> שמאל</h1>'],
       ["<p class=\"tagline\">Does it fit? Swipe right. Doesn't? Swipe left.</p>", '<p class="tagline">מתאים? החליקו ימינה. לא מתאים? שמאלה.</p>'],
       ["<b>Today's round</b>", '<b>הסבב של היום</b>'],
       ['<h2>Unlimited</h2>', '<h2>בלי הגבלה</h2>'],
       ['<button id="btn-unlimited" class="btn ghost"><b>Play</b>', '<button id="btn-unlimited" class="btn ghost"><b>שחקו</b>'],
-      ['<small>Swipe right for</small>', '<small>ימינה אם זה</small>'],
-      [`aria-label="Doesn't fit (left arrow)"`, 'aria-label="לא מתאים (חץ שמאלה)"'],
-      ['aria-label="Fits (right arrow)"', 'aria-label="מתאים (חץ ימינה)"'],
-      [`<li>Each round has a <b>subject</b> and <b>24 words</b>.</li>
-    <li>Swipe <b>right</b> (or <kbd>→</kbd>) if the word fits the subject, <b>left</b> (or <kbd>←</kbd>) if it doesn't.</li>
-    <li>You have <b>60 seconds</b>. A wrong swipe costs <b>3 seconds</b>. Run out and it's game over.</li>
-    <li><b>10 points</b> per right answer, plus <b>5 points</b> for every second left when you finish.</li>`,
-      `<li>בכל סבב יש <b>נושא</b> ו־<b>24 מילים</b>.</li>
-    <li>החליקו <b>ימינה</b> (או <kbd>→</kbd>) אם המילה מתאימה לנושא, ו<b>שמאלה</b> (או <kbd>←</kbd>) אם לא.</li>
-    <li>יש לכם <b>60 שניות</b>. החלקה שגויה עולה <b>3 שניות</b>. נגמר הזמן — נגמר המשחק.</li>
-    <li><b>10 נקודות</b> על כל תשובה נכונה, ועוד <b>5 נקודות</b> על כל שנייה שנשארה בסוף.</li>`],
-      ['<p class="muted small">One daily round plus unlimited rounds.</p>', '<p class="muted small">סבב יומי אחד, ועוד סבבים בלי הגבלה.</p>'],
+      ...WORDSWIPE_GAME,
+      WORDSWIPE_HELP,
+      WORDSWIPE_HELP_FOOT,
+      ['>Make a round</a>', '>צרו סבב</a>'],
+    ],
+
+    'wordswipe/editor.html': [
+      ['Make a WordSwipe round', 'צרו סבב — שמאל ימין שמאל'],
+      ["Make your own WordSwipe round: a subject and 24 words, some that fit and some that don't. Test it, then send the link to a friend.",
+        'צרו סבב משלכם של שמאל ימין שמאל: נושא ו־24 מילים, חלקן מתאימות וחלקן לא. נסו אותו, ואז שלחו את הקישור לחברים.'],
+      ['<h1 class="wordmark ed-title">Make a <span>round</span></h1>', '<h1 class="wordmark ed-title">צרו <span>סבב</span></h1>'],
+      ['<p class="tagline">A subject and 24 words. Test it, then send it to a friend.</p>', '<p class="tagline">נושא ו־24 מילים. נסו אותו, ואז שלחו לחברים.</p>'],
+      ['<span class="kicker">Subject</span>', '<span class="kicker">נושא</span>'],
+      ['placeholder="Things that are yellow"', 'placeholder="דברים צהובים"'],
+      ['<h2 class="kicker">Fits <b', '<h2 class="kicker">מתאים <b'],
+      [`<h2 class="kicker">Doesn't fit <b`, '<h2 class="kicker">לא מתאים <b'],
+      ['aria-label="Add a word that fits"', 'aria-label="הוספת מילה שמתאימה"'],
+      [`aria-label="Add a word that doesn't fit"`, 'aria-label="הוספת מילה שלא מתאימה"'],
+      ['placeholder="Banana, Sun…"', 'placeholder="בננה, שמש…"'],
+      ['placeholder="Grass, Snow…"', 'placeholder="דשא, שלג…"'],
+      ['<p class="ed-hint">Type a word and press Enter, or paste a list split by commas or lines. Tap a word to move it to the other list.</p>',
+        '<p class="ed-hint">הקלידו מילה והקישו Enter, או הדביקו רשימה מופרדת בפסיקים או בשורות. הקישו על מילה כדי להעביר אותה לרשימה השנייה.</p>'],
+      ['<b>Test it</b>', '<b>לנסות</b>'],
+      ['<b>Share</b>', '<b>שיתוף</b>'],
+      ['<b>Copy link</b>', '<b>העתקת קישור</b>'],
+      ['class="foot-link">Start over</button>', 'class="foot-link">להתחיל מחדש</button>'],
+      ['<b>Back to editing</b>', '<b>חזרה לעריכה</b>'],
+      ...WORDSWIPE_GAME,
+    ],
+
+    'wordswipe/play.html': [
+      ['A WordSwipe round, made for you', 'סבב שמאל ימין שמאל, במיוחד בשבילכם'],
+      ["Someone made you a WordSwipe round: a subject, 24 words, 60 seconds. Swipe right if the word fits, left if it doesn't.",
+        'מישהו הכין לכם סבב של שמאל ימין שמאל: נושא אחד, 24 מילים, 60 שניות. מתאים? החליקו ימינה. לא מתאים? שמאלה.'],
+      WORDSWIPE_LOGO,
+      ['<p class="kicker">A round made for you</p>', '<p class="kicker">סבב שהוכן בשבילכם</p>'],
+      [`<p class="tagline">24 words, 60 seconds. Does it fit? Swipe right. Doesn't? Swipe left.</p>`, '<p class="tagline">24 מילים, 60 שניות. מתאים? החליקו ימינה. לא מתאים? שמאלה.</p>'],
+      ['<button id="btn-play" class="btn daily"><b>Play</b></button>', '<button id="btn-play" class="btn daily"><b>שחקו</b></button>'],
+      ['<h1 class="wordmark">Oops</h1>', '<h1 class="wordmark">אופס</h1>'],
+      [`<p class="tagline">This link is broken: the round in it can't be read. Ask whoever sent it to copy the link again.</p>`,
+        '<p class="tagline">הקישור הזה שבור: אי אפשר לקרוא את הסבב שבו. בקשו ממי ששלח אותו להעתיק את הקישור שוב.</p>'],
+      ...WORDSWIPE_GAME,
+      WORDSWIPE_HELP,
+      WORDSWIPE_HELP_FOOT,
     ],
 
     'orderly/index.html': [

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A WordSwipe round, made for you</title>
+<meta name="description" content="Someone made you a WordSwipe round: a subject, 24 words, 60 seconds. Swipe right if the word fits, left if it doesn't.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Games by Miki">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/wordswipe/play.html">
+<meta property="og:title" content="A WordSwipe round, made for you">
+<meta property="og:description" content="Someone made you a WordSwipe round: a subject, 24 words, 60 seconds. Swipe right if the word fits, left if it doesn't.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/wordswipe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<script data-goatcounter="https://goatcounter-production-28ca10cd.up.railway.app/count" async src="https://goatcounter-production-28ca10cd.up.railway.app/count.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ccircle cx='28' cy='36' r='16' fill='%2326366b'/%3E%3Ccircle cx='36' cy='28' r='16' fill='%2300838a' fill-opacity='.88'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- A made-up round from a link (#r=..., see custom.js and shared/link.js). Play only: no editor, nothing saved or counted. -->
+<main id="intro" class="screen" hidden>
+  <a class="icon corner-start" href="./" aria-label="WordSwipe menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-theme" aria-label="Theme"></button><button class="icon js-sound" aria-label="Sound"></button></div>
+  <div id="logo" aria-hidden="true"><i></i><i></i><i>Owl?</i></div>
+  <p class="kicker">A round made for you</p>
+  <h1 id="intro-subject" class="wordmark custom-subject"></h1>
+  <p class="tagline">24 words, 60 seconds. Does it fit? Swipe right. Doesn't? Swipe left.</p>
+  <nav class="menu">
+    <button id="btn-play" class="btn daily"><b>Play</b></button>
+    <div class="links"><button id="btn-help" class="foot-link">How to play</button><a class="foot-link" href="editor.html">Make your own round</a></div>
+  </nav>
+</main>
+
+<main id="broken" class="screen" hidden>
+  <a class="icon corner-start" href="./" aria-label="WordSwipe menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-theme" aria-label="Theme"></button></div>
+  <h1 class="wordmark">Oops</h1>
+  <p class="tagline">This link is broken: the round in it can't be read. Ask whoever sent it to copy the link again.</p>
+  <nav class="menu">
+    <a class="btn daily" href="./"><b>Play WordSwipe</b></a>
+    <div class="links"><a class="foot-link" href="editor.html">Make your own round</a></div>
+  </nav>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="clock" aria-label="Seconds left">60</span>
+      <button id="btn-print" class="icon" aria-label="Print this puzzle"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg></button>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="fuse"><i id="fuse"></i></div>
+  <p class="subject"><small>Swipe right for</small><b id="subject"></b></p>
+  <div id="stack" class="stack" aria-live="polite"></div>
+  <div class="answer">
+    <button id="btn-no" class="vote no" aria-label="Doesn't fit (left arrow)"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <p class="tally"><b id="progress"></b><small id="score"></small><button id="btn-giveup" class="give-up">Give up</button></p>
+    <button id="btn-yes" class="vote yes" aria-label="Fits (right arrow)"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></button>
+  </div>
+  <button id="btn-result" class="btn primary center" hidden><b>See result</b></button>
+</main>
+
+<dialog id="dlg-help">
+  <h2>How to play</h2>
+  <ol class="rules">
+    <li>Each round has a <b>subject</b> and <b>24 words</b>.</li>
+    <li>Swipe <b>right</b> (or <kbd>→</kbd>) if the word fits the subject, <b>left</b> (or <kbd>←</kbd>) if it doesn't.</li>
+    <li>You have <b>60 seconds</b>. A wrong swipe costs <b>3 seconds</b>. Run out and it's game over.</li>
+    <li><b>10 points</b> per right answer, plus <b>5 points</b> for every second left when you finish.</li>
+  </ol>
+  <p class="muted small">One daily round plus unlimited rounds.</p>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-end">
+  <h2 id="end-title"></h2>
+  <p id="end-score" class="big-score"></p>
+  <p id="end-stats" class="stats"></p>
+  <div id="end-misses" class="misses"></div>
+  <div class="win-actions">
+    <button id="end-next" class="btn primary center" autofocus><b></b></button>
+    <a class="btn ghost center" href="./"><b>Play WordSwipe</b></a>
+  </div>
+  <div class="links"><a class="foot-link" href="editor.html">Make your own round</a></div>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="../shared/link.js"></script>
+<script src="custom.js"></script>
+<script src="game.js"></script>
+<script src="play.js"></script>
+</body>
+</html>
