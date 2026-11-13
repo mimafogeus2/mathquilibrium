@@ -184,6 +184,7 @@ function hint() {
   G.hinted.add(q);
   G.history = []; // a hint is final: undoing past it could bring back the queens it removed
   sfx.hint();
+  track('hint');
   refresh(false);
   flash(G.view.pieces[q].firstChild.firstChild, 'pop');
   saveGame();

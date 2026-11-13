@@ -92,6 +92,7 @@ function play(key) {
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, hints: sv?.hints || 0, done: false };
   toGame(date ? 'daily' : code(n));
+  track('start', mode(date, DIFF[lv.d]));
   $('#g-title').textContent = T(date ? 'Daily' : 'Random');
   $('#g-sub').textContent = (date ? shortDate(date) + ' · ' : '') + (sp ? sp.occasion : T(DIFF[lv.d]));
   $('#subject').textContent = lv.subject;
@@ -205,6 +206,7 @@ function hint() {
   const cards = cardEls();
   flash(cards[c], 'pop'); flash(cards[c + 1], 'pop');
   sfx.hint();
+  track('hint', mode(P.date, DIFF[P.lv.d]));
   status();
   save();
 }
@@ -219,6 +221,7 @@ function win() {
   layout();
   sfx.win();
   confetti();
+  track('finish', mode(P.date, DIFF[P.lv.d]));
   showResult(true);
 }
 
@@ -228,6 +231,7 @@ function giveUp() {
   P.done = true;
   delete store.saves[P.key];
   persist();
+  track('giveup', mode(P.date, DIFF[P.lv.d]));
   P.order = [...Array(N).keys()];
   P.links.fill(true);
   layout();
@@ -254,6 +258,7 @@ function showResult(fresh) {
 }
 
 async function share() {
+  track('share', mode(P.date, DIFF[P.lv.d]));
   const r = store.daily[P.date].r;
   const sp = special(SPECIAL, P.date), text = `${T('{game} daily', { game: game.name })} · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
     `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
@@ -265,6 +270,7 @@ async function share() {
 
 // The link to the puzzle on screen: a random one's own code, or the daily (which is a different puzzle tomorrow).
 async function shareLink() {
+  track('share-link', mode(P.date, DIFF[P.lv.d]));
   const url = location.href;
   try {
     if (navigator.share) await navigator.share({ title: game.name, url });
@@ -307,7 +313,7 @@ dlgTopics.addEventListener('close', () => {
   playRandom(true, +dlgTopics.dataset.d);
 });
 $('#btn-link').onclick = shareLink;
-$('#btn-help').onclick = () => $('#dlg-help').showModal();
+$('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
 const goHome = () => { save(); P = null; screen('home'); };
 $('#btn-back').onclick = goHome;
 $('#btn-check').onclick = check;

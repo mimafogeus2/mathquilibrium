@@ -56,6 +56,7 @@ function play(key) {
   $('#game').classList.remove('done');
   $('#btn-result').hidden = true;
   toGame(date ? 'daily' : `round-${n + 1}`);
+  track('start', mode(date));
   $('#stack').replaceChildren();
   refill();
   hud();
@@ -174,6 +175,7 @@ function finish() {
   persist();
   $('#game').classList.add('done');
   if (rec.t) { sfx.win(); confetti(); }
+  track(R.marks.length === 24 ? 'finish' : 'timeout', mode(R.date));
   setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
 }
 
@@ -194,6 +196,7 @@ function showEnd(rec, daily) {
 }
 
 async function shareDaily(rec) {
+  track('share', 'daily');
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
   const sp = special(SPECIAL, date), text = `${T('{game} daily', { game: game.name })} · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) +
@@ -212,7 +215,7 @@ store = { daily: {}, n: 0, best: 0, muted: false, seenHelp: false, ...store };
 
 $('#btn-daily').onclick = () => play('D' + today());
 $('#btn-unlimited').onclick = () => play('U' + store.n);
-$('#btn-help').onclick = () => $('#dlg-help').showModal();
+$('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
 const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
 $('#btn-back').onclick = goHome;
 $('#btn-yes').onclick = () => answer(true);
