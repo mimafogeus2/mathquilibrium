@@ -78,4 +78,5 @@
 .p-pairs { width: 100%; margin: 0; padding: 0; list-style: none; font-size: 18pt; font-weight: 600; font-variant-numeric: tabular-nums; }
 .p-pairs li { display: grid; grid-template-columns: 1fr 22mm 1fr; align-items: end; gap: 6mm; padding: 4.5mm 0; }
 .p-pairs span:first-child { text-align: right; }
-.p-pairs i { height: 11mm; border-bottom: 1.2pt solid #000; }
+.p-pairs i { height: 11mm; border-bottom: 1.2pt solid #000; text-align: center; font-style: normal; }
+.p-pairs small { font-size: 11pt; font-weight: 400; }

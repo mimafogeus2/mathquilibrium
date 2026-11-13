@@ -55,6 +55,7 @@ module.exports = {
       'Easy': 'קל',
       'Medium': 'בינוני',
       'Hard': 'קשה',
+      '{game}: the answer': '{game}: הפתרון',
       '{n}-day streak': 'רצף: {n}',
       '1 hint': 'רמז אחד',
       '{n} hints': '{n} רמזים',

@@ -99,6 +99,9 @@
 /* scissors on the cut line */
 .p-strips li::before { content: '✂'; position: absolute; inset-inline-start: 3mm; top: -.62em; padding: 0 1mm; background: #fff; font-size: 12pt; line-height: 1; font-weight: 400; }
 .p-strips i { flex: none; width: 12mm; height: 7mm; border-bottom: 1.2pt solid #000; }
+.p-order { width: 100%; margin: 0; padding-inline-start: 10mm; font-size: 13pt; }
+.p-order li { padding: 2.5mm 0; border-bottom: .5pt solid #888; }
+.p-order span { font-weight: 400; color: #444; }
 
 /* ---------- play.html: a shared level ---------- */
 .broken { margin: auto 0; width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; }

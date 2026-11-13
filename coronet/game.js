@@ -292,6 +292,8 @@ printable(() => {
   const el = svg('svg', { class: 'p-ring', 'aria-hidden': 'true' });
   drawBoard(el, G.p);
   el.insertAdjacentHTML('afterbegin', PRINT_DEFS);
+  const solved = svg('svg', { class: 'p-ring', 'aria-hidden': 'true' });
+  drawBoard(solved, G.p, { mini: true });
   return {
     rules: [
       T('Place <b>{n} queens</b>: one in every <b>ring</b>, every <b>slice</b> and every <b>shade</b>.', { n: G.p.N }),
@@ -299,6 +301,7 @@ printable(() => {
       T('Each queen rules out the rest of its ring, its slice and its shade.'),
     ],
     body: el.outerHTML,
+    answer: solved.outerHTML, // its fills use the first board's patterns
   };
 });
 
