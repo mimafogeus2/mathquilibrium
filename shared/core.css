@@ -109,6 +109,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px;
 }
 .foot-link:hover { color: var(--ink); text-decoration-color: var(--brand); }
+/* a link styled as one: centered in its 44px touch target like a button's label (min-height, below) */
+a.foot-link { display: inline-flex; align-items: center; }
 
 .btn {
   display: flex; flex-direction: column; align-items: flex-start; gap: 2px;

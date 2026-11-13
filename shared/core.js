@@ -110,7 +110,7 @@ function flash(el, cls) {
 // A no-op when count.js is blocked or not loaded (localhost, file://). The mode defaults to the boot() game's puzzle in play.
 const mode = (date, tier) => (date ? 'daily' : 'level') + (tier ? '-' + tier.toLowerCase() : '');
 function track(what, m = G && mode(G.date, TIERS[G.pack])) {
-  const g = location.pathname.replace(/index\.html$/, '').split('/').filter(Boolean).pop();
+  const g = location.pathname.replace(/[^/]*\.html$/, '').split('/').filter(Boolean).pop();
   window.goatcounter?.count?.({ path: `${g}/${what}` + (m ? '/' + m : ''), event: true });
 }
 function toGame(h) {

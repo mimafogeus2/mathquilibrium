@@ -60,3 +60,24 @@ for (let day = 0; day < LEVELS.length * 7; day++) {
 }
 for (const d of [1, 2, 3]) assert.strictEqual(seen[d].size, pool(d).length, `${DIFF[d]} dailies repeat before the pool runs out`);
 console.log('ok', LEVELS.length, 'levels,', SPECIAL.length, 'special days; today is', parse(LEVELS[dailyIndex(new Date().toISOString().slice(0, 10))]).subject);
+
+// custom levels (the editor's share links): encode → decode gives the level back; a broken or doctored link is turned away, not played
+(async () => {
+  const { packLink, unpackLink } = require('../shared/link.js'), { CUSTOM, customLevel } = require('./custom.js');
+  const L = parse(LEVELS[0]), lvl = { s: L.subject, t: L.top, b: L.bottom, c: L.items.map((it) => [it.name, it.val]) };
+  const code = await packLink(lvl);
+  assert(/^[\w-]+$/.test(code), 'link code is not base64url');
+  assert.deepStrictEqual(await unpackLink(code), lvl, 'round trip');
+  assert.deepStrictEqual(customLevel(await unpackLink(code)).items, L.items, 'round trip to a playable level');
+  for (const bad of [code.slice(0, -6), code.slice(0, 10), 'not*base64', '', 'AAAA']) assert.strictEqual(customLevel(await unpackLink(bad)), null, 'broken link accepted: ' + bad);
+  const doctored = [{ ...lvl, c: lvl.c.slice(1) }, { ...lvl, s: '' }, { ...lvl, c: [lvl.c[0], ...lvl.c.slice(0, 9)] }, { ...lvl, c: lvl.c.map(([n]) => [n, 1]) }, { ...lvl, t: 'x'.repeat(CUSTOM.label + 1) }, [], null];
+  for (const o of doctored) assert.strictEqual(customLevel(await unpackLink(await packLink(o))), null, 'bad level accepted: ' + JSON.stringify(o));
+  // the longest level the editor allows still makes a link well under ~2,000 characters (some apps cut longer ones), in Hebrew too
+  const rand = rng(7), word = (abc, n) => Array.from({ length: n }, () => abc[Math.floor(rand() * abc.length)]).join('');
+  for (const abc of ['abcdefghijklmnopqrstuvwxyz ', 'אבגדהוזחטיכלמנסעפצקרשת ']) {
+    const big = { s: word(abc, CUSTOM.subject), t: word(abc, CUSTOM.label), b: word(abc, CUSTOM.label), c: Array.from({ length: N }, () => [word(abc, CUSTOM.name), word(abc, CUSTOM.value)]) };
+    const url = 'https://mimafogeus2.github.io/mathquilibrium/he/orderly/play.html#l=' + await packLink(big);
+    assert(customLevel(big) && url.length < 2000, `longest link is ${url.length} chars`);
+    console.log('longest custom level link:', url.length, 'chars', abc[0] === 'a' ? '(English)' : '(Hebrew)');
+  }
+})().catch((e) => { console.error(e); process.exit(1); });
