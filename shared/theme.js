@@ -29,5 +29,20 @@
       apply();
     });
     apply();
+
+    // .js-fav: browsers don't let pages add bookmarks, so the star shows how to on this device
+    // ponytail: UA sniffing for the hint only; a wrong guess just shows the desktop shortcut
+    const T = (s) => (typeof I18N === 'object' && I18N[s]) || s;
+    const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const hint = ios ? T('Tap Share, then Add to Home Screen')
+      : matchMedia('(pointer: coarse)').matches ? T('Open the browser menu and tap ☆ or Add to Home screen')
+      : /Mac/.test(ua) ? T('Press ⌘D to bookmark this page') : T('Press Ctrl+D to bookmark this page');
+    for (const b of document.querySelectorAll('.js-fav')) {
+      const tip = Object.assign(document.createElement('div'), { className: 'fav-tip', textContent: hint, popover: 'auto', id: 'fav-tip' });
+      b.after(tip);
+      b.setAttribute('popovertarget', 'fav-tip');
+      b.title = b.getAttribute('aria-label');
+      b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>';
+    }
   });
 })();
