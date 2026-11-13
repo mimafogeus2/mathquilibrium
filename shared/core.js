@@ -7,6 +7,7 @@
 //   key(e)         -> handle a keydown during play; return true if used
 //   reveal(G)      -> show the answer on the board (after giving up)
 //   random         -> optional: random levels per difficulty with share codes (playRandom), no unlocks or levels grid
+//   stars(G)       -> optional: the stars for a win (default: by hints); a game with it has no hints, and its results show stars instead
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
 // the waves are their own paths, so core.css can ripple them out (on) or draw them back in (muted: they stay, invisible)
@@ -261,8 +262,8 @@ function win() {
   G.done = true;
   clearInterval(timer);
   delete store.saves[G.key];
-  const h = G.hinted.size, stars = h === 0 ? 3 : h <= 2 ? 2 : 1;
-  if (G.date) ((store.daily[G.date] ??= {})[G.pack] ??= { t: G.elapsed, h });
+  const h = G.hinted.size, stars = game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1;
+  if (G.date) ((store.daily[G.date] ??= {})[G.pack] ??= { t: G.elapsed, h, s: stars });
   else {
     const pp = store.packs[G.pack];
     pp.stars[G.n] = Math.max(pp.stars[G.n] || 0, stars);
@@ -281,7 +282,7 @@ function win() {
     if (G !== g) return;
     starRow($('#win-stars'), stars);
     $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
-    $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b> · ${h ? hintsText(h) : T('no hints')}` + (g.date ? streakText(streak()) : '');
+    $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b>` + (game.stars ? '' : ` · ${h ? hintsText(h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
     const last = !g.date && !game.random && g.n === PACK_SIZE;
     if (last) $('#win-title').textContent = T('{tier} pack complete!', { tier: tierName(g.pack) });
     $('#win-next').hidden = last;
@@ -307,7 +308,7 @@ function giveUp() {
 async function share() {
   track('share');
   const r = store.daily[G.date][G.pack];
-  const text = `${T('{game} daily', { game: game.name })} · ${G.date} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ ' + T('no hints')}` +
+  const text = `${T('{game} daily', { game: game.name })} · ${G.date} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${game.stars ? '⭐'.repeat(r.s) : r.h ? '💡'.repeat(r.h) : '⭐ ' + T('no hints')}` +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(G.pack) : '');
   try {
     if (navigator.share) await navigator.share({ text });

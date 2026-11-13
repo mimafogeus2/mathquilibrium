@@ -5,7 +5,7 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const LANGS = ['he'];
-const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip'].map((g) => g + '/index.html')];
+const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip', 'alienchess'].map((g) => g + '/index.html')];
 const SITE = 'https://mimafogeus2.github.io/mathquilibrium/';
 const ROOT = __dirname, read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const check = process.argv.includes('--check'), errors = [];

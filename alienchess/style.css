@@ -1,0 +1,100 @@
+/* Alien Chess: the board, the pieces and their cards. Everything else is in shared/core.css.
+   Your pieces are paper with an ink outline; the computer's are printed in the brand red. */
+:root { --brand: var(--red); --brand-text: var(--red-text); --on-brand: var(--on-red); }
+
+/* The board is drawn from your side, files left to right: it never mirrors */
+.board, .cards, #help-card { direction: ltr; }
+.board {
+  --n: 5; position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr);
+  width: min(400px, calc(100vw - 32px), calc(100dvh - 420px)); min-width: 220px; aspect-ratio: 1;
+  border-radius: 10px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line), 4px 5px 0 var(--reg);
+  user-select: none; -webkit-user-select: none;
+}
+.board:focus-visible { outline-offset: 4px; }
+.sq { position: relative; background: var(--grain), var(--stock); cursor: pointer; animation: enter .3s var(--d, 0ms) both var(--ease); }
+.sq.dk { background: var(--grain), color-mix(in srgb, var(--brand) 14%, var(--stock)); }
+.sq::after { content: ''; position: absolute; pointer-events: none; }
+.sq.last { box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--sun) 28%, transparent); }
+.sq.sel { box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--sun) 55%, transparent); }
+.sq.to::after { inset: 37%; border-radius: 50%; background: var(--ink); opacity: .45; }
+.sq.take::after { inset: 6%; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--ink); opacity: .7; z-index: 4; }
+.sq.cur::before { content: ''; position: absolute; inset: 3px; border-radius: 6px; box-shadow: inset 0 0 0 2.5px var(--ink); z-index: 4; pointer-events: none; }
+@media (hover: hover) { .sq.to:hover::after, .sq.take:hover::after { opacity: 1; } }
+
+/* a piece slides from square to square */
+.unit {
+  position: absolute; top: 0; left: 0; width: calc(100% / var(--n)); aspect-ratio: 1; pointer-events: none; z-index: 2;
+  transform: translate(calc(var(--c) * 100%), calc(var(--r) * 100%)); transition: transform .32s var(--ease);
+  display: grid; place-items: center;
+}
+.unit .pc { width: 78%; height: 88%; filter: drop-shadow(1px 2px 0 color-mix(in srgb, var(--reg) 40%, transparent)); }
+.unit.gone .pc { animation: gone .35s ease-in forwards; }
+@keyframes gone { to { opacity: 0; transform: scale(.3) rotate(25deg); } }
+.unit.pop .pc { animation: hop .4s var(--ease); }
+@keyframes hop { 40% { transform: translateY(-14%); } }
+.board.shake { animation: shake .4s; }
+.board.lost .unit .pc.you { opacity: .55; }
+.board.solved .sq { animation: wave .6s var(--d, 0ms) both var(--ease); }
+
+/* the pieces themselves */
+.pc { overflow: visible; }
+.pc * { fill: var(--pf); stroke: var(--ps); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.pc .d { fill: var(--ps); stroke: none; }
+.pc .l { fill: none; stroke-width: 2.6; }
+.pc .w { fill: var(--stock); }
+.pc .crown { fill: var(--sun); stroke: var(--navy); stroke-width: 1.2; }
+.pc.you { --pf: var(--stock); --ps: var(--ink); }
+.pc.foe { --pf: var(--brand); --ps: var(--navy); }
+:root[data-theme="dark"] .pc.you { --pf: #f4ecdc; --ps: var(--navy); }
+/* on blue stock a navy line vanishes: antennae, legs and rings take the piece's own colour */
+:root[data-theme="dark"] .pc .l { stroke: var(--pf); }
+:root[data-theme="dark"] .pc .w { fill: #f4ecdc; } /* eyes and glass stay pale */
+
+/* ---------- cards ---------- */
+.cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 460px; }
+.card {
+  width: 128px; padding: 8px 8px 10px; border-radius: 12px; background: var(--grain), var(--stock);
+  box-shadow: inset 0 0 0 1px var(--hair), var(--lift); cursor: pointer;
+  transition: transform .15s var(--ease), box-shadow .15s var(--ease); animation: rise .35s both var(--ease);
+}
+.card:nth-child(2) { animation-delay: 60ms; } .card:nth-child(3) { animation-delay: 120ms; }
+.card.on { transform: translateY(-3px); box-shadow: inset 0 0 0 2px var(--ink), 2px 3px 0 var(--reg); }
+.card-head { display: flex; align-items: center; gap: 0; margin-bottom: 6px; min-height: 30px; }
+.card-head .pc { width: 18px; height: 24px; flex: none; }
+.card-head .pc + .pc { margin-inline-start: -7px; }
+.card-head b { margin-inline-start: 5px; font: 600 14.5px/1.1 var(--display); letter-spacing: -0.01em; }
+.card.king { box-shadow: inset 0 0 0 1.5px var(--sun), var(--lift); }
+.card.king.on { box-shadow: inset 0 0 0 2px var(--ink), 2px 3px 0 var(--reg); }
+.card { position: relative; }
+.card-head small { position: absolute; top: -8px; inset-inline-end: 8px; padding: 2px 6px; border-radius: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--sun); color: var(--navy); }
+.diagram { display: block; width: 100%; height: auto; }
+.diagram .sqs rect { fill: none; stroke: var(--hair); stroke-width: .5; }
+.diagram .sqs rect.dk { fill: var(--slot); }
+.diagram .me { fill: var(--brand); stroke: var(--navy); stroke-width: .8; }
+.diagram .lines path { fill: none; stroke: var(--ink); stroke-width: 1.3; opacity: .55; }
+.diagram .any { fill: var(--ink); stroke: none; }
+.diagram .mv { fill: var(--stock); stroke: var(--ink); stroke-width: 1.3; }
+.diagram .cp { fill: none; stroke: var(--red-text); stroke-width: 1.7; }
+
+/* ---------- home, help ---------- */
+#logo { width: 84px; height: 100px; margin: 0 auto 2px; transform: rotate(-6deg); }
+#logo .pc { width: 100%; height: 100%; }
+#help-card .card { margin: 0 auto 6px; cursor: default; animation: none; }
+/* practice, as in Coronet: each pack row resumes its puzzle or deals a new one; the row below always deals a new one */
+.pack-count { text-align: end; min-width: 6.2em; }
+.pack-count small { display: block; font-size: 11.5px; color: var(--brand-text); }
+.new-head { margin: 6px 2px -4px; }
+#new-row .btn { padding: 12px 8px; }
+#new-row .btn b { font-size: 15px; }
+#new-row .btn b::before { content: var(--pips); display: block; font-size: 8px; letter-spacing: 2px; color: var(--brand-text); margin-bottom: 3px; }
+
+/* keep board, tip, cards and tools together in the middle */
+#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+#game .tip { margin: 8px 0 10px; }
+#game .tools { margin: 10px 0 auto; padding-bottom: 8px; }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .board { width: min(calc(100dvh - 90px), calc(100vw - 420px)); }
+  .cards { grid-column: 2; grid-row: 4; max-width: 400px; }
+  .card { width: 112px; }
+}

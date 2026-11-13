@@ -205,6 +205,42 @@ module.exports = {
       'Not clear yet. <b>Tap a used piece</b> to lift it, or undo.': 'הלוח עוד לא נקי. <b>הקישו על צורה משומשת</b> כדי להרים אותה, או בטלו.',
       'Restart this level? Your pieces come back off the board; the clock keeps running.': 'להתחיל את השלב מחדש? הצורות יורדות מהלוח; השעון ממשיך לרוץ.',
     },
+    'alienchess/game.js': {
+      'Alien Chess': 'שחמאדים',
+      // the aliens: the same nonsense, in Hebrew letters
+      'Bloorp': 'בלורפ',
+      'Zib': 'זיב',
+      'Gromf': 'גרומף',
+      'Quizzle': 'קוויזל',
+      'Thrubb': 'תראב',
+      'Yeep': 'ייפ',
+      'Vonk': 'וונק',
+      'Splorg': 'ספלורג',
+      'Snee': 'סני',
+      'Mibbix': 'מיביקס',
+      'Durfle': 'דרפל',
+      'Oomba': 'אומבה',
+      'King': 'מלך',
+      'Win in 1 move': 'ניצחון במסע אחד',
+      'Win in {k} moves': 'ניצחון ב־{k} מסעים',
+      'Take the enemy <b>king</b>, or every enemy piece.': 'אכלו את <b>המלך</b> של האויב, או את כל הכלים שלו.',
+      'Take <b>every</b> enemy piece.': 'אכלו <b>את כל</b> הכלים של האויב.',
+      'Thinking…': 'חושב…',
+      'Alien Chess board, {n} by {n}. You have {a} pieces, the computer {b}.': 'לוח שחמאדים, {n} על {n}. לכם {a} כלים, למחשב {b}.',
+      'You: {piece} {from} to {to}.': 'אתם: {piece} מ־{from} ל־{to}.',
+      'Computer: {piece} {from} to {to}.': 'המחשב: {piece} מ־{from} ל־{to}.',
+      'Takes a piece.': 'ואוכל כלי.',
+      'Your <b>king</b> fell.': '<b>המלך</b> שלכם נפל.',
+      'You lost <b>every piece</b>.': 'איבדתם <b>את כל הכלים</b>.',
+      'Nobody can move.': 'אף צד לא יכול לזוז.',
+      "The computer can't move, and passes.": 'המחשב לא יכול לזוז, ומדלג.',
+      "It can't move, so it passes: <b>your turn</b> again.": 'הוא לא יכול לזוז, אז הוא מדלג: <b>שוב התור שלכם</b>.',
+      "You can't move, so you pass.": 'אתם לא יכולים לזוז, אז אתם מדלגים.',
+      'Undo, or restart.': 'בטלו מסע, או התחילו מחדש.',
+      'your {piece}': '{piece} שלכם',
+      'enemy {piece}': '{piece} של האויב',
+      'empty': 'ריק',
+    },
   },
 
   // Page text: [English, Hebrew] replacements, exactly as the English HTML has them. Each must be found (build.js fails otherwise),
@@ -251,8 +287,8 @@ module.exports = {
     'index.html': [
       ['<title>Games by Miki — daily logic games</title>', '<title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>'],
       ['content="Games by Miki — daily logic games"', 'content="מדף המשחקים של מיקי — משחקי היגיון יומיים"'],
-      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr and Quadflip. New puzzles every day."',
-        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה ומהפכים. חידות חדשות בכל יום."'],
+      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip and Alien Chess. New puzzles every day."',
+        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים ושחמאדים. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
       // The Hebrew title is ~7.5em wide: size it to the header's width so it stays on one line (13cqi ≈ 100% / 7.6em, shadow included)
       ['<header>', '<header style="container-type: inline-size">'],
@@ -281,6 +317,9 @@ module.exports = {
       ['<span class="kicker">06 <em>Logic</em></span>', '<span class="kicker">06 <em>היגיון</em></span>'],
       ['<h2>Quad<span>flip</span></h2>', '<h2>מ<span>הפכים</span></h2>'],
       ['<p>Stamp every piece once to flip the board back to blank.</p>', '<p>החתימו כל צורה פעם אחת והפכו את הלוח בחזרה ללבן.</p>'],
+      ['<span class="kicker">07 <em>Logic</em></span>', '<span class="kicker">07 <em>היגיון</em></span>'],
+      ['<h2>Alien <span>Chess</span></h2>', '<h2>שח<span>מאדים</span></h2>'],
+      ['<p>Chess with pieces from another planet, new every level. Read their cards, then take the enemy king.</p>', '<p>שחמט עם כלים מכוכב אחר, חדשים בכל שלב. קראו את הקלפים שלהם, ואז אכלו את המלך של האויב.</p>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
       // the inline script
       ['`No. ${no.toLocaleString()}`', '`גיליון ${no.toLocaleString()}`'],
@@ -417,6 +456,29 @@ module.exports = {
     <li>הקישו על צורה משומשת כדי להרים אותה שוב.</li>`],
       ['<p class="muted small no-touch">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> pick a piece, arrows to move it, <kbd>Space</kbd> to stamp, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small no-touch">מקלדת: <kbd>1</kbd>–<kbd>5</kbd> בחירת צורה, חצים להזזה, <kbd>רווח</kbd> להחתמה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+    ],
+    'alienchess/index.html': [
+      ['Alien Chess — strange pieces, small boards', 'שחמאדים — כלים מוזרים, לוחות קטנים'],
+      ['Chess puzzles with pieces from another planet: new ones every level, each with a card. Read them, then take the enemy king. New daily puzzles every day.',
+        'חידות שחמט עם כלים מכוכב אחר: חדשים בכל שלב, ולכל אחד קלף. קראו אותם, ואז אכלו את המלך של האויב. חידות יומיות חדשות בכל יום.'],
+      ['<h1 class="wordmark">Alien <span>Chess</span></h1>', '<h1 class="wordmark">שח<span>מאדים</span></h1>'],
+      ['<p class="tagline">Chess, as they play it out there.</p>', '<p class="tagline">שחמט, כמו שמשחקים אותו שם בחוץ.</p>'],
+      ['<p id="board-keys" class="sr-only">Your pieces start at the bottom. Arrow keys move around the board. Space or Enter picks up one of your pieces, then puts it down on a square it can reach. Z takes back your last move.</p>',
+        '<p id="board-keys" class="sr-only">הכלים שלכם מתחילים למטה. החצים זזים על הלוח. רווח או Enter מרימים כלי שלכם, ואז מניחים אותו במשבצת שהוא יכול להגיע אליה. Z מבטל את המסע האחרון.</p>'],
+      [`<li>Every level brings <b>new pieces</b>. Each one's <b>card</b> shows how it moves.</li>
+    <li>On a card, a <b>line</b> slides until something blocks it; an arrow runs to the edge. A <b>lone dot</b> jumps straight there. <b>●</b> moves or takes, <b>○</b> only moves, <b>×</b> only takes.</li>
+    <li>Cards point up the board. The enemy's pieces move the same way, <b>upside down</b>.</li>
+    <li>Take the enemy's <b>king</b> (the crowned piece), or <b>all</b> of its pieces. Lose yours and you lose. A side with no move skips its turn.</li>
+    <li>You move first. There's always a <b>win</b> in the moves shown on top: undo, restart and try again.</li>
+    <li>Win fast for <b>three stars</b>.</li>`,
+      `<li>בכל שלב יש <b>כלים חדשים</b>. ה<b>קלף</b> של כל אחד מראה איך הוא זז.</li>
+    <li>בקלף, <b>קו</b> הוא החלקה עד שמשהו חוסם אותה; חץ ממשיך עד הקצה. <b>נקודה בודדת</b> היא קפיצה ישר לשם. <b>●</b> זז או אוכל, <b>○</b> רק זז, <b>×</b> רק אוכל.</li>
+    <li>הקלפים פונים אל ראש הלוח. הכלים של האויב זזים אותו דבר, <b>הפוך</b>.</li>
+    <li>אכלו את <b>המלך</b> של האויב (הכלי עם הכתר), או את <b>כל</b> הכלים שלו. אם תאבדו את שלכם, הפסדתם. צד שאין לו מסע מדלג על התור.</li>
+    <li>אתם מתחילים. תמיד יש <b>ניצחון</b> במספר המסעים שכתוב למעלה: בטלו, התחילו מחדש ונסו שוב.</li>
+    <li>נצחו מהר ותקבלו <b>שלושה כוכבים</b>.</li>`],
+      ['<p class="muted small">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
+        '<p class="muted small">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להרמה ולהנחה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
   },
 };
