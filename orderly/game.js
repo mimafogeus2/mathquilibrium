@@ -6,10 +6,10 @@ const N = 10, HINTS = 3, DIFF = ['', 'Easy', 'Medium', 'Hard'];
 const TOPICS = { history: 'History', science: 'Science', nature: 'Nature', places: 'Places', screen: 'Film & TV', music: 'Music', words: 'Books & Art', sport: 'Sport & Games', food: 'Food & Drink', tech: 'Tech & Inventions' };
 const stars = (checks) => (checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
 
-// The daily's difficulty climbs through the (UTC) week: Easy Mon–Tue, Medium Wed–Fri, Hard Sat–Sun.
+// The daily's difficulty climbs through the (UTC) week: Easy Mon–Tue, Medium Wed–Fri, Hard Sat–Sun (Hebrew: the Israeli week, Sun–Sat).
 // Each difficulty's days walk a fixed shuffle of that difficulty's levels, so no repeats until its pool has all been used.
-const DAY0 = Date.UTC(2025, 11, 29); // a Monday
-const WEEK = [1, 1, 2, 2, 2, 3, 3]; // Monday first
+const DAY0 = Date.UTC(2025, 11, LANG === 'he' ? 28 : 29); // the first day of a week: Sunday or Monday
+const WEEK = [1, 1, 2, 2, 2, 3, 3]; // from the week's first day
 const POOLS = {};
 function pool(d) {
   if (POOLS[d]) return POOLS[d];

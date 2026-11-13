@@ -4,6 +4,7 @@ const assert = require('assert');
 const dir = process.argv[2] ? `${__dirname}/../${process.argv[2]}/orderly` : __dirname;
 const LEVELS = require(dir + '/levels.js');
 globalThis.LEVELS = LEVELS;
+globalThis.LANG = process.argv[2] || 'en';
 Object.assign(globalThis, require('../shared/common.js'));
 
 // the pure helpers the page uses (game.js needs a DOM, so they're lifted out of the source)
@@ -53,7 +54,7 @@ assert(codes.every((c, i) => /^[0-9a-z]{3}$/.test(c) && fromCode(c) === i + 1) &
 // the daily follows the weekly curve, and each difficulty's days cover its whole pool before repeating
 const seen = { 1: new Set(), 2: new Set(), 3: new Set() }, count = { 1: 0, 2: 0, 3: 0 };
 for (let day = 0; day < LEVELS.length * 7; day++) {
-  const date = new Date(DAY0 + day * 864e5 + 12 * 36e5), want = [3, 1, 1, 2, 2, 2, 3][date.getUTCDay()], i = dailyIndex(date.toISOString().slice(0, 10));
+  const date = new Date(DAY0 + day * 864e5 + 12 * 36e5), want = (LANG === 'he' ? [1, 1, 2, 2, 2, 3, 3] : [3, 1, 1, 2, 2, 2, 3])[date.getUTCDay()], i = dailyIndex(date.toISOString().slice(0, 10));
   assert.strictEqual(parse(LEVELS[i]).d, want, 'wrong daily difficulty on ' + date);
   if (count[want]++ < pool(want).length) seen[want].add(i);
 }
