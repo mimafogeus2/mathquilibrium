@@ -323,6 +323,7 @@ function hint() {
   G.hinted.add(c.key);
   G.history = []; // a hint is final: undoing past it could bring back the wrong tile it replaced
   sfx.hint();
+  track('hint');
   flash(c.el, 'pop');
   G.sel = nextEmpty(c);
   G.eq = null;

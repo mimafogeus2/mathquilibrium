@@ -90,14 +90,14 @@ function flash(el, cls) {
 // ---------- URLs ----------
 // Each puzzle has its own hash (#daily-easy, #easy-12, ...); the menu has none. Menu -> puzzle pushes a history entry,
 // puzzle -> puzzle replaces it, so Back returns to the menu and Forward to the last puzzle played from it.
-// Anonymous GoatCounter event, e.g. "orderly/finish/daily": no cookies, nothing personal, same data as a page view.
-// A no-op when count.js is blocked or not loaded (localhost, file://).
-function track(what, daily) {
+// Anonymous GoatCounter event, e.g. "coronet/finish/daily-hard": no cookies, nothing personal, same data as a page view.
+// A no-op when count.js is blocked or not loaded (localhost, file://). The mode defaults to the boot() game's puzzle in play.
+const mode = (date, tier) => (date ? 'daily' : 'level') + (tier ? '-' + tier.toLowerCase() : '');
+function track(what, m = G && mode(G.date, TIERS[G.pack])) {
   const g = location.pathname.replace(/index\.html$/, '').split('/').filter(Boolean).pop();
-  window.goatcounter?.count?.({ path: `${g}/${what}/${daily ? 'daily' : 'level'}`, event: true });
+  window.goatcounter?.count?.({ path: `${g}/${what}` + (m ? '/' + m : ''), event: true });
 }
 function toGame(h) {
-  track('start', h.startsWith('daily'));
   if (location.hash) history.replaceState(history.state, '', '#' + h);
   else history.pushState('game', '', '#' + h);
 }
@@ -184,6 +184,7 @@ function renderHome() {
 function start(pack, n, date = null) {
   const key = date ? 'D' + pack + date : pack + n, save = store.saves[key] || {};
   G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: false, paused: false };
+  track('start');
   $('#g-title').textContent = date ? T('Daily · {tier}', { tier: tierName(pack) }) : `${tierName(pack)} · ${game.random ? levelCode(n) : n}`;
   show('game');
   $('#game').classList.remove('done');
@@ -239,7 +240,7 @@ function win() {
   $('#game').classList.add('done');
   sfx.win();
   confetti();
-  track('finish', G.date);
+  track('finish');
 
   const g = G;
   setTimeout(() => {
@@ -264,13 +265,14 @@ function giveUp() {
   clearInterval(timer);
   delete store.saves[G.key];
   persist();
+  track('giveup');
   $('#game').classList.add('done');
   game.reveal(G);
   sfx.erase();
 }
 
 async function share() {
-  track('share', true);
+  track('share');
   const r = store.daily[G.date][G.pack];
   const text = `${T('{game} daily', { game: game.name })} · ${G.date} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.h ? '💡'.repeat(r.h) : '⭐ ' + T('no hints')}` +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(G.pack) : '');
@@ -386,7 +388,7 @@ function boot(g) {
     for (const k in TIERS) store.cur[k] ??= +Object.keys(store.saves).find((s) => s[0] === k && /^\d+$/.test(s.slice(1)))?.slice(1) || undefined;
     for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(b.dataset.pack, true);
   } else $('#btn-levels').onclick = () => openLevels();
-  $('#btn-help').onclick = () => $('#dlg-help').showModal();
+  $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
   const home = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
   $('#btn-back').onclick = home;
   $('#btn-pause').onclick = () => setPaused(!G.paused);

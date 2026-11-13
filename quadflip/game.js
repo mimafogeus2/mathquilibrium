@@ -177,6 +177,7 @@ function hint() {
   G.hinted.add(k);
   if (G.sel === k || G.placed[G.sel] >= 0) G.sel = Math.max(0, nextFree());
   sfx.hint();
+  track('hint');
   refresh();
   SHAPES[pieces[k]].forEach(([r, c]) => flash(G.view.tiles[sol[i] + r * G.p.N + c], 'pop'));
   saveGame();

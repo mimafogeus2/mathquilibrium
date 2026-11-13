@@ -53,6 +53,7 @@ function start(pack, n, date = null) {
   $('#btn-result').hidden = true;
   screen('game');
   toGame(levelHash(pack, n));
+  track('start', mode(date, TIERS[pack]));
   if (R.marks.length === PAIRS || R.left <= 0) return finish(); // left mid-reveal of the last answer
   deal();
   hud();
@@ -152,7 +153,7 @@ function finish() {
   persist();
   $('#game').classList.add('done');
   if (full) { sfx.win(); confetti(); }
-  track('finish', R.date);
+  track(full ? 'finish' : 'timeout', mode(R.date, TIERS[R.pack]));
   const r = R;
   setTimeout(() => showEnd(rec, r), full ? 700 : 300);
 }
@@ -175,7 +176,7 @@ function showEnd(rec, { pack, n, date }) {
 }
 
 async function share(rec, pack, date) {
-  track('share', true);
+  track('share', mode(date, TIERS[pack]));
   const text = `${T('{game} daily', { game: game.name })} · ${date} · ${tierName(pack)}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
   try {
@@ -191,7 +192,7 @@ store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...sto
 for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
 
 $('#btn-levels').onclick = () => openLevels();
-$('#btn-help').onclick = () => $('#dlg-help').showModal();
+$('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
 const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
 $('#btn-back').onclick = goHome;
 sides().forEach((el, i) => (el.onclick = () => answer(i)));
