@@ -153,14 +153,14 @@ function drag(e) {
   if (!el || P.done || e.button) return;
   e.preventDefault();
   const all = units(), unit = all.find((u) => u.includes(+el.dataset.i)), rest = all.filter((u) => u !== unit);
-  const cards = cardEls(), els = unit.map((c) => cards[c]), start = P.order.indexOf(unit[0]), y0 = e.clientY;
+  const cards = cardEls(), els = unit.map((c) => cards[c]), start = P.order.indexOf(unit[0]), y0 = e.clientY, sc = pageScale();
   const pitch = el.offsetHeight + parseFloat(getComputedStyle($('#list')).rowGap || 0);
   // tops[j] = where the unit's top card sits if inserted at index j
   const tops = rest.reduce((t, u) => [...t, t.at(-1) + u.length], [0]);
   el.setPointerCapture(e.pointerId);
   els.forEach((c) => c.classList.add('held'));
   const moveTo = (ev) => {
-    const dy = ev.clientY - y0, want = start + dy / pitch;
+    const dy = (ev.clientY - y0) / sc, want = start + dy / pitch;
     const j = tops.reduce((b, t, k) => (Math.abs(t - want) < Math.abs(tops[b] - want) ? k : b), 0);
     if (tops[j] !== P.order.indexOf(unit[0])) { place(rest, unit, j); layout(false); sfx.tap(); }
     els.forEach((c) => c.style.setProperty('--dy', dy - (tops[j] - start) * pitch + 'px'));
@@ -288,9 +288,9 @@ async function shareLink() {
 // Each language has its own levels, so its own progress (math games share theirs: the puzzles are the same)
 game = { name: T('Orderly'), storeKey: LANG === 'en' ? 'orderly' : 'orderly-' + LANG, glyphs: ['↑', '↓'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
-store = { daily: {}, stars: {}, saves: {}, off: [], muted: false, seenHelp: false, ...store };
+store = { daily: {}, stars: {}, saves: {}, off: [], seenHelp: false, ...store };
 
-// play.html shares the store (sound, help seen) but may sit open beside a game tab: it re-reads before writing, so it never writes back a stale copy.
+// play.html shares the store (help seen) but may sit open beside a game tab: it re-reads before writing, so it never writes back a stale copy.
 const remember = (patch) => {
   if (SOLO) try { store = { ...store, ...JSON.parse(localStorage.getItem(game.storeKey)) }; } catch {}
   Object.assign(store, patch);
@@ -301,7 +301,6 @@ $('#btn-giveup').onclick = giveUp;
 $('#btn-hint').onclick = hint;
 $('#list').addEventListener('pointerdown', drag);
 $('#dlg-help').addEventListener('close', () => remember({ seenHelp: true }));
-for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { remember({ muted: !store.muted }); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
   if (!P || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -379,6 +378,5 @@ printable((bound) => P && {
   body: `<ul class="p-strips${bound ? ' bound' : ''}">${deal(hash(P.key)).map((i) => `<li><i></i>${esc(P.lv.items[i].name)}</li>`).join('')}</ul>`,
   answer: `<ol class="p-order">${P.lv.items.map((it) => `<li><b>${esc(it.name)}</b> <span>${esc(it.val)}</span></li>`).join('')}</ol>`,
 }, (_, date) => { P = { key: 'D' + date, lv: parse(dailyLine(date)) }; });
-syncSound();
 nudge(() => P && !P.done && !$('#game').hidden);
 if (!store.seenHelp) $('#dlg-help').showModal();

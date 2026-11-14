@@ -12,7 +12,7 @@
 }
 
 .board {
-  width: min(620px, calc(100vw - 24px), calc(100dvh - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
+  width: min(620px, calc(100 * var(--vw) - 24px), calc(100 * var(--dvh) - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
   fill: initial; stroke: none; stroke-width: 1;
   touch-action: none; user-select: none; -webkit-user-select: none;
   /* box-shadow, not filter: drop-shadow — a filter on the <svg> makes WebKit redraw every speck and stamp on each tap (~10x slower on iPhone) */
@@ -97,7 +97,7 @@
 @keyframes ripple { 40% { transform: scale(1.03); } }
 
 @media (orientation: landscape) and (max-height: 540px) {
-  .board:not(.mini) { width: min(calc(100dvh - 90px), calc(100vw - 380px)); }
+  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
 }
 
 /* keep board, tip and tools together in the middle instead of the tools stranded at the bottom */
@@ -139,3 +139,6 @@
 #print .rg5 { fill: url(#p-back); }
 #print .rg6 { fill: url(#p-greydots); }
 #print { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+/* high contrast (core.css): the inks print flat, without speckle or the stamp's rough edge */
+:root[data-contrast] :is(.cells, .pc, .hub circle, .seal-ink) { filter: none; }

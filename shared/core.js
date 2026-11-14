@@ -23,6 +23,8 @@ const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>';
 const LANG = document.documentElement.lang, LOCALE = LANG === 'en' ? undefined : LANG;
 const T = (s, v = {}) => ((typeof I18N === 'object' && I18N[s]) || s).replace(/\{(\w+)\}/g, (_, k) => v[k]);
 const tierName = (k) => T(TIERS[k]); // TIERS stay English: they're also URL hashes (#daily-easy)
+// The text & tile size zoom (theme.js sets --scale on <html>). Pointer coordinates are zoomed px: divide by it to get the page's own CSS px.
+const pageScale = () => +getComputedStyle(document.documentElement).getPropertyValue('--scale') || 1;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 let game, store, G = null, timer = null;
@@ -54,10 +56,14 @@ function streak() {
 }
 
 // ---------- sound (synthesized, no assets) ----------
+// Muted or not is one setting for every game (localStorage 'muted': '1' or '0'). It used to live in each game's store: once, on the
+// first load without it, a game muted there mutes all.
+const muted = () => { try { return localStorage.getItem('muted') === '1'; } catch { return false; } };
+try { if (localStorage.getItem('muted') === null && Object.values(localStorage).some((v) => v.includes('"muted":true'))) localStorage.setItem('muted', '1'); } catch {}
 const sfx = (() => {
   let ctx;
   function tone(freq, { dur = 0.12, type = 'sine', vol = 0.15, at = 0, slide } = {}) {
-    if (store.muted) return;
+    if (muted()) return;
     try {
       ctx ??= new (window.AudioContext || window.webkitAudioContext)();
       if (ctx.state === 'suspended') ctx.resume();
@@ -89,12 +95,21 @@ const sfx = (() => {
 })();
 
 function syncSound(go) {
+  const m = muted();
   for (const b of document.querySelectorAll('.js-sound')) {
-    b.innerHTML = store.muted ? (go ? ICON_OFF_GO : ICON_OFF) : ICON_ON;
-    if (go) b.firstChild.classList.add('go', store.muted ? 'off' : 'on');
-    b.setAttribute('aria-pressed', String(!store.muted));
+    b.innerHTML = m ? (go ? ICON_OFF_GO : ICON_OFF) : ICON_ON;
+    if (go) b.firstChild.classList.add('go', m ? 'off' : 'on');
+    b.setAttribute('aria-pressed', String(!m));
   }
 }
+for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => {
+  try { localStorage.setItem('muted', muted() ? '0' : '1'); } catch {}
+  syncSound(true);
+  sfx.tap();
+};
+syncSound();
+// another tab (another game) flipped it
+addEventListener('storage', (e) => e.key === 'muted' && syncSound());
 
 function flash(el, cls) {
   el.classList.remove('pop', 'shake', 'psst');
@@ -338,8 +353,9 @@ async function share() {
 // Cut paper in the page's inks, overprinted (multiply on cream, screen on blue stock). A special day passes its own glyphs (its emoji);
 // a streak milestone just reached (bumped) throws twice as much, higher.
 function confetti(glyphs = game.glyphs) {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const cv = $('#fx'), ctx = cv.getContext('2d'), dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
+  if (document.documentElement.hasAttribute('data-calm')) return; // reduce motion (theme.js)
+  // the canvas's own size: under the text & tile size zoom it's smaller than innerWidth in CSS px
+  const cv = $('#fx'), ctx = cv.getContext('2d'), dpr = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   const css = getComputedStyle(document.documentElement);
   const colors = ['--brand', '--brand', '--sun', '--teal', '--ink'].map((v) => css.getPropertyValue(v).trim());
@@ -454,7 +470,7 @@ function printable(build, daily) {
 function boot(g) {
   game = g;
   try { store = JSON.parse(localStorage.getItem(g.storeKey)) || {}; } catch { store = {}; }
-  store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...store };
+  store = { packs: {}, daily: {}, saves: {}, seenHelp: false, ...store };
   for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
   if (g.random) {
     store.cur ??= {};
@@ -474,7 +490,6 @@ function boot(g) {
     if (G.date) share(); else { $('#dlg-win').close(); game.random ? playRandom(G.pack, true) : start(G.pack, G.n + 1); }
   };
   $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
-  for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 
   document.addEventListener('keydown', (e) => {
     if (!G || $('#game').hidden || document.querySelector('dialog[open]')) return;
@@ -491,7 +506,6 @@ function boot(g) {
     if (game.key(e)) e.preventDefault();
   });
 
-  syncSound();
   nudge(() => playing() && !$('#game').hidden);
   router((h) => openLevel(h, start), home);
   if (!store.seenHelp) $('#dlg-help').showModal();

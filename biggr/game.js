@@ -190,7 +190,7 @@ async function share(rec, pack, date) {
 // ---------- wiring ----------
 game = { name: T('Biggr'), storeKey: 'biggr', glyphs: ['>', '<', '+', '×'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
-store = { packs: {}, daily: {}, saves: {}, muted: false, seenHelp: false, ...store };
+store = { packs: {}, daily: {}, saves: {}, seenHelp: false, ...store };
 for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
 
 $('#btn-levels').onclick = () => openLevels();
@@ -203,7 +203,6 @@ $('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The r
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); R = null; screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
-for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
   if (!R || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -223,6 +222,5 @@ printable(() => R && {
   body: `<ol class="p-pairs">${R.pairs.map(([lt, , rt]) => `<li><span>${esc(lt)}</span><i></i><span>${esc(rt)}</span></li>`).join('')}</ol>`,
   answer: `<ol class="p-pairs">${R.pairs.map(([lt, lv, rt, rv]) => `<li><span>${esc(lt)} <small>(${lv})</small></span><i>${lv > rv ? '&gt;' : '&lt;'}</i><span><small>(${rv})</small> ${esc(rt)}</span></li>`).join('')}</ol>`,
 }, (k, date) => { R = { pairs: generate(hash('D' + k + date), k) }; });
-syncSound();
 router((h) => openLevel(h, start), goHome);
 if (!store.seenHelp) $('#dlg-help').showModal();

@@ -20,6 +20,8 @@ Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded leve
 
 - `shared/common.js` — seeded RNG, hash, tiers and pack size (no DOM; tests `require()` it)
 - `shared/core.js`, `shared/core.css` — the shell: home menu, dailies, levels, timer, pause, win, share, sound, confetti
+- `shared/theme.js` — runs in `<head>` before paint: the light/dark theme and Settings (the sliders icon beside the theme button, or beside the back arrow on a game's home): high contrast and reduce motion (both follow the system until changed), text & tile size, and progress export/import/reset. Sound is one setting for all games, on the speaker icon. A new game adds its `storeKey` to `GAMES` there, or export and reset miss it
+- Text & tile size zooms the whole page (CSS `zoom`), so styles write viewport units as `calc(100 * var(--vw))` / `var(--dvh)` (not `vw`/`dvh`), container units as `100cqw * var(--cq, 1)` (WebKit zooms those twice), and divide pointer distances by `pageScale()` (core.js). Width breakpoints that should follow the text size are `@container` queries (see the hub page); `@media` sees the window, not the zoomed page
 - `orderly/levels.js` — the level pool, one `difficulty|Subject|top|bottom|Name=Value;...` line each, cards in the right order
 - `wordswipe/rounds.js` — the round pool, one `Subject|fits,...|doesn't,...` line each; `wordswipe/game.js` uses core.js helpers but not `boot()`
 - `wordswipe/editor.html` — make your own round and share it; `wordswipe/play.html#r=…` plays a shared one (nothing saved, no streaks). The round travels in the link: `shared/link.js` gzips JSON into base64url, `wordswipe/custom.js` checks it
