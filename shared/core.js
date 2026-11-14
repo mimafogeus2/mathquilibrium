@@ -330,9 +330,9 @@ function win() {
 
 // Every game, for the win dialog's "Try …" after a daily: [folder, name, store key, daily tiers ('' for one round, daily.r), brand text color].
 // ponytail: kept in step by hand with index.html's data-store / data-tiers / --brand-text
-const L = LANG === 'en' ? '' : '-' + LANG;
-const GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'pink-text'], ['biggr', T('Biggr'), 'biggr', 'EMH', 'orange-text'],
-  ['wordswipe', T('WordSwipe'), 'wordswipe' + L, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + L, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
+const LSUF = LANG === 'en' ? '' : '-' + LANG;
+const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'pink-text'], ['biggr', T('Biggr'), 'biggr', 'EMH', 'orange-text'],
+  ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
   ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text']];
 // A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today
 function winDaily(g) {
@@ -346,8 +346,8 @@ function winDaily(g) {
     upBtn.innerHTML = `<b>${esc(T('{tier} daily  →', { tier: tierName(up) }))}</b>`;
     upBtn.onclick = () => { $('#dlg-win').close(); start(up, null, g.date); };
   }
-  const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), i = GAMES.findIndex((x) => x[0] === me);
-  const other = [...GAMES.slice(i + 1), ...GAMES.slice(0, i)].find(([, , key, ts]) => {
+  const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), i = ALL_GAMES.findIndex((x) => x[0] === me);
+  const other = [...ALL_GAMES.slice(i + 1), ...ALL_GAMES.slice(0, i)].find(([, , key, ts]) => {
     let d = {};
     try { d = JSON.parse(localStorage.getItem(key))?.daily?.[g.date] || {}; } catch {}
     return ts ? [...ts].some((k) => !d[k]) : !d.r;
