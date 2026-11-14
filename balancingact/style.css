@@ -3,7 +3,7 @@
 :root { --brand: var(--orange); --brand-text: var(--orange-text); --on-brand: var(--on-orange); }
 
 /* Drawn left to right, plates numbered from the left: it never mirrors */
-.board, .tray, #help-rig, #logo, .p-rig, .p-store { direction: ltr; }
+.board, .tray, #help-rig, #help-balloon, #logo, .p-rig, .p-store { direction: ltr; }
 .board { width: min(560px, calc(100 * var(--vw) - 24px)); user-select: none; -webkit-user-select: none; }
 .board:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
 .rig { display: block; width: 100%; height: auto; max-height: 100%; overflow: visible; stroke: none; }
@@ -72,7 +72,8 @@
 .carry svg { width: 100%; height: 100%; overflow: visible; }
 
 #logo { width: 150px; margin: 0 auto 4px; transform: rotate(-3deg); }
-#help-rig { width: 220px; margin: 0 auto; }
+#help-rig, #help-balloon { width: 220px; margin: 0 auto; }
+#help-balloon { width: 200px; }
 .rig.mini { max-height: none; }
 .rig.mini .hit, .rig.mini .tot { display: none; }
 
