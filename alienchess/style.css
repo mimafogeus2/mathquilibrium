@@ -104,5 +104,3 @@
   .card { width: 128px; }
 }
 
-/* logo hides on short screens; keep the wordmark clear of the corner icons */
-@media (max-height: 760px) { .wordmark { margin-top: 44px; } }
