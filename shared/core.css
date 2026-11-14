@@ -352,6 +352,9 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 #game :is(.palette, .tools, .tip, .tray) { transition: opacity .2s .2s, visibility 0s .2s; }
 #game.paused :is(.palette, .tools, .tip, .tray) { opacity: 0; transition: opacity .2s, visibility 0s .2s; }
 .pause-cover { visibility: hidden; rotate: x -90deg; transition: rotate .2s ease-in, visibility 0s .2s; }
+/* under the perspective, the edge-on cover's near edge projects wider than the board area (~1.3x on a tall board), and phones
+   widen the whole page to fit it: body's overflow-x: hidden doesn't stop that. Clip it at the screen. */
+#game { overflow-x: clip; }
 #game.paused .pause-cover { visibility: visible; rotate: none; transition: rotate .22s var(--ease) .2s, visibility 0s .2s; }
 .pause-cover::before {
   content: ''; position: absolute; z-index: -1; width: min(var(--sheet-w, 100%), 100%); height: min(var(--sheet-h, 100%), 100%); border-radius: var(--sheet-r, 16px);
