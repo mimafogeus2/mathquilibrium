@@ -81,6 +81,7 @@ module.exports = {
       'Coronet': 'הכתרה',
       'Quadflip': 'מהפכים',
       'Alien Chess': 'שחמאדים',
+      'Balancing Act': 'על כפות המאזניים',
       'Easy': 'קל',
       'Medium': 'בינוני',
       'Hard': 'קשה',
@@ -317,6 +318,24 @@ module.exports = {
       'Not clear yet. <b>Tap a used piece</b> to lift it, or undo.': 'הלוח עוד לא נקי. <b>הקישו על צורה משומשת</b> כדי להרים אותה, או בטלו.',
       'Restart this level? Your pieces come back off the board; the clock keeps running.': 'להתחיל את השלב מחדש? הצורות יורדות מהלוח; השעון ממשיך לרוץ.',
     },
+    'balancingact/game.js': {
+      'Balancing Act': 'על כפות המאזניים',
+      'weight {n}': 'משקולת {n}',
+      'balloon {n}': 'בלון {n}',
+      '{item} back in the store.': '{item}: בחזרה במחסן.',
+      '{item} on plate {n}: it now holds {t}.': '{item} על כף {n}: עכשיו יש בה {t}.',
+      '{item}, on plate {n}': '{item}, על כף {n}',
+      '{m} moves · ★★★ in {n}': '{m} מהלכים · ★★★ ב־{n}',
+      '{p} plates · {k} items': '{p} כפות · {k} פריטים',
+      'Balancing Act: {p} plates, {left} of {k} items still in the store': 'על כפות המאזניים: {p} כפות, {left} מתוך {k} פריטים עדיין במחסן',
+      'Drag every <b>item</b> onto a <b>plate</b> until every beam hangs <b>level</b>.': 'גררו כל <b>פריט</b> אל <b>כף</b>, עד שכל המוטות יהיו <b>מאוזנים</b>.',
+      'Everything is hung, but not every beam is <b>level</b> yet.': 'הכול תלוי, אבל עוד לא כל המוטות <b>מאוזנים</b>.',
+      'Restart this level? Everything goes back to the store; your moves still count.': 'להתחיל את השלב מחדש? הכול חוזר למחסן; המהלכים שכבר עשיתם עדיין נספרים.',
+      "Hang every item from the <b>store</b> on a plate, so that every beam is <b>level</b>. Write each plate's items in its box.": 'תלו כל פריט מה<b>מחסן</b> על כף, כך שכל המוטות יהיו <b>מאוזנים</b>. כתבו בתיבה של כל כף מה מונח עליה.',
+      "A beam is level when <b>weight × arm</b> is the same on both sides. A side's weight is everything hanging under it.": 'מוט מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. המשקל של צד הוא כל מה שתלוי מתחתיו.',
+      'A <b>balloon</b> lifts: a −2 balloon cancels out a 2 weight.': '<b>בלון</b> מושך למעלה: בלון ‎−2 מבטל משקולת 2.',
+      "Use every item exactly once. There's only one way.": 'השתמשו בכל פריט פעם אחת בדיוק. יש רק דרך אחת.',
+    },
     'alienchess/game.js': {
       'Alien Chess': 'שחמאדים',
       // the aliens: the same nonsense, in Hebrew letters
@@ -404,8 +423,8 @@ module.exports = {
       ['<span class="print-hint" aria-hidden="true"><span>Printable version here</span><svg', '<span class="print-hint" aria-hidden="true"><span>אפשר גם להדפיס</span><svg'],
       ['<title>Games by Miki — daily logic games</title>', '<title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>'],
       ['content="Games by Miki — daily logic games"', 'content="מדף המשחקים של מיקי — משחקי היגיון יומיים"'],
-      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip and Alien Chess. New puzzles every day."',
-        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים ושחמאדים. חידות חדשות בכל יום."'],
+      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess and Balancing Act. New puzzles every day."',
+        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים ועל כפות המאזניים. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
       // The Hebrew title is ~7.5em wide: size it to the header's width so it stays on one line (13cqi ≈ 100% / 7.6em, shadow included)
       ['<header>', '<header style="container-type: inline-size">'],
@@ -437,6 +456,9 @@ module.exports = {
       ['<span class="kicker">07 <em>Logic</em></span>', '<span class="kicker">07 <em>היגיון</em></span>'],
       ['<h2>Alien <span>Chess</span></h2>', '<h2>שח<span>מאדים</span></h2>'],
       ['<p>Chess with pieces from another planet, new every level. Read their cards, then take the enemy king.</p>', '<p>שחמט עם כלים מכוכב אחר, חדשים בכל שלב. קראו את הקלפים שלהם, ואז אכלו את המלך של האויב.</p>'],
+      ['<span class="kicker">08 <em>Math</em></span>', '<span class="kicker">08 <em>חשבון</em></span>'],
+      ['<h2>Balancing <span>Act</span></h2>', '<h2>על כפות <span>המאזניים</span></h2>'],
+      ['<p>Hang every weight on the right plate until the whole contraption hangs level.</p>', '<p>תלו כל משקולת על הכף הנכונה, עד שכל המתקן התלוי מאוזן.</p>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
       // the inline script
       ['`No. ${no.toLocaleString()}`', '`גיליון ${no.toLocaleString()}`'],
@@ -652,6 +674,32 @@ module.exports = {
       ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להרמה ולהנחה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
+    'balancingact/index.html': [
+      ['Balancing Act — hang it level', 'על כפות המאזניים — תלו ואזנו'],
+      ['Hang every weight on the right plate until every beam of a hanging contraption is level. Arm lengths are written on the beams. New daily puzzles every day.',
+        'תלו כל משקולת על הכף הנכונה עד שכל המוטות במתקן התלוי יהיו מאוזנים. אורכי הזרועות כתובים על המוטות. חידות יומיות חדשות בכל יום.'],
+      ['<h1 class="wordmark">Balancing <span>Act</span></h1>', '<h1 class="wordmark">על כפות <span>המאזניים</span></h1>'],
+      ['<p class="tagline">Every weight on a plate. Every beam level.</p>', '<p class="tagline">כל משקולת על כף. כל מוט מאוזן.</p>'],
+      ['aria-label="Store"', 'aria-label="מחסן"'],
+      ['<p id="board-keys" class="sr-only">Plates are numbered from the left. Arrow keys pick an item, from the store first. A number key hangs it on that plate; 0 sends it back to the store.</p>',
+        '<p id="board-keys" class="sr-only">הכפות ממוספרות משמאל. החצים בוחרים פריט, קודם מהמחסן. מקש מספר תולה אותו על הכף הזו; 0 מחזיר אותו למחסן.</p>'],
+      [`<li>Hang every item from the <b>store</b> on a plate, until every beam hangs <b>level</b>.</li>
+    <li>A beam is level when <b>weight × arm</b> is the same on both sides. The numbers on a beam are its arms' lengths, and a side weighs everything hanging under it.</li>
+    <li class="no-touch">Drag an item onto a plate, or click it and then click a plate. Drag it back to the store to take it off.</li>
+    <li class="touch">Drag an item onto a plate, or tap it and then tap a plate. Drag it back to the store to take it off.</li>
+    <li>A <b>balloon</b> lifts: a −2 balloon cancels out a 2 weight. Some come tied to their plate with a bow.</li>
+    <li>Use every item. There's only <b>one way</b>.</li>
+    <li>Every drop counts as a move, and Restart doesn't undo them: within <b>one move</b> of the fewest for three stars.</li>`,
+      `<li>תלו כל פריט מה<b>מחסן</b> על כף, עד שכל המוטות יהיו <b>מאוזנים</b>.</li>
+    <li>מוט מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. המספרים על מוט הם אורכי הזרועות שלו, וצד שוקל את כל מה שתלוי מתחתיו.</li>
+    <li class="no-touch">גררו פריט אל כף, או לחצו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
+    <li class="touch">גררו פריט אל כף, או הקישו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
+    <li><b>בלון</b> מושך למעלה: בלון ‎−2 מבטל משקולת 2. יש בלונים שמגיעים קשורים לכף שלהם בפפיון.</li>
+    <li>השתמשו בכל הפריטים. יש רק <b>דרך אחת</b>.</li>
+    <li>כל הנחה נספרת כמהלך, וגם „מההתחלה״ לא מוחק אותם: עד <b>מהלך אחד</b> מעל המינימום, ושלושה כוכבים שלכם.</li>`],
+      ['<p class="muted small kbd-hint">Keyboard: arrows pick an item, <kbd>1</kbd>–<kbd>8</kbd> hang it on that plate, <kbd>0</kbd> back to the store, <kbd>P</kbd> pause.</p>',
+        '<p class="muted small kbd-hint">מקלדת: החצים בוחרים פריט, <kbd>1</kbd>–<kbd>8</kbd> תולים אותו על הכף, <kbd>0</kbd> בחזרה למחסן, <kbd>P</kbd> השהיה.</p>'],
+    ],
     // the daily zine. The booklet opens right to left: a sheet's right page is its front.
     'print.html': [
       [`<title>Games by Miki — print today's zine</title>`, '<title>מדף המשחקים של מיקי — הגיליון של היום להדפסה</title>'],
@@ -674,8 +722,8 @@ module.exports = {
       ['<span><b>Staple</b> twice through the fold, from the outside. Opening the stapler flat onto some cardboard helps.</span>', '<span><b>הדקו</b> פעמיים דרך הקפל, מבחוץ. עוזר לפתוח את המהדק לגמרי ולהדק על קרטון.</span>'],
       ['<h2 class="kicker z-head">Preview</h2>', '<h2 class="kicker z-head">תצוגה מקדימה</h2>'],
       // the inline script
-      ["const GAMES = [['mathquilibrium', 'Mathquilibrium', 'EMH'], ['biggr', 'Biggr', 'EMH'], ['wordswipe', 'WordSwipe', ''], ['orderly', 'Orderly', ''], ['coronet', 'Coronet', 'EMH']];",
-        "const GAMES = [['mathquilibrium', 'מאוזן', 'EMH'], ['biggr', 'כמה כמה', 'EMH'], ['wordswipe', 'שמאל ימין שמאל', ''], ['orderly', 'בסדר', ''], ['coronet', 'הכתרה', 'EMH']];"],
+      ["const GAMES = [['mathquilibrium', 'Mathquilibrium', 'EMH'], ['biggr', 'Biggr', 'EMH'], ['wordswipe', 'WordSwipe', ''], ['orderly', 'Orderly', ''], ['coronet', 'Coronet', 'EMH'], ['balancingact', 'Balancing Act', 'EMH']];",
+        "const GAMES = [['mathquilibrium', 'מאוזן', 'EMH'], ['biggr', 'כמה כמה', 'EMH'], ['wordswipe', 'שמאל ימין שמאל', ''], ['orderly', 'בסדר', ''], ['coronet', 'הכתרה', 'EMH'], ['balancingact', 'על כפות המאזניים', 'EMH']];"],
       ['d.toLocaleDateString(undefined,', "d.toLocaleDateString('he',"],
       [`    daily: 'Daily', answer: 'Answer', answers: 'Answers', foot: 'Games by Miki · No. {no}', top: 'Daily logic games', free: 'Free · one coffee break',
     mast: 'Games<br>by Miki', no: 'No.', note: 'A pen is all you need.', scratch: 'Scratch paper', working: 'For working out',
