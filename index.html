@@ -109,7 +109,7 @@
   .game p { margin: 8px 0 12px; color: var(--muted); font-size: 15px; line-height: 1.45; max-width: 36ch; text-wrap: pretty; }
   /* hover: the title's drums drift out of register, two faint ghosts (pink, sunflower) easing a hair off the key ink,
      and drift back when the pointer leaves. --sep is a registered @property, so it transitions both ways. */
-  .game h2, .b-name { --sep: 0em; transition: --sep 1.4s cubic-bezier(.3, 0, .2, 1);
+  .game h2, .b-name { --sep: 0em; transition: --sep .5s cubic-bezier(.3, 0, .2, 1);
     text-shadow: calc(-1 * var(--sep)) calc(-.5 * var(--sep)) 0 color-mix(in srgb, var(--pink) 35%, transparent),
       var(--sep) calc(.6 * var(--sep)) 0 color-mix(in srgb, var(--sun) 45%, transparent); }
   .game:hover h2, .banner:hover .b-name { --sep: .055em; }
