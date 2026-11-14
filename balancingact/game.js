@@ -402,6 +402,14 @@ for (const [id, key] of [['#logo', 'logo'], ['#help-rig', 'help']]) {
   draw(el, p, p.items.map((x) => x.plate), { level: true, mini: true });
   $(id).append(el);
 }
+// help, page 2: a balloon at work, 5 − 2 at arm 2 balancing 6 at arm 1
+{
+  const p = { tree: { a: 2, b: 1, l: 0, r: 1 }, plates: 2, fixed: [], items: [{ v: 5, plate: 0 }, { v: -2, plate: 0 }, { v: 6, plate: 1 }], target: [3, 6] };
+  const el = document.createElementNS(SVGNS, 'svg');
+  el.setAttribute('class', 'rig mini');
+  draw(el, p, p.items.map((x) => x.plate), { level: true, mini: true });
+  $('#help-balloon').append(el);
+}
 
 boot({ name: T('Balancing Act'), storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
   save: (G) => ({ at: G.at, moves: G.moves }), key: onKey, moves: (G) => G.moves,

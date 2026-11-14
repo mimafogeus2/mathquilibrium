@@ -3,15 +3,48 @@
 const ORDERLY_GAME = [
       ['<h1 class="wordmark">Order<span>ly</span></h1>', '<h1 class="wordmark">ב<span>סדר</span></h1>'],
       ['<b>Check</b>', '<b>בדיקה</b>'],
+      // the sample cards in How to play
+      ['<span class="name">Airplane</span>', '<span class="name">מטוס</span>'],
+      ['<span class="name">Telephone</span>', '<span class="name">טלפון</span>'],
+      ['<span class="name">Light bulb</span>', '<span class="name">נורה</span>'],
+      ['<span class="name">Television</span>', '<span class="name">טלוויזיה</span>'],
       ['<button id="btn-hint" class="btn ghost center"><b>Hint</b>', '<button id="btn-hint" class="btn ghost center"><b>רמז</b>'],
       [`<li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>
     <li><b>Drag</b> the cards into order, top to bottom.<span class="kbd-hint"> Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="help-cards" aria-hidden="true">
+    <li class="card"><span class="name">Airplane</span></li>
+    <li class="card ok link"><span class="name">Telephone</span><span class="val">1876</span></li>
+    <li class="card ok linked"><span class="name">Light bulb</span><span class="val">1879</span></li>
+    <li class="card"><span class="name">Television</span></li>
+  </ol>
+  <ol class="rules" start="3">
     <li>Press <b>Check</b>. Cards that sit next to each other in the right order turn green, show their value, and join into a group &mdash; even if the group isn't in its final spot yet. Drag a group to move it as one.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="4">
     <li>Stuck? Use up to <b>3 hints</b>. Each one slides two cards that belong together into place and joins them.</li>
     <li>Solve it in <b>2 checks</b> for three stars, <b>4</b> for two.</li>`,
       `<li>בכל חידה יש <b>נושא</b> ו־<b>10 קלפים</b>.</li>
     <li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה.<span class="kbd-hint"> במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="help-cards" aria-hidden="true">
+    <li class="card"><span class="name">Airplane</span></li>
+    <li class="card ok link"><span class="name">Telephone</span><span class="val">1876</span></li>
+    <li class="card ok linked"><span class="name">Light bulb</span><span class="val">1879</span></li>
+    <li class="card"><span class="name">Television</span></li>
+  </ol>
+  <ol class="rules" start="3">
     <li>לחצו <b>בדיקה</b>. קלפים שעומדים זה ליד זה בסדר הנכון נצבעים בירוק, חושפים את הערך שלהם ומתחברים לקבוצה &mdash; גם אם הקבוצה עוד לא במקומה הסופי. גררו קבוצה כדי להזיז אותה כיחידה אחת.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="4">
     <li>תקועים? יש לכם עד <b>3 רמזים</b>. כל רמז מחליק למקומם שני קלפים ששייכים זה לזה ומחבר אותם.</li>
     <li>פתרון ב־<b>2 בדיקות</b> שווה שלושה כוכבים, ב־<b>4</b> — שניים.</li>`],
 ];
@@ -71,6 +104,9 @@ module.exports = {
     // also the strings several games share
     'shared/core.js': {
       'How to play': 'איך משחקים',
+      // How to play's pages
+      'Back': 'הקודם',
+      'Next': 'הבא',
       'Sound': 'צליל',
       'More': 'עוד',
       '{tier} daily  →': 'היומי ה{tier}  ←',
@@ -491,10 +527,18 @@ module.exports = {
         '<p id="board-keys" class="sr-only">כל משבצת ריקה נמצאת על שורה מאוזנת, על עמודה מאונכת או על שתיהן. הקלידו פעולה כדי למלא את המשבצת הנבחרת: פלוס, מינוס, כוכבית לכפל, לוכסן לחילוק, שווה. החצים עוברים בין המשבצות, Backspace מנקה, Z מבטל.</p>'],
       [`<li>Fill every blank tile with an operator so <b>each row and column is a true equation</b>. Equations read <b>left to right</b> or <b>top to bottom</b> only.</li>
     <li>Tiles where lines cross are <b>shared</b> — one symbol has to work both ways.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
     <li>Usual math order: <b>×  ÷</b> before <b>+  −</b>. Division must come out exact.</li>
     <li>Harder levels add <b>^</b> power, <b>.</b> decimal point (3 . 5 is 3.5), <b>%</b> remainder, and <b>&lt;  &gt;</b> for lines that are inequalities.</li>`,
       `<li>מלאו כל משבצת ריקה בפעולה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>. משוואות נקראות רק <b>משמאל לימין</b> או <b>מלמעלה למטה</b>.</li>
     <li>משבצות שבהן קווים נחתכים הן <b>משותפות</b> — סימן אחד צריך לעבוד בשני הכיוונים.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
     <li>סדר פעולות רגיל: <b>×  ÷</b> לפני <b>+  −</b>. החילוק חייב לצאת שלם.</li>
     <li>בשלבים הקשים יותר מצטרפות <b>^</b> חזקה, <b>.</b> נקודה עשרונית (<span dir="ltr">3 . 5</span> הוא 3.5), <b>%</b> שארית, ו־<b dir="ltr">&lt;  &gt;</b> לשורות של אי־שוויון.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, arrows to move, <kbd>⌫</kbd> to clear, <kbd>Z</kbd> undo, <kbd>P</kbd> to pause.</p>',
@@ -652,11 +696,19 @@ module.exports = {
       [`<li>Turn every tile back to <b>blank paper</b>.</li>
     <li class="no-touch">Pick a <b>piece</b>, then click the board: the four tiles under it <b>flip</b>.</li>
     <li class="touch">Tap a <b>piece</b> below the board to pick it. Then <b>press and drag</b> on the board to aim it, and <b>let go</b> to stamp: the four tiles under it <b>flip</b>. Let go off the board to cancel.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
     <li>Use <b>every piece exactly once</b>. There's only one way to do it.</li>
     <li>Tap a used piece to lift it off again.</li>`,
       `<li>החזירו כל משבצת ל<b>נייר לבן</b>.</li>
     <li class="no-touch">בחרו <b>צורה</b> ולחצו על הלוח: ארבע המשבצות שמתחתיה <b>מתהפכות</b>.</li>
     <li class="touch">הקישו על <b>צורה</b> מתחת ללוח כדי לבחור אותה. אחר כך <b>לחצו וגררו</b> על הלוח כדי לכוון, ו<b>שחררו</b> כדי להחתים: ארבע המשבצות שמתחתיה <b>מתהפכות</b>. שחררו מחוץ ללוח כדי לבטל.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
     <li>השתמשו ב<b>כל צורה בדיוק פעם אחת</b>. יש רק דרך אחת לעשות את זה.</li>
     <li>הקישו על צורה משומשת כדי להרים אותה שוב.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> pick a piece, arrows to move it, <kbd>Space</kbd> to stamp, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
@@ -672,14 +724,32 @@ module.exports = {
         '<p id="board-keys" class="sr-only">הכלים שלכם מתחילים למטה. החצים זזים על הלוח. רווח או Enter מרימים כלי שלכם, ואז מניחים אותו במשבצת שהוא יכול להגיע אליה. Z מבטל את המסע האחרון.</p>'],
       [`<li>Every level brings <b>new pieces</b>. Each one's <b>card</b> shows how it moves.</li>
     <li>On a card, a <b>line</b> slides until something blocks it; an arrow runs to the edge. A <b>lone dot</b> jumps straight there. <b>●</b> moves or takes, <b>○</b> only moves, <b>×</b> only takes.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <div id="help-king" aria-hidden="true"></div>
+  <ol class="rules" start="3">
     <li>Cards point up the board. The enemy's pieces move the same way, <b>upside down</b>.</li>
     <li>Take the enemy's <b>king</b> (the crowned piece), or <b>all</b> of its pieces. Lose yours and you lose. A side with no move skips its turn.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
     <li>You move first. There's always a <b>win</b> in the moves shown on top: undo, restart and try again.</li>
     <li>Win fast for <b>three stars</b>.</li>`,
       `<li>בכל שלב יש <b>כלים חדשים</b>. ה<b>קלף</b> של כל אחד מראה איך הוא זז.</li>
     <li>בקלף, <b>קו</b> הוא החלקה עד שמשהו חוסם אותה; חץ ממשיך עד הקצה. <b>נקודה בודדת</b> היא קפיצה ישר לשם. <b>●</b> זז או אוכל, <b>○</b> רק זז, <b>×</b> רק אוכל.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <div id="help-king" aria-hidden="true"></div>
+  <ol class="rules" start="3">
     <li>הקלפים פונים אל ראש הלוח. הכלים של האויב זזים אותו דבר, <b>הפוך</b>.</li>
     <li>אכלו את <b>המלך</b> של האויב (הכלי עם הכתר), או את <b>כל</b> הכלים שלו. אם תאבדו את שלכם, הפסדתם. צד שאין לו מסע מדלג על התור.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
     <li>אתם מתחילים. תמיד יש <b>ניצחון</b> במספר המסעים שכתוב למעלה: בטלו, התחילו מחדש ונסו שוב.</li>
     <li>נצחו מהר ותקבלו <b>שלושה כוכבים</b>.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
@@ -696,16 +766,34 @@ module.exports = {
         '<p id="board-keys" class="sr-only">הכפות ממוספרות משמאל. החצים בוחרים פריט, קודם מהמחסן. מקש מספר תולה אותו על הכף הזו; 0 מחזיר אותו למחסן.</p>'],
       [`<li>Hang every item from the <b>store</b> on a plate, until every beam hangs <b>level</b>.</li>
     <li>A beam is level when <b>weight × arm</b> is the same on both sides. The numbers on a beam are its arms' lengths, and a side weighs everything hanging under it.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <div id="help-balloon" aria-hidden="true"></div>
+  <ol class="rules" start="3">
     <li class="no-touch">Drag an item onto a plate, or click it and then click a plate. Drag it back to the store to take it off.</li>
     <li class="touch">Drag an item onto a plate, or tap it and then tap a plate. Drag it back to the store to take it off.</li>
     <li>A <b>balloon</b> lifts: a −2 balloon cancels out a 2 weight. Some come tied to their plate with a bow.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
     <li>Use every item. There's only <b>one way</b>.</li>
     <li>Every drop counts as a move, and Restart doesn't undo them: within <b>one move</b> of the fewest for three stars.</li>`,
       `<li>תלו כל פריט מה<b>מחסן</b> על כף, עד שכל המוטות יהיו <b>מאוזנים</b>.</li>
     <li>מוט מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. המספרים על מוט הם אורכי הזרועות שלו, וצד שוקל את כל מה שתלוי מתחתיו.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <div id="help-balloon" aria-hidden="true"></div>
+  <ol class="rules" start="3">
     <li class="no-touch">גררו פריט אל כף, או לחצו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
     <li class="touch">גררו פריט אל כף, או הקישו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
     <li><b>בלון</b> מושך למעלה: בלון ‎−2 מבטל משקולת 2. יש בלונים שמגיעים קשורים לכף שלהם בפפיון.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
     <li>השתמשו בכל הפריטים. יש רק <b>דרך אחת</b>.</li>
     <li>כל הנחה נספרת כמהלך, וגם „מההתחלה״ לא מוחק אותם: עד <b>מהלך אחד</b> מעל המינימום, ושלושה כוכבים שלכם.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: arrows pick an item, <kbd>1</kbd>–<kbd>8</kbd> hang it on that plate, <kbd>0</kbd> back to the store, <kbd>P</kbd> pause.</p>',

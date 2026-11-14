@@ -3,7 +3,7 @@
 :root { --brand: var(--red); --brand-text: var(--red-text); --on-brand: var(--on-red); }
 
 /* The board is drawn from your side, files left to right: it never mirrors */
-.board, .cards, #help-card { direction: ltr; }
+.board, .cards, #help-card, #help-king { direction: ltr; }
 .board {
   --n: 5; position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr);
   width: min(400px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 420px)); min-width: 220px; aspect-ratio: 1;
@@ -79,7 +79,7 @@
 /* ---------- home, help ---------- */
 #logo { width: 84px; height: 100px; margin: 0 auto 2px; transform: rotate(-6deg); }
 #logo .pc { width: 100%; height: 100%; }
-#help-card .card { margin: 0 auto 6px; cursor: default; animation: none; }
+:is(#help-card, #help-king) .card { margin: 0 auto 6px; cursor: default; animation: none; }
 /* practice, as in Coronet: each pack row resumes its puzzle or deals a new one; the row below always deals a new one */
 
 /* keep board, tip, cards and tools together in the middle */

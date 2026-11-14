@@ -85,17 +85,31 @@
 </main>
 
 <dialog id="dlg-help">
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
   <h2>How to play</h2>
+  <div class="help-pages">
+  <div class="help-page">
   <div id="help-card" aria-hidden="true"></div>
   <ol class="rules">
     <li>Every level brings <b>new pieces</b>. Each one's <b>card</b> shows how it moves.</li>
     <li>On a card, a <b>line</b> slides until something blocks it; an arrow runs to the edge. A <b>lone dot</b> jumps straight there. <b>●</b> moves or takes, <b>○</b> only moves, <b>×</b> only takes.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <div id="help-king" aria-hidden="true"></div>
+  <ol class="rules" start="3">
     <li>Cards point up the board. The enemy's pieces move the same way, <b>upside down</b>.</li>
     <li>Take the enemy's <b>king</b> (the crowned piece), or <b>all</b> of its pieces. Lose yours and you lose. A side with no move skips its turn.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
     <li>You move first. There's always a <b>win</b> in the moves shown on top: undo, restart and try again.</li>
     <li>Win fast for <b>three stars</b>.</li>
   </ol>
   <p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>
+  </div>
+  </div>
   <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
 </dialog>
 

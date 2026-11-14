@@ -78,15 +78,34 @@
 </main>
 
 <dialog id="dlg-help">
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
   <h2>How to play</h2>
+  <div class="help-pages">
+  <div class="help-page">
   <ol class="rules">
     <li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>
     <li><b>Drag</b> the cards into order, top to bottom.<span class="kbd-hint"> Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="help-cards" aria-hidden="true">
+    <li class="card"><span class="name">Airplane</span></li>
+    <li class="card ok link"><span class="name">Telephone</span><span class="val">1876</span></li>
+    <li class="card ok linked"><span class="name">Light bulb</span><span class="val">1879</span></li>
+    <li class="card"><span class="name">Television</span></li>
+  </ol>
+  <ol class="rules" start="3">
     <li>Press <b>Check</b>. Cards that sit next to each other in the right order turn green, show their value, and join into a group &mdash; even if the group isn't in its final spot yet. Drag a group to move it as one.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="4">
     <li>Stuck? Use up to <b>3 hints</b>. Each one slides two cards that belong together into place and joins them.</li>
     <li>Solve it in <b>2 checks</b> for three stars, <b>4</b> for two.</li>
   </ol>
   <p class="muted small">One daily puzzle plus random puzzles from the whole collection.</p>
+  </div>
+  </div>
   <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
 </dialog>
 

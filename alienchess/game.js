@@ -307,9 +307,11 @@ function onKey(e) {
 $('#btn-undo').onclick = undo;
 $('#btn-reset').onclick = reset;
 
-// Home logo: a crowned Bloorp; help: a sample card
+// Home logo: a crowned Bloorp; help, page 1: a sample card
 $('#logo').innerHTML = pieceSvg({ look: 0, king: true }, -1);
 $('#help-card').innerHTML = card({ look: 1, king: false, rules: [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 9, m: 'any' }, { k: 'leap', v: [[-2, 0], [2, 0]], m: 'move' }, { k: 'slide', v: [[0, -1], [0, 1]], n: 1, m: 'cap' }] });
+// help, page 2: a king's card (its head shows the piece as you'd see yours and the enemy's)
+$('#help-king').innerHTML = card({ look: 0, king: true, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 1, m: 'any' }] });
 
 boot({ name: T('Alien Chess'), storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
