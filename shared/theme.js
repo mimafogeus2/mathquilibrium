@@ -214,7 +214,11 @@
     document.body.append(b);
     let ss = null;
     try { ss = sessionStorage.getItem('peel'); sessionStorage.removeItem('peel'); } catch {}
-    if (on && ss) b.classList.add('roll');
+    // the roll-in, once: left on, its animation would hold width and height, and hover's transitions would just jump
+    if (on && ss) {
+      b.classList.add('roll');
+      b.querySelector('.peel-flap').addEventListener('animationend', () => b.classList.remove('roll'), { once: true });
+    }
     if (!on) fire(b.querySelector('canvas'), () => b.matches(':hover, :focus-visible, .tease'));
     let tease;
     b.onclick = () => {
