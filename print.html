@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Games by Miki — print today's zine</title>
+<meta name="description" content="Today's printable daily puzzles as a little booklet: print it on one side, fold, staple, and solve with a pen.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Games by Miki">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/print.html">
+<meta property="og:title" content="Games by Miki — print today's zine">
+<meta property="og:description" content="Today's printable daily puzzles as a little booklet: print it on one side, fold, staple, and solve with a pen.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="shared/theme.js"></script>
+<script data-goatcounter="https://goatcounter-production-28ca10cd.up.railway.app/count" async src="https://goatcounter-production-28ca10cd.up.railway.app/count.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ccircle cx='28' cy='36' r='16' fill='%23ff48b0'/%3E%3Ccircle cx='36' cy='28' r='16' fill='%23ffb511' fill-opacity='.88'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/core.css">
+<style>
+  /* The zine: A5 pages, two to a landscape A4 sheet.
+     One side: each sheet folds in half, print outside, into one leaf (its first page the front); leaves stack and staple along the open edge.
+     Both sides: a booklet. The sheets stack, fold once down the middle and staple on the fold. */
+  .z-screen { max-width: 960px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom)); }
+  .z-intro { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+  .z-sides { display: flex; padding: 3px; margin: 0 0 14px; border-radius: 99px; box-shadow: inset 0 0 0 1px var(--line); }
+  .z-sides button { min-height: 40px; padding: 0 18px; border: 0; border-radius: 99px; background: none; font-size: 14.5px; font-weight: 600; color: var(--muted); transition: background-color .15s, color .15s; }
+  .z-sides button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .z-count { margin: 0 0 14px; font-size: 15px; color: var(--muted); text-align: center; }
+  .z-count b { color: var(--ink); font-size: 17px; }
+  #btn-go { max-width: 360px; padding-block: 20px; }
+  #btn-go b { font: 600 26px var(--display); letter-spacing: -0.02em; }
+  #btn-go:disabled { opacity: .6; cursor: progress; }
+
+  .z-steps { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+  .z-steps li { counter-increment: step; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.45; text-wrap: pretty; }
+  .z-steps li::before { content: counter(step); font: italic 600 22px var(--display); color: var(--brand-text); }
+  .z-steps svg { width: 100%; height: auto; aspect-ratio: 3 / 2; padding: 10px; box-sizing: border-box; border-radius: 10px; background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair); stroke-width: 1.4; }
+  .z-steps .sheet-fill { fill: var(--stock); }
+  .z-steps .cover-fill { fill: var(--brand); stroke: none; }
+  .z-steps .back-fill { fill: var(--slot); }
+  .z-steps .staple { stroke: var(--ink); stroke-width: 3; }
+  [dir="rtl"] .z-steps svg { scale: -1 1; } /* the booklet opens the other way: spine on the right */
+  @media (max-width: 640px) { .z-steps { grid-template-columns: 1fr; } .z-steps svg { max-width: 300px; } }
+
+  .z-head { margin: 44px 0 12px; border-bottom: 1px solid var(--hair); padding-bottom: 6px; }
+  #z-preview { width: 100%; }
+  #z-msg { text-align: center; color: var(--muted); padding: 40px 0; }
+  #sheets { display: flex; flex-direction: column; align-items: center; gap: 4mm; }
+  .z-cap { margin: 8mm 0 0; font-size: 13pt; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .bar a { color: inherit; }
+  #measure { position: absolute; top: 0; left: -10000px; visibility: hidden; }
+  .z-frame { position: absolute; top: 0; left: -10000px; width: 1024px; height: 768px; border: 0; visibility: hidden; }
+
+  /* ---- the paper: black ink on white, greys and halftones only ---- */
+  .sheet {
+    --ink: #000; --muted: #444; --paper: #fff; --stock: #fff; --line: #000; --hair: #888; color-scheme: light;
+    --wonk: 'SOFT' 100, 'WONK' 1;
+    position: relative; flex: none; display: flex; width: 297mm; height: 210mm; overflow: hidden;
+    background: #fff; color: #000; box-shadow: 0 3mm 9mm -4mm rgb(0 0 0 / .35);
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  .sheet::after { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; border-left: .3mm dashed #bbb; } /* the fold */
+  .pg { position: relative; flex: none; width: 148.5mm; height: 210mm; overflow: hidden; }
+  .pg-area { position: absolute; inset: 11mm 11mm 18mm; }
+  /* a puzzle: its header across the slot, then the game's sheet shrunk to fit, centred */
+  .slot { position: absolute; display: flex; flex-direction: column; }
+  .z-h { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 2mm; height: 9mm; margin-bottom: 3mm; border-bottom: .6mm solid #000; padding-bottom: 1.2mm; box-sizing: border-box; }
+  .z-h h3 { margin: 0; min-width: 0; font: 800 15pt/1 var(--display); letter-spacing: -0.035em; font-variation-settings: var(--wonk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tag { flex: none; margin-bottom: .6mm; padding: .9mm 1.8mm .7mm; border-radius: .6mm; background: #000; color: #fff; font: 700 6pt/1 Inter, Heebo, sans-serif; letter-spacing: .16em; text-transform: uppercase; rotate: -2.5deg; }
+  .z-b { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: flex-start; }
+  .blk { flex: none; }
+  /* running foot, the folio in a black dot at the outer corner (a front page's outer edge is its inline end) */
+  .pg-foot { position: absolute; inset: auto 11mm 8mm; display: flex; align-items: center; gap: 3mm; font-size: 6.5pt; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  .pg-foot::before { content: ''; flex: 1; order: 1; border-top: .3mm solid #000; }
+  .pg-foot b { order: 2; display: grid; place-items: center; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: #000; color: #fff; font: 800 9pt/1 var(--display); letter-spacing: 0; }
+  .pg.verso .pg-foot { flex-direction: row-reverse; }
+
+  /* the cover */
+  .cover { position: absolute; inset: 11mm 11mm 12mm; display: flex; flex-direction: column; }
+  .c-top { display: flex; justify-content: space-between; padding-bottom: 1.5mm; border-bottom: .6mm solid #000; font-size: 6.5pt; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  .c-mast { position: relative; margin: 5mm 0 0; font: 800 50pt/.84 var(--display); letter-spacing: -0.05em; font-variation-settings: var(--wonk); }
+  .c-stamp {
+    position: absolute; top: 16mm; inset-inline-end: 1mm; width: 25mm; height: 25mm; border-radius: 50%; display: grid; place-content: center; text-align: center;
+    border: .7mm solid #000; outline: .3mm solid #000; outline-offset: .8mm; background: #fff; rotate: -11deg;
+    font-size: 6pt; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  }
+  .c-stamp b { display: block; font: 800 24pt/1 var(--display); letter-spacing: -0.03em; font-variation-settings: var(--wonk); }
+  .c-date { margin: 6mm 0 0; padding: 1.5mm 0; border-block: .3mm solid #000; font-size: 7pt; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  .c-toc { list-style: none; margin: 7mm 0 0; padding: 0; width: 74%; position: relative; z-index: 1; }
+  .c-toc li { display: flex; align-items: center; gap: 3mm; padding: 1.6mm 0; border-bottom: .3mm dashed #000; background: #fff; }
+  .c-toc b { flex: none; display: grid; place-items: center; width: 7mm; height: 7mm; border-radius: 50%; background: #000; color: #fff; font: 800 10pt/1 var(--display); }
+  .c-toc span { font: 700 14pt/1.1 var(--display); letter-spacing: -0.02em; font-variation-settings: var(--wonk); }
+  .c-toc small { margin-inline-start: auto; font-size: 6.5pt; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #444; }
+  .c-note { margin: auto 0 0; font: italic 500 11pt var(--display); position: relative; z-index: 1; }
+  /* overprinted shapes, like the front page's art, in halftones: the day's own (coverArt() below) */
+  .art { position: absolute; mix-blend-mode: multiply; }
+
+  /* scratch paper and the back cover */
+  .scratch { position: absolute; inset: 11mm 11mm 18mm; display: flex; flex-direction: column; }
+  .scratch i { flex: 1; background: radial-gradient(circle, #999 .28mm, transparent .34mm) 0 0 / 5mm 5mm; }
+  .back { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .back p { position: relative; margin: 0; }
+  .back .b1 { margin-top: 44mm; font: 800 20pt/1 var(--display); letter-spacing: -0.03em; font-variation-settings: var(--wonk); }
+  .back .b2 { margin-top: 3mm; font: italic 500 10.5pt var(--display); }
+  .back .b3 { margin-top: 8mm; padding: 1mm 2.5mm; background: #000; color: #fff; font-size: 7pt; font-weight: 700; letter-spacing: .12em; rotate: -2deg; }
+
+  @media print {
+    @page { size: A4 landscape; margin: 0; }
+    html, body { min-height: 0; background: none; }
+    .z-screen { max-width: none; padding: 0; }
+    .z-screen > :not(#z-preview), .z-cap { display: none !important; }
+    #sheets { zoom: 1 !important; gap: 0; }
+    .sheet { box-shadow: none; break-after: page; }
+    .sheet:last-child { break-after: auto; }
+    .sheet::after { border-left-color: #ddd; }
+  }
+</style>
+</head>
+<body>
+<main class="z-screen" style="--brand: var(--pink); --brand-text: var(--pink-text)">
+  <header class="bar">
+    <div class="bar-start"><a id="btn-back" class="icon" href="./" aria-label="Back to the games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a></div>
+    <div class="title"><b>Today's zine</b><small id="z-date"></small></div>
+    <div class="bar-end"><button class="icon js-theme" aria-label="Theme"></button></div>
+  </header>
+
+  <section class="z-intro">
+    <h1 class="wordmark">Print the <span>zine</span></h1>
+    <p class="tagline">All of today's printable puzzles in one little booklet, answers at the back. Print it, fold it, staple it, and solve with a pen.</p>
+    <div class="z-sides" role="group" aria-label="Printer"><button data-sides="1">One side</button><button data-sides="2">Both sides</button></div>
+    <p class="z-count" id="z-count">&nbsp;</p>
+    <button id="btn-go" class="btn primary center" disabled><b>Print</b><small id="z-go">Setting the type…</small></button>
+  </section>
+
+  <ol class="z-steps" data-sides="1">
+    <li>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <rect class="sheet-fill" x="10" y="10" width="100" height="62" rx="1.5"/>
+        <rect class="cover-fill" x="16" y="16" width="38" height="12" rx="1"/>
+        <path d="M16 34h38M16 40h30M16 46h38M16 52h26M66 18h38M66 24h30M66 30h38M66 36h22M66 46h38M66 52h30M66 58h34" opacity=".55"/>
+        <path d="M60 6v70" stroke-dasharray="3 2.5"/>
+      </svg>
+      <span><b>Print</b> on A4, one side only, at 100% scale. Each sheet holds two pages.</span>
+    </li>
+    <li>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <path class="back-fill" d="M60 10L84 18V64L60 72Z"/>
+        <rect class="sheet-fill" x="22" y="10" width="38" height="62" rx="1.5"/>
+        <rect class="cover-fill" x="27" y="16" width="28" height="12" rx="1"/>
+        <path d="M27 34h28M27 40h22M27 46h28M27 52h18" opacity=".55"/>
+        <path d="M60 6v70" stroke-dasharray="3 2.5"/>
+        <path d="M100 40c0-18-10-28-26-30"/><path d="M79 6l-5 4 5 4"/>
+      </svg>
+      <span><b>Fold</b> each sheet in half along the dashed line, printed side out, so its left page is the front.</span>
+    </li>
+    <li>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <rect class="sheet-fill" x="50" y="8" width="38" height="58" rx="1.5"/>
+        <rect class="sheet-fill" x="45" y="12" width="38" height="58" rx="1.5"/>
+        <rect class="sheet-fill" x="40" y="16" width="38" height="58" rx="1.5"/>
+        <rect class="cover-fill" x="45" y="22" width="28" height="12" rx="1"/>
+        <path d="M45 40h28M45 46h22M45 52h28" opacity=".55"/>
+        <path class="staple" d="M43.5 26v10M43.5 56v10"/>
+      </svg>
+      <span><b>Stack</b> the folded sheets in order, page 1 on top, and <b>staple</b> twice along the open edge.</span>
+    </li>
+  </ol>
+  <ol class="z-steps" data-sides="2" hidden>
+    <li>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <rect class="back-fill" x="16" y="6" width="96" height="58" rx="1.5"/>
+        <rect class="sheet-fill" x="8" y="14" width="96" height="58" rx="1.5"/>
+        <rect class="cover-fill" x="60" y="20" width="38" height="12" rx="1"/>
+        <path d="M14 22h38M14 28h30M14 34h38M14 40h22M60 40h38M60 46h30M60 52h38" opacity=".55"/>
+        <path d="M56 10v66" stroke-dasharray="3 2.5"/>
+        <path d="M112 44c6-10 4-24-6-30"/><path d="M104 9l2 5 5-1"/>
+      </svg>
+      <span><b>Print</b> on A4, both sides, at 100% scale. Choose <b>flip on short edge</b>.</span>
+    </li>
+    <li>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <rect class="sheet-fill" x="14" y="18" width="92" height="54" rx="1.5"/>
+        <rect class="sheet-fill" x="11" y="14" width="92" height="54" rx="1.5"/>
+        <rect class="sheet-fill" x="8" y="10" width="92" height="54" rx="1.5"/>
+        <rect class="cover-fill" x="58" y="16" width="36" height="12" rx="1"/>
+        <path d="M54 6v62" stroke-dasharray="3 2.5"/>
+        <path d="M84 74c-8 4-22 4-28-2"/><path d="M60 67l-4 5 6 1"/>
+      </svg>
+      <span><b>Stack</b> the sheets in order, sheet 1 on the outside, and <b>fold</b> them in half together, page 1 on the front.</span>
+    </li>
+    <li>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <path class="sheet-fill" d="M60 12L18 16V70L60 66Z"/>
+        <path class="sheet-fill" d="M60 12L102 16V70L60 66Z"/>
+        <path d="M26 26h26M26 32h20M26 38h26M68 26h26M68 32h20M68 38h26" opacity=".55"/>
+        <path d="M60 12v54"/>
+        <path class="staple" d="M60 22v10M60 46v10"/>
+      </svg>
+      <span><b>Staple</b> twice through the fold, from the outside. Opening the stapler flat onto some cardboard helps.</span>
+    </li>
+  </ol>
+
+  <h2 class="kicker z-head">Preview</h2>
+  <div id="z-preview"><p id="z-msg">Setting the type…</p><div id="sheets"></div></div>
+</main>
+<div id="measure"></div>
+
+<script src="shared/common.js"></script>
+<script src="shared/core.js"></script>
+<script>
+  // Each game's page loads in a hidden frame and hands over today's dailies on paper (paper() in core.js: the same sheets its print button makes).
+  // Each puzzle gets the smallest slot it fits at a readable size: a quarter, half or whole page. Answers follow, the same way.
+  const GAMES = [['mathquilibrium', 'Mathquilibrium', 'EMH'], ['biggr', 'Biggr', 'EMH'], ['wordswipe', 'WordSwipe', ''], ['orderly', 'Orderly', ''], ['coronet', 'Coronet', 'EMH']];
+  const L = {
+    daily: 'Daily', answer: 'Answer', answers: 'Answers', foot: 'Games by Miki · No. {no}', top: 'Daily logic games', free: 'Free · one coffee break',
+    mast: 'Games<br>by Miki', no: 'No.', note: 'A pen is all you need.', scratch: 'Scratch paper', working: 'For working out',
+    back: 'Printed fresh every morning.', tomorrow: 'A new issue tomorrow at', puzzles: '{n} puzzles', puzzle: '1 puzzle',
+    count: (sheets, pages, both) => `<b>${sheets === 1 ? '1 sheet' : sheets + ' sheets'}</b> of A4${both ? ', both sides' : ''} · ${pages} pages`,
+    go: (both) => (both ? 'A4, landscape, both sides: flip on short edge' : 'A4, landscape, one side'),
+    cap: (i, side) => `Sheet ${i}` + (side ? (side === 1 ? ' · front' : ' · back') : ''),
+    fail: "Couldn't set the type. Reload the page to try again.",
+  };
+  const MM = 96 / 25.4, CW = 126.5, CH = 181, GAP = 6, HEAD = 12; // a page's type area (.pg-area) and a puzzle's header (.z-h), mm
+  const QW = (CW - GAP) / 2, HH = (CH - GAP) / 2;
+  const SLOTS = [[1, QW, HH], [2, CW, HH], [4, CW, CH]]; // quarter, half, whole: [size, width, height]
+  const Z = 0.7, MIN_Z = 0.52, MIN_ANSWER = 0.42; // the games' sheets are set for A4: 0.7 is that on A5; below MIN_Z try a bigger slot (answers are only checked: smaller)
+  // the sheets a little tighter than on A4: bigger rules (they get shrunk most), a smaller ring, closer Biggr lines
+  const FIT = new CSSStyleSheet();
+  FIT.replaceSync(`#print { display: flex !important; }
+    .p-ring { width: 120mm; height: 120mm; margin-top: 0; }
+    #print .rules { font-size: 12.5pt; }
+    .p-pairs li { padding: 2mm 0; } .p-pairs i { height: 8mm; } .p-pairs span { white-space: nowrap; }`);
+
+  const date = ymd(new Date()), d = new Date(date + 'T12:00Z');
+  const no = Math.max(1, Math.round((Date.parse(date) - Date.UTC(2026, 10, 12)) / 864e5) + 1); // as on the front page
+  const longDate = d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  $('#z-date').textContent = d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const site = location.host + location.pathname.replace(/print\.html$/, '');
+
+  function frame(g) {
+    const f = document.createElement('iframe');
+    f.className = 'z-frame';
+    f.tabIndex = -1;
+    f.setAttribute('aria-hidden', 'true');
+    f.src = g + '/';
+    document.body.append(f);
+    return new Promise((ok) => { f.onload = () => {
+      // The frame only lends its sheets: it must never save (its games save on pagehide, and would store the dailies set up below as played)
+      f.contentWindow.Storage.prototype.setItem = () => {};
+      ok(f);
+    }; });
+  }
+  // The frame's styles (core.css and the game's), for the game's sheets: each sheet sits in a shadow root, so games' styles don't mix.
+  function styles(f) {
+    const css = new CSSStyleSheet();
+    css.replaceSync([...f.contentDocument.styleSheets].map((s) => { try { return [...s.cssRules].map((r) => r.cssText).join('\n'); } catch { return ''; } }).join('\n')); // the font sheet is cross-origin
+    return css;
+  }
+  // A puzzle: { host: the game's sheet in a shadow root, name, tag: its header }. The header is the zine's own, outside the shrinking.
+  function block(css, html, name, tag, game) {
+    const host = document.createElement('div');
+    host.className = 'blk';
+    const root = host.attachShadow({ mode: 'open' });
+    root.adoptedStyleSheets = [css, FIT];
+    root.innerHTML = `<section id="print">${html}</section>`;
+    $('#measure').append(host);
+    return { host, name, tag, game };
+  }
+
+  // The zoom (at most Z) at which the sheet, laid out w / zoom mm wide so it spans the slot, fits w × h mm. Some sheets grow with
+  // their width (Coronet's ring) and some shrink (wrapping text), so it's searched for: the biggest zoom that fits, to within 1%.
+  function zoomFor(host, w, h) {
+    const sec = host.shadowRoot.firstChild, fits = (z) => {
+      host.style.width = w / z + 'mm';
+      const wide = Math.max(...[...sec.children].map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth || 0))); // scrollWidth: what spills out of a list
+      return wide * z <= w * MM + 0.5 && sec.getBoundingClientRect().height * z <= h * MM + 0.5;
+    };
+    let lo = 0.2, hi = Z;
+    if (fits(hi)) return hi;
+    while (hi - lo > 0.01) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
+    return lo;
+  }
+  // The smallest slot the block fits at zoom min or more (a whole page whatever it takes); its zoom and width are kept for placing.
+  const fit = (min) => (b) => {
+    for (const [size, w, h] of SLOTS) {
+      const z = zoomFor(b.host, w, h - HEAD);
+      if (z >= min || size === 4) return Object.assign(b, { size, w, z });
+    }
+  };
+
+  // Pages from blocks: a whole block takes a page; halves and quarters fill two rows a page, two quarters to a row.
+  // In order, a block goes on the last page or a new one; with anyGap (the answers) into the first page with room.
+  function pack(blocks, anyGap) {
+    const pages = [], open = (rows) => rows[0][0].size < 4 && rows; // a page halves and quarters can join
+    for (const b of blocks) {
+      if (b.size === 4) { pages.push([[b]]); continue; }
+      const look = (anyGap ? pages : pages.slice(-1)).filter(open);
+      const pair = b.size === 1 && look.flat().find((r) => r.length === 1 && r[0].size === 1);
+      if (pair) { pair.push(b); continue; }
+      const room = look.find((rows) => rows.length < 2);
+      if (room) room.push([b]); else pages.push([[b]]);
+    }
+    return pages;
+  }
+  // A slot's header spans it; the sheet keeps the zoom and width it was fitted at (a lone quarter: centred under a full-width header).
+  function slot(b, x, y, w, h) {
+    const s = document.createElement('div');
+    s.className = 'slot';
+    Object.assign(s.style, { insetInlineStart: x + 'mm', top: y + 'mm', width: w + 'mm', height: h + 'mm' });
+    s.innerHTML = `<header class="z-h"><h3>${esc(b.name)}</h3><span class="tag">${esc(b.tag)}</span></header><div class="z-b"></div>`;
+    Object.assign(b.host.style, { width: b.w / b.z + 'mm', zoom: b.z });
+    s.lastChild.append(b.host);
+    return s;
+  }
+  const rowsToSlots = (rows) => rows.flatMap((r, i) => (r[0].size === 4 ? [slot(r[0], 0, 0, CW, CH)]
+    : r.length === 1 ? [slot(r[0], 0, i * (HH + GAP), CW, HH)] : r.map((b, j) => slot(b, j * (QW + GAP), i * (HH + GAP), QW, HH))));
+  // The day's art: two or three shapes in different halftones, overprinted, dealt from the date (every copy of an issue alike).
+  // On the cover they keep to the bottom outer corner, under the contents (whose rows are white) and clear of the note.
+  const SHAPES = [ // [height / width, css]
+    [1, 'border-radius: 50%'], [1, 'border-radius: 4mm'], [0.5, 'border-radius: 999px 999px 0 0'], [0.55, 'border-radius: 999px'],
+    [0.87, 'clip-path: polygon(50% 0, 100% 100%, 0 100%)'], [1, 'border-radius: 100% 0 0 0'],
+  ];
+  const TEXTURES = [
+    (r) => { const p = 1.3 + r() * 0.7; return `radial-gradient(circle, #000 ${p * 0.28}mm, transparent ${p * 0.28 + 0.06}mm) 0 0 / ${p}mm ${p}mm`; }, // dots
+    (r) => `repeating-linear-gradient(${pick(r, [-45, 45, -30, 60])}deg, #000 0 .3mm, transparent .3mm ${1.1 + r() * 0.6}mm)`, // hatch
+    (r) => `repeating-linear-gradient(${pick(r, [0, 90])}deg, #000 0 .9mm, transparent .9mm 2.4mm)`, // stripes
+    () => 'linear-gradient(#000 .25mm, transparent .25mm) 0 0 / 2mm 2mm, linear-gradient(90deg, #000 .25mm, transparent .25mm) 0 0 / 2mm 2mm', // grid
+    () => '#cfcfcf', // a flat grey
+  ];
+  // bounds(w, h): the range [x0, x1, y0, y1] of a shape's position (mm) on that page; at(x, y): its css. The first shape lands anywhere
+  // in range, the rest overlap it (that's the overprint), each in its own texture.
+  function dayArt(seed, bounds, at) {
+    const r = rng(hash(date + seed)), tex = [...TEXTURES];
+    for (let i = tex.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [tex[i], tex[j]] = [tex[j], tex[i]]; }
+    const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+    let cx, cy, w0, h0;
+    return Array.from({ length: 2 + (r() < 0.4) }, (_, i) => {
+      const [k, css] = pick(r, SHAPES), w = i ? 26 + r() * 18 : 44 + r() * 20, h = w * k, [x0, x1, y0, y1] = bounds(w, h);
+      const x = i ? clamp(cx - w / 2 + (r() - 0.5) * w0, x0, x1) : x0 + r() * Math.max(0, x1 - x0);
+      const y = i ? clamp(cy - h / 2 + (r() - 0.5) * h0, y0, y1) : y0 + r() * Math.max(0, y1 - y0);
+      if (!i) [cx, cy, w0, h0] = [x + w / 2, y + h / 2, w, h];
+      return `<i class="art" style="${css}; width: ${w}mm; height: ${h}mm; ${at(x, y)}; rotate: ${Math.round(r() * 50 - 25)}deg; background: ${tex[i](r)}"></i>`;
+    }).join('');
+  }
+  // cover: from the outer edge (some bleed) to at most 80mm in, from just off the bottom to no higher than the contents' end
+  const coverArt = dayArt('cover', (w, h) => [-16, 80 - w, -12, 72 - h], (x, y) => `inset-inline-end: ${x}mm; bottom: ${y}mm`);
+  // back cover: around the middle, ending above the colophon
+  const backArt = dayArt('back', (w, h) => [-40, 40 - w, 30, 100 - h], (x, y) => `left: calc(50% + ${x}mm); top: ${y}mm`); // ends above 100mm, clear of the text
+
+  let book; // { pp, ap: packed puzzle and answer pages, toc }
+  // The pages, in reading order: cover, puzzles, answers, then any pages left on the last sheet: scratch paper, the last one a back cover.
+  function pages(per) {
+    const n = Math.ceil((1 + book.pp.length + book.ap.length) / per) * per, out = [];
+    const pg = (html, label) => {
+      const p = document.createElement('div'), i = out.length + 1;
+      p.className = 'pg' + (i % 2 ? '' : ' verso');
+      p.innerHTML = html + (label ? `<footer class="pg-foot"><span>${esc(label)}</span><b>${i}</b></footer>` : '');
+      out.push(p);
+      return p;
+    };
+    const foot = L.foot.replace('{no}', no);
+    pg(`<div class="cover"><div class="c-top"><span>${L.top}</span><span>${L.free}</span></div>
+      <h1 class="c-mast">${L.mast}</h1><div class="c-stamp">${L.no}<b>${no}</b></div>
+      <p class="c-date">${esc(longDate)}</p>
+      <ol class="c-toc">${book.toc.map(([name, at, n]) => `<li><b>${at}</b><span>${esc(name)}</span><small>${n ? (n === 1 ? L.puzzle : L.puzzles.replace('{n}', n)) : ''}</small></li>`).join('')}</ol>
+      ${coverArt}<p class="c-note">${L.note}</p></div>`);
+    for (const rows of book.pp) pg('<div class="pg-area"></div>', foot).firstChild.append(...rowsToSlots(rows));
+    for (const rows of book.ap) pg('<div class="pg-area"></div>', L.answers).firstChild.append(...rowsToSlots(rows));
+    while (out.length < n - 1) pg(`<div class="scratch"><header class="z-h"><h3>${L.scratch}</h3><span class="tag">${L.working}</span></header><i></i></div>`, foot);
+    if (out.length < n) pg(`<div class="back">${backArt}<p class="b1">${L.back}</p><p class="b2">${L.tomorrow}</p><p class="b3" dir="ltr">${esc(site)}</p></div>`);
+    return out;
+  }
+  // Pages onto A4 sheets. One side: two pages a sheet, in order. Both sides: a booklet folded once, so the outer sheet carries
+  // the last page and the first on its front, the second and the second last on its back (flex in rtl puts the first child right).
+  function render(sides) {
+    const both = sides === 2, p = pages(both ? 4 : 2), n = p.length, out = [];
+    const sheet = (a, b, cap) => {
+      const s = document.createElement('div');
+      s.className = 'sheet';
+      s.append(a, b);
+      out.push(Object.assign(document.createElement('p'), { className: 'z-cap', textContent: cap }), s);
+    };
+    if (both) for (let i = 0; i < n / 4; i++) { sheet(p[n - 1 - 2 * i], p[2 * i], L.cap(i + 1, 1)); sheet(p[2 * i + 1], p[n - 2 - 2 * i], L.cap(i + 1, 2)); }
+    else for (let i = 0; i < n; i += 2) sheet(p[i], p[i + 1], L.cap(i / 2 + 1));
+    $('#sheets').replaceChildren(...out);
+    $('#z-count').innerHTML = L.count(n / (both ? 4 : 2), n, both);
+    $('#z-go').textContent = L.go(both);
+    for (const b of document.querySelectorAll('.z-sides button')) b.setAttribute('aria-pressed', String(+b.dataset.sides === sides));
+    for (const o of document.querySelectorAll('.z-steps')) o.hidden = +o.dataset.sides !== sides;
+    preview();
+  }
+
+  async function make() {
+    const frames = await Promise.all(GAMES.map(([g]) => frame(g)));
+    await document.fonts.ready;
+    const puzzles = [], answers = [];
+    GAMES.forEach(([g, name, tiers], i) => {
+      const f = frames[i], css = styles(f), seen = new Set();
+      for (const k of tiers ? [...tiers] : [undefined]) {
+        const s = f.contentWindow.paper(k), sub = k ? tierName(k) : L.daily;
+        const rules = s.rules.filter((r) => !seen.has(r)); // a game's rules once, on its first puzzle; later ones add only what's new
+        rules.forEach((r) => seen.add(r));
+        puzzles.push(block(css, (s.top || '') + (rules.length ? `<ol class="rules">${rules.map((r) => `<li>${r}</li>`).join('')}</ol>` : '') + s.body, name, sub, g));
+        answers.push(block(css, (s.top || '') + s.answer, name, `${sub} · ${L.answer}`, g));
+      }
+      f.remove();
+    });
+    await document.fonts.ready;
+    const pp = pack(puzzles.map(fit(MIN_Z))), ap = pack(answers.map(fit(MIN_ANSWER)), true);
+    const at = (b) => 2 + pp.findIndex((rows) => rows.flat().includes(b));
+    book = { pp, ap, toc: [...GAMES.map(([g, name]) => { const bs = puzzles.filter((b) => b.game === g); return [name, at(bs[0]), bs.length]; }), [L.answers, 2 + pp.length, 0]] };
+    $('#z-msg').remove();
+    $('#btn-go').disabled = false;
+    render(sides);
+  }
+  // one side or both: the viewer's printer, remembered
+  let sides = 1;
+  try { sides = +localStorage.getItem('zine-sides') || 1; } catch {}
+  for (const b of document.querySelectorAll('.z-sides button')) b.onclick = () => {
+    sides = +b.dataset.sides;
+    try { localStorage.setItem('zine-sides', sides); } catch {}
+    if (book) render(sides); else for (const x of document.querySelectorAll('.z-sides button')) x.setAttribute('aria-pressed', String(x === b));
+  };
+  document.querySelector(`.z-sides button[data-sides="${sides}"]`)?.setAttribute('aria-pressed', 'true');
+  for (const o of document.querySelectorAll('.z-steps')) o.hidden = +o.dataset.sides !== sides;
+  // the preview: the sheets as printed, shrunk to the page
+  const preview = () => { $('#sheets').style.zoom = Math.min(1, $('#z-preview').clientWidth / (297 * MM)); };
+  addEventListener('resize', preview);
+  $('#btn-go').onclick = () => { window.goatcounter?.count?.({ path: 'zine/print/' + sides, event: true }); print(); };
+  make().catch((e) => { console.error(e); $('#z-msg').textContent = L.fail; $('#z-go').textContent = ''; });
+</script>
+</body>
+</html>

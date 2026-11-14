@@ -6,7 +6,7 @@
 const fs = require('fs'), path = require('path');
 const LANGS = ['he'];
 const PAGES = ['index.html', ...['mathquilibrium', 'biggr', 'wordswipe', 'orderly', 'coronet', 'quadflip', 'alienchess'].map((g) => g + '/index.html'), 'orderly/play.html', 'orderly/editor.html',
-  'wordswipe/editor.html', 'wordswipe/play.html'];
+  'wordswipe/editor.html', 'wordswipe/play.html', 'print.html'];
 const SITE = 'https://mimafogeus2.github.io/mathquilibrium/';
 const ROOT = __dirname, read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const check = process.argv.includes('--check'), errors = [];

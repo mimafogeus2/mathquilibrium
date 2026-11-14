@@ -25,6 +25,7 @@ Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded leve
 - `wordswipe/editor.html` — make your own round and share it; `wordswipe/play.html#r=…` plays a shared one (nothing saved, no streaks). The round travels in the link: `shared/link.js` gzips JSON into base64url, `wordswipe/custom.js` checks it
 - `orderly/special.js`, `wordswipe/special.js` — special days: `YYYY-MM-DD|Occasion|puzzle line` replaces that date's daily with a themed one. Each date is used once ever: a small day gets one line, a big holiday one per year, and small days sharing a date take turns by year
 - `orderly/editor.html` — make a level (draft kept in localStorage); its link opens `orderly/play.html#l=…`, a play-only page that records nothing. `orderly/custom.js` checks a level's shape; `shared/link.js` packs any JSON into a URL hash (gzip + base64url)
+- `print.html` — today's printable dailies as an A5 zine (the front page's printer icon): each game's page loads in a hidden frame and hands over its print sheets (`printable()` / `paper()` in core.js); each puzzle gets the smallest of a quarter, half or whole page it fits at a readable size, answers at the back. Two pages per A4 sheet, printed one side, folded and stapled
 - `<game>/gen.js` — the generator; `<game>/game.js` — the board, calling `boot({ ... })`
 
 ## Translations

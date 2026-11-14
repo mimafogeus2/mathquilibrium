@@ -222,7 +222,7 @@ printable(() => R && {
   ],
   body: `<ol class="p-pairs">${R.pairs.map(([lt, , rt]) => `<li><span>${esc(lt)}</span><i></i><span>${esc(rt)}</span></li>`).join('')}</ol>`,
   answer: `<ol class="p-pairs">${R.pairs.map(([lt, lv, rt, rv]) => `<li><span>${esc(lt)} <small>(${lv})</small></span><i>${lv > rv ? '&gt;' : '&lt;'}</i><span><small>(${rv})</small> ${esc(rt)}</span></li>`).join('')}</ol>`,
-});
+}, (k, date) => { R = { pairs: generate(hash('D' + k + date), k) }; });
 syncSound();
 router((h) => openLevel(h, start), goHome);
 if (!store.seenHelp) $('#dlg-help').showModal();

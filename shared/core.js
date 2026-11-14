@@ -432,7 +432,11 @@ function openLevels(pack = store.lastPack || 'E', page) {
 // answer is the solved puzzle, printed on a page of its own after the puzzle.
 // It fills #print right before printing (the #btn-print button or Ctrl+P); in print, core.css shows only #print, on one A4 page plus the answer page.
 // From the menu nothing is filled, so the page prints as it looks.
-function printable(build) {
+// daily(tier, date) sets up that daily as the puzzle build() reads, without playing it: print.html (the daily zine) loads this page
+// in a hidden frame and calls paper(tier) for each of today's dailies (tier: undefined for a game with one daily).
+// There build(true) is asked for: a sheet bound into a booklet, so nothing on it can be cut out (its back is another page).
+function printable(build, daily) {
+  window.paper = (tier) => { daily(tier, ymd(new Date())); return build(true); };
   const out = document.createElement('section');
   out.id = 'print';
   document.body.append(out);

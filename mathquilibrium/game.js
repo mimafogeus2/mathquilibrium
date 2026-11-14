@@ -394,7 +394,7 @@ printable(() => {
       grid(false),
     answer: grid(true),
   };
-});
+}, (k, date) => { G = { p: generate(hash('D' + k + date), levelConfig(PACKS[k].daily)) }; });
 
 mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);

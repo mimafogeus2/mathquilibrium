@@ -98,6 +98,8 @@
 .p-strips li { position: relative; display: flex; align-items: center; gap: 5mm; min-height: 14mm; padding: 1mm 6mm; border: 1pt dashed #000; font-size: 13pt; font-weight: 600; }
 /* scissors on the cut line */
 .p-strips li::before { content: '✂'; position: absolute; inset-inline-start: 3mm; top: -.62em; padding: 0 1mm; background: #fff; font-size: 12pt; line-height: 1; font-weight: 400; }
+.p-strips.bound li { border-style: solid; }
+.p-strips.bound li::before { content: none; }
 .p-strips i { flex: none; width: 12mm; height: 7mm; border-bottom: 1.2pt solid #000; }
 .p-order { width: 100%; margin: 0; padding-inline-start: 10mm; font-size: 13pt; }
 .p-order li { padding: 2.5mm 0; border-bottom: .5pt solid #888; }
