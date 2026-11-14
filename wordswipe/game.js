@@ -38,6 +38,7 @@ function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
   $('#daily-meta').innerHTML = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
+  rollIn($('#btn-daily'), 'r');
   $('#btn-daily small').textContent = rec ? `✓ ${T('{n} points', { n: rec.s })} · ${T('see result')}` : store.cur?.key === 'D' + t ? T('Resume') : sp ? sp.occasion : T('24 words · 60 seconds');
   $('#btn-unlimited small').textContent = T('Round {n}', { n: store.n + 1 }) + (store.best ? ' · ' + T('best {n}', { n: store.best }) : '') +
     (store.cur?.key === 'U' + store.n ? ' · ' + T('resume') : '');
@@ -179,7 +180,7 @@ function finish() {
     if (R.date) (store.daily[R.date] ??= {}).r = rec;
     else { store.n = Math.max(store.n, R.n + 1); store.best = Math.max(store.best, rec.s); }
     persist();
-    bump(st);
+    bump(st, R.date && 'r');
   }
   $('#game').classList.add('done');
   if (rec.t) { sfx.win(); confetti(sp ? sp.occasion.split(' ', 1) : undefined); } // a special day throws its own emoji
@@ -191,13 +192,14 @@ function showEnd(rec, daily) {
   const right = [...rec.m].filter((c) => c === '1').length, done = rec.m.length === 24;
   $('#end-title').textContent = T(!done ? "Time's up!" : right === 24 ? 'Flawless!' : right >= 20 ? 'Sharp!' : 'Done!');
   $('#end-score').innerHTML = `${rec.s}<small>${T('points')}</small>`;
+  const round = !daily && R?.key === 'C' && R.round;
+  stamp($('#dlg-end'), { date: daily && today(), label: daily ? '' : round || !R ? T('Custom round') : T('Round {n}', { n: R.n + 1 }), value: T('{n} pts', { n: rec.s }) });
   $('#end-stats').innerHTML = T('<b>{n}/{total}</b> right', { n: right, total: 24 }) + ' · ' +
     (done ? T('<b>{n}s</b> left (+{bonus})', { n: rec.t, bonus: rec.t * PER_SEC }) : T('{n} unanswered', { n: 24 - rec.m.length }));
   $('#end-misses').innerHTML = rec.misses.length
     ? `<p class="muted small">${T('{subject} — you missed:', { subject: esc(rec.subject) })}</p>` +
       rec.misses.map((w) => `<span class="${w[0] === '+' ? 'yes' : 'no'}">${w[0] === '+' ? '✓' : '✗'} ${esc(w.slice(1))}</span>`).join('')
     : '';
-  const round = !daily && R?.key === 'C' && R.round;
   $('#end-next b').textContent = daily ? T(navigator.share ? 'Share result' : 'Copy result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); round ? play('C', round) : play('U' + store.n); };
   $('#btn-result').hidden = false;

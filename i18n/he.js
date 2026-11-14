@@ -98,6 +98,10 @@ module.exports = {
       'Play': 'שחקו',
       'New puzzle': 'חידה חדשה',
       'Daily · {tier}': 'היום · {tier}',
+      // the win stamp and the menu's slug
+      'Daily': 'יומי',
+      'No. {n}': 'גיליון {n}',
+      'Games by Miki': 'מדף המשחקים של מיקי',
       'Pause': 'השהיה',
       '{n} of 3 stars': '{n} מתוך 3 כוכבים',
       'Brilliant!': 'מבריק!',
@@ -468,7 +472,7 @@ module.exports = {
       ['<span class="b-go">Play <b', '<span class="b-go">שחקו <b'],
       // the inline script
       [`['Did you try…', "Let's play…", 'Have you considered…']`, "['ניסיתם את…', 'בואו נשחק…', 'שווה לנסות:']"],
-      ['`No. ${no.toLocaleString()}`', '`גיליון ${no.toLocaleString()}`'],
+      ['`Vol. ${Math.floor((no - 1) / 365) + 1} · No. ${no.toLocaleString()}`', '`כרך ${Math.floor((no - 1) / 365) + 1} · גיליון ${no.toLocaleString()}`'],
       ['d.toLocaleDateString(undefined,', "d.toLocaleDateString('he',"],
       ["`Today: ${done.r.c ? `${done.r.c} check${done.r.c > 1 ? 's' : ''}` : `${done.r.s} points`}` : 'New round today'",
         "`היום: ${done.r.c ? (done.r.c > 1 ? `${done.r.c} בדיקות` : 'בדיקה אחת') : `${done.r.s} נקודות`}` : 'סבב חדש היום'"],

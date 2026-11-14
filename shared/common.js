@@ -27,4 +27,7 @@ function special(list, date) {
   if (s) { const i = s.indexOf('|', 11); return { occasion: s.slice(11, i), line: s.slice(i + 1) }; }
 }
 
-if (typeof module === 'object') module.exports = { TIERS, PACK_SIZE, rng, hash, int, pick, special };
+// The day's issue number: No. 1 was 2026-11-12 (as on the front page and the printed zine). date: 'YYYY-MM-DD'.
+const issueNo = (date) => Math.max(1, Math.round((Date.parse(date) - Date.UTC(2026, 10, 12)) / 864e5) + 1);
+
+if (typeof module === 'object') module.exports = { TIERS, PACK_SIZE, rng, hash, int, pick, special, issueNo };

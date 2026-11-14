@@ -80,6 +80,7 @@ function home() {
   const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
   $('#daily-meta').innerHTML = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
+  rollIn($('#btn-daily'), 'r');
   $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · ${T('see result')}` : store.saves['D' + t] ? T('Resume') : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
   $('#lv-meta').textContent = T('{n} / {total} solved', { n: solved, total: LEVELS.length });
   // A random puzzle in progress: the main button resumes it. The difficulty row always deals a new one.
@@ -224,7 +225,7 @@ function win() {
     if (P.date) (store.daily[P.date] ??= {}).r = rec;
     else store.stars[P.n] = Math.max(store.stars[P.n] || 0, stars(rec.c));
     persist();
-    bump(st);
+    bump(st, P.date && 'r');
   }
   layout();
   sfx.win();
@@ -256,6 +257,7 @@ function showResult(fresh) {
   $('#play').hidden = true;
   $('#result').hidden = false;
   starRow($('#res-stars'), s, fresh);
+  stamp($('#result'), { date: P.date, label: P.date ? '' : P.n ? T(DIFF[P.lv.d]) : T('Custom level'), value: checksText(c), fresh });
   $('#res-text').innerHTML = T('Solved in <b>{checks}</b>', { checks: checksText(c) }) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
   $('#res-next').hidden = SOLO;
   $('#res-next b').textContent = T(P.date ? (navigator.share ? 'Share result' : 'Copy result') : 'Another puzzle  →');

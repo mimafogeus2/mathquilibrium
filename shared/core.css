@@ -498,3 +498,99 @@ label.set-row { cursor: pointer; }
 .p-answer { width: 100%; break-before: page; display: flex; flex-direction: column; align-items: center; gap: 6mm; }
 /* a box to write in */
 .p-box { flex: none; display: inline-block; width: 6mm; height: 6mm; border: 1pt solid #000; border-radius: 1mm; vertical-align: middle; }
+
+/* ---------- print-shop ephemera ---------- */
+/* The marks a real riso job carries: trim marks, registration targets, the slug, the inspector's stamp. Decoration only:
+   high contrast (plain paper) drops them, reduce motion keeps them but still. */
+
+/* every dialog is a trimmed sheet: crop marks just inside its corners (background layers, so no markup) */
+dialog {
+  --crop: linear-gradient(var(--line), var(--line));
+  background:
+    var(--crop) 5px 15px / 8px 1px no-repeat, var(--crop) 15px 5px / 1px 8px no-repeat,
+    var(--crop) right 5px top 15px / 8px 1px no-repeat, var(--crop) right 15px top 5px / 1px 8px no-repeat,
+    var(--crop) left 5px bottom 15px / 8px 1px no-repeat, var(--crop) left 15px bottom 5px / 1px 8px no-repeat,
+    var(--crop) right 5px bottom 15px / 8px 1px no-repeat, var(--crop) right 15px bottom 5px / 1px 8px no-repeat,
+    var(--grain), var(--stock);
+}
+:root[data-contrast] dialog, :is(#dlg-win, #dlg-end) { --crop: linear-gradient(transparent, transparent); } /* the win is a ticket: no crop marks */
+
+/* the win: a ticket. A perforated line above its actions, and on close it comes off the pad (tilts away from its top corner and drops).
+   An exit transition: display and overlay stay on (allow-discrete) until it's done; browsers without it just close. */
+dialog .win-actions { position: relative; padding-top: 22px; }
+dialog .win-actions::before {
+  content: ''; position: absolute; top: 4px; inset-inline: -28px; height: 4px;
+  background: radial-gradient(circle, var(--line) 1.5px, transparent 2px) center / 9px 4px repeat-x;
+}
+:is(#dlg-win, #dlg-end) {
+  --tear: 7deg; transform-origin: 0 0;
+  transition: translate .34s ease-in, rotate .34s ease-in, opacity .26s .08s ease-in, display .34s allow-discrete, overlay .34s allow-discrete;
+}
+[dir="rtl"] :is(#dlg-win, #dlg-end) { --tear: -7deg; transform-origin: 100% 0; }
+:is(#dlg-win, #dlg-end):not([open]) { translate: 0 calc(12 * var(--dvh)); rotate: var(--tear); opacity: 0; }
+:is(#dlg-win, #dlg-end)::backdrop { transition: opacity .34s, display .34s allow-discrete, overlay .34s allow-discrete; }
+:is(#dlg-win, #dlg-end):not([open])::backdrop { opacity: 0; }
+
+/* the inspector's stamp (stamp() in core.js), in the game's ink, overprinted, its coverage patchy like a real one.
+   .seal: a daily's round edition seal; .tag: a level's small rectangle */
+#result { position: relative; } /* Orderly shows its result under the cards, not in a dialog */
+.stamp {
+  --tilt: -11deg; position: absolute; top: 12px; inset-inline-start: 12px; z-index: 1; pointer-events: none;
+  color: var(--brand-text); mix-blend-mode: var(--blend); opacity: .88; rotate: var(--tilt);
+}
+[dir="rtl"] .stamp { --tilt: 11deg; }
+/* where the ink missed: the speckle punched out of it (on .ink, so the bleed ring around it isn't clipped by the mask) */
+.stamp .ink { mask: var(--speck), linear-gradient(#000, #000); mask-composite: exclude; border-radius: inherit; }
+:root[data-contrast] .stamp .ink { mask: none; }
+.stamp.fresh { animation: thump .34s .7s both cubic-bezier(.3, 0, .2, 1); }
+/* the stamp keyframe's motion, on scale and rotate so the resting tilt (rotate) holds */
+@keyframes thump {
+  0% { opacity: 0; scale: 1.5; rotate: calc(var(--tilt) - 8deg); }
+  60% { opacity: .88; scale: .94; rotate: calc(var(--tilt) + 1deg); }
+}
+/* the ink squeezed out on impact: a ring that spreads and fades */
+.stamp.fresh::before {
+  content: ''; position: absolute; inset: 0; border: 2px solid currentColor; border-radius: inherit;
+  animation: bleed .5s .9s ease-out both;
+}
+@keyframes bleed { from { opacity: .5; } to { opacity: 0; scale: 1.28; } }
+.seal { width: 84px; height: 84px; border-radius: 50%; }
+.seal .ink { height: 100%; }
+.seal svg { display: block; width: 100%; height: 100%; fill: currentColor; stroke: none; overflow: visible; }
+.seal circle { fill: none; stroke: currentColor; stroke-width: 2.4; }
+.seal circle + circle { stroke-width: 1.1; }
+.seal text { text-anchor: middle; }
+.seal .ring { font: 700 8.2px 'Inter', 'Heebo', sans-serif; text-transform: uppercase; text-anchor: start; direction: ltr; } /* laid from the path's start in every language (RTL would anchor it off the far end) */
+.seal .no { font: 600 15px var(--display); letter-spacing: -.02em; }
+.seal .val { font: 700 10.5px 'Inter', 'Heebo', sans-serif; font-variant-numeric: tabular-nums; }
+.tag { --tilt: -7deg; top: 16px; inset-inline-start: 14px; border-radius: 4px; }
+.tag .ink {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 4px 9px 5px; border: 2px solid currentColor; box-shadow: inset 0 0 0 2px var(--stock), inset 0 0 0 3px currentColor;
+}
+[dir="rtl"] .tag { --tilt: 7deg; }
+.tag small { font-size: 8.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.tag b { font: 600 15px/1 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+:lang(he) .tag small, :lang(he) .seal .ring { letter-spacing: normal; }
+/* the timed games' result opens on its title, not stars: room above it for the stamp */
+#dlg-end:has(> .stamp) { padding-top: 64px; }
+:root[data-contrast] .stamp { mix-blend-mode: normal; opacity: 1; }
+
+/* a daily just finished: the menu runs an ink roller over its button, once (rollIn() in core.js) */
+.btn.daily.inked { position: relative; }
+:is(.daily-btn, .btn.daily).inked { overflow: hidden; }
+:is(.daily-btn, .btn.daily).inked::after {
+  content: ''; position: absolute; inset-block: -2px; inset-inline-start: 0; width: 42%; border-radius: 8px;
+  background: var(--speck), var(--brand); mix-blend-mode: var(--blend); opacity: .6; pointer-events: none;
+  translate: -110% 0; animation: roll .9s .55s cubic-bezier(.45, 0, .3, 1) both;
+}
+@keyframes roll { to { translate: 260% 0; } }
+@keyframes roll-rtl { to { translate: -260% 0; } }
+[dir="rtl"] :is(.daily-btn, .btn.daily).inked::after { translate: 110% 0; animation-name: roll-rtl; }
+
+/* the slug at the foot of a game's menu: house and issue */
+.slug {
+  justify-self: center; display: flex; align-items: center; gap: 8px; margin: 26px 0 0; text-align: center;
+  font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+:lang(he) .slug { letter-spacing: normal; font-size: 12px; }
