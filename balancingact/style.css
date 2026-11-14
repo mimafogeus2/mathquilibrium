@@ -6,7 +6,7 @@
 .board, .tray, #help-rig, #logo, .p-rig, .p-store { direction: ltr; }
 .board { width: min(560px, calc(100 * var(--vw) - 24px)); user-select: none; -webkit-user-select: none; }
 .board:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
-.rig { display: block; width: 100%; height: auto; max-height: calc(100 * var(--dvh) - 330px); overflow: visible; stroke: none; }
+.rig { display: block; width: 100%; height: auto; max-height: 100%; overflow: visible; stroke: none; }
 /* core.css strokes every svg (its icons): these draw their own */
 :is(.rig, .slot, .carry, .p-store) svg, .rig { stroke: none; }
 :is(.rig, .slot, .carry, .p-store) text { font: 600 11px Inter, system-ui, sans-serif; text-anchor: middle; fill: var(--ink); stroke: none; font-variant-numeric: tabular-nums; }
@@ -78,11 +78,16 @@
 .rig.mini { max-height: none; }
 .rig.mini .hit, .rig.mini .tot { display: none; }
 
-#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+/* one screen tall: the board shrinks to whatever the tip, store and tools leave (the store wraps to 2+ rows on big levels) */
+#game { height: calc(100 * var(--dvh)); }
+#game > * { flex-shrink: 0; } /* only the board gives: the store has a min-height, so it would shrink too */
+#game .board-wrap { flex: 0 1 auto; min-height: 0; margin-top: auto; grid-template-rows: minmax(0, 1fr); }
+#game .board { height: 100%; display: grid; grid-template-rows: minmax(0, 1fr); align-items: center; }
 #game .tip { margin: 8px 0 4px; }
 #game .tools { margin: 10px 0 auto; padding-bottom: 8px; }
 
 @media (orientation: landscape) and (max-height: 540px) {
+  #game { height: auto; } /* ponytail: the controls column can outgrow the screen here (Hard: ~70px), so it scrolls rather than overlap the bar */
   .rig { max-height: calc(100 * var(--dvh) - 110px); }
   .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
 }
