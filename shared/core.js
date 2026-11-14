@@ -30,6 +30,37 @@ const pageScale = () => +getComputedStyle(document.documentElement).getPropertyV
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 let game, store, G = null, timer = null;
+// Impossible Mode (theme.js decides, per page load): boot() swaps TIERS for the one Impossible daily (the level packs hide: core.css) and the game's store for its own
+// (<storeKey>-impossible: its own dailies, saves and streak). REG keeps the regular tiers, shown disabled on the menu.
+const IMP = document.documentElement.hasAttribute('data-impossible');
+let REG = TIERS;
+// For every shell (boot(), and the games that run their own: Biggr, Orderly, WordSwipe), before the store is read
+function goImpossible(g) {
+  if (!IMP) return;
+  g.storeKey += '-impossible';
+  REG = { ...TIERS };
+  for (const k in TIERS) delete TIERS[k];
+  TIERS.I = 'Impossible';
+}
+// The regular dailies, disabled, ahead of the Impossible one on the menu (call after rendering #daily-btns).
+// labels: [text] for a game with one daily round (its button's own label), else the regular tiers'.
+function offDailies(labels = Object.values(REG).map((s) => T(s)), box = $('#daily-btns')) {
+  if (!IMP) return;
+  const off = (text) => Object.assign(document.createElement('button'), { className: 'daily-btn', disabled: true, innerHTML: `<b>${esc(text)}</b>` });
+  box.style.setProperty('--n', labels.length);
+  box.prepend(...labels.map(off));
+}
+// A game whose Impossible daily has a rule of its own explains it once (store.impSeen), before the first one starts; then() starts it.
+function impossibleIntro(lines, then) {
+  if (!IMP || store.impSeen) return then();
+  const d = Object.assign(document.createElement('dialog'), { className: 'imp-intro' });
+  d.innerHTML = `<h2>${esc(T('Impossible'))}</h2><ol class="rules">${lines.map((l) => `<li>${l}</li>`).join('')}</ol>` +
+    `<form method="dialog"><button class="btn primary center"><b>${esc(T('Bring it on'))}</b></button></form>`;
+  document.body.append(d);
+  d.addEventListener('close', () => { store.impSeen = true; persist(); d.remove(); then(); }, { once: true });
+  d.showModal();
+}
+const PENTA = '<svg class="penta" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M12 21.5 6.42 4.31 21.03 14.94H2.97L17.58 4.31Z"/></svg>';
 const persist = () => { try { localStorage.setItem(game.storeKey, JSON.stringify(store)); } catch {} };
 
 const ymd = (d) => d.toISOString().slice(0, 10); // UTC: the daily rolls over at midnight UTC, the same moment everywhere
@@ -56,7 +87,7 @@ const shortDate = (date) => new Date(date + 'T12:00').toLocaleDateString(LOCALE,
 const hintsText = (h) => (h === 1 ? T('1 hint') : T('{n} hints', { n: h }));
 function streak() {
   const d = new Date();
-  const any = () => Object.keys(store.daily[ymd(d)] || {}).length > 0; // any difficulty counts
+  const any = () => Object.values(store.daily[ymd(d)] || {}).some((r) => !r.lost); // any difficulty counts; a lost Impossible doesn't
   if (!any()) d.setUTCDate(d.getUTCDate() - 1);
   let n = 0;
   for (; any(); d.setUTCDate(d.getUTCDate() - 1)) n++;
@@ -96,6 +127,8 @@ const sfx = (() => {
     good: (n) => { const s = SCALE[Math.min(n, SCALE.length - 1)]; [0, 4, 7].forEach((d, i) => tone(note(s + d), { dur: 0.3, vol: 0.09, at: i * 0.05 })); },
     bad: () => { tone(196, { dur: 0.22, type: 'square', vol: 0.035, slide: 140 }); tone(185, { dur: 0.22, type: 'square', vol: 0.035, slide: 130 }); },
     star: (i) => tone(note([12, 16, 19][i]), { dur: 0.16, vol: 0.08, at: 0.5 + i * 0.16, type: 'triangle' }), // as each star lands (.stars in core.css)
+    // a light switch: a sharp click, higher going on than off (WordSwipe's Reversed light)
+    toggle: (on) => { tone(on ? 1500 : 820, { dur: 0.035, type: 'square', vol: 0.05 }); tone(on ? 2300 : 1250, { dur: 0.025, type: 'triangle', vol: 0.04, at: 0.015 }); },
     hint: () => [12, 19, 24].forEach((s, i) => tone(note(s), { dur: 0.18, vol: 0.06, at: i * 0.07, type: 'triangle' })),
     win: () => [0, 4, 7, 12, 7, 12, 16, 19, 24].forEach((s, i) =>
       tone(note(s), { dur: i === 8 ? 0.9 : 0.22, vol: 0.1, at: i * 0.085, type: i % 2 ? 'triangle' : 'sine' })),
@@ -184,12 +217,14 @@ function track(what, m = G && mode(G.date, TIERS[G.pack])) {
   window.goatcounter?.count?.({ path: `${g}/${what}` + (m ? '/' + m : ''), event: true });
 }
 function toGame(h) {
+  // Impossible puzzles have no hash (the mode stays out of the URL): an entry of their own, same address
+  if (IMP) { if (history.state !== 'game') history.pushState('game', '', location.pathname + location.search); return; }
   if (location.hash) history.replaceState(history.state, '', '#' + h);
   else history.pushState('game', '', '#' + h);
 }
 // Back to the menu: onto the menu's own entry when this one was pushed from it (so Forward still works), else turn this entry into the menu.
 function toMenu(back = true) {
-  if (!location.hash) return;
+  if (!location.hash && !(IMP && history.state === 'game')) return;
   if (back && history.state === 'game') history.back();
   else history.replaceState(null, '', location.pathname + location.search);
 }
@@ -200,6 +235,7 @@ function router(open, home) {
     if (!open(decodeURIComponent(location.hash.slice(1)))) home();
   };
   addEventListener('hashchange', go);
+  if (IMP) addEventListener('popstate', () => history.state !== 'game' && go()); // Back from a hashless Impossible puzzle
   go();
 }
 // Pack games: #daily-easy is today's Easy daily, #easy-12 is Easy level 12 (if unlocked).
@@ -247,6 +283,8 @@ function renderHome() {
     b.onclick = () => start(k, null, t);
     return b;
   }));
+  offDailies();
+  if (IMP) return;
   $('#pack-btns').replaceChildren(...Object.keys(TIERS).map((k) => {
     const pp = store.packs[k], done = Object.keys(pp.stars).length;
     const b = document.createElement('button');
@@ -332,8 +370,8 @@ function tick() {
 
 // ★★☆ into el: each star stamps in on its own beat, with a rising note. fresh = false (a result seen again) sets them at once, quietly.
 function starRow(el, n, fresh = true) {
-  el.innerHTML = [0, 1, 2].map((i) => `<span class="${i < n ? 'on' : ''}" style="--i:${fresh ? i : -9}">★</span>`).join('');
-  el.setAttribute('aria-label', T('{n} of 3 stars', { n }));
+  el.innerHTML = [0, 1, 2].map((i) => `<span class="${i < n ? 'on' : ''}" style="--i:${fresh ? i : -9}">${IMP ? PENTA : '★'}</span>`).join('');
+  el.setAttribute('aria-label', T(IMP ? '{n} of 3 pentagrams' : '{n} of 3 stars', { n }));
   if (fresh) for (let i = 0; i < n; i++) sfx.star(i);
 }
 // "Copied ✓" into a button label, its tick drawn in
@@ -363,7 +401,7 @@ function win() {
   G.done = true;
   clearInterval(timer);
   delete store.saves[G.key];
-  const h = G.hinted.size, rec = { t: G.elapsed, h, s: game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1, m: game.moves?.(G) };
+  const h = G.hinted.size, rec = { t: G.elapsed, h, s: IMP ? game.impossible?.stars?.(G) ?? 3 : game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1, m: game.moves?.(G) };
   if (G.date) (store.daily[G.date] ??= {})[G.pack] ??= rec;
   else {
     const pp = store.packs[G.pack];
@@ -387,7 +425,7 @@ function winScreen(g, r, fresh) {
   starRow($('#win-stars'), r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3), fresh); // results saved before stars were recorded: rate by hints
   stamp($('#dlg-win'), { date: g.date, label: g.date ? tierName(g.pack) : `${tierName(g.pack)} · ${game.random ? levelCode(g.n) : g.n}`, value: fmt(r.t), fresh });
   $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
-  $('#win-stats').innerHTML = `<b>${fmt(r.t)}</b>` + (game.moves && r.m != null ? ` · ${T('{n} moves', { n: r.m })}` : '') + (game.stars ? '' : ` · ${r.h ? hintsText(r.h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
+  $('#win-stats').innerHTML = `<b>${fmt(r.t)}</b>` + (game.moves && r.m != null ? ` · ${T('{n} moves', { n: r.m })}` : '') + (game.stars || IMP ? '' : ` · ${r.h ? hintsText(r.h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
   const last = !g.date && !game.random && g.n === PACK_SIZE;
   if (last) $('#win-title').textContent = T('{tier} pack complete!', { tier: tierName(g.pack) });
   $('#win-next').hidden = last;
@@ -446,8 +484,8 @@ function winDaily(g, dlg = $('#dlg-win')) {
   const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), i = ALL_GAMES.findIndex((x) => x[0] === me);
   const other = [...ALL_GAMES.slice(i + 1), ...ALL_GAMES.slice(0, i)].find(([, , key, ts]) => {
     let d = {};
-    try { d = JSON.parse(localStorage.getItem(key))?.daily?.[g.date] || {}; } catch {}
-    return ts ? [...ts].some((k) => !d[k]) : !d.r;
+    try { d = JSON.parse(localStorage.getItem(key + (IMP ? '-impossible' : '')))?.daily?.[g.date] || {}; } catch {}
+    return ts ? [...(IMP ? 'I' : ts)].some((k) => !d[k]) : !d.r;
   });
   box.innerHTML = '<p id="win-clock" class="stats"></p>' + (other ? `<a class="win-try" href="../${other[0]}/">${esc(T('Try {game}  →', { game: '{game}' })).replace('{game}', `<b style="color: var(--${other[4]})">${esc(other[1])}</b>`)}</a>` : '');
   winClock();
@@ -479,7 +517,7 @@ async function share() {
   track('share');
   const r = store.daily[G.date][G.pack];
   const st = streak(), s = r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3); // results saved before stars were recorded: rate by hints, as the win screen does
-  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.m ? `👣 ${T('{n} moves', { n: r.m })}  ` : ''}${'⭐'.repeat(s)}` +
+  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${IMP ? '🔥 ' : ''}${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.m ? `👣 ${T('{n} moves', { n: r.m })}  ` : ''}${(IMP ? '⛧' : '⭐').repeat(s)}` +
     (st ? `  🔥 ${T('{n}-day streak', { n: st })}` : '') +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   // Android's in-app browsers (Telegram, Gmail…) have no navigator.share, or a share that rejects: copy instead, down to the
@@ -607,6 +645,7 @@ function printable(build, daily) {
 // ---------- boot ----------
 function boot(g) {
   game = g;
+  goImpossible(g);
   try { store = JSON.parse(localStorage.getItem(g.storeKey)) || {}; } catch { store = {}; }
   store = { packs: {}, daily: {}, saves: {}, seenHelp: false, ...store };
   for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };

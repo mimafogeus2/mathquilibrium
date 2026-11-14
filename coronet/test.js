@@ -9,8 +9,9 @@ assert.deepStrictEqual(neighbors(4, 0).sort((a, b) => a - b), [1, 3, 4]); // wra
 assert(sees(4, Array(16).fill(0), 0, 15) && !sees(4, [...Array(16).keys()], 0, 5));
 
 const keys = [];
-for (const k in SIZES) for (let n = 1; n <= PACK_SIZE; n++) keys.push(k + n);
+for (const k in SIZES) if (k !== 'I') for (let n = 1; n <= PACK_SIZE; n++) keys.push(k + n);
 for (const k in SIZES) keys.push('D' + k + '2026-11-11');
+for (let d = 0; d < 60; d++) keys.push('DI' + new Date(Date.UTC(2026, 10, 14 + d)).toISOString().slice(0, 10)); // Impossible: dailies only
 
 const t0 = Date.now();
 let slowest = 0;

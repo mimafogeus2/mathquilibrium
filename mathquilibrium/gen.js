@@ -12,10 +12,14 @@ const OPS = {
   '%': (a, b) => (Number.isInteger(a) && Number.isInteger(b) && b > 0 ? a % b : NaN),
   // decimal point: 2 . 5 = 2.5, 3 . 25 = 3.25; binds tightest, can't chain
   '.': (a, b) => (Number.isInteger(a) && Number.isInteger(b) && a >= 0 && b >= 0 ? a + b / 10 ** String(b).length : NaN),
+  // Impossible Mode's three. Root: 3 √ 8 = 2, the cube root (as ³√8 is written), exact only. Max and min: 7 ↑ 3 = 7, 7 ↓ 3 = 3.
+  '√': (a, b) => { const r = Math.round(b ** (1 / a)); return Number.isInteger(a) && a >= 2 && a <= 6 && b >= 0 && r ** a === b ? r : NaN; },
+  '↑': Math.max,
+  '↓': Math.min,
 };
 // Players may enter any true math: 11 ÷ 3 < 8 or 3 ^ 64 > 8 hold, though the generator never makes them.
 const LOOSE = { '÷': (a, b) => a / b, '^': (a, b) => a ** b };
-const PREC = { '.': 4, '^': 3, '×': 2, '÷': 2, '%': 2, '+': 1, '-': 1 };
+const PREC = { '.': 4, '^': 3, '√': 3, '×': 2, '÷': 2, '%': 2, '+': 1, '-': 1, '↑': 1, '↓': 1 };
 const REL = { '=': (l, r) => Math.abs(l - r) < 1e-9, '<': (l, r) => l < r - 1e-9, '>': (l, r) => l > r + 1e-9 };
 const FLIP = { '=': '=', '<': '>', '>': '<' };
 
@@ -74,12 +78,15 @@ const PACKS = {
   E: { from: 1, to: 8, daily: 4 },
   M: { from: 5, to: 18, daily: 11 },
   H: { from: 12, to: 28, daily: 22 },
+  I: { daily: 36 }, // Impossible Mode: a daily only
 };
 const packDifficulty = (pack, n) =>
   Math.round(PACKS[pack].from + (PACKS[pack].to - PACKS[pack].from) * Math.min(1, (n - 1) / (RAMP - 1)));
 
 // Difficulty n: new operators arrive at 3, 6, 12, 14, 18, 22.
 function levelConfig(n) {
+  // Impossible: every operator plus root, max and min, inequalities, no footholds, a bigger board
+  if (n >= 36) return { ops: ['+', '-', '×', '÷', '^', '√', '.', '%', '↑', '↓'], rels: ['=', '<', '>'], ineq: 0.4, eqs: 16, long: 0.8, maxNum: 30, maxResult: 300, reveal: 0, size: 13 };
   const ops = ['+', '-'];
   if (n >= 3) ops.push('×');
   if (n >= 6) ops.push('÷');
@@ -120,6 +127,7 @@ function genEquation(rand, cfg, terms) {
     ops.forEach((op, i) => {
       if (op === '÷') { nums[i + 1] = int(rand, 2, 9); nums[i] = nums[i + 1] * int(rand, 1, 9); }
       if (op === '^') { nums[i] = int(rand, 2, 5); nums[i + 1] = int(rand, 2, 3); }
+      if (op === '√') { nums[i] = int(rand, 2, 3); nums[i + 1] = int(rand, 2, nums[i] === 2 ? 12 : 5) ** nums[i]; }
       if (op === '%') { nums[i + 1] = int(rand, 2, 9); nums[i] = int(rand, nums[i + 1] + 1, 30); }
       if (op === '.') nums[i + 1] = int(rand, 1, 9);
     });

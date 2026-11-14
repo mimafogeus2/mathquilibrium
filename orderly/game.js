@@ -7,7 +7,10 @@ const TOPICS = { history: 'History', science: 'Science', nature: 'Nature', place
 // play.html (a shared custom level, or the editor's Test it) has no #home: it only plays, and never writes progress (custom.js).
 const SOLO = !document.getElementById('home');
 const pmode = () => (P.lv.custom ? 'custom' : mode(P.date, DIFF[P.lv.d])); // the analytics label of the puzzle on screen
-const stars = (checks) => (checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
+const stars = (checks) => (IMP ? Math.max(1, 4 - checks) : checks <= 2 ? 3 : checks <= 4 ? 2 : 1);
+// Impossible Mode's daily: a Hard level (its own walk through them, no special days), and only BUDGET checks; miss with the last and it's lost
+const BUDGET = 3;
+const impIndex = (date) => { const p = pool(3), day = Math.round((Date.parse(date) - DAY0) / 864e5); return p[(((day * 5 + 11) % p.length) + p.length) % p.length]; };
 
 // The daily's difficulty climbs through the (UTC) week: Easy Mon–Tue, Medium Wed–Fri, Hard Sat–Sun (Hebrew: the Israeli week, Sun–Sat).
 // Each difficulty's days walk a fixed shuffle of that difficulty's levels, so no repeats until its pool has all been used.
@@ -26,7 +29,7 @@ function dailyIndex(date) {
   return p[((n % p.length) + p.length) % p.length];
 }
 // On a special day (special.js) its themed level replaces the pool's.
-const dailyLine = (date) => special(SPECIAL, date)?.line ?? LEVELS[dailyIndex(date)];
+const dailyLine = (date) => (IMP ? LEVELS[impIndex(date)] : special(SPECIAL, date)?.line ?? LEVELS[dailyIndex(date)]);
 
 function parse(line) {
   const [d, topic, subject, top, bottom, items] = line.split('|');
@@ -77,11 +80,11 @@ function screen(id) {
 }
 
 function home() {
-  const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
+  const t = today(), sp = !IMP && special(SPECIAL, t), rec = store.daily[t]?.r, st = streak(), solved = Object.keys(store.stars).length;
   $('#daily-meta').innerHTML = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
   rollIn($('#btn-daily'), 'r');
-  $('#btn-daily small').textContent = rec ? `✓ ${checksText(rec.c)} · ${T('see result')}` : store.saves['D' + t] ? T('Resume') : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
+  $('#btn-daily small').textContent = rec ? `${rec.lost ? '💀' : '✓ ' + checksText(rec.c)} · ${T('see result')}` : store.saves['D' + t] ? T('Resume') : sp ? sp.occasion : parse(LEVELS[dailyIndex(t)]).subject;
   $('#lv-meta').textContent = T('{n} / {total} solved', { n: solved, total: LEVELS.length });
   // A random puzzle in progress: the main button resumes it. The difficulty row always deals a new one.
   const cur = store.saves['L' + store.cur];
@@ -93,13 +96,13 @@ const checksText = (c) => (c === 1 ? T('1 check') : T('{n} checks', { n: c }));
 // play(key) plays a daily (D2026-01-01) or level (L12); play('C…', lv) plays a custom level.
 function play(key, custom) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date || custom ? null : +key.slice(1);
-  const lv = custom || parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
-  P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, done: true }
+  const lv = custom || parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && !IMP && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
+  P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, lost: rec.lost, done: true }
     : { key, date, n, lv, order: sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: sv?.moved ?? true, hints: sv?.hints || 0, done: false };
   if (!custom) toGame(date ? 'daily' : code(n));
   track('start', pmode());
   $('#g-title').textContent = T(date ? 'Daily' : custom ? 'Custom level' : 'Random');
-  $('#g-sub').textContent = (date ? shortDate(date) + ' · ' : '') + (sp ? sp.occasion : custom ? '' : T(DIFF[lv.d]));
+  $('#g-sub').textContent = (date ? shortDate(date) + ' · ' : '') + (sp ? sp.occasion : custom ? '' : IMP ? T('Impossible') : T(DIFF[lv.d]));
   $('#subject').textContent = lv.subject;
   $('#lbl-top').textContent = '▲ ' + lv.top;
   $('#lbl-bottom').textContent = '▼ ' + lv.bottom;
@@ -116,7 +119,13 @@ function play(key, custom) {
   screen('game');
   layout();
   if (P.done) showResult(false);
-  else { $('#play').hidden = false; $('#result').hidden = true; status(); }
+  else {
+    $('#play').hidden = false; $('#result').hidden = true; status();
+    impossibleIntro([T('Today\'s puzzle is a <b>Hard</b> one, and you get only <b>3 checks</b>.'),
+      T('Checks still join the cards that sit right into groups.'),
+      T('If the third check isn\'t all right, the puzzle <b>burns</b>: the order is shown and today\'s Impossible is lost.'),
+      T('Right on the first check: three pentagrams. Second: two. Third: one.')], () => {});
+  }
 }
 
 // Cards sit at --pos; the CSS turns that into a translateY, so moving one is just changing a number.
@@ -141,6 +150,7 @@ function status() {
   const r = P.rows.at(-1), grouped = r ? [...r].filter((c) => c === '1').length : 0;
   $('#status').textContent = !r ? T('Drag the cards into order, then check.') : T('{n} of {total} grouped · {checks} so far', { n: grouped, total: N, checks: checksText(P.rows.length) });
   $('#btn-check').disabled = !P.moved;
+  if (IMP) $('#btn-check b').textContent = T('Check') + ' ' + '●'.repeat(BUDGET - P.rows.length) + '○'.repeat(P.rows.length);
   $('#btn-hint b').textContent = T('Hint ({n} left)', { n: HINTS - P.hints });
   $('#btn-hint').disabled = P.hints >= HINTS || P.links.slice(0, N - 1).every(Boolean);
 }
@@ -186,6 +196,7 @@ function check() {
   P.moved = false;
   layout();
   if (P.order.every((c, p) => c === p)) return win();
+  if (IMP && P.date && P.rows.length >= BUDGET) return lose();
   const fresh = units().filter((u) => u.length > 1).flat().filter((c) => !was.has(c));
   if (fresh.length) sfx.good([...row].filter((c) => c === '1').length);
   else { sfx.bad(); flash($('#list'), 'shake'); }
@@ -234,6 +245,21 @@ function win() {
   showResult(true);
 }
 
+// Out of checks (Impossible): the day is recorded as lost, no retry, and the right order shown with the result.
+function lose() {
+  P.done = P.lost = true;
+  delete store.saves[P.key];
+  (store.daily[P.date] ??= {}).r = { c: P.rows.length, rows: P.rows, h: 0, lost: true };
+  persist();
+  P.order = [...Array(N).keys()];
+  P.links.fill(true);
+  layout();
+  sfx.bad();
+  flash($('#list'), 'shake');
+  track('lost', pmode());
+  showResult(true);
+}
+
 // Give up: the cards snap into the right order, nothing is recorded, and the save is dropped.
 function giveUp() {
   if (!P || P.done || !confirm(T("Give up and see the right order? This puzzle won't count as solved."))) return;
@@ -253,15 +279,15 @@ function giveUp() {
 // The win dialog: opened a beat after a win (fresh), or only filled in for a solved daily seen again. Closing it leaves the cards on view,
 // with See result under them to bring it back.
 function showResult(fresh) {
-  const c = P.rows.length, s = stars(c), p = P;
+  const c = P.rows.length, s = P.lost ? 0 : stars(c), p = P;
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-note').textContent = '';
   $('#btn-result').hidden = false;
   starRow($('#res-stars'), s, fresh);
-  $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
-  stamp($('#dlg-win'), { date: P.date, label: P.date ? '' : P.n ? T(DIFF[P.lv.d]) : T('Custom level'), value: checksText(c), fresh });
-  $('#res-text').innerHTML = T('Solved in <b>{checks}</b>', { checks: checksText(c) }) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
+  $('#win-title').textContent = P.lost ? T('Burned!') : T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
+  stamp($('#dlg-win'), { date: P.date, label: P.date ? '' : P.n ? T(DIFF[P.lv.d]) : T('Custom level'), value: P.lost ? '💀' : checksText(c), fresh });
+  $('#res-text').innerHTML = (P.lost ? T("Out of checks. Here's the right order.") : T('Solved in <b>{checks}</b>', { checks: checksText(c) })) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
   $('#res-next').hidden = SOLO;
   $('#res-next b').textContent = T(P.date ? (navigator.share ? 'Share result' : 'Copy result') : 'Another puzzle  →');
   $('#res-next').onclick = P.date ? () => share() : () => { $('#dlg-win').close(); playRandom(true, P.lv.d); };
@@ -272,8 +298,8 @@ function showResult(fresh) {
 async function share() {
   track('share', pmode());
   const r = store.daily[P.date].r;
-  const sp = special(SPECIAL, P.date), text = `${T('{game} daily', { game: game.name })} · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
-    `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
+  const sp = !IMP && special(SPECIAL, P.date), text = `${T('{game} daily', { game: game.name })} · ${P.date}${sp ? ' · ' + sp.occasion : ''}${IMP ? ' · 🔥 ' + T('Impossible') : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
+    `${checksText(r.c)} ${r.lost ? '💀' : (IMP ? '⛧' : '⭐').repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + (IMP ? '' : '#daily') : '');
   if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
   copyLink(text, $('#res-next'));
 }
@@ -291,6 +317,7 @@ async function shareLink() {
 // ---------- wiring ----------
 // Each language has its own levels, so its own progress (math games share theirs: the puzzles are the same)
 game = { name: T('Orderly'), storeKey: LANG === 'en' ? 'orderly' : 'orderly-' + LANG, glyphs: ['↑', '↓'] };
+if (!SOLO) goImpossible(game);
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { daily: {}, stars: {}, saves: {}, off: [], seenHelp: false, ...store };
 
@@ -337,6 +364,11 @@ if (SOLO) {
   open();
 } else {
   $('#btn-daily').onclick = () => play('D' + today());
+  if (IMP) { // the regular daily, disabled, above the Impossible one
+    const off = Object.assign(document.createElement('button'), { className: 'btn daily', disabled: true, innerHTML: `<b>${esc(T("Today's puzzle"))}</b>` });
+    $('#btn-daily').before(off);
+    $('#btn-daily b').textContent = T('Impossible');
+  }
   $('#btn-random').onclick = () => playRandom();
   // Easy / Medium / Hard ask which topics first; the choice is kept (as store.off, the unticked ones) for next time and for "Another puzzle".
   $('#t-list').replaceChildren(...Object.entries(TOPICS).map(([k, name]) => {
@@ -385,4 +417,4 @@ printable((bound) => P && {
   answer: `<ol class="p-order">${P.lv.items.map((it) => `<li><b>${esc(it.name)}</b> <span>${esc(it.val)}</span></li>`).join('')}</ol>`,
 }, (_, date) => { P = { key: 'D' + date, lv: parse(dailyLine(date)) }; });
 nudge(() => P && !P.done && !$('#game').hidden);
-if (!store.seenHelp) $('#dlg-help').showModal();
+if (!store.seenHelp && !IMP) $('#dlg-help').showModal();

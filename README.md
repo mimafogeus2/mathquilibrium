@@ -17,6 +17,23 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 
 Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (Quadflip: Easy and Hard, two dailies), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard. Coronet deals its levels at random (each with its own link, `#easy-k3f`) instead of unlocking them in order.
 
+## Impossible Mode
+
+Hidden: hover the bottom-right corner of the front page or a game's menu (on touch, tap it twice) and the page peels back over fire. Clicking it turns Impossible Mode on (localStorage `impossible`, never in the URL) until the peel is clicked again. Every game then offers one Impossible daily instead of its regular ones, with its own progress and streak (`<storeKey>-impossible`), no hints, and pentagrams for stars:
+
+| Game | Impossible daily |
+|---|---|
+| Mathquilibrium | 13×13, no operators given, plus `√` (root: `3 √ 8 = 2`), `↑` (max) and `↓` (min) |
+| Coronet | 9 rings, every color at least 3 arcs |
+| Quadflip | 4×4 with 6 pieces |
+| Alien Chess | a forced win in 4 on 6×6, built in a background worker (`shared/pregen.js`) as any Impossible page opens |
+| Balancing Act | 7–9 plates, tied and loose balloons together |
+| Biggr | the two sums 1–2 apart (squares, powers, bigger products); a wrong pick costs 5s |
+| Orderly | a Hard level and only 3 checks: miss with the third and the day is lost |
+| WordSwipe | a Reversed light that may switch every 2–3 words; while it's on, answer the other way round |
+
+In the code: `theme.js` (the peel, the fire, `data-impossible`), `core.js` (`IMP`, `goImpossible()`, `offDailies()`, `impossibleIntro()`), `core.css` (the scorched stock), and tier `I` in each `gen.js`.
+
 ## Layout
 
 - `shared/common.js` — seeded RNG, hash, tiers and pack size (no DOM; tests `require()` it)

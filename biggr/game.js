@@ -2,7 +2,7 @@
 // Biggr: two sums, no answers. Pick the bigger one, 10 pairs against the clock.
 // Borrows storage, sound, confetti, openLevels and helpers from shared/core.js (but not boot()).
 // Pairs come from gen.js, seeded by the level key: 'E12' for Easy level 12, 'DE2026-11-11' for that day's Easy daily.
-const PENALTY = 3000, PER_RIGHT = 10, PER_SEC = 5, REVEAL = 650;
+const PENALTY = { E: 3000, M: 3000, H: 3000, I: 5000 }, PER_RIGHT = 10, PER_SEC = 5, REVEAL = 650;
 const stars = (wrong) => (wrong === 0 ? 3 : wrong <= 2 ? 2 : 1);
 // The time bonus scales with how many were right, so mashing fast doesn't beat thinking.
 const bonus = (secs, right) => Math.round((secs * PER_SEC * right) / PAIRS);
@@ -31,6 +31,7 @@ function home() {
     b.onclick = () => start(k, null, t);
     return b;
   }));
+  offDailies();
   $('#pack-btns').replaceChildren(...Object.keys(TIERS).map((k) => {
     const pp = store.packs[k], done = Object.keys(pp.stars).length, b = document.createElement('button');
     b.className = `pack-btn tier-${k}`;
@@ -117,11 +118,11 @@ function answer(side) {
   if (right) sfx.good(R.marks.filter(Boolean).length % 8);
   else {
     sfx.bad();
-    R.left = Math.max(0, R.left - PENALTY);
+    R.left = Math.max(0, R.left - PENALTY[R.pack]);
     flash($('#clock'), 'shake');
     const m = document.createElement('span');
     m.className = 'minus';
-    m.textContent = T('−{n}s', { n: PENALTY / 1000 });
+    m.textContent = T('−{n}s', { n: PENALTY[R.pack] / 1000 });
     $('.bar-end').append(m);
     setTimeout(() => m.remove(), 900);
   }
@@ -182,14 +183,15 @@ function showEnd(rec, { pack, n, date }) {
 
 async function share(rec, pack, date) {
   track('share', mode(date, TIERS[pack]));
-  const text = `${T('{game} daily', { game: game.name })} · ${date} · ${tierName(pack)}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
-    T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
+  const text = `${T('{game} daily', { game: game.name })} · ${date} · ${IMP ? '🔥 ' : ''}${tierName(pack)}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
+    T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + (IMP ? '' : '#' + levelHash(pack)) : '');
   if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
   copyLink(text, $('#end-next'));
 }
 
 // ---------- wiring ----------
 game = { name: T('Biggr'), storeKey: 'biggr', glyphs: ['>', '<', '+', '×'] };
+goImpossible(game);
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { packs: {}, daily: {}, saves: {}, seenHelp: false, ...store };
 for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };

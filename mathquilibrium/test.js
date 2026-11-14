@@ -52,7 +52,13 @@ assert(!checkEquation([3, '<', 4, '=', 4])); // exactly one relation
 }
 
 const keys = [];
-for (const k of Object.keys(PACKS)) for (let n = 1; n <= PACK_SIZE; n++) keys.push([k + n, packDifficulty(k, n)]);
+for (const k of Object.keys(PACKS)) if (k !== 'I') for (let n = 1; n <= PACK_SIZE; n++) keys.push([k + n, packDifficulty(k, n)]);
+for (let d = 1; d < 60; d++) keys.push(['DI' + new Date(Date.UTC(2026, 10, 10 + d)).toISOString().slice(0, 10), PACKS.I.daily]); // Impossible: dailies only
+// Impossible's operators
+assert.strictEqual(evalExpr([3, 8], ['√']), 2);
+assert(Number.isNaN(evalExpr([2, 8], ['√'])));
+assert.strictEqual(evalExpr([2, 7, 3], ['+', '↑']), 9); // left to right with +: (2 + 7) ↑ 3
+assert.strictEqual(evalExpr([7, 3, 2], ['↓', '×']), 6); // × first: 7 ↓ 6
 for (const k of Object.keys(PACKS)) keys.push(['D' + k + '2026-11-10', PACKS[k].daily]);
 
 const t0 = Date.now(), seen = new Set();

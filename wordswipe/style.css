@@ -180,3 +180,14 @@ a.btn { text-decoration: none; color: inherit; }
 
 /* narrow phones: the lists stack */
 @media (max-width: 359px) { .ed-lists { grid-template-columns: 1fr; } }
+
+/* Impossible Mode: the Reversed light under the subject (game.js). Dark glass when off; lit pink, glowing, when on. */
+.rev { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 4px auto 6px; }
+.rev i {
+  width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 38% 32%, #4a2a3a, #1c0d15 70%);
+  box-shadow: inset 0 2px 5px rgb(0 0 0 / .7), 0 0 0 3px var(--line); transition: background .08s, box-shadow .08s;
+}
+.rev span { font: 800 11.5px/1 Inter, Heebo, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); transition: color .08s; }
+:lang(he) .rev span { letter-spacing: .04em; font-size: 13px; }
+.rev.on i { background: radial-gradient(circle at 38% 32%, #fff 0 10%, #ffc2e4 22%, var(--pink) 58%); box-shadow: 0 0 26px 8px rgb(255 79 178 / .65), 0 0 0 3px var(--pink); }
+.rev.on span { color: var(--pink); text-shadow: 0 0 10px rgb(255 79 178 / .7); }

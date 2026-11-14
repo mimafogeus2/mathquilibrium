@@ -11,6 +11,8 @@ const TIER = {
   E: { plates: [3, 3], depth: [2, 2], arm: 4, items: [4, 5], per: 2, fixed: [0, 0], loose: [0, 0], uneven: false },
   M: { plates: [4, 5], depth: [2, 3], arm: 6, items: [6, 8], per: 3, fixed: [1, 2], loose: [0, 0], uneven: false },
   H: { plates: [5, 8], depth: [3, 4], arm: 8, items: [8, 12], per: 4, fixed: [0, 0], loose: [1, 2], uneven: true },
+  // Impossible Mode's daily: Hard's widest contraptions, a bigger store, and both kinds of balloon at once
+  I: { plates: [7, 9], depth: [4, 4], arm: 8, items: [12, 15], per: 4, fixed: [1, 2], loose: [1, 2], uneven: true },
 };
 const LO = 1, HI = 10; // item sizes
 

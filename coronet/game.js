@@ -133,7 +133,7 @@ function shimmer(r) {
 }
 
 // Region names follow the inks in style.css (--r0 … --r6), so a sighted helper and a screen reader agree.
-const REGION = ['pink', 'yellow', 'blue', 'lime', 'orange', 'teal', 'violet'];
+const REGION = ['pink', 'yellow', 'blue', 'lime', 'orange', 'teal', 'violet', 'red', 'grey'];
 function describe(i, left, conflicts) {
   const N = N_(), k = shown(i);
   const what = k === 'q' ? T(G.hinted.has(i) ? 'queen, from a hint' : 'queen') + (conflicts.has(i) ? T(', clashes with another queen') : '')
@@ -309,4 +309,6 @@ printable(() => {
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
 boot({ name: T('Coronet'), storeKey: 'coronet', random: true, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+  // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
+  impossible: { stars: (G) => (G.elapsed <= 300 ? 3 : G.elapsed <= 720 ? 2 : 1) },
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });

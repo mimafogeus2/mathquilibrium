@@ -608,3 +608,85 @@ dialog .win-actions::before {
   font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
 }
 :lang(he) .slug { letter-spacing: normal; font-size: 12px; }
+
+/* ---------- Impossible Mode (theme.js sets data-impossible; core.js swaps in the Impossible daily) ----------
+   The same job printed on scorched stock, in one ink: the pink, now fire. Light or dark theme alike. */
+:root[data-impossible] {
+  --pink: #ff4fb2; --pink-text: #ff7cc6;
+  --orange: #ff8a4c; --orange-text: #ff9a63; --teal: #3fd0c2; --teal-text: #5fdccf; --on-teal: var(--navy);
+  --sun: #ffd23f; --sun-text: #ffd23f; --red: #ff6b5e; --red-text: #ff8378; --on-red: var(--navy);
+  --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--navy);
+  --paper: #140a10; --stock: #21121a; --ink: #f3e6dc; --muted: #b9a0aa;
+  --hair: rgb(243 230 220 / .14); --line: rgb(243 230 220 / .3); --slot: rgb(243 230 220 / .06); --dot: rgb(243 230 220 / .2);
+  --hl: #42182c; --reg: #000;
+  --lift: 0 1px 1px rgb(0 0 0 / .3), 0 10px 22px -12px rgb(0 0 0 / .6);
+  --float: 0 2px 4px rgb(0 0 0 / .3), 0 36px 70px -24px rgb(0 0 0 / .75), 0 0 60px -20px rgb(255 79 178 / .35);
+  --blend: screen;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .5 0 0 0 0 .6 .5 0 0 0 -.28'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --speck: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .04 0 0 0 0 .06 2.4 0 0 0 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+/* the regular tiers, disabled; the Impossible daily across the full row under them */
+:is(.daily-btn, .btn.daily):disabled { pointer-events: none; opacity: .4; filter: grayscale(1); box-shadow: none; }
+:root[data-impossible] .btn.daily:not(:disabled) { box-shadow: 2px 3px 0 var(--reg), 0 0 34px -8px var(--pink); }
+:root[data-impossible] .btn.daily:disabled { padding-block: 12px; margin-bottom: 10px; }
+:root[data-impossible] .trio { grid-template-columns: repeat(var(--n, 3), 1fr); }
+.daily-btn:disabled { min-height: 58px; }
+.daily-btn.tier-I { grid-column: 1 / -1; min-height: 116px; box-shadow: 2px 3px 0 var(--reg), 0 0 34px -8px var(--pink); }
+.daily-btn.tier-I.done { box-shadow: inset 0 0 0 1px var(--pink), 0 0 34px -12px var(--pink); }
+.tier-I { --pips: '⛧'; }
+.daily-btn.tier-I::before { font-size: 16px; letter-spacing: 0; }
+:root[data-impossible] :is(#btn-hint, #btn-levels, #new-row, #pack-btns, .block-head:has(+ #pack-btns), #btn-random, .block-head:has(+ #btn-random), #btn-unlimited, .block-head:has(+ #btn-unlimited), .print-hint, a[href$="print.html"]) { display: none !important; }
+/* pentagrams for stars (starRow() in core.js) */
+.stars .penta { width: .86em; height: .86em; stroke-width: 1.5; vertical-align: -.08em; }
+.stars .on .penta { color: var(--pink); filter: drop-shadow(0 0 7px var(--pink)); }
+/* "Impossible", stamped across the masthead or wordmark (theme.js) */
+.imp-stamp {
+  --tilt: -6deg; position: absolute; inset-inline-end: 0; top: calc(100% + 2px); rotate: var(--tilt); padding: .12em .5em .1em; pointer-events: none; white-space: nowrap;
+  font: 800 clamp(17px, calc(2.6 * var(--vw)), 26px)/1.25 Inter, Heebo, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--pink);
+  background: var(--paper); border: 3px solid currentColor; border-radius: 5px; text-shadow: 0 0 12px rgb(255 79 178 / .6);
+  box-shadow: 0 0 18px -4px var(--pink); animation: thump .34s .3s both cubic-bezier(.3, 0, .2, 1);
+}
+:lang(he) .imp-stamp { letter-spacing: .04em; }
+:root[data-impossible] :is(.masthead, .wordmark) > span:last-child { position: relative; }
+:root[data-impossible] .masthead { padding-bottom: 54px !important; }
+:root[data-impossible] .wordmark { margin-bottom: 46px; }
+
+/* the peel: a hit area in the bottom-right corner. Its square holds the curled-up flap (top-left half, the paper's back)
+   and what the curl uncovers (bottom-right half): fire. --s is the curl's size; nothing shows at 0. */
+.peel { --s: 0px; position: fixed; right: 0; bottom: 0; z-index: 60; width: 64px; height: 64px; padding: 0; border: 0; background: none; -webkit-tap-highlight-color: transparent; }
+.peel > span { position: absolute; right: 0; bottom: 0; width: var(--s); height: var(--s); transition: width .38s var(--ease), height .38s var(--ease); }
+.peel-under { clip-path: polygon(100% 0, 100% 100%, 0 100%); background: #0b0407; overflow: hidden; }
+.peel.on .peel-under { background: var(--real-paper); }
+.peel-under canvas { position: absolute; right: 0; bottom: 0; width: 150px; height: 150px; }
+/* the fire's ink screens stay crisp dots, and miss the paper in spots like every other ink */
+.peel-under canvas, .fire-band { image-rendering: pixelated; }
+.peel-under canvas { mask: var(--speck), linear-gradient(#000, #000); mask-composite: exclude; }
+.peel-under::after { /* the curl's shadow, cast just past the fold onto what it uncovers */
+  content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 50%, rgb(0 0 0 / .35) 51%, rgb(0 0 0 / .12) 57%, transparent 68%);
+}
+/* the flap (an SVG drawn by theme.js, stretched to the square): the paper's back, its edges and tip curling. Matte, like paper:
+   a soft, even fall-off toward the crease (no sheen), the stock's grain on it, a low shadow under it.
+   Off: the Impossible side's scorched stock; on: the page's own. */
+.peel-flap svg { display: block; width: 100%; height: 100%; overflow: visible; stroke: none; filter: drop-shadow(-1px -1px 1.5px rgb(0 0 0 / .22)) drop-shadow(-4px -4px 7px rgb(0 0 0 / .12)); }
+.peel .s1 { stop-color: #23121b; } .peel .s2 { stop-color: #27151e; } .peel .s3 { stop-color: #1e0f17; } .peel .s4 { stop-color: #160a10; }
+.peel.on .s1 { stop-color: color-mix(in srgb, var(--real-paper), #000 7%); } .peel.on .s2 { stop-color: color-mix(in srgb, var(--real-paper), #000 4%); }
+.peel.on .s3 { stop-color: color-mix(in srgb, var(--real-paper), #000 11%); } .peel.on .s4 { stop-color: color-mix(in srgb, var(--real-paper), #000 20%); }
+/* off: lit pink toward the fold by the fire under it, flickering */
+.peel .lit { animation: firelight 1.9s ease-in-out infinite; }
+.peel.on .lit { display: none; }
+@keyframes firelight { 0%, 100% { opacity: .75; } 18% { opacity: 1; } 31% { opacity: .62; } 47% { opacity: .9; } 63% { opacity: .7; } 80% { opacity: .95; } }
+:root[data-calm] .peel .lit { animation: none; }
+.peel:is(:hover, :focus-visible, .tease) { --s: 74px; }
+/* on: a small dog-ear that stays, peeling up to full size when hovered */
+.peel.on { --s: 28px; width: 74px; height: 74px; }
+.peel.on:is(:hover, :focus-visible) { --s: 74px; }
+.peel.drop { --s: 0px !important; }
+.peel.roll > span { animation: peel-in .8s .35s both cubic-bezier(.3, 1.3, .5, 1); }
+@keyframes peel-in { from { width: 0; height: 0; } }
+:root[data-calm] .peel > span { transition: none; animation: none; }
+/* the fire along the foot of the menus, behind the page's content */
+.fire-band { position: fixed; left: 0; bottom: 0; z-index: -1; width: 100%; height: 150px; pointer-events: none; mask: linear-gradient(to top, #000 55%, transparent), var(--speck); mask-composite: subtract; }
+:root[data-impossible] body { padding-bottom: 70px; }
+body:has(#game:not([hidden])) :is(.peel, .fire-band) { display: none; }
+@media print { .peel, .fire-band { display: none !important; } }

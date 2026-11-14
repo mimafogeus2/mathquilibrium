@@ -17,11 +17,21 @@
     // the stars sit in the moon's bite; core.css scales them in when the moon rises
     dark: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/><path class="star" style="--i:0" d="M17 3v3M15.5 4.5h3"/><path class="star" style="--i:1" d="M20.6 9.2h.01"/><path class="star" style="--i:2" d="M14.6 8.4h.01"/></svg>',
   };
+  // Impossible Mode (localStorage 'impossible': '1'): a hidden page peel in the bottom corner turns it on and off. Never in the URL.
+  // Only the front page and a game's own page (not editors, play.html or print.html), and not when the page opens on a puzzle link
+  // (#daily-hard): a link is an explicit ask for that normal puzzle. ponytail: decided once per page load
+  const HERE = document.currentScript?.src; // for pregen.js, beside this file
+  const IMP_PAGE = !/\.html$/.test(location.pathname) || /\/index\.html$/.test(location.pathname);
+  root.toggleAttribute('data-impossible', IMP_PAGE && get('impossible') === '1' && !location.hash);
+  document.addEventListener('DOMContentLoaded', () => IMP_PAGE && !location.hash && impossible());
+
   const pref = () => get('theme') || 'auto';
   function apply() {
-    const p = pref(), dark = p === 'dark' || (p === 'auto' && mq.matches);
-    root.dataset.theme = dark ? 'dark' : 'light';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#1d2a55' : '#f3ede1');
+    const p = pref(), dark = p === 'dark' || (p === 'auto' && mq.matches), imp = root.hasAttribute('data-impossible');
+    // Impossible Mode always prints on dark stock (so every dark-stock rule applies); the on-peel shows the page's real stock under it
+    root.dataset.theme = dark || imp ? 'dark' : 'light';
+    root.style.setProperty('--real-paper', dark ? '#1d2a55' : '#f3ede1');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', imp ? '#140a10' : dark ? '#1d2a55' : '#f3ede1');
     const label = T(`Theme: ${p}`);
     for (const b of document.querySelectorAll('.js-theme')) {
       b.innerHTML = ICONS[p];
@@ -31,6 +41,7 @@
   }
   mq.addEventListener('change', apply);
   apply();
+
   document.addEventListener('DOMContentLoaded', () => {
     for (const b of document.querySelectorAll('.js-theme')) b.addEventListener('click', () => {
       const next = { auto: 'light', light: 'dark', dark: 'auto' }[pref()];
@@ -178,5 +189,120 @@
       const back = t.closest('.corner')?.parentElement.querySelector(':scope > .corner-start');
       if (back) { b.classList.add('corner-start'); back.after(b); } else t.after(b);
     }
+  }
+  // ---------- Impossible Mode: the peel and the fire ----------
+  // Off, nothing shows: hovering the bottom-right corner (on touch, a first tap) curls the page's corner up over fire, and clicking
+  // it (a second tap within 3s) lays it flat, flips the mode and reloads into it (a replace: the page cross-fade plays), where a
+  // darker curl rolls in and stays. Clicking that one lays it flat and leaves the same way.
+  function impossible() {
+    const on = root.hasAttribute('data-impossible');
+    const b = Object.assign(document.createElement('button'), { className: 'peel' + (on ? ' on' : '') });
+    b.setAttribute('aria-label', T(on ? 'Leave Impossible Mode' : 'Impossible Mode'));
+    // off, the curl uncovers fire; on, it uncovers the ordinary page underneath
+    // The flap's outline in a 100×100 square: from the page edge along the curled top, round the tip, down the curled side, and back
+    // along the fold (a straight crease). Its gradients run from the tip (0,0) to the fold's middle (50,50).
+    const grad = (id, stops) => `<linearGradient id="${id}" x1="0" y1="0" x2=".5" y2=".5">${stops}</linearGradient>`;
+    const FLAP = 'M100 0C72 5 34 6 9 4Q1 3 3 11C5 35 5 70 0 100Z';
+    b.innerHTML = `<span class="peel-under">${on ? '' : '<canvas></canvas>'}</span><span class="peel-flap"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">` +
+      grad('peel-g', '<stop offset="0" class="s1"/><stop offset=".55" class="s2"/><stop offset=".88" class="s3"/><stop offset="1" class="s4"/>') +
+      // paper grain: fine noise, as faint flecks over the flap only
+      '<filter id="peel-p" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="4"/>' +
+      '<feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 .62"/><feComposite in2="SourceGraphic" operator="in"/>' +
+      '<feMerge><feMergeNode in="SourceGraphic"/><feMergeNode/></feMerge></filter>' +
+      grad('peel-l', '<stop offset=".4" stop-color="#ff4fb2" stop-opacity="0"/><stop offset=".85" stop-color="#ff4fb2" stop-opacity=".22"/><stop offset="1" stop-color="#ff6fc0" stop-opacity=".5"/>') +
+      `<path d="${FLAP}" fill="url(#peel-g)" filter="url(#peel-p)"/><path class="lit" d="${FLAP}" fill="url(#peel-l)"/></svg></span>`;
+    document.body.append(b);
+    let ss = null;
+    try { ss = sessionStorage.getItem('peel'); sessionStorage.removeItem('peel'); } catch {}
+    // the roll-in, once: left on, its animation would hold width and height, and hover's transitions would just jump
+    if (on && ss) {
+      b.classList.add('roll');
+      b.querySelector('.peel-flap').addEventListener('animationend', () => b.classList.remove('roll'), { once: true });
+    }
+    if (!on) fire(b.querySelector('canvas'), () => b.matches(':hover, :focus-visible, .tease'));
+    let tease;
+    b.onclick = () => {
+      if (!on && matchMedia('(hover: none)').matches && !b.classList.contains('tease')) {
+        b.classList.add('tease');
+        clearTimeout(tease);
+        tease = setTimeout(() => b.classList.remove('tease'), 3000);
+        return;
+      }
+      b.classList.add('drop');
+      b.disabled = true;
+      put('impossible', on ? null : '1');
+      try { if (!on) sessionStorage.setItem('peel', '1'); } catch {}
+      setTimeout(() => location.replace(location.pathname + location.search), root.hasAttribute('data-calm') ? 0 : 400);
+    };
+    if (!on) return;
+    pregen();
+    const band = Object.assign(document.createElement('canvas'), { className: 'fire-band' });
+    band.setAttribute('aria-hidden', 'true');
+    document.body.append(band);
+    fire(band, () => true);
+    // under the title's last word ("Miki", "flip")
+    document.querySelector(':is(.masthead, .wordmark) > span:last-child')?.insertAdjacentHTML('beforeend', `<span class="imp-stamp" aria-hidden="true">${T('Impossible')}</span>`);
+  }
+
+  // Alien Chess's Impossible daily takes seconds to find (on a phone, maybe most of a minute): any Impossible page builds today's in a
+  // worker as it opens and keeps it ('alienchess-impossible-pre': { key, p }), so the game opens it at once. window.pregen resolves when
+  // it's in (null if it couldn't run: file://, no workers; the game then builds it itself). ponytail: one game needs it; add others here if they do
+  function pregen() {
+    const key = 'DI' + new Date().toISOString().slice(0, 10);
+    let pre;
+    try { pre = JSON.parse(get('alienchess-impossible-pre')); } catch {}
+    if (pre?.key === key || !HERE) return;
+    window.pregen = new Promise((done) => {
+      try {
+        const w = new Worker(new URL('pregen.js', HERE));
+        w.onmessage = (e) => { put('alienchess-impossible-pre', JSON.stringify({ key, p: e.data })); w.terminate(); done(e.data); };
+        w.onerror = () => done(null);
+        w.postMessage({ gen: '../alienchess/gen.js', tier: 'I', key });
+      } catch { done(null); }
+    });
+  }
+
+  // Fire, Doom style: a coarse grid of heat fed from its bottom row; each cell rises, drifts sideways and cools. Printed riso style:
+  // two flat inks, pink for the flames and sun for their hot core, each screened into dots (a 4×4 ordered dither) and the sun drum a
+  // cell out of register; overprinted where they meet. Drawn at 1/3 size, scaled up crisp (core.css), speckled by core.css's mask.
+  // Runs ~30fps while live() and on screen; reduced motion draws one still frame.
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+  const rgb = (v, d) => (getComputedStyle(root).getPropertyValue(v).trim().match(/[\da-f]{2}/gi) || d).map((h) => parseInt(h, 16));
+  function fire(cv, live) {
+    const ctx = cv.getContext('2d'), S = 3;
+    let W = 0, H = 0, heat, img, inks, cool, last = 0, drawn = false;
+    function size() {
+      W = Math.max(8, Math.round(cv.clientWidth / S)); H = Math.max(8, Math.round(cv.clientHeight / S));
+      cv.width = W; cv.height = H;
+      heat = new Uint8Array(W * H); img = ctx.createImageData(W, H);
+      cool = Math.max(1, Math.ceil(90 / H)); // flames die out about two thirds of the way up, whatever the height
+      const pink = rgb('--pink', ['ff', '4f', 'b2']), sun = rgb('--sun', ['ff', 'd2', '3f']);
+      // [none, pink, sun, both]: screen, as the inks overprint on dark stock
+      inks = [[0, 0, 0, 0], [...pink, 255], [...sun, 255], [...pink.map((v, i) => 255 - ((255 - v) * (255 - sun[i])) / 255), 255]];
+      for (let i = 0; i < 90; i++) step();
+    }
+    function step() {
+      for (let x = 0; x < W; x++) heat[(H - 1) * W + x] = 28 + ((Math.random() * 9) | 0);
+      for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) {
+        const src = y * W + x, p = heat[src], r = (Math.random() * 3.99) | 0;
+        const dst = src - W + Math.min(W - 1 - x, Math.max(-x, 1 - r));
+        heat[dst] = p > (r & 1) * cool ? p - (r & 1) * cool : 0;
+      }
+    }
+    function frame(now) {
+      requestAnimationFrame(frame);
+      if (now - last < 33 || document.hidden || !live() || !cv.getClientRects().length) return;
+      last = now;
+      if (Math.round(cv.clientWidth / S) !== W || Math.round(cv.clientHeight / S) !== H) size();
+      else if (root.hasAttribute('data-calm') && drawn) return;
+      else step();
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x, d = BAYER[(y & 3) * 4 + (x & 3)], j = Math.min(H - 1, y + 1) * W + Math.max(0, x - 1); // the sun drum, off register
+        img.data.set(inks[((heat[i] / 36 - 0.12) * 2.4 > d) | (((heat[j] / 36 - 0.6) * 3 > d) << 1)], i * 4);
+      }
+      ctx.putImageData(img, 0, 0);
+      drawn = true;
+    }
+    requestAnimationFrame(frame);
   }
 })();

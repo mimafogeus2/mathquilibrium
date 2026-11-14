@@ -2,7 +2,7 @@
 // Place N queens: one per ring, one per angle (spoke), one per color. Every puzzle has exactly one solution.
 // Cell index = ring * N + spoke, ring 0 innermost. Uses rng/pick from shared/common.js (a global).
 
-const SIZES = { E: 5, M: 6, H: 7 };
+const SIZES = { E: 5, M: 6, H: 7, I: 9 }; // I: Impossible Mode's daily
 
 // Arcs touch along rings (wrapping all the way round) and across neighboring rings.
 function neighbors(N, i) {
@@ -59,10 +59,13 @@ function connectedWithout(N, region, g, skip) {
   return seen.size === cells.length;
 }
 
+// Impossible's 9 rings (only) also turn down any region under 3 arcs: a one-arc region is a queen given away.
+// (Not for the smaller sizes: that would change the levels their seeds already deal.)
+const MIN_REGION = { 9: 3 };
 function generate(seed, N) {
   for (let s = seed; ; s++) {
     const p = tryGenerate(s, N);
-    if (p) return p;
+    if (p && !(MIN_REGION[N] && Array.from({ length: N }, (_, g) => p.region.filter((x) => x === g).length).some((n) => n < MIN_REGION[N]))) return p;
   }
 }
 

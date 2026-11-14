@@ -1,8 +1,9 @@
 'use strict';
 const sym = (v) => (v === '-' ? '−' : String(v));
-const KEYS = { '+': '+', '-': '-', '*': '×', x: '×', X: '×', '/': '÷', ':': '÷', '=': '=', '^': '^', '%': '%', '.': '.', ',': '.', '<': '<', '>': '>' };
+const KEYS = { '+': '+', '-': '-', '*': '×', x: '×', X: '×', '/': '÷', ':': '÷', '=': '=', '^': '^', '%': '%', '.': '.', ',': '.', '<': '<', '>': '>',
+  r: '√', R: '√', ']': '↑', '[': '↓' }; // the last three: Impossible Mode's root, max and min
 const NAMES = Object.fromEntries(Object.entries({
-  '+': 'plus', '-': 'minus', '×': 'times', '÷': 'divided by', '^': 'power', '%': 'remainder', '.': 'decimal point',
+  '+': 'plus', '-': 'minus', '×': 'times', '÷': 'divided by', '^': 'power', '%': 'remainder', '.': 'decimal point', '√': 'root', '↑': 'max', '↓': 'min',
   '=': 'equals', '<': 'less than', '>': 'greater than',
 }).map(([k, v]) => [k, T(v)]));
 const FIRST_TIP = T('Tap a blank tile, then pick an operator. Every row and column must be <b>true</b>. Where lines cross, <b>one symbol</b> has to work both ways.');
@@ -13,6 +14,8 @@ const OP_TIPS = { // shown on the level where an operator first appears: [exampl
   '.': [[7, '÷', 2, '=', 3, '.', 5], T('Decimal point: 3 . 5 is 3.5.')],
   '%': [[7, '%', 3, '=', 1], T('Remainder: what\'s left over after dividing.')],
   '<': [[3, '+', 4, '<', 9], T('Less than and greater than: some lines are <b>inequalities</b>.')],
+  '√': [[3, '√', 8, '=', 2], T('Root: 3 √ 8 is the cube root of 8, and 2 √ 9 the square root of 9. Worked out before × and +.')],
+  '↑': [[7, '↑', 3, '=', 7], T('Max and min: 7 ↑ 3 is the bigger of the two, 7 ↓ 3 the smaller. Worked out last, with + and −.')],
 };
 const ICON_ERASE = '<svg viewBox="0 0 24 24"><path d="M9 5h11v14H9l-6-7 6-7zM12 9l5 6M17 9l-5 6"/></svg>';
 
@@ -32,7 +35,7 @@ function mini(el, rows, blanks = '') {
   }));
 }
 
-const syms = (o) => (o === '<' ? '<>' : o); // one intro covers both inequalities
+const syms = (o) => (o === '<' ? '<>' : o === '↑' ? '↑↓' : o); // one intro covers both inequalities, and both max and min
 
 // Intro modal for unseen intro ids: 'first' (how to play) and/or operators, each with its key and an example line.
 function intro(ids) {
@@ -383,7 +386,7 @@ printable(() => {
       T('Write an operator in every empty box so <b>each row and column is a true equation</b>. Equations read <b>left to right</b> or <b>top to bottom</b> only.'),
       T('Boxes where lines cross are <b>shared</b>: one symbol has to work both ways.'),
       T('Usual math order: <b>× ÷</b> before <b>+ −</b>. Division must come out exact.'),
-      ...['^', '.', '%', '<'].filter((o) => all.includes(o)).map((o) => `${[...syms(o)].map((x) => `<b dir="ltr">${esc(x)}</b>`).join(' ')} ${OP_TIPS[o][1]}`),
+      ...['^', '√', '.', '%', '<', '↑'].filter((o) => all.includes(o)).map((o) => `${[...syms(o)].map((x) => `<b dir="ltr">${esc(x)}</b>`).join(' ')} ${OP_TIPS[o][1]}`),
     ],
     body: `<p class="p-ops">${T('Use:')} ${all.map((o) => `<b>${esc(sym(o))}</b>`).join('')}</p>` +
       grid(false),
@@ -395,4 +398,6 @@ mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);
 // ponytail: storage key keeps the old name so existing saves survive the rename.
 boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true, glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
-  reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); } });
+  reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); },
+  // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
+  impossible: { stars: (G) => (G.elapsed <= 600 ? 3 : G.elapsed <= 1200 ? 2 : 1) } });

@@ -299,4 +299,6 @@ try {
 } catch {}
 boot({ name: T('Quadflip'), storeKey: 'quadflip', glyphs: ['■', '▚'], start: startLevel,
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
+  // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
+  impossible: { stars: (G) => (G.elapsed <= 240 ? 3 : G.elapsed <= 600 ? 2 : 1) },
   reveal: () => { G.placed = [...G.p.sol]; G.order = []; G.hinted = new Set(); refresh(); } });
