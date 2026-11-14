@@ -49,9 +49,9 @@
   @media (max-width: 640px) { .z-steps { grid-template-columns: 1fr; } .z-steps svg { max-width: 300px; } }
 
   .z-head { margin: 44px 0 12px; border-bottom: 1px solid var(--hair); padding-bottom: 6px; }
-  #z-preview { width: 100%; }
+  #z-preview { width: 100%; display: flow-root; } /* keeps #sheets' negative margin (the preview's shrink) inside */
   #z-msg { text-align: center; color: var(--muted); padding: 40px 0; }
-  #sheets { display: flex; flex-direction: column; align-items: center; gap: 4mm; }
+  #sheets { display: flex; flex-direction: column; align-items: center; gap: 4mm; transform-origin: top center; }
   .z-cap { margin: 8mm 0 0; font-size: 13pt; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
   .bar a { color: inherit; }
   #measure { position: absolute; top: 0; left: -10000px; visibility: hidden; }
@@ -115,7 +115,7 @@
     html, body { min-height: 0; background: none; }
     .z-screen { max-width: none; padding: 0; }
     .z-screen > :not(#z-preview), .z-cap { display: none !important; }
-    #sheets { zoom: 1 !important; gap: 0; }
+    #sheets { transform: none !important; margin: 0 !important; gap: 0; }
     .sheet { box-shadow: none; break-after: page; }
     .sheet:last-child { break-after: auto; }
     .sheet::after { border-left-color: #ddd; }
@@ -275,11 +275,13 @@
 
   // The zoom (at most Z) at which the sheet, laid out w / zoom mm wide so it spans the slot, fits w × h mm. Some sheets grow with
   // their width (Coronet's ring) and some shrink (wrapping text), so it's searched for: the biggest zoom that fits, to within 1%.
+  // Measured at that zoom, as it will be set: Safari wraps text differently zoomed, so an unzoomed measure times the zoom overflows.
   function zoomFor(host, w, h) {
     const sec = host.shadowRoot.firstChild, fits = (z) => {
-      host.style.width = w / z + 'mm';
-      const wide = Math.max(...[...sec.children].map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth || 0))); // scrollWidth: what spills out of a list
-      return wide * z <= w * MM + 0.5 && sec.getBoundingClientRect().height * z <= h * MM + 0.5;
+      Object.assign(host.style, { width: w / z + 'mm', zoom: z });
+      // rects come back zoomed; scrollWidth (what spills out of a list) doesn't
+      const wide = Math.max(...[...sec.children].map((c) => Math.max(c.getBoundingClientRect().width, (c.scrollWidth || 0) * z)));
+      return wide <= w * MM + 0.5 && sec.getBoundingClientRect().height <= h * MM + 0.5;
     };
     let lo = 0.2, hi = Z;
     if (fits(hi)) return hi;
@@ -429,8 +431,11 @@
   };
   document.querySelector(`.z-sides button[data-sides="${sides}"]`)?.setAttribute('aria-pressed', 'true');
   for (const o of document.querySelectorAll('.z-steps')) o.hidden = +o.dataset.sides !== sides;
-  // the preview: the sheets as printed, shrunk to the page
-  const preview = () => { $('#sheets').style.zoom = Math.min(1, $('#z-preview').clientWidth / (297 * MM)); };
+  // the preview: the sheets as printed, shrunk to the page. A transform, not zoom: Safari re-wraps zoomed text, spilling the slots.
+  const preview = () => {
+    const el = $('#sheets'), k = Math.min(1, $('#z-preview').clientWidth / (297 * MM));
+    Object.assign(el.style, { transform: `scale(${k})`, marginBottom: -el.offsetHeight * (1 - k) + 'px' });
+  };
   addEventListener('resize', preview);
   $('#btn-go').onclick = () => { window.goatcounter?.count?.({ path: 'zine/print/' + sides, event: true }); print(); };
   make().catch((e) => { console.error(e); $('#z-msg').textContent = L.fail; $('#z-go').textContent = ''; });
