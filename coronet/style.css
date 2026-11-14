@@ -78,6 +78,10 @@
 .pc.bad .crown { fill: var(--red); }
 .pc.hinted .crown { fill: var(--sun-text); }
 :root[data-theme="dark"] .pc.hinted .crown { fill: var(--sun); }
+.tut-ring { display: none; fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; pointer-events: none; outline: none !important; }
+.tut-ring.coach-at { display: inline; animation: tut-ring 1.2s ease-in-out infinite !important; }
+@keyframes tut-ring { 50% { stroke-opacity: .35; } }
+[data-calm] .tut-ring.coach-at { animation: none !important; }
 .cursor { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
 
 .crown.pop { animation: pop .22s var(--ease); }

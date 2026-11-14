@@ -192,10 +192,10 @@ function sim(now) {
 const SVGNS = 'http://www.w3.org/2000/svg';
 const FIRST_TIP = T('Drag every <b>item</b> onto a <b>plate</b> until every beam hangs <b>level</b>.');
 const best = () => G.p.items.length;
-const subText = () => T('{m} moves · ★★★ in {n}', { m: G.moves, n: best() + 1 });
+const subText = () => G.tut ? '' : T('{m} moves · ★★★ in {n}', { m: G.moves, n: best() + 1 });
 
 function startLevel(G, save) {
-  const p = generate(hash(G.key), G.pack), K = p.items.length;
+  const p = G.tut ? TUTORIAL : generate(hash(G.key), G.pack), K = p.items.length;
   const fits = Array.isArray(save.at) && save.at.length === K && save.at.every((x) => Number.isInteger(x) && x >= -1 && x < p.plates) && Number.isInteger(save.moves) && save.moves >= 0;
   Object.assign(G, { p, at: fits ? [...save.at] : Array(K).fill(-1), moves: fits ? save.moves : 0, sel: null, kbd: false });
   delete $('#tip').dataset.warn;
@@ -419,7 +419,15 @@ for (const [id, key] of [['#logo', 'logo'], ['#help-rig', 'help']]) {
   $('#help-balloon').append(el);
 }
 
-boot({ name: T('Balancing Act'), storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
+// Tutorial: one beam, arms 2 and 1, and a store of 2, 1 and 6: (2 + 1) × 2 on the left balances 6 × 1 on the right
+const TUTORIAL = { tree: { a: 2, b: 1, l: 0, r: 1 }, plates: 2, fixed: [], items: [{ v: 2, plate: 0 }, { v: 1, plate: 0 }, { v: 6, plate: 1 }], target: [3, 6] };
+
+boot({ name: T('Balancing Act'),
+  tutorial: [
+    [T('Drag a weight from the store onto a plate, or tap it, then tap a plate.'), () => G.at.some((x) => x >= 0), '#tray'],
+    [T('The numbers on the beam are its <b>arm lengths</b>. It hangs level when <b>weight × arm</b> is the same on both sides. Hang the <b>6</b> on the short arm.'), () => G.at[2] === 1],
+    [T('6 × 1 is 6, so the long arm needs 3, as 3 × 2 is 6 too. Hang the rest on the left plate.')],
+  ], storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
   save: (G) => ({ at: G.at, moves: G.moves }), key: onKey, moves: (G) => G.moves,
   reveal: () => { G.at = G.p.items.map((x) => x.plate); G.sel = null; refresh(); $('#board').classList.add('solved'); },
   stars: (G) => { const extra = G.moves - best(); return extra <= 1 ? 3 : extra <= Math.ceil(best() / 2) ? 2 : 1; } });

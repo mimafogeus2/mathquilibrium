@@ -698,7 +698,9 @@ body:has(#game:not([hidden])) :is(.peel, .fire-band) { display: none; }
 .coach.pop { animation: pop .25s; }
 .coach small { display: block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--brand-text); }
 .coach p { margin: 2px 0 0; line-height: 1.4; }
-.tut :is(#timer, #btn-print, #btn-pause, .give-up, #btn-giveup) { visibility: hidden; }
+.tut :is(#timer, #btn-print, #btn-link, #btn-pause, .give-up, #btn-giveup) { visibility: hidden; }
 .coach-at { outline: 3px solid var(--brand) !important; outline-offset: 2px !important; animation: coach-ring 1.2s ease-in-out infinite !important; } /* !important: over a game's own selection ring and entrance */
 @keyframes coach-ring { 50% { outline-offset: 5px; outline-color: color-mix(in srgb, var(--brand) 40%, transparent); } }
+.board .coach-at { outline-offset: -4px !important; animation-name: coach-ring-in !important; } /* inside: a board clips its edges */
+@keyframes coach-ring-in { 50% { outline-offset: -8px; outline-color: color-mix(in srgb, var(--brand) 40%, transparent); } }
 [data-calm] .coach-at { animation: none !important; }

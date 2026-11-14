@@ -57,7 +57,8 @@ const nextFree = (from = 0) => {
 };
 
 function startLevel(G, save) {
-  const p = generate(seedOf(G.key), G.pack), K = p.pieces.length, N = p.N;
+  // the tutorial: an O and a T on 3×3, overlapping on two tiles that flip back (valid(): its only answer)
+  const p = G.tut ? { N: 3, pieces: [2, 3], sol: [0, 3], board: 0b010100011 } : generate(seedOf(G.key), G.pack), K = p.pieces.length, N = p.N;
   const okPos = (k, v) => v === -1 || placements(N, p.pieces[k]).some((q) => q.pos === v);
   const fits = Array.isArray(save.placed) && save.placed.length === K && save.placed.every((v, k) => okPos(k, v)) &&
     Array.isArray(save.order) && save.order.every((k) => save.placed[k] >= 0) &&
@@ -298,6 +299,10 @@ try {
   }
 } catch {}
 boot({ name: T('Quadflip'), storeKey: 'quadflip', glyphs: ['■', '▚'], start: startLevel,
+  tutorial: [
+    [T('Every tile has to end up <b>light</b>. The picked piece flips the four tiles under it: tap the board to stamp it.'), () => G.order.length || G.placed.some((v) => v >= 0), '#board'],
+    [T('Now stamp the other piece: <b>every piece</b> is used once. A tile flipped twice turns light again. Wrong spot? Tap a used piece in the tray to lift it off.')],
+  ],
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 240 ? 3 : G.elapsed <= 600 ? 2 : 1) },

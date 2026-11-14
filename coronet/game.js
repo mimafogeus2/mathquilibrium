@@ -84,14 +84,14 @@ const shown = (i) => (G.queens.has(i) ? 'q' : G.marks.has(i) ? 'm' : auto(i) ? '
 
 function startLevel(G, save) {
   const N = SIZES[G.pack];
-  const p = generate(hash(G.key), N);
+  const p = G.tut ? generate(hash('tutorial'), 4) : generate(hash(G.key), N); // the tutorial's 4 rings: color 3 is one arc (14), a queen for sure
   const ok = (a) => Array.isArray(a) && a.every((i) => Number.isInteger(i) && i >= 0 && i < N * N);
   const fits = ok(save.queens) && ok(save.marks) && ok(save.hinted) && save.hinted.every((i) => p.queens.includes(i));
   const s = fits ? save : {};
   Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
 
-  $('#g-sub').textContent = T('{n} queens', { n: N });
-  $('#tip').innerHTML = G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
+  $('#g-sub').textContent = T('{n} queens', { n: p.N });
+  $('#tip').innerHTML = G.tut ? '' : G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -308,7 +308,19 @@ printable(() => {
 
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
-boot({ name: T('Coronet'), storeKey: 'coronet', random: true, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+// SVG arcs draw no outline: the ring is a path of its own on top, shaped like arc i (core.css's .coach-at only names it; style.css draws it)
+const arc = (i) => () => {
+  const v = G.view;
+  v.ring ??= $('#board').appendChild(svg('path', { class: 'tut-ring' }));
+  v.ring.setAttribute('d', v.els[i].getAttribute('d'));
+  return v.ring;
+};
+boot({ name: T('Coronet'), storeKey: 'coronet', random: true,
+  tutorial: [
+    [T('Tap the ringed arc once to mark it <b>×</b>: a reminder that it can\'t hold a queen.'), () => G.marks.size || G.queens.size, arc(0)],
+    [T('Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed arc is the only one of its color, so it must be a queen: tap it until the crown shows.'), () => G.queens.has(14), arc(14)],
+    [T('Its ring, slice and color are ruled out now. Place the other three queens: one in every ring, slice and color.')],
+  ], glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 300 ? 3 : G.elapsed <= 720 ? 2 : 1) },
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });

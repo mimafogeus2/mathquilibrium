@@ -64,7 +64,7 @@ const sqName = (i) => 'abcdefgh'[i % G.p.N] + (G.p.N - Math.floor(i / G.p.N));
 const replay = (log) => log.reduce((b, m) => play(b, m), G.p.board);
 
 function startLevel(G, save) {
-  const p = (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
+  const p = G.tut ? TUTORIAL : (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
   // a save is the move list: it must replay legally, you and the computer in turn (null: a pass, only with no move), with the game still on
   let ok = Array.isArray(save.log), b = p.board;
   if (ok) for (const [k, m] of save.log.entries()) {
@@ -313,7 +313,19 @@ $('#help-card').innerHTML = card({ look: 1, king: false, rules: [{ k: 'slide', v
 // help, page 2: a king's card (its head shows the piece as you'd see yours and the enemy's)
 $('#help-king').innerHTML = card({ look: 0, king: true, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 1, m: 'any' }] });
 
-boot({ name: T('Alien Chess'), storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
+// Tutorial: 4×4, no kings. Your Zib (slides straight, any distance) on b1 takes the Gromf on b4; the other Gromf (one step
+// diagonally forward) comes to b2, and the Zib takes it down the file. The computer's reply is its own, and on this board it's that one.
+const TUTORIAL = { N: 4, K: 2, king: [false, false], first: [13, 1], board: [0, -2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+  types: [{ look: 1, king: false, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 9, m: 'any' }] },
+    { look: 2, king: false, rules: [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1, m: 'any' }] }] };
+const enemies = () => G.b.filter((x) => x < 0).length;
+
+boot({ name: T('Alien Chess'),
+  tutorial: [
+    [T('Your pieces are at the bottom, the computer\'s at the top. Each kind moves the way its <b>card</b> shows. Tap your piece.'), () => G.sel !== null || G.log.length, () => G.units[13]],
+    [T('Its card lights up: it slides straight, as far as it likes. The board marks where it can go. Take the enemy piece at the top of its column.'), () => enemies() < 2, () => G.units[1]],
+    [T('The computer answers every move. Take its last piece to win.'), null, () => G.units.find((u, i) => u && G.b[i] < 0)],
+  ], storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1; } });
 game.impossible = { stars: game.stars }; // the same rule in Impossible Mode, on its own times

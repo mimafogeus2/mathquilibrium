@@ -30,6 +30,14 @@ function light(sound) {
   el.setAttribute('aria-label', T(on ? 'Reversed: on' : 'Reversed: off'));
 }
 
+// The tutorial (key 'T'): five words in a fixed order, no fuse, nothing saved; coach() (core.js) talks it through.
+const TUTORIAL = () => ({ subject: T('Fruit'), cards: [[T('Apple'), true], [T('Carrot'), false], [T('Banana'), true], [T('Bread'), false], [T('Mango'), true]].map(([w, yes]) => ({ w, yes })) });
+const TUT_STEPS = () => [
+  [T('Does <b>{word}</b> fit <b>{subject}</b>? It does: swipe it <b>right</b>, or tap ✓.', { word: T('Apple'), subject: T('Fruit') }), () => R?.marks.length >= 1, '#btn-yes'],
+  [T('<b>{word}</b> doesn\'t fit: swipe it <b>left</b>, or tap ✗.', { word: T('Carrot') }), () => R?.marks.length >= 2, '#btn-no'],
+  [T('Each right answer scores points; a wrong one costs 3 seconds. A real round is 24 words against a 60-second fuse. Finish these three.')],
+];
+
 const parse = (line) => { const [s, y, n] = line.split('|'); return { s, y: y.split(','), n: n.split(',') }; };
 function deal({ s: subject, y, n }, seed) {
   const cards = [...y.map((w) => ({ w, yes: true })), ...n.map((w) => ({ w, yes: false }))];
@@ -44,9 +52,10 @@ const score = (r) => r.marks.filter(Boolean).length * PER_RIGHT + (r.marks.lengt
 // R = the round being played: { key, date?, n?, subject, cards, marks: [right?], left: ms, over }
 let R = null, raf = 0, last = 0;
 const today = () => ymd(new Date());
-const save = () => { if (R && !R.over && R.key !== 'C') { store.cur = R; persist(); } };
+const save = () => { if (R && !R.over && R.key !== 'C' && R.key !== 'T') { store.cur = R; persist(); } };
 
 function screen(id) {
+  if (id !== 'game') coach(null);
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   if (id === 'home') { home(); toMenu(); }
 }
@@ -63,27 +72,29 @@ function home() {
 
 // play(key): 'D<date>' the daily, 'U<n>' unlimited round n; play('C', round) a made-up round.
 function play(key, round) {
-  const custom = key === 'C', date = key[0] === 'D' ? key.slice(1) : null, n = date || custom ? null : +key.slice(1);
+  const tut = key === 'T', custom = key === 'C' || tut, date = key[0] === 'D' ? key.slice(1) : null, n = date || custom ? null : +key.slice(1);
   // A finished daily shows its result over the menu.
   if (date && store.daily[date]?.r) { toMenu(false); screen('home'); return showEnd(store.daily[date].r, true); }
-  R = store.cur?.key === key ? store.cur
+  R = tut ? { key, ...TUTORIAL(), marks: [], left: TIME, over: false }
+    : store.cur?.key === key ? store.cur
     : custom ? { key, round, ...deal(round, Math.random() * 2 ** 32), marks: [], left: TIME, over: false }
     : { key, date, n, ...deal(parse(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)]), hash(key)), marks: [], left: TIME, over: false, flip: IMP ? reversals(hash('R' + key)) : null };
-  $('#g-title').textContent = custom ? T('Custom round') : date ? T('Daily') : T('Round {n}', { n: n + 1 });
+  $('#g-title').textContent = tut ? T('Tutorial') : custom ? T('Custom round') : date ? T('Daily') : T('Round {n}', { n: n + 1 });
   const sp = date && !IMP && special(SPECIAL, date);
   $('#g-sub').textContent = date ? shortDate(date) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
   $('#game').classList.remove('done');
   $('#btn-result').hidden = true;
-  if (!custom) toGame(date ? 'daily' : `round-${n + 1}`); // a custom round's page keeps its own hash (play.html: the round)
-  track('start', custom ? 'custom' : mode(date));
+  if (!custom || tut) toGame(tut ? 'tutorial' : date ? 'daily' : `round-${n + 1}`); // a custom round's page keeps its own hash (play.html: the round)
+  track(tut ? 'tutorial' : 'start', custom ? 'custom' : mode(date));
+  coach(tut && TUT_STEPS(), { onEnd: goHome });
   $('#stack').replaceChildren();
   refill();
   hud();
   last = performance.now();
   cancelAnimationFrame(raf);
-  raf = requestAnimationFrame(frame);
+  if (!tut) raf = requestAnimationFrame(frame); // the tutorial has no fuse
   light(false);
   if (IMP && date) impossibleIntro([T('A <b>Reversed</b> light sits under the subject. Every few words it may switch on or off.'),
     T('While it\'s <b>on</b>, answer the other way round: swipe <b>left</b> if the word fits, <b>right</b> if it doesn\'t.'),
@@ -111,7 +122,7 @@ function hud() {
   $('#clock').textContent = secs;
   $('#fuse').style.width = (R.left / TIME) * 100 + '%';
   $('#game').classList.toggle('hurry', secs <= 10);
-  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, 24), total: 24 });
+  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, R.cards.length), total: R.cards.length });
   $('#score').textContent = T('{n} pts', { n: R.marks.filter(Boolean).length * PER_RIGHT });
 }
 
@@ -192,6 +203,7 @@ function drag(e) {
 
 // ---------- end ----------
 function finish() {
+  if (R.key === 'T') { R.over = true; $('#game').classList.add('done'); sfx.win(); confetti(); return coachEnd(); }
   const custom = R.key === 'C', st = custom ? 0 : streak(), sp = R.date && !IMP && special(SPECIAL, R.date);
   R.over = true;
   cancelAnimationFrame(raf);
@@ -292,14 +304,16 @@ if ($('#home')) {
     $('#btn-daily b').textContent = T('Impossible');
   }
   $('#btn-unlimited').onclick = () => play('U' + store.n);
+  tutorialLink(() => play('T'));
   $('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
   // #daily is today's round; #round-7 is unlimited round 7, open once reached (so Forward can replay the last one).
   router((h) => {
     const n = h === 'daily' ? -1 : /^round-\d+$/.test(h) ? +h.slice(6) - 1 : NaN;
-    if (n === -1) play('D' + today());
+    if (h === 'tutorial') play('T');
+    else if (n === -1) play('D' + today());
     else if (n >= 0 && n <= store.n) play('U' + n);
     else return false;
     return true;
   }, goHome);
-  if (!store.seenHelp && !IMP) $('#dlg-help').showModal();
+  if (!store.seenHelp && !IMP && !R) $('#dlg-help').showModal();
 }

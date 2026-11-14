@@ -9,8 +9,8 @@ Object.assign(globalThis, require('../shared/common.js'));
 
 // the pure helpers the page uses (game.js needs a DOM, so they're lifted out of the source)
 const src = require('fs').readFileSync(__dirname + '/game.js', 'utf8');
-for (const re of [/const N = [^\n]*\n/, /const TOPICS = [^\n]*\n/, /const DAY0[^]*?\n\n/, /function parse[^]*?\n}\n/, /function deal[^]*?\n}\n/, /const code = [^\n]*\n/, /const fromCode = [^\n]*\n/])
-  (0, eval)(src.match(re)[0].replace(/^const /gm, 'var '));
+for (const re of [/const HINTS = [^\n]*\nlet N = [^\n]*\n/, /const TOPICS = [^\n]*\n/, /const DAY0[^]*?\n\n/, /function parse[^]*?\n}\n/, /function deal[^]*?\n}\n/, /const code = [^\n]*\n/, /const fromCode = [^\n]*\n/])
+  (0, eval)(src.match(re)[0].replace(/^(const|let) /gm, 'var '));
 
 const subjects = new Set();
 const CHECK = (line, at) => {

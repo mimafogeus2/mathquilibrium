@@ -107,6 +107,13 @@ module.exports = {
     // also the strings several games share
     'shared/core.js': {
       'How to play': 'איך משחקים',
+      // the tutorial: its menu link, the coach line, and the dialog at its end
+      'Tutorial': 'מדריך',
+      'Tutorial · {n} of {k}': 'מדריך · {n} מתוך {k}',
+      "That's it — you know how to play. Have fun!": 'זהו — אתם יודעים לשחק. תיהנו!',
+      'Tutorial complete!': 'סיימתם את המדריך!',
+      "That's all there is to it. The real puzzles are waiting.": 'זה כל הסיפור. החידות האמיתיות מחכות.',
+      "Let's play": 'יאללה, משחקים',
       // How to play's pages
       'Back': 'הקודם',
       'Next': 'הבא',
@@ -184,6 +191,17 @@ module.exports = {
       'Give up? The round ends now, scored as it stands.': 'לוותר? הסבב ייגמר עכשיו, עם הניקוד שצברתם עד כה.',
     },
     'orderly/game.js': {
+      // the tutorial's round
+      'Inventions': 'המצאות',
+      'Oldest': 'הכי ישן',
+      'Newest': 'הכי חדש',
+      'Printing press': 'מכונת דפוס',
+      'Telephone': 'טלפון',
+      'Airplane': 'מטוס',
+      'Smartphone': 'סמארטפון',
+      'Put the cards in order: <b>oldest</b> at the top, <b>newest</b> at the bottom. Drag a card to move it.': 'סדרו את הקלפים: <b>הכי ישן</b> למעלה, <b>הכי חדש</b> למטה. גררו קלף כדי להזיז אותו.',
+      'Not sure yet? <b>Check</b> anyway: cards that sit right next to each other turn green and show their value.': 'עוד לא בטוחים? לחצו <b>בדיקה</b> בכל זאת: קלפים שעומדים נכון זה ליד זה נצבעים בירוק ומראים את הערך שלהם.',
+      'Green cards are joined into a <b>group</b> that moves as one. Get every card in order and check again.': 'קלפים ירוקים מתחברים ל<b>קבוצה</b> שזזה יחד. סדרו את כל הקלפים ובדקו שוב.',
       'Orderly': 'בסדר',
       'Daily': 'יומית',
       'Custom level': 'חידה אישית',
@@ -255,6 +273,16 @@ module.exports = {
       'Clear every field and start over?': 'לנקות את כל השדות ולהתחיל מחדש?',
     },
     'wordswipe/game.js': {
+      // the tutorial's round
+      'Fruit': 'פירות',
+      'Apple': 'תפוח',
+      'Carrot': 'גזר',
+      'Banana': 'בננה',
+      'Bread': 'לחם',
+      'Mango': 'מנגו',
+      'Does <b>{word}</b> fit <b>{subject}</b>? It does: swipe it <b>right</b>, or tap ✓.': 'האם <b>{word}</b> מתאים ל<b>{subject}</b>? כן: החליקו <b>ימינה</b>, או הקישו ✓.',
+      "<b>{word}</b> doesn't fit: swipe it <b>left</b>, or tap ✗.": '<b>{word}</b> לא מתאים: החליקו <b>שמאלה</b>, או הקישו ✗.',
+      'Each right answer scores points; a wrong one costs 3 seconds. A real round is 24 words against a 60-second fuse. Finish these three.': 'כל תשובה נכונה שווה נקודות, וטעות עולה 3 שניות. סבב אמיתי הוא 24 מילים מול פתיל של 60 שניות. סיימו את שלוש האחרונות.',
       'WordSwipe': 'שמאל ימין שמאל',
       'Daily': 'יומי',
       '24 words · 60 seconds': '24 מילים · 60 שניות',
@@ -298,6 +326,9 @@ module.exports = {
       'A WordSwipe round: {subject}': 'סבב שמאל ימין שמאל: {subject}',
     },
     'biggr/game.js': {
+      'Two sums, no answers. Work them out and tap the <b>bigger</b> one (or press <b>←</b> / <b>→</b>).': 'שני תרגילים, בלי תשובות. חשבו אותם והקישו על ה<b>גדול</b> יותר (או לחצו <b>←</b> / <b>→</b>).',
+      'In a real round a clock runs, and a wrong pick costs <b>3 seconds</b>. Quick, but not too quick: try this one.': 'בסבב אמיתי השעון רץ, וכל טעות עולה <b>3 שניות</b>. מהר, אבל לא מהר מדי: נסו את זה.',
+      'A round is 10 pairs; seconds left at the end add to your score. Last one!': 'בסבב יש 10 זוגות, והשניות שנשארות בסוף מתווספות לניקוד. עוד אחד אחרון!',
       'Biggr': 'כמה כמה',
       '{n}s': '{n} שנ׳',
       '{sum} (left arrow)': '{sum} (חץ שמאלה)',
@@ -308,6 +339,9 @@ module.exports = {
     },
     'mathquilibrium/game.js': {
       'Mathquilibrium': 'מאוזן',
+      'Every row and column has to be a <b>true equation</b>. The ringed tile sits in 3 _ 5 = 8: pick the operator that fits from the keys below.': 'כל שורה וכל עמודה חייבות להיות <b>משוואה נכונה</b>. המשבצת המסומנת נמצאת ב־<span dir="ltr">3 _ 5 = 8</span>: בחרו מהמקשים למטה את הסימן שמתאים.',
+      'That tile is <b>shared</b>: the column reads 2 + 4 _ 6 now. One symbol has to work both ways. Finish the row: tap its last blank and pick <b>=</b>.': 'המשבצת הזאת <b>משותפת</b>: בעמודה כתוב עכשיו <span dir="ltr">2 + 4 _ 6</span>. סימן אחד צריך לעבוד בשני הכיוונים. סיימו את השורה: הקישו על המשבצת הריקה האחרונה בה ובחרו <b>=</b>.',
+      "A line turns green when it's true. Now finish the column.": 'שורה נכונה נצבעת בירוק. עכשיו סיימו את העמודה.',
       'plus': 'פלוס',
       'minus': 'מינוס',
       'times': 'כפול',
@@ -353,6 +387,11 @@ module.exports = {
     },
     'coronet/game.js': {
       'Coronet': 'הכתרה',
+      "Tap the ringed arc once to mark it <b>×</b>: a reminder that it can't hold a queen.": 'הקישו פעם אחת על הקשת המסומנת כדי לסמן בה <b>×</b>: תזכורת שאין בה מלכה.',
+      'Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed arc is the only one of its color, so it must be a queen: tap it until the crown shows.':
+        'בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b> יש בדיוק מלכה אחת. הקשת המסומנת היא היחידה בצבע שלה, אז חייבת להיות בה מלכה: הקישו עליה עד שיופיע הכתר.',
+      'Its ring, slice and color are ruled out now. Place the other three queens: one in every ring, slice and color.':
+        'הטבעת, הפלח והצבע שלה נפסלו עכשיו. הציבו את שלוש המלכות האחרות: אחת בכל טבעת, בכל פלח ובכל צבע.',
       'Tap an arc to mark it <b>×</b>, again for a <b>queen</b>. One queen per <b>ring</b>, <b>slice</b> and <b>color</b>.':
         'הקישו על קשת כדי לסמן בה <b>×</b>, ושוב כדי להציב <b>מלכה</b>. מלכה אחת בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b>.',
       '{n} queens': '{n} מלכות',
@@ -380,6 +419,10 @@ module.exports = {
     },
     'quadflip/game.js': {
       'Quadflip': 'מהפכים',
+      'Every tile has to end up <b>light</b>. The picked piece flips the four tiles under it: tap the board to stamp it.':
+        'כל המשבצות צריכות להיות <b>בהירות</b> בסוף. הצורה שבחרתם הופכת את ארבע המשבצות שמתחתיה: הקישו על הלוח כדי להטביע אותה.',
+      'Now stamp the other piece: <b>every piece</b> is used once. A tile flipped twice turns light again. Wrong spot? Tap a used piece in the tray to lift it off.':
+        'עכשיו הטביעו את הצורה השנייה: משתמשים ב<b>כל צורה</b> פעם אחת. משבצת שהתהפכה פעמיים חוזרת להיות בהירה. טעיתם במקום? הקישו על צורה משומשת במגש כדי להרים אותה.',
       'Pick a <b>piece</b>, tap the board to <b>flip</b> the tiles under it. Use <b>every piece</b> once to clear the board.':
         'בחרו <b>צורה</b> והקישו על הלוח כדי <b>להפוך</b> את המשבצות שמתחתיה. השתמשו ב<b>כל צורה</b> פעם אחת כדי לנקות את הלוח.',
       '{n} pieces': '{n} צורות',
@@ -394,6 +437,10 @@ module.exports = {
     },
     'balancingact/game.js': {
       'Balancing Act': 'על כפות המאזניים',
+      'Drag a weight from the store onto a plate, or tap it, then tap a plate.': 'גררו משקולת מהמחסן אל כף, או הקישו עליה ואז על כף.',
+      'The numbers on the beam are its <b>arm lengths</b>. It hangs level when <b>weight × arm</b> is the same on both sides. Hang the <b>6</b> on the short arm.':
+        'המספרים על המוט הם <b>אורכי הזרועות</b> שלו. הוא מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. תלו את ה־<b>6</b> על הזרוע הקצרה.',
+      '6 × 1 is 6, so the long arm needs 3, as 3 × 2 is 6 too. Hang the rest on the left plate.': '<span dir="ltr">6 × 1</span> זה 6, אז הזרוע הארוכה צריכה 3, כי גם <span dir="ltr">3 × 2</span> זה 6. תלו את השאר על הכף השמאלית.',
       'weight {n}': 'משקולת {n}',
       'Total: {t}': 'סך הכול: {t}',
       'balloon {n}': 'בלון {n}',
@@ -413,6 +460,9 @@ module.exports = {
     },
     'alienchess/game.js': {
       'Summoning…': 'מזמנים…',
+      "Your pieces are at the bottom, the computer's at the top. Each kind moves the way its <b>card</b> shows. Tap your piece.": 'הכלים שלכם למטה, של המחשב למעלה. כל סוג זז כמו שמראה ה<b>קלף</b> שלו. הקישו על הכלי שלכם.',
+      'Its card lights up: it slides straight, as far as it likes. The board marks where it can go. Take the enemy piece at the top of its column.': 'הקלף שלו נדלק: הוא נע בקו ישר, כמה משבצות שירצה. הלוח מסמן לאן הוא יכול ללכת. אכלו את הכלי של המחשב בראש הטור שלו.',
+      'The computer answers every move. Take its last piece to win.': 'המחשב עונה על כל מהלך. אכלו את הכלי האחרון שלו וניצחתם.',
       'Alien Chess': 'שחמאדים',
       // the aliens: the same nonsense, in Hebrew letters
       'Bloorp': 'בלורפ',
