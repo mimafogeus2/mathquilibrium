@@ -435,6 +435,7 @@ module.exports = {
       ['<span class="kicker">01 <em>Math</em></span>', '<span class="kicker">01 <em>חשבון</em></span>'],
       ['<h2>Math<span>quilibrium</span></h2>', '<h2>מאו<span>זן</span></h2>'],
       ['<p>The numbers are given. Fill in the operators so every line is true.</p>', '<p>המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.</p>'],
+      ['<span>Try a random game</span>', '<span>נסו משחק אקראי</span>'],
       ['<span class="kicker">02 <em>Math</em></span>', '<span class="kicker">02 <em>חשבון</em></span>'],
       ['<h2>Bigg<span>r</span></h2>', '<h2><span>כ</span>מה <span>כ</span>מה</h2>'],
       ['<p>Two sums, no answers. Pick the bigger one, fast.</p>', '<p>שני תרגילים, בלי תשובות. בחרו את הגדול יותר, מהר.</p>'],
