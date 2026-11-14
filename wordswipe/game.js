@@ -252,7 +252,7 @@ printable(() => R && {
   ],
   body: words(false),
   answer: words(true),
-});
+}, (_, date) => { R = deal(parse(dailyLine(date)), hash('D' + date)); });
 function words(solved) {
   const box = (mark) => `<span class="p-box">${solved ? mark : ''}</span>`;
   return `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>

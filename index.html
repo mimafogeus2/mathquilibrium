@@ -26,6 +26,16 @@
   .cover { max-width: 1040px; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) clamp(16px, 4vw, 40px) max(32px, env(safe-area-inset-bottom)); }
   /* ---- masthead ---- */
   .mast-icons { display: flex; gap: 2px; }
+  .mast-icons a { color: inherit; }
+  /* a pencilled note pointing at the printer icon */
+  .mast-icons { align-items: center; margin-inline-start: auto; }
+  .print-hint { display: flex; align-items: center; gap: 3px; margin-inline-end: -9px; font: italic 600 16px/1 var(--display); color: var(--pink-text); white-space: nowrap; animation: enter .5s .5s var(--ease) both; }
+  .print-hint svg { width: 46px; height: 26px; stroke-width: 1.8; } /* a swipe from the text down and up into the icon: the tip (42, 13) is level with its middle */
+  .print-hint > span { translate: 0 -4px; } /* level with the arrow's start, which sits above its tip */
+  [dir="rtl"] .print-hint svg { scale: -1 1; }
+  @media (max-width: 480px) { .mast-top > .kicker { display: none; } }
+  /* narrow phones: the note in two lines, so the icons keep their room */
+  @media (max-width: 380px) { .print-hint > span { white-space: normal; max-width: 6.5em; text-align: end; font-size: 14.5px; line-height: 1.05; translate: 0 -2px; } }
   .mast-top { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
   .masthead {
     margin: 0; padding: clamp(10px, 2vw, 18px) 0 clamp(14px, 2.6vw, 26px); text-align: center;
@@ -98,7 +108,7 @@
   <header>
     <div class="mast-top">
       <span class="kicker">Daily logic games</span>
-      <div class="mast-icons"><button class="icon js-fav" aria-label="Add to favorites"></button><button class="icon js-theme" aria-label="Theme"></button></div>
+      <div class="mast-icons"><span class="print-hint" aria-hidden="true"><span>Printable version here</span><svg viewBox="0 0 46 26"><path d="M2 12C9 22 30 21 42 13"/><path d="M34 13.3 42 13 37.9 19.8"/></svg></span><a class="icon" href="print.html" aria-label="Print today's puzzles" title="Print today's puzzles"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg></a><button class="icon js-fav" aria-label="Add to favorites"></button><button class="icon js-theme" aria-label="Theme"></button></div>
     </div>
     <h1 class="masthead">Games by <span>Miki</span></h1>
     <p class="issue"><span><b id="issue-no">No. 1</b></span><span id="issue-date"></span><span class="hide-sm">Price: one coffee break</span></p>
