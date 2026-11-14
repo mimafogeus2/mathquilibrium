@@ -70,6 +70,9 @@ module.exports = {
     },
     // also the strings several games share
     'shared/core.js': {
+      'How to play': 'איך משחקים',
+      'Sound': 'צליל',
+      'More': 'עוד',
       '{tier} daily  →': 'היומי ה{tier}  ←',
       'Next puzzle in {time}': 'החידה הבאה בעוד {time}',
       'A new puzzle is ready': 'חידה חדשה מחכה',

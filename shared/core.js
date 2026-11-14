@@ -103,6 +103,26 @@ function syncSound(go) {
     b.setAttribute('aria-pressed', String(!m));
   }
 }
+// How to play, in every game screen's top bar beside the sound button (game timers already stop while a dialog is open).
+// A phone's bar has no room for both: there they fold into a ⋯ menu (core.css), and share stays in the bar.
+const barSound = $('#game .bar-end .js-sound');
+if (barSound) {
+  const help = $('#dlg-help') && `<button class="icon js-help" aria-label="${T('How to play')}" data-label="${T('How to play')}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg></button>`;
+  if (help) barSound.insertAdjacentHTML('beforebegin', help);
+  barSound.insertAdjacentHTML('afterend', `<button class="icon bar-more" aria-label="${T('More')}"><svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3.2"/></svg></button>`);
+  const menu = document.createElement('div'), more = barSound.nextElementSibling;
+  menu.id = 'bar-menu';
+  menu.popover = 'auto';
+  menu.innerHTML = (help || '') + `<button class="icon js-sound" aria-label="${T('Sound')}" data-label="${T('Sound')}"></button>`;
+  document.body.append(menu);
+  more.popoverTargetElement = menu;
+  menu.addEventListener('toggle', (e) => {
+    if (e.newState === 'open') menu.style.top = more.getBoundingClientRect().bottom / pageScale() + 4 + 'px';
+  });
+  for (const b of document.querySelectorAll('.js-help')) b.onclick = () => { menu.hidePopover(); track('help', 'bar'); $('#dlg-help').showModal(); };
+  // Escape shuts the menu, not the puzzle (each game's keydown sends Escape to the back button)
+  addEventListener('keydown', (e) => e.key === 'Escape' && menu.matches(':popover-open') && e.stopImmediatePropagation(), true);
+}
 for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => {
   try { localStorage.setItem('muted', muted() ? '0' : '1'); } catch {}
   syncSound(true);
@@ -258,7 +278,7 @@ function saveGame() {
 }
 
 function tick() {
-  if (!G || G.done || G.paused || document.hidden || $('#game').hidden || document.querySelector('dialog[open]')) return;
+  if (!G || G.done || G.paused || document.hidden || $('#game').hidden || document.querySelector('dialog[open], :popover-open')) return;
   G.elapsed++;
   $('#timer').textContent = fmt(G.elapsed);
   if (G.elapsed % 5 === 0) saveGame();
@@ -442,7 +462,7 @@ function nudge(active) {
   for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, () => { lastInput = Date.now(); nudged = false; }, true);
   setInterval(() => {
     const b = $('#btn-hint');
-    if (nudged || Date.now() - lastInput < 20000 || !active() || document.hidden || document.querySelector('dialog[open]')) return;
+    if (nudged || Date.now() - lastInput < 20000 || !active() || document.hidden || document.querySelector('dialog[open], :popover-open')) return;
     nudged = true;
     if (b && !b.disabled && b.offsetParent) flash(b, 'psst');
   }, 1000);
@@ -534,7 +554,7 @@ function boot(g) {
   $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });
 
   document.addEventListener('keydown', (e) => {
-    if (!G || $('#game').hidden || document.querySelector('dialog[open]')) return;
+    if (!G || $('#game').hidden || document.querySelector('dialog[open], :popover-open')) return;
     // Ctrl+Z / Cmd+Z clicks the game's undo button, if it has one and it's enabled.
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 'z' || e.key === 'Z') && !e.target.closest('input, textarea')) {
       const u = $('#btn-undo');
