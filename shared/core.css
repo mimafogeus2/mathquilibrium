@@ -150,6 +150,10 @@ a.foot-link { display: inline-flex; align-items: center; }
 .title small { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 .bar-start { display: flex; gap: 2px; }
 .bar-end { display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+.bar-more { display: none; }
+#bar-menu { inset: auto; inset-inline-end: 12px; margin: 0; padding: 6px; border: 1px solid var(--hair); border-radius: 14px; background: var(--grain), var(--stock); color: var(--ink); box-shadow: var(--lift); }
+#bar-menu .icon { display: flex; gap: 12px; width: 100%; padding-inline: 10px 16px; border-radius: 10px; color: inherit; font: inherit; font-size: 16px; }
+#bar-menu .icon::after { content: attr(data-label); }
 #timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); min-width: 3.5ch; text-align: end; }
 
 .board-wrap { flex: 1; display: grid; place-items: center; width: 100%; padding: 12px 0; }
@@ -462,7 +466,7 @@ label.set-row { cursor: pointer; }
    One A4 sheet (plus one for the answer), black ink on white: no grain, no shadows, no motion. Game sheets style their own body in style.css. */
 #print { display: none; }
 /* phones rarely print and the bar has no room for a third icon there; the browser's own Print still works */
-@media (max-width: 459px) { #btn-print { display: none; } }
+@media (max-width: 459px) { #btn-print, #game .bar-end > :is(.js-help, .js-sound) { display: none; } #game .bar-more { display: grid; } } /* no room: help and sound go in the ⋯ menu */
 @media print {
   @page { size: A4; margin: 14mm; }
   :root, :root[data-theme="dark"] {

@@ -67,7 +67,7 @@ function frame(now) {
   const dt = now - last;
   last = now;
   if (!R || R.over) return;
-  if (!R.hold && !document.hidden && !$('#game').hidden && !document.querySelector('dialog[open]')) {
+  if (!R.hold && !document.hidden && !$('#game').hidden && !document.querySelector('dialog[open], :popover-open')) {
     const before = Math.ceil(R.left / 1000);
     R.left -= Math.min(dt, 250);
     const after = Math.ceil(R.left / 1000);
