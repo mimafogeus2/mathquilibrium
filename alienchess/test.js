@@ -31,8 +31,9 @@ assert(!wins(p, B('r... .... ..N. ....'), 1)); // the knight can't reach
 assert(!wins(p, B('.... .n.. .... R...'), 1) && wins(p, B('.... .n.. .... R...'), 2));
 
 const count = +process.argv[2] || 150, keys = [];
-for (const k in TIER) for (let n = 1; n <= count; n++) keys.push(k + n);
+for (const k in TIER) if (k !== 'I') for (let n = 1; n <= count; n++) keys.push(k + n);
 for (const k in TIER) keys.push('D' + k + '2026-11-13');
+for (let d = 1; d < 6; d++) keys.push('DI' + new Date(Date.UTC(2026, 10, 13 + d)).toISOString().slice(0, 10)); // Impossible: dailies only
 const t0 = Date.now(), slowest = {};
 for (const key of keys) {
   const tier = key.replace(/^D/, '')[0], t = Date.now();

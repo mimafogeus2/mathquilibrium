@@ -12,8 +12,9 @@ assert.strictEqual(count([4, 4], [-2, 6, 4]), 2); // 6-2 | 4, either plate
 assert.strictEqual(count([3, 5], [-2, 6, 4]), 0);
 
 const keys = [];
-for (const k in TIER) for (let n = 1; n <= PACK_SIZE; n++) keys.push(k + n);
+for (const k in TIER) if (k !== 'I') for (let n = 1; n <= PACK_SIZE; n++) keys.push(k + n);
 for (const k in TIER) keys.push('D' + k + '2026-11-14');
+for (let d = 1; d < 60; d++) keys.push('DI' + new Date(Date.UTC(2026, 10, 14 + d)).toISOString().slice(0, 10)); // Impossible: dailies only
 
 const t0 = Date.now(), slowest = {};
 for (const key of keys) {

@@ -3,7 +3,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<script>var I18N = {"Theme: auto":"ערכת צבע: אוטומטית","Theme: light":"ערכת צבע: בהירה","Theme: dark":"ערכת צבע: כהה","Tap Share, then Add to Home Screen":"הקישו על שיתוף ואז על „הוספה למסך הבית״","Open the browser menu and tap ☆ or Add to Home screen":"פתחו את תפריט הדפדפן והקישו על ☆ או על „הוספה למסך הבית״","Press ⌘D to bookmark this page":"הקישו ⌘D כדי להוסיף את הדף למועדפים","Press Ctrl+D to bookmark this page":"הקישו Ctrl+D כדי להוסיף את הדף למועדפים","Settings":"הגדרות","High contrast":"ניגודיות גבוהה","Plain paper: no grain or misprints, darker text":"נייר חלק: בלי גרעיניות ובלי הדפסה מוסטת, טקסט כהה יותר","Reduce motion":"פחות תנועה","No confetti, flips or sliding":"בלי קונפטי, היפוכים והחלקות","Text & tile size":"גודל טקסט ומשבצות","Normal":"רגיל","Large":"גדול","Larger":"גדול יותר","Your progress":"ההתקדמות שלכם","Kept in this browser only. Export it to keep a copy or move it to another device.":"נשמרת רק בדפדפן הזה. ייצאו אותה כדי לשמור עותק או להעביר אותה למכשיר אחר.","Export":"ייצוא","Import":"ייבוא","Reset all progress":"איפוס כל ההתקדמות","Done":"סיום","That file isn't a Games by Miki export.":"הקובץ הזה אינו ייצוא של מדף המשחקים של מיקי.","Replace the progress in this browser with the one in this file?":"להחליף את ההתקדמות בדפדפן הזה בזו שבקובץ?","Erase all progress, streaks and saved games, in every game? This can't be undone. (Export first to keep a copy.)":"למחוק את כל ההתקדמות, הרצפים והמשחקים השמורים, בכל המשחקים? אי אפשר לבטל את זה. (כדאי לייצא קודם כדי לשמור עותק.)"};</script>
+<script>var I18N = {"Theme: auto":"ערכת צבע: אוטומטית","Theme: light":"ערכת צבע: בהירה","Theme: dark":"ערכת צבע: כהה","Tap Share, then Add to Home Screen":"הקישו על שיתוף ואז על „הוספה למסך הבית״","Open the browser menu and tap ☆ or Add to Home screen":"פתחו את תפריט הדפדפן והקישו על ☆ או על „הוספה למסך הבית״","Press ⌘D to bookmark this page":"הקישו ⌘D כדי להוסיף את הדף למועדפים","Press Ctrl+D to bookmark this page":"הקישו Ctrl+D כדי להוסיף את הדף למועדפים","Settings":"הגדרות","High contrast":"ניגודיות גבוהה","Plain paper: no grain or misprints, darker text":"נייר חלק: בלי גרעיניות ובלי הדפסה מוסטת, טקסט כהה יותר","Reduce motion":"פחות תנועה","No confetti, flips or sliding":"בלי קונפטי, היפוכים והחלקות","Text & tile size":"גודל טקסט ומשבצות","Normal":"רגיל","Large":"גדול","Larger":"גדול יותר","Your progress":"ההתקדמות שלכם","Kept in this browser only. Export it to keep a copy or move it to another device.":"נשמרת רק בדפדפן הזה. ייצאו אותה כדי לשמור עותק או להעביר אותה למכשיר אחר.","Export":"ייצוא","Import":"ייבוא","Reset all progress":"איפוס כל ההתקדמות","Done":"סיום","That file isn't a Games by Miki export.":"הקובץ הזה אינו ייצוא של מדף המשחקים של מיקי.","Replace the progress in this browser with the one in this file?":"להחליף את ההתקדמות בדפדפן הזה בזו שבקובץ?","Impossible Mode":"מצב בלתי אפשרי","Leave Impossible Mode":"יציאה מהמצב הבלתי אפשרי","Impossible":"בלתי אפשרי","Erase all progress, streaks and saved games, in every game? This can't be undone. (Export first to keep a copy.)":"למחוק את כל ההתקדמות, הרצפים והמשחקים השמורים, בכל המשחקים? אי אפשר לבטל את זה. (כדאי לייצא קודם כדי לשמור עותק.)"};</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>
 <meta name="description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים ועל כפות המאזניים. חידות חדשות בכל יום.">
@@ -41,6 +41,8 @@
   }
   @keyframes trim { from { background-size: 0 1px, 1px 0, 0 1px, 1px 0, 0 1px, 1px 0, 0 1px, 1px 0; } }
   :root[data-contrast] .cover::before { display: none; }
+  /* Impossible Mode: outlined in the stock, so the bottom ones still read against the fire */
+  :root[data-impossible] .cover::before { opacity: .85; filter: drop-shadow(0 0 1px var(--paper)) drop-shadow(0 0 1px var(--paper)) drop-shadow(0 0 .5px var(--paper)); }
   /* ---- masthead ---- */
   .mast-icons { display: flex; gap: 2px; }
   .mast-icons a { color: inherit; }
@@ -71,6 +73,11 @@
     content: ''; position: absolute; top: 50%; width: 15px; height: 15px; margin-top: -7.5px; opacity: .7;
     background: var(--ink); filter: drop-shadow(1.2px 1px 0 var(--pink));
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23000' stroke-width='1.3'%3E%3Ccircle cx='10' cy='10' r='5.5'/%3E%3Cpath d='M10 0v20M0 10h20'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  /* Impossible Mode: the targets are pentagrams */
+  :root[data-impossible] .masthead::before, :root[data-impossible] .masthead::after {
+    width: 19px; height: 19px; margin-top: -9.5px;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.3' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10.5'/%3E%3Cpath d='M12 21.5 6.42 4.31 21.03 14.94H2.97L17.58 4.31Z'/%3E%3C/svg%3E");
   }
   .masthead::before { inset-inline-start: calc(var(--pad) / -2 - 7.5px); }
   .masthead::after { inset-inline-end: calc(var(--pad) / -2 - 7.5px); }
@@ -122,6 +129,21 @@
   .today i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line); }
   .today i.on { background: var(--brand); box-shadow: 1px 1px 0 var(--reg); }
   .today i + span { margin-inline-start: 5px; }
+  /* Impossible Mode: each card's foot smoulders */
+  :root[data-impossible] .game { position: relative; }
+  :root[data-impossible] .game::after {
+    /* only under the card's rule, brightest against it: the rule's underside, lit by the fire below */
+    content: ''; position: absolute; inset: 100% 4% auto; height: 12px; pointer-events: none; transform-origin: top;
+    background: radial-gradient(ellipse 50% 100% at 50% 0, rgb(255 79 178 / .7), rgb(255 79 178 / .22) 55%, transparent);
+    mix-blend-mode: screen; animation: smoulder 2.3s linear infinite; /* one fire: every card flickers together */
+  }
+  /* firelight: quick, uneven dips and flares, the glow's reach twitching with them */
+  @keyframes smoulder {
+    0%, 100% { opacity: .8; scale: 1 .96; } 7% { opacity: .92; scale: 1 1.03; } 12% { opacity: .74; scale: 1 .94; } 21% { opacity: .86; scale: 1 1; }
+    29% { opacity: .77; scale: 1 .95; } 34% { opacity: .95; scale: 1 1.04; } 46% { opacity: .72; scale: 1 .93; } 53% { opacity: .84; scale: 1 .98; }
+    61% { opacity: .78; scale: 1 .95; } 68% { opacity: .91; scale: 1 1.02; } 79% { opacity: .75; scale: 1 .94; } 88% { opacity: .86; scale: 1 1; }
+  }
+  :root[data-calm] .game::after { animation: none; opacity: .6; }
   /* the banner: a random game above the games, its lead-in over it and a rule under it (the script below deals it) */
   .cover { container-name: cover; } /* named: inside the banner the nearest container is .b-text */
   .pick { padding-bottom: clamp(20px, calc(3 * var(--vw)), 30px); margin-bottom: clamp(20px, calc(3 * var(--vw)), 30px); border-bottom: 1px solid var(--ink); animation: enter .45s 60ms both var(--ease); }
@@ -505,10 +527,16 @@
   document.getElementById('issue-no').textContent = `כרך ${Math.floor((no - 1) / 365) + 1} · גיליון ${no.toLocaleString()}`; // a volume a year
   document.getElementById('issue-date').textContent = d.toLocaleDateString('he', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-  // Today's dailies, read from each game's saved progress.
+  // Today's dailies, read from each game's saved progress. Impossible Mode (theme.js): the one Impossible daily, from its own store.
+  const IMP = document.documentElement.hasAttribute('data-impossible');
   for (const a of document.querySelectorAll('.game')) {
     let done = {};
-    try { done = JSON.parse(localStorage.getItem(a.dataset.store))?.daily?.[today] || {}; } catch {}
+    try { done = JSON.parse(localStorage.getItem(a.dataset.store + (IMP ? '-impossible' : '')))?.daily?.[today] || {}; } catch {}
+    if (IMP) {
+      const r = done.I || done.r;
+      a.querySelector('.today').innerHTML = `<i class="${r ? 'on' : ''}"></i><span>${r ? (r.lost ? '💀 נשרף היום' : '⛧ נפתר היום') : 'בלתי אפשרי היום'}</span>`;
+      continue;
+    }
     if ('one' in a.dataset) { // one daily round, not tiers
       a.querySelector('.today').innerHTML = `<i class="${done.r ? 'on' : ''}"></i><span>${done.r ? `היום: ${done.r.c ? (done.r.c > 1 ? `${done.r.c} בדיקות` : 'בדיקה אחת') : `${done.r.s} נקודות`}` : 'סבב חדש היום'}</span>`;
       continue;

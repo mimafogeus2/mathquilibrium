@@ -11,7 +11,24 @@ const DAY0 = Date.UTC(2026, 0, 1);
 const dailyIndex = (date) => ((Math.round((Date.parse(date) - DAY0) / 864e5) * 1237 + 4021) % ROUNDS.length + ROUNDS.length) % ROUNDS.length;
 const unlimitedIndex = (n) => (n * 2903 + 1777) % ROUNDS.length;
 // On a special day (special.js) its themed round replaces the pool's.
-const dailyLine = (date) => special(SPECIAL, date)?.line ?? ROUNDS[dailyIndex(date)];
+const dailyLine = (date) => (IMP ? ROUNDS[(dailyIndex(date) + 1013) % ROUNDS.length] : special(SPECIAL, date)?.line ?? ROUNDS[dailyIndex(date)]);
+// Impossible Mode's daily: a Reversed light (#rev) that rerolls every 2–3 answers, 50/50; while it's on, every answer is the other way round.
+// Seeded by the day, so everyone gets the same flips on the same cards. It starts off. A wrong swipe costs 5s, not 3.
+function reversals(seed) {
+  const rand = rng(seed), out = [];
+  for (let on = false; out.length < 24; on = rand() < 0.5) out.push(...Array(2 + (rand() < 0.5)).fill(on));
+  return out.slice(0, 24);
+}
+const flipped = () => IMP && !!R?.flip?.[R.marks.length];
+const penaltyMs = () => (IMP ? 5000 : PENALTY);
+function light(sound) {
+  const el = $('#rev');
+  if (!el) return;
+  const on = flipped();
+  if (sound && on !== el.classList.contains('on')) sfx.toggle(on);
+  el.classList.toggle('on', on);
+  el.setAttribute('aria-label', T(on ? 'Reversed: on' : 'Reversed: off'));
+}
 
 const parse = (line) => { const [s, y, n] = line.split('|'); return { s, y: y.split(','), n: n.split(',') }; };
 function deal({ s: subject, y, n }, seed) {
@@ -35,7 +52,7 @@ function screen(id) {
 }
 
 function home() {
-  const t = today(), sp = special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
+  const t = today(), sp = !IMP && special(SPECIAL, t), rec = store.daily[t]?.r, st = streak();
   $('#daily-meta').innerHTML = todayLine(st);
   $('#btn-daily').classList.toggle('done', !!rec);
   rollIn($('#btn-daily'), 'r');
@@ -51,9 +68,9 @@ function play(key, round) {
   if (date && store.daily[date]?.r) { toMenu(false); screen('home'); return showEnd(store.daily[date].r, true); }
   R = store.cur?.key === key ? store.cur
     : custom ? { key, round, ...deal(round, Math.random() * 2 ** 32), marks: [], left: TIME, over: false }
-    : { key, date, n, ...deal(parse(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)]), hash(key)), marks: [], left: TIME, over: false };
+    : { key, date, n, ...deal(parse(date ? dailyLine(date) : ROUNDS[unlimitedIndex(n)]), hash(key)), marks: [], left: TIME, over: false, flip: IMP ? reversals(hash('R' + key)) : null };
   $('#g-title').textContent = custom ? T('Custom round') : date ? T('Daily') : T('Round {n}', { n: n + 1 });
-  const sp = date && special(SPECIAL, date);
+  const sp = date && !IMP && special(SPECIAL, date);
   $('#g-sub').textContent = date ? shortDate(date) + (sp ? ' · ' + sp.occasion : '') : '';
   $('#subject').textContent = R.subject;
   screen('game');
@@ -67,6 +84,10 @@ function play(key, round) {
   last = performance.now();
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(frame);
+  light(false);
+  if (IMP && date) impossibleIntro([T('A <b>Reversed</b> light sits under the subject. Every few words it may switch on or off.'),
+    T('While it\'s <b>on</b>, answer the other way round: swipe <b>left</b> if the word fits, <b>right</b> if it doesn\'t.'),
+    T('A wrong swipe costs <b>5 seconds</b>.')], () => {}); // the fuse waits while it's open
 }
 
 // The fuse burns only while the round is on screen and no dialog covers it.
@@ -116,7 +137,7 @@ const topCard = () => [...$('#stack').querySelectorAll('.card:not(.gone)')].pop(
 
 function answer(saidYes) {
   if (!R || R.over || $('#game').hidden) return;
-  const card = R.cards[R.marks.length], el = topCard(), right = card.yes === saidYes;
+  const card = R.cards[R.marks.length], el = topCard(), right = card.yes === (flipped() ? !saidYes : saidYes);
   R.marks.push(right);
   el.classList.add('gone', right ? 'right' : 'wrong');
   el.style.setProperty('--dir', saidYes ? 1 : -1);
@@ -125,20 +146,21 @@ function answer(saidYes) {
   if (right) sfx.good(R.marks.filter(Boolean).length % 8);
   else {
     sfx.bad();
-    R.left = Math.max(0, R.left - PENALTY);
+    R.left = Math.max(0, R.left - penaltyMs());
     flash($('#clock'), 'shake');
     penalty();
   }
   hud();
   if (R.marks.length === R.cards.length || R.left <= 0) return finish();
   refill();
+  light(true);
   save();
 }
 
 function penalty() {
   const p = document.createElement('span');
   p.className = 'minus';
-  p.textContent = T('−{n}s', { n: PENALTY / 1000 });
+  p.textContent = T('−{n}s', { n: penaltyMs() / 1000 });
   $('.bar-end').append(p);
   setTimeout(() => p.remove(), 900);
 }
@@ -170,7 +192,7 @@ function drag(e) {
 
 // ---------- end ----------
 function finish() {
-  const custom = R.key === 'C', st = custom ? 0 : streak(), sp = R.date && special(SPECIAL, R.date);
+  const custom = R.key === 'C', st = custom ? 0 : streak(), sp = R.date && !IMP && special(SPECIAL, R.date);
   R.over = true;
   cancelAnimationFrame(raf);
   const rec = { s: score(R), m: R.marks.map(Number).join(''), t: R.marks.length === 24 ? Math.ceil(R.left / 1000) : 0, subject: R.subject,
@@ -210,9 +232,9 @@ function showEnd(rec, daily) {
 async function shareDaily(rec) {
   track('share', 'daily');
   const date = today(), grid = [...rec.m.padEnd(24, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜'));
-  const sp = special(SPECIAL, date), text = `${T('{game} daily', { game: game.name })} · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
+  const sp = !IMP && special(SPECIAL, date), text = `${T('{game} daily', { game: game.name })} · ${date}${sp ? ' · ' + sp.occasion : ''}${IMP ? ' · 🔥 ' + T('Impossible') : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) +
-    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
+    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + (IMP ? '' : '#daily') : '');
   if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
   copyLink(text, $('#end-next'));
 }
@@ -220,6 +242,8 @@ async function shareDaily(rec) {
 // ---------- wiring ----------
 // Each language has its own rounds, so its own progress
 game = { name: T('WordSwipe'), storeKey: LANG === 'en' ? 'wordswipe' : 'wordswipe-' + LANG, glyphs: ['✓', '✗'] };
+goImpossible(game);
+if (IMP) $('.subject').insertAdjacentHTML('afterend', `<div id="rev" class="rev" role="img"><i></i><span>${esc(T('Reversed'))}</span></div>`);
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
 store = { daily: {}, n: 0, best: 0, seenHelp: false, ...store };
 
@@ -262,6 +286,11 @@ function words(solved) {
 if ($('#home')) {
   $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
   $('#btn-daily').onclick = () => play('D' + today());
+  if (IMP) { // the regular daily, disabled, above the Impossible one
+    const off = Object.assign(document.createElement('button'), { className: 'btn daily', disabled: true, innerHTML: `<b>${esc(T("Today's round"))}</b>` });
+    $('#btn-daily').before(off);
+    $('#btn-daily b').textContent = T('Impossible');
+  }
   $('#btn-unlimited').onclick = () => play('U' + store.n);
   $('#end-home').onclick = () => { $('#dlg-end').close(); screen('home'); };
   // #daily is today's round; #round-7 is unlimited round 7, open once reached (so Forward can replay the last one).
@@ -272,5 +301,5 @@ if ($('#home')) {
     else return false;
     return true;
   }, goHome);
-  if (!store.seenHelp) $('#dlg-help').showModal();
+  if (!store.seenHelp && !IMP) $('#dlg-help').showModal();
 }

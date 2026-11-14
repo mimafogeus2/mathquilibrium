@@ -17,7 +17,8 @@ const SHAPES = [
 const dims = (s) => [Math.max(...SHAPES[s].map((c) => c[0])) + 1, Math.max(...SHAPES[s].map((c) => c[1])) + 1];
 
 // Board size and how many pieces, per difficulty. (A 5×5 Hard with 6–7 pieces was dropped: far too hard.)
-const TIER = { E: { N: 3, K: [3, 4] }, H: { N: 4, K: [4, 5] } };
+// I: Impossible Mode's daily, Hard's board packed with six pieces, so most tiles flip two or three times.
+const TIER = { E: { N: 3, K: [3, 4] }, H: { N: 4, K: [4, 5] }, I: { N: 4, K: [6, 6] } };
 // The level/daily key's seed. Hard is the old Medium renamed, so it keeps Medium's seeds: same puzzles, old saves still fit.
 const seedOf = (key) => hash(key.replace('H', 'M'));
 

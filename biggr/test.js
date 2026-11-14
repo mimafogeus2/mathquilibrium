@@ -3,7 +3,7 @@ const assert = require('assert');
 Object.assign(globalThis, require('../shared/common.js'));
 const { PAIRS, GAP, generate } = require('./gen.js');
 
-const evalText = (t) => Function(`return ${t.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-')}`)();
+const evalText = (t) => Function(`return ${t.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, (s) => '**' + [...s].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)).join(''))}`)();
 const keys = [];
 for (const k in GAP) for (let n = 1; n <= PACK_SIZE; n++) keys.push(k + n);
 for (const k in GAP) keys.push('D' + k + '2026-11-11');

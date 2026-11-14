@@ -24,7 +24,7 @@ const ART = [
 const CROWN = '<path class="crown" d="M1 12L0 3l4.5 3.5L8 0l3.5 6.5L16 3l-1 9z"/>';
 const pieceSvg = (type, side) => `<svg class="pc ${side > 0 ? 'you' : 'foe'}" viewBox="0 -2 40 50" aria-hidden="true">${BASE}${ART[type.look]}${type.king ? CROWN : ''}</svg>`;
 // Seconds for three and two stars, per difficulty
-const STAR_TIME = { E: [30, 90], M: [60, 180], H: [120, 300] };
+const STAR_TIME = { E: [30, 90], M: [60, 180], H: [120, 300], I: [240, 600] }; // I: Impossible. ponytail: a first guess, to tune in the playtest
 
 // A type's moves as a little diagram, from your side (up = forward): the piece in the middle, a line per slide
 // (an arrow when it runs past the diagram's edge), and a mark per square it reaches: ● moves or takes, ○ only moves, × only takes.
@@ -64,7 +64,7 @@ const sqName = (i) => 'abcdefgh'[i % G.p.N] + (G.p.N - Math.floor(i / G.p.N));
 const replay = (log) => log.reduce((b, m) => play(b, m), G.p.board);
 
 function startLevel(G, save) {
-  const p = generate(hash(G.key), G.pack);
+  const p = (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
   // a save is the move list: it must replay legally, you and the computer in turn (null: a pass, only with no move), with the game still on
   let ok = Array.isArray(save.log), b = p.board;
   if (ok) for (const [k, m] of save.log.entries()) {
@@ -316,3 +316,15 @@ $('#help-king').innerHTML = card({ look: 0, king: true, rules: [{ k: 'slide', v:
 boot({ name: T('Alien Chess'), storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1; } });
+game.impossible = { stars: game.stars }; // the same rule in Impossible Mode, on its own times
+// Impossible's daily, built in the background (theme.js's pregen()): open it from there, or wait for it while it's still coming.
+function prebuilt(key) { try { const x = JSON.parse(localStorage.getItem('alienchess-impossible-pre')); return x?.key === key ? x.p : null; } catch { return null; } }
+if (IMP) $('#daily-btns').addEventListener('click', async (e) => {
+  const b = e.target.closest('.tier-I');
+  if (!b || !window.pregen || prebuilt('DI' + ymd(new Date()))) return;
+  e.stopPropagation(); // capturing: the button's own click waits
+  b.querySelector('small').textContent = T('Summoning…');
+  await window.pregen;
+  window.pregen = null; // in, or failed: either way the button now just plays
+  b.click();
+}, true);

@@ -25,6 +25,8 @@ const TIER = {
   E: { N: 4, K: 2, types: [2, 2], units: [2, 3] },
   M: { N: 5, K: 3, types: [2, 3], units: [2, 3] },
   H: { N: 6, K: 3, types: [3, 3], units: [3, 4] },
+  // Impossible Mode's daily: a win in 4. Up to ~10s to find on a laptop, so it's built in a background worker (theme.js's pregen())
+  I: { N: 6, K: 4, types: [3, 3], units: [3, 4] },
 };
 
 // A piece type's moves: one or two rules; sometimes it moves with one and only takes with the other.
