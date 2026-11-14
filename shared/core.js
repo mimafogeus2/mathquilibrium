@@ -395,13 +395,11 @@ const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'p
   ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
   ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text'],
   ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text']];
-// The slug at the foot of a game's menu, as a print shop pencils on the job: the house, today's issue, and the drums it ran on
-// (the game's own ink and Federal Blue, the key ink everything shares). Riso's own ink names.
-const INKS = { 'pink-text': 'Fluoro Pink', 'orange-text': 'Orange', 'teal-text': 'Teal', 'sun-text': 'Sunflower', 'red-text': 'Bright Red' };
+// The slug at the foot of a game's menu, as a print shop pencils on the job: the house and today's issue
 {
-  const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), g = ALL_GAMES.find((x) => x[0] === me), home = $('#home');
-  if (g && home) home.insertAdjacentHTML('beforeend', `<p class="slug" aria-hidden="true"><svg class="reg-mark" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5"/><path d="M10 1v18M1 10h18"/></svg>` +
-    `<span>${esc([T('Games by Miki'), T('No. {n}', { n: issueNo(ymd(new Date())) }), [INKS[g[4]], 'Federal Blue'].filter(Boolean).map((i) => T(i)).join(' + ')].join('\u00a0· '))}</span></p>`);
+  const home = $('#home');
+  if (home) home.insertAdjacentHTML('beforeend', `<p class="slug" aria-hidden="true"><svg class="reg-mark" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5"/><path d="M10 1v18M1 10h18"/></svg>` +
+    `<span>${esc([T('Games by Miki'), T('No. {n}', { n: issueNo(ymd(new Date())) })].join('\u00a0· '))}</span></p>`);
 }
 
 // A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today

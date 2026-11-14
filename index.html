@@ -59,10 +59,10 @@
     font-variation-settings: 'SOFT' 60, 'WONK' 0;
     text-shadow: .03em .025em 0 color-mix(in srgb, var(--pink) 60%, transparent);
     --mis: color-mix(in srgb, var(--pink) 60%, transparent);
-    /* the pink drum lands well out of register and snaps in once the cards have settled, so the snap is the only thing moving */
-    position: relative; animation: enter .5s var(--ease) both, register .45s 1.05s cubic-bezier(.5, 0, .2, 1) both;
+    /* the pink drum lands well out of register and snaps in */
+    position: relative; animation: enter .5s var(--ease) both, register .45s .5s cubic-bezier(.5, 0, .2, 1) both;
   }
-  .masthead span { color: var(--pink-text); text-shadow: .03em .025em 0 color-mix(in srgb, var(--sun) 75%, transparent); --mis: color-mix(in srgb, var(--sun) 75%, transparent); animation: register .45s 1.05s cubic-bezier(.5, 0, .2, 1) both; }
+  .masthead span { color: var(--pink-text); text-shadow: .03em .025em 0 color-mix(in srgb, var(--sun) 75%, transparent); --mis: color-mix(in srgb, var(--sun) 75%, transparent); animation: register .45s .5s cubic-bezier(.5, 0, .2, 1) both; }
   @keyframes register { from { text-shadow: .1em .075em 0 var(--mis); } }
   /* registration targets in the margins, level with the masthead, the second drum a hair off */
   .masthead::before, .masthead::after {
@@ -101,14 +101,6 @@
   .plate svg { width: 62%; height: auto; max-height: 82%; overflow: visible; stroke: none; transition: transform .35s var(--ease); }
   .game.wide .plate svg { width: 46%; }
   .game:hover .plate svg { transform: translate(-2px, -2px) rotate(-1deg); }
-  /* hover: the plate's top corner peels up off the stack, showing the sheet's back and the page under it */
-  .plate::after {
-    content: ''; position: absolute; top: 0; inset-inline-end: 0; width: 0; aspect-ratio: 1;
-    background: linear-gradient(225deg, var(--paper) 50%, color-mix(in srgb, var(--plate), var(--ink) 14%) 50%);
-    box-shadow: -2px 3px 5px -2px rgb(20 28 60 / .3); border-end-start-radius: 4px; transition: width .3s var(--ease);
-  }
-  [dir="rtl"] .plate::after { background: linear-gradient(135deg, var(--paper) 50%, color-mix(in srgb, var(--plate), var(--ink) 14%) 50%); box-shadow: 2px 3px 5px -2px rgb(20 28 60 / .3); }
-  .game:hover .plate::after { width: clamp(18px, 14%, 30px); }
   .kicker { display: flex; gap: 10px; align-items: baseline; }
   .kicker em { font-style: normal; color: var(--brand-text); }
   .game h2 { margin: 6px 0 0; font: 600 clamp(30px, calc(4 * var(--vw)), 42px)/1 var(--display); letter-spacing: -0.03em; font-variation-settings: 'SOFT' 60; }
@@ -157,16 +149,7 @@
     .b-ask { font-size: 17px; margin-bottom: 6px; }
     .b-go { font-size: 15px; }
   }
-  /* ---- the press foot: the colophon over a color bar (every drum on the job, then the key ink's tints) and the ink slug ---- */
-  .press { margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .colophon { margin: 0; text-align: center; font: italic 400 15px var(--display); color: var(--muted); }
-  .color-bar { display: flex; align-items: center; gap: 10px; }
-  .color-bar span { display: flex; box-shadow: 0 0 0 1px var(--hair); }
-  .color-bar i { width: 18px; height: 10px; background: var(--speck), var(--c); }
-  .color-bar svg { width: 13px; height: 13px; stroke-width: 1.2; opacity: .7; filter: drop-shadow(1px 1px 0 var(--pink)); }
-  .ink-slug { margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: center; text-wrap: balance; }
-  :lang(he) .ink-slug { letter-spacing: normal; font-size: 12px; }
-  :root[data-contrast] .color-bar svg { filter: none; }
+  .colophon { margin-top: 36px; text-align: center; font: italic 400 15px var(--display); color: var(--muted); }
 
   @container (max-width: 700px) {
     .contents { grid-template-columns: 1fr; gap: 22px; }
@@ -371,11 +354,7 @@
       </div>
     </a>
   </nav>
-  <footer class="press">
-    <p class="colophon">Printed fresh every morning.</p>
-    <div class="color-bar" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5"/><path d="M10 1v18M1 10h18"/></svg><span><i style="--c: var(--pink)"></i><i style="--c: var(--orange)"></i><i style="--c: var(--sun)"></i><i style="--c: var(--teal)"></i><i style="--c: var(--red)"></i><i style="--c: var(--ink)"></i></span><span><i style="--c: color-mix(in srgb, var(--ink) 70%, var(--paper))"></i><i style="--c: color-mix(in srgb, var(--ink) 40%, var(--paper))"></i><i style="--c: color-mix(in srgb, var(--ink) 15%, var(--paper))"></i></span><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5"/><path d="M10 1v18M1 10h18"/></svg></div>
-    <p class="ink-slug">Fluoro&nbsp;Pink&nbsp;· Orange&nbsp;· Sunflower&nbsp;· Teal&nbsp;· Bright&nbsp;Red&nbsp;· Federal&nbsp;Blue</p>
-  </footer>
+  <p class="colophon">Printed fresh every morning.</p>
 </main>
 <!-- riso speckle: the ink misses the paper in tiny spots -->
 <svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="speck" x="0" y="0" width="100%" height="100%">

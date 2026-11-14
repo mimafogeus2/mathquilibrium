@@ -513,7 +513,7 @@ dialog {
     var(--crop) right 5px bottom 15px / 8px 1px no-repeat, var(--crop) right 15px bottom 5px / 1px 8px no-repeat,
     var(--grain), var(--stock);
 }
-:root[data-contrast] dialog { --crop: linear-gradient(transparent, transparent); }
+:root[data-contrast] dialog, :is(#dlg-win, #dlg-end) { --crop: linear-gradient(transparent, transparent); } /* the win is a ticket: no crop marks */
 
 /* the win: a ticket. A perforated line above its actions, and on close it comes off the pad (tilts away from its top corner and drops).
    An exit transition: display and overlay stay on (allow-discrete) until it's done; browsers without it just close. */
@@ -542,7 +542,7 @@ dialog .win-actions::before {
 /* where the ink missed: the speckle punched out of it (on .ink, so the bleed ring around it isn't clipped by the mask) */
 .stamp .ink { mask: var(--speck), linear-gradient(#000, #000); mask-composite: exclude; border-radius: inherit; }
 :root[data-contrast] .stamp .ink { mask: none; }
-.stamp.fresh { animation: thump .34s .3s both cubic-bezier(.3, 0, .2, 1); }
+.stamp.fresh { animation: thump .34s .7s both cubic-bezier(.3, 0, .2, 1); }
 /* the stamp keyframe's motion, on scale and rotate so the resting tilt (rotate) holds */
 @keyframes thump {
   0% { opacity: 0; scale: 1.5; rotate: calc(var(--tilt) - 8deg); }
@@ -551,7 +551,7 @@ dialog .win-actions::before {
 /* the ink squeezed out on impact: a ring that spreads and fades */
 .stamp.fresh::before {
   content: ''; position: absolute; inset: 0; border: 2px solid currentColor; border-radius: inherit;
-  animation: bleed .5s .5s ease-out both;
+  animation: bleed .5s .9s ease-out both;
 }
 @keyframes bleed { from { opacity: .5; } to { opacity: 0; scale: 1.28; } }
 .seal { width: 84px; height: 84px; border-radius: 50%; }
@@ -588,7 +588,7 @@ dialog .win-actions::before {
 @keyframes roll-rtl { to { translate: -260% 0; } }
 [dir="rtl"] :is(.daily-btn, .btn.daily).inked::after { translate: 110% 0; animation-name: roll-rtl; }
 
-/* the slug at the foot of a game's menu: house, issue, the drums it ran on, beside a registration target printed slightly off */
+/* the slug at the foot of a game's menu: house and issue, beside a registration target printed slightly off */
 .slug {
   justify-self: center; display: flex; align-items: center; gap: 8px; margin: 26px 0 0; text-align: center;
   font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
