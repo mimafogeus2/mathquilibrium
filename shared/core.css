@@ -78,6 +78,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   /* every time a screen is shown (display: none -> flex restarts it): the brand drum lands out of register, then snaps in */
   animation: print .32s var(--ease) backwards;
 }
+.loading .screen { visibility: hidden; animation: none; } /* until the page's scripts have run (theme.js) */
 @keyframes print { from { opacity: 0; filter: drop-shadow(-8px 5px 0 var(--brand)); } 50% { opacity: 1; } }
 /* hub <-> game page loads: the browser's cross-fade between documents, where supported (theme.js skips it under data-calm) */
 @view-transition { navigation: auto; }
