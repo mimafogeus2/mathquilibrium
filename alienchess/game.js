@@ -311,6 +311,6 @@ $('#btn-reset').onclick = reset;
 $('#logo').innerHTML = pieceSvg({ look: 0, king: true }, -1);
 $('#help-card').innerHTML = card({ look: 1, king: false, rules: [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 9, m: 'any' }, { k: 'leap', v: [[-2, 0], [2, 0]], m: 'move' }, { k: 'slide', v: [[0, -1], [0, 1]], n: 1, m: 'cap' }] });
 
-boot({ name: T('Alien Chess'), storeKey: 'alienchess', random: true, winDelay: 1300, glyphs: ['♞', '♛', '★'], start: startLevel,
+boot({ name: T('Alien Chess'), storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1; } });

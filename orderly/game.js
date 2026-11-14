@@ -266,7 +266,7 @@ function showResult(fresh) {
   $('#res-next b').textContent = T(P.date ? (navigator.share ? 'Share result' : 'Copy result') : 'Another puzzle  →');
   $('#res-next').onclick = P.date ? () => share() : () => { $('#dlg-win').close(); playRandom(true, P.lv.d); };
   winDaily(P);
-  if (fresh) setTimeout(() => P === p && !$('#game').hidden && $('#dlg-win').showModal(), 900);
+  if (fresh) setTimeout(() => P === p && !$('#game').hidden && $('#dlg-win').showModal(), 1200); // same delay as the core games (core.js)
 }
 
 async function share() {
