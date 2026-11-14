@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Balancing Act — hang it level</title>
+<meta name="description" content="Hang every weight on the right plate until every beam of a hanging contraption is level. Arm lengths are written on the beams. New daily puzzles every day.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Games by Miki">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/balancingact/">
+<meta property="og:title" content="Balancing Act — hang it level">
+<meta property="og:description" content="Hang every weight on the right plate until every beam of a hanging contraption is level. Arm lengths are written on the beams. New daily puzzles every day.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/balancingact/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<script data-goatcounter="https://goatcounter-production-28ca10cd.up.railway.app/count" async src="https://goatcounter-production-28ca10cd.up.railway.app/count.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Cpath d='M32 8v14M14 22h36M14 22v14M50 22v10' stroke='%2326366b' stroke-width='3' fill='none'/%3E%3Cpath d='M6 38h16l-2 6H8zM42 34h16l-2 6H44z' fill='%23ff6c2f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="home" class="screen">
+  <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-fav" aria-label="Add to favorites"></button><button class="icon js-theme" aria-label="Theme"></button><button class="icon js-sound" aria-label="Sound"></button></div>
+  <div id="logo" aria-hidden="true"></div>
+  <h1 class="wordmark">Balancing <span>Act</span></h1>
+  <p class="tagline">Every weight on a plate. Every beam level.</p>
+  <nav class="menu">
+    <div class="block-head"><h2>Today</h2><span id="daily-meta"></span></div>
+    <div id="daily-btns" class="trio"></div>
+    <div class="block-head"><h2>Practice</h2><span>1,000 each</span></div>
+    <div id="pack-btns" class="packs"></div>
+    <div class="new-head kicker">New puzzle</div>
+    <div id="new-row" class="row">
+      <button class="btn ghost tier-E" data-pack="E"><b>Easy</b></button>
+      <button class="btn ghost tier-M" data-pack="M"><b>Medium</b></button>
+      <button class="btn ghost tier-H" data-pack="H"><b>Hard</b></button>
+    </div>
+    <div class="links"><button id="btn-help" class="foot-link">How to play</button></div>
+  </nav>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button id="btn-pause" class="icon" aria-label="Pause"></button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="timer" aria-label="Time">0:00</span>
+      <button id="btn-print" class="icon" aria-label="Print this puzzle"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg></button>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="board-wrap">
+    <div id="board" class="board" tabindex="0" role="application" aria-roledescription="board" aria-describedby="board-keys"></div>
+    <p id="board-keys" class="sr-only">Plates are numbered from the left. Arrow keys pick an item, from the store first. A number key hangs it on that plate; 0 sends it back to the store.</p>
+    <p id="sr" class="sr-only" aria-live="polite"></p>
+    <div id="pause-cover" class="pause-cover" hidden>
+      <b>Paused</b>
+      <button id="btn-resume" class="btn primary center"><b>Resume</b></button>
+    </div>
+  </div>
+  <p id="tip" class="tip"></p>
+  <div id="tray" class="tray" role="toolbar" aria-label="Store"></div>
+  <div class="tools">
+    <button id="btn-reset" class="chip" disabled>
+      <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>Restart
+    </button>
+    <button id="btn-giveup" class="give-up">Give up</button>
+    <button id="btn-result" class="btn primary center" hidden><b>See result</b></button>
+  </div>
+</main>
+
+<dialog id="dlg-help">
+  <h2>How to play</h2>
+  <div id="help-rig" aria-hidden="true"></div>
+  <ol class="rules">
+    <li>Hang every item from the <b>store</b> on a plate, until every beam hangs <b>level</b>.</li>
+    <li>A beam is level when <b>weight × arm</b> is the same on both sides. The numbers on a beam are its arms' lengths, and a side weighs everything hanging under it.</li>
+    <li class="no-touch">Drag an item onto a plate, or click it and then click a plate. Drag it back to the store to take it off.</li>
+    <li class="touch">Drag an item onto a plate, or tap it and then tap a plate. Drag it back to the store to take it off.</li>
+    <li>A <b>balloon</b> lifts: a −2 balloon cancels out a 2 weight. Some come tied to their plate with a bow.</li>
+    <li>Use every item. There's only <b>one way</b>.</li>
+    <li>Every drop counts as a move, and Restart doesn't undo them: within <b>one move</b> of the fewest for three stars.</li>
+  </ol>
+  <p class="muted small kbd-hint">Keyboard: arrows pick an item, <kbd>1</kbd>–<kbd>8</kbd> hang it on that plate, <kbd>0</kbd> back to the store, <kbd>P</kbd> pause.</p>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-win">
+  <div id="win-stars" class="stars" role="img"></div>
+  <h2 id="win-title"></h2>
+  <p id="win-stats" class="stats"></p>
+  <div class="win-actions">
+    <button id="win-next" class="btn primary center"><b></b></button>
+    <button id="win-home" class="btn ghost center"><b>Menu</b></button>
+  </div>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="gen.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

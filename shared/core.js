@@ -333,7 +333,8 @@ function win() {
 const LSUF = LANG === 'en' ? '' : '-' + LANG;
 const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'pink-text'], ['biggr', T('Biggr'), 'biggr', 'EMH', 'orange-text'],
   ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
-  ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text']];
+  ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text'],
+  ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text']];
 // A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today
 function winDaily(g) {
   const box = $('#win-daily') || $('.win-actions').insertAdjacentElement('afterend', Object.assign(document.createElement('div'), { id: 'win-daily' }));

@@ -13,6 +13,7 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 | Biggr | `biggr/` | Two sums side by side, no answers: pick the bigger one. 10 pairs against the clock (45/70/90s), wrong picks cost 3s, leftover seconds score. Three dailies plus 1,000 seeded levels per difficulty. |
 | Quadflip | `quadflip/` | A board of two-sided tiles and a tray of tetrominoes: stamp each piece once, flipping the four tiles under it, until every tile is blank. One answer, and no smaller set of pieces works. Easy 3×3 with 3–4 pieces, Hard 4×4 with 4–5. |
 | Alien Chess | `alienchess/` | Chess puzzles on 4×4 to 6×6 boards with pieces dealt fresh each level, their moves drawn on cards. Take the enemy king (or every piece) against a computer that defends its best; each puzzle is a forced win in 2 (Easy) or 3 moves from one first move. Stars for speed. Three dailies plus 1,000 random levels per difficulty. |
+| Balancing Act | `balancingact/` | A hanging contraption of beams (arm lengths written on them) and a store of whole weights from 1 to 10: hang every item on a plate until every beam is level. Each plate's target follows from the arms and the store's total; the store splits into them one way only. Medium adds balloons (−1 to −10) tied to plates, Hard loose balloons and up to 8 plates. Stars for moves: three within one of the fewest. Three dailies plus 1,000 random levels per difficulty. |
 
 Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (Quadflip: Easy and Hard, two dailies), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard. Coronet deals its levels at random (each with its own link, `#easy-k3f`) instead of unlocking them in order.
 
@@ -49,6 +50,6 @@ No build step for the English pages (Hebrew: `node build.js`, see above). Serve 
 python3 -m http.server
 ```
 
-Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js && node quadflip/test.js && node alienchess/test.js` (Alien Chess checks 150 levels a difficulty by default: `node alienchess/test.js 1000` for all)
+Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js && node quadflip/test.js && node alienchess/test.js && node balancingact/test.js` (Alien Chess checks 150 levels a difficulty by default: `node alienchess/test.js 1000` for all)
 
 Hebrew: `node build.js --check && node wordswipe/test.js he && node orderly/test.js he`

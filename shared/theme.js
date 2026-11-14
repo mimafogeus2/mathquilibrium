@@ -98,7 +98,7 @@
 
   // Progress lives in this browser's localStorage, one key per game (plus editor drafts: orderly-editor, wordswipe-draft).
   // ponytail: a new game adds its storeKey here, or export and reset miss it
-  const GAMES = /^(crossum2|coronet|wordswipe|orderly|biggr|quadflip|alienchess)(-|$)/;
+  const GAMES = /^(crossum2|coronet|wordswipe|orderly|biggr|quadflip|alienchess|balancingact)(-|$)/;
   const PREFS = ['theme', 'contrast', 'motion', 'size', 'muted'];
   const keys = () => { try { return Object.keys(localStorage).filter((k) => GAMES.test(k) || PREFS.includes(k)); } catch { return []; } };
   const progress = () => keys().filter((k) => GAMES.test(k));

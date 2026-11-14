@@ -1,0 +1,114 @@
+/* Balancing Act: the hanging contraption and the store. Everything else is in shared/core.css.
+   Beams and strings in the key ink; weights printed in ink, balloons in teal, the brand orange marks what you've picked up. */
+:root { --brand: var(--orange); --brand-text: var(--orange-text); --on-brand: var(--on-orange); }
+
+/* Drawn left to right, plates numbered from the left: it never mirrors */
+.board, .tray, #help-rig, #logo, .p-rig, .p-store { direction: ltr; }
+.board { width: min(560px, calc(100 * var(--vw) - 24px)); user-select: none; -webkit-user-select: none; }
+.board:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
+.rig { display: block; width: 100%; height: auto; max-height: calc(100 * var(--dvh) - 330px); overflow: visible; stroke: none; }
+/* core.css strokes every svg (its icons): these draw their own */
+:is(.rig, .slot, .carry, .p-store) svg, .rig { stroke: none; }
+:is(.rig, .slot, .carry, .p-store) text { font: 600 11px Inter, system-ui, sans-serif; text-anchor: middle; fill: var(--ink); stroke: none; font-variant-numeric: tabular-nums; }
+
+.str { stroke: var(--ink); stroke-width: 1; fill: none; opacity: .7; }
+.ceil { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.beam { fill: var(--ink); }
+.pivot { fill: var(--ink); }
+.arm { font-family: var(--display) !important; font-size: 12.5px !important; fill: var(--brand-text) !important; }
+.ring { fill: var(--stock); stroke: var(--ink); stroke-width: 1.2; }
+.pan { fill: var(--stock); stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+.tot { font-size: 12px !important; }
+.no { display: none; fill: var(--muted) !important; }
+.kbd .no { display: inline; }
+.kbd .tot { translate: 14px 0; }
+
+/* tilting: the beam swings about its pivot, its hangers swing back to hang straight; a little overshoot, like a real beam */
+.tilt, .untilt { transition: transform .7s cubic-bezier(.3, 1.35, .5, 1); }
+.tilt.level > .beam { fill: var(--teal-text); }
+
+/* weights and balloons */
+.it text { font-size: 10.5px; }
+.wt path { fill: var(--ink); }
+.wt .hd { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.wt text { fill: var(--stock); }
+.bal .bb, .bal .bk { fill: var(--teal); }
+.bal .bk { fill: color-mix(in srgb, var(--teal) 75%, var(--ink)); }
+.bal .shine { fill: #fff; opacity: .45; }
+.bal text { fill: var(--on-teal); font-size: 9.5px; }
+.tether { fill: none; stroke: var(--ink); stroke-width: .8; opacity: .75; pointer-events: none; }
+.bow { fill: var(--teal); stroke: var(--ink); stroke-width: .6; stroke-linejoin: round; }
+.float.fixed { pointer-events: none; }
+[data-item] { cursor: grab; touch-action: none; }
+.sel .wt path:not(.hd), .sel.bal .bb, .sel.bal .bk { fill: var(--orange); }
+.sel .wt .hd { stroke: var(--orange); }
+.sel text { fill: var(--navy); }
+
+/* plates: an invisible tap target the width of their slot; outlined while something is picked up */
+.hit { fill: transparent; stroke: none; pointer-events: none; } /* only while aiming: else they'd cover the balloons beneath */
+.aiming .hit { pointer-events: all; stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; cursor: pointer; }
+.plate.over .hit { fill: color-mix(in srgb, var(--sun) 30%, transparent); stroke: var(--ink); }
+.solved .tilt > .beam { fill: var(--teal-text); }
+
+/* ---------- the store ---------- */
+.tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; max-width: 460px; min-height: 52px; padding: 6px; border-radius: 14px; transition: background-color .15s; }
+.tray.aiming { box-shadow: inset 0 0 0 1px var(--line); }
+.tray.over { background: color-mix(in srgb, var(--sun) 30%, transparent); }
+.slot {
+  width: 48px; height: 44px; padding: 4px; border: 0; border-radius: 10px; display: grid; place-items: center; touch-action: none;
+  background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift); cursor: grab;
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease);
+}
+.slot svg { width: 100%; height: 100%; overflow: visible; }
+.slot[aria-pressed="true"] { background: var(--speck), var(--sun); box-shadow: 2px 3px 0 var(--reg); transform: translate(-1px, -2px); }
+/* on a plate: an empty dotted slot, its item's outline. Tapping it brings the item back. */
+.slot.used { background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px; box-shadow: inset 0 0 0 1px var(--hair); cursor: pointer; }
+.slot.used svg { opacity: .22; }
+.slot:disabled { cursor: default; }
+@media (hover: hover) { .slot:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1px var(--ink), var(--lift); } }
+
+/* carried by a drag */
+.carry { position: fixed; left: 0; top: 0; width: 56px; height: 50px; margin: -32px 0 0 -28px; pointer-events: none; z-index: 20; filter: drop-shadow(2px 4px 0 var(--reg)); }
+.carry svg { width: 100%; height: 100%; overflow: visible; }
+
+#logo { width: 150px; margin: 0 auto 4px; transform: rotate(-3deg); }
+/* logo hides on short screens (core.css); keep the wordmark clear of the corner icons, as Alien Chess does */
+@media (max-height: 760px) { .wordmark { margin-top: 44px; } }
+#help-rig { width: 220px; margin: 0 auto; }
+.rig.mini { max-height: none; }
+.rig.mini .hit, .rig.mini .tot { display: none; }
+
+#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+#game .tip { margin: 8px 0 4px; }
+#game .tools { margin: 10px 0 auto; padding-bottom: 8px; }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .rig { max-height: calc(100 * var(--dvh) - 110px); }
+  .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
+}
+
+/* help text per input */
+.touch { display: none; }
+@media (hover: none) { .touch { display: list-item; } .no-touch { display: none; } }
+
+/* ---------- paper ---------- */
+.p-rig { width: 170mm; height: auto; max-height: none; } /* a fixed width, so the zine gives it a slot big enough to write in */
+.p-rig .str, .p-rig .ceil, .p-rig .beam, .p-rig .pivot, .p-rig .ring, .p-rig .pan { stroke: #000; }
+.p-rig .beam, .p-rig .pivot, .p-rig .wt path:not(.hd) { fill: #000; }
+.p-rig .wt .hd { stroke: #000; }
+.p-rig .arm { fill: #000 !important; }
+.p-rig .pan, .p-rig .ring { fill: #fff; }
+.p-rig .bal .bb, .p-rig .bal .bk, .p-rig .bow { fill: #fff; stroke: #000; stroke-width: .8; }
+.p-rig .bal .shine { display: none; }
+.p-rig .tether { stroke: #000; }
+.p-rig .bal text { fill: #000; }
+.p-rig .hit, .p-rig .tot, .p-rig .no { display: none; }
+.p-rig .wbox { fill: #fff; stroke: #000; stroke-width: 1; }
+.p-store { display: flex; flex-wrap: wrap; justify-content: center; gap: 3mm; }
+.p-store svg { width: 12mm; height: 11mm; overflow: visible; }
+.p-store .wt path:not(.hd) { fill: #000; }
+.p-store .wt .hd { stroke: #000; }
+.p-store .bal .bb, .p-store .bal .bk { fill: #fff; stroke: #000; stroke-width: .8; }
+.p-store .bal .shine { display: none; }
+.p-store .tether { stroke: #000; }
+.p-store .bal text { fill: #000; }
