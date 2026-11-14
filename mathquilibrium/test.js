@@ -15,7 +15,10 @@ assert(checkEquation([1, '.', 5, '×', 4, '=', 6]));
 assert(checkEquation([0, '.', 1, '+', 0, '.', 2, '=', 0, '.', 3])); // no float drift
 assert(checkEquation([3, '.', 25, '×', 4, '=', 13]));
 assert(!checkEquation([1, '.', 2, '.', 3, '=', 1])); // can't chain
-assert(!checkEquation([1, '÷', 3, '=', 0, '.', 33])); // 1/3 doesn't terminate
+assert(!checkEquation([1, '÷', 3, '=', 0, '.', 33])); // 1/3 isn't 0.33
+assert(checkEquation([11, '÷', 3, '<', 64, '÷', 8])); // players' division needn't terminate (daily hard 2026-11-14)
+assert(checkEquation([11, '<', 3, '^', 64])); // nor stay small
+assert(!checkEquation([1, '÷', 0, '=', 1]));
 // inequalities
 assert(checkEquation([3, '+', 4, '<', 8]));
 assert(checkEquation([9, '>', 2, '×', 4]));
