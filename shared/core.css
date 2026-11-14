@@ -240,6 +240,7 @@ dialog form { margin-top: 20px; }
 .muted { color: var(--muted); }
 .small { font-size: 13.5px; line-height: 1.5; }
 kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 5px; box-shadow: inset 0 0 0 1px var(--line), 0 1px 0 var(--line); }
+@media (hover: none) and (pointer: coarse) { .kbd-hint { display: none; } } /* keyboard shortcuts: clutter on touch-only devices */
 
 /* only the level numbers scroll: the grid absorbs any height the viewport can't spare */
 #dlg-levels[open] { display: flex; flex-direction: column; overflow: hidden; max-height: calc(100 * var(--dvh) - 32px); }

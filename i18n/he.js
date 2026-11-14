@@ -5,12 +5,12 @@ const ORDERLY_GAME = [
       ['<b>Check</b>', '<b>בדיקה</b>'],
       ['<button id="btn-hint" class="btn ghost center"><b>Hint</b>', '<button id="btn-hint" class="btn ghost center"><b>רמז</b>'],
       [`<li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>
-    <li><b>Drag</b> the cards into order, top to bottom. Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</li>
+    <li><b>Drag</b> the cards into order, top to bottom.<span class="kbd-hint"> Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
     <li>Press <b>Check</b>. Cards that sit next to each other in the right order turn green, show their value, and join into a group &mdash; even if the group isn't in its final spot yet. Drag a group to move it as one.</li>
     <li>Stuck? Use up to <b>3 hints</b>. Each one slides two cards that belong together into place and joins them.</li>
     <li>Solve it in <b>2 checks</b> for three stars, <b>4</b> for two.</li>`,
       `<li>בכל חידה יש <b>נושא</b> ו־<b>10 קלפים</b>.</li>
-    <li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה. במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</li>
+    <li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה.<span class="kbd-hint"> במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
     <li>לחצו <b>בדיקה</b>. קלפים שעומדים זה ליד זה בסדר הנכון נצבעים בירוק, חושפים את הערך שלהם ומתחברים לקבוצה &mdash; גם אם הקבוצה עוד לא במקומה הסופי. גררו קבוצה כדי להזיז אותה כיחידה אחת.</li>
     <li>תקועים? יש לכם עד <b>3 רמזים</b>. כל רמז מחליק למקומם שני קלפים ששייכים זה לזה ומחבר אותם.</li>
     <li>פתרון ב־<b>2 בדיקות</b> שווה שלושה כוכבים, ב־<b>4</b> — שניים.</li>`],
@@ -453,8 +453,8 @@ module.exports = {
     <li>משבצות שבהן קווים נחתכים הן <b>משותפות</b> — סימן אחד צריך לעבוד בשני הכיוונים.</li>
     <li>סדר פעולות רגיל: <b>×  ÷</b> לפני <b>+  −</b>. החילוק חייב לצאת שלם.</li>
     <li>בשלבים הקשים יותר מצטרפות <b>^</b> חזקה, <b>.</b> נקודה עשרונית (<span dir="ltr">3 . 5</span> הוא 3.5), <b>%</b> שארית, ו־<b dir="ltr">&lt;  &gt;</b> לשורות של אי־שוויון.</li>`],
-      ['<p class="muted small">Keyboard: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, arrows to move, <kbd>⌫</kbd> to clear, <kbd>Z</kbd> undo, <kbd>P</kbd> to pause.</p>',
-        '<p class="muted small">מקלדת: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, חצים לתזוזה, <kbd>⌫</kbd> לניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+      ['<p class="muted small kbd-hint">Keyboard: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, arrows to move, <kbd>⌫</kbd> to clear, <kbd>Z</kbd> undo, <kbd>P</kbd> to pause.</p>',
+        '<p class="muted small kbd-hint">מקלדת: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, חצים לתזוזה, <kbd>⌫</kbd> לניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
 
     'biggr/index.html': [
@@ -593,8 +593,8 @@ module.exports = {
       `<li>הציבו <b>מלכה</b> אחת בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b>.</li>
     <li>הקישו על קשת כדי לסמן בה <b>×</b>, הקישו שוב למלכה, ופעם נוספת לניקוי. גררו על פני כמה קשתות כדי לסמן את כולן.</li>
     <li>מלכה מסמנת בשבילכם את כל הטבעת, הפלח והצבע שלה. הורידו אותה והסימונים האלה נעלמים — הסימונים שלכם נשארים.</li>`],
-      ['<p class="muted small">Keyboard: arrows to move, <kbd>Space</kbd> to cycle, <kbd>Q</kbd> queen, <kbd>X</kbd> mark, <kbd>⌫</kbd> clear, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
-        '<p class="muted small">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להחלפה, <kbd>Q</kbd> מלכה, <kbd>X</kbd> סימון, <kbd>⌫</kbd> ניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+      ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to cycle, <kbd>Q</kbd> queen, <kbd>X</kbd> mark, <kbd>⌫</kbd> clear, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
+        '<p class="muted small kbd-hint">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להחלפה, <kbd>Q</kbd> מלכה, <kbd>X</kbd> סימון, <kbd>⌫</kbd> ניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
 
     'quadflip/index.html': [
@@ -615,8 +615,8 @@ module.exports = {
     <li class="touch">הקישו על <b>צורה</b> מתחת ללוח כדי לבחור אותה. אחר כך <b>לחצו וגררו</b> על הלוח כדי לכוון, ו<b>שחררו</b> כדי להחתים: ארבע המשבצות שמתחתיה <b>מתהפכות</b>. שחררו מחוץ ללוח כדי לבטל.</li>
     <li>השתמשו ב<b>כל צורה בדיוק פעם אחת</b>. יש רק דרך אחת לעשות את זה.</li>
     <li>הקישו על צורה משומשת כדי להרים אותה שוב.</li>`],
-      ['<p class="muted small no-touch">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> pick a piece, arrows to move it, <kbd>Space</kbd> to stamp, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
-        '<p class="muted small no-touch">מקלדת: <kbd>1</kbd>–<kbd>5</kbd> בחירת צורה, חצים להזזה, <kbd>רווח</kbd> להחתמה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+      ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> pick a piece, arrows to move it, <kbd>Space</kbd> to stamp, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
+        '<p class="muted small kbd-hint">מקלדת: <kbd>1</kbd>–<kbd>5</kbd> בחירת צורה, חצים להזזה, <kbd>רווח</kbd> להחתמה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
     'alienchess/index.html': [
       ['Alien Chess — strange pieces, small boards', 'שחמאדים — כלים מוזרים, לוחות קטנים'],
@@ -638,8 +638,8 @@ module.exports = {
     <li>אכלו את <b>המלך</b> של האויב (הכלי עם הכתר), או את <b>כל</b> הכלים שלו. אם תאבדו את שלכם, הפסדתם. צד שאין לו מסע מדלג על התור.</li>
     <li>אתם מתחילים. תמיד יש <b>ניצחון</b> במספר המסעים שכתוב למעלה: בטלו, התחילו מחדש ונסו שוב.</li>
     <li>נצחו מהר ותקבלו <b>שלושה כוכבים</b>.</li>`],
-      ['<p class="muted small">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
-        '<p class="muted small">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להרמה ולהנחה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+      ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
+        '<p class="muted small kbd-hint">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להרמה ולהנחה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
     // the daily zine. The booklet opens right to left: a sheet's right page is its front.
     'print.html': [
