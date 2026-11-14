@@ -314,6 +314,7 @@ document.addEventListener('keydown', (e) => {
     const all = units(), k = all.findIndex((u) => u.includes(+el.dataset.i)), to = k + (e.key === 'ArrowUp' ? -1 : 1);
     if (to >= 0 && to < all.length) { place(all.filter((_, x) => x !== k), all[k], to); layout(); el.focus(); sfx.place(); status(); save(); }
   } else if (e.key === 'Escape') $('#btn-back').click();
+  else if (e.key === 'Enter' && !document.activeElement?.matches?.('button, a, input')) check(); // focused controls handle their own Enter
   else return;
   e.preventDefault();
 });
