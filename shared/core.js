@@ -143,7 +143,7 @@ addEventListener('storage', (e) => e.key === 'muted' && syncSound());
 // core.css stacks the pages in one grid cell, so the dialog keeps the tallest page's size and doesn't jump.
 const helpPages = [...document.querySelectorAll('#dlg-help .help-page')];
 if (helpPages.length > 1) {
-  const dlg = $('#dlg-help'), form = dlg.querySelector('form'), done = form.querySelector('button'), last = helpPages.length - 1;
+  const dlg = $('#dlg-help'), form = dlg.querySelector('form:not(.dlg-x)'), done = form.querySelector('button'), last = helpPages.length - 1;
   form.classList.add('help-nav');
   form.insertAdjacentHTML('afterbegin', `<button type="button" class="btn ghost center"><b>${T('Back')}</b></button>`);
   done.insertAdjacentHTML('beforebegin', `<button type="button" class="btn primary center"><b>${T('Next')}</b></button>`);
@@ -163,6 +163,8 @@ if (helpPages.length > 1) {
   dlg.addEventListener('close', () => go(0));
   go(0);
 }
+// Opening focuses Next / Got it, not the × that comes first (showModal skips the hidden one)
+for (const b of document.querySelectorAll('#dlg-help form:not(.dlg-x) .btn.primary')) b.autofocus = true;
 
 function flash(el, cls) {
   el.classList.remove('pop', 'shake', 'psst');
