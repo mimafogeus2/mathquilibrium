@@ -370,7 +370,7 @@ function winScreen(g, r, fresh) {
   winDaily(g);
 }
 
-// The win's rubber stamp, pressed into the top corner of its dialog (or Orderly's result panel). A daily gets the round edition
+// The win's rubber stamp, pressed into the top corner of its dialog. A daily gets the round edition
 // seal: the day's issue number and the result, ringed by the game's name; a level (or a shared custom one: no date) the small
 // rectangular stamp. label: the tier and level ('' for none); value: the time, score or checks. fresh: thump it down, else it's just there.
 function stamp(host, { date, label, value, fresh = true }) {
@@ -402,17 +402,19 @@ const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'p
     `<span>${esc([T('Games by Miki'), T('No. {n}', { n: issueNo(ymd(new Date())) })].join('\u00a0· '))}</span></p>`);
 }
 
-// A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today
-function winDaily(g) {
-  const box = $('#win-daily') || $('.win-actions').insertAdjacentElement('afterend', Object.assign(document.createElement('div'), { id: 'win-daily' }));
-  const upBtn = $('#win-up') || $('#win-next').insertAdjacentElement('afterend', Object.assign(document.createElement('button'), { id: 'win-up', className: 'btn center' }));
-  const done = store.daily[g.date] || {}, tiers = Object.keys(TIERS), up = g.date && tiers.slice(tiers.indexOf(g.pack) + 1).find((k) => !done[k]);
+// A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today.
+// g: { date, pack } (no pack: a one-round daily). dlg: the game's win dialog; its .win-actions' first button is the share / next one.
+function winDaily(g, dlg = $('#dlg-win')) {
+  const box = $('#win-daily') || dlg.querySelector('.win-actions').insertAdjacentElement('afterend', Object.assign(document.createElement('div'), { id: 'win-daily' }));
+  const upBtn = $('#win-up') || dlg.querySelector('.win-actions > :first-child').insertAdjacentElement('afterend', Object.assign(document.createElement('button'), { id: 'win-up', className: 'btn center' }));
+  const done = store.daily[g.date] || {}, tiers = Object.keys(TIERS), up = g.date && g.pack && tiers.slice(tiers.indexOf(g.pack) + 1).find((k) => !done[k]);
   box.hidden = !g.date;
+  box.dataset.date = g.date || '';
   upBtn.hidden = !up;
   if (!g.date) return;
   if (up) {
     upBtn.innerHTML = `<b>${esc(T('{tier} daily  →', { tier: tierName(up) }))}</b>`;
-    upBtn.onclick = () => { $('#dlg-win').close(); start(up, null, g.date); };
+    upBtn.onclick = () => { dlg.close(); start(up, null, g.date); };
   }
   const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), i = ALL_GAMES.findIndex((x) => x[0] === me);
   const other = [...ALL_GAMES.slice(i + 1), ...ALL_GAMES.slice(0, i)].find(([, , key, ts]) => {
@@ -425,10 +427,10 @@ function winDaily(g) {
 }
 // "Next puzzle in 7:42:10" to the next midnight UTC (when ymd() rolls over); past it, today's new puzzle is ready
 function winClock() {
-  const c = $('#win-clock');
-  if (!c || !G?.date || !$('#dlg-win').open) return;
+  const box = $('#win-daily'), c = $('#win-clock');
+  if (!c || box.hidden) return; // ticks while the dialog is closed too, so See result opens it already filled in
   const s = Math.ceil((864e5 - (Date.now() % 864e5)) / 1000);
-  c.textContent = ymd(new Date()) !== G.date ? T('A new puzzle is ready')
+  c.textContent = ymd(new Date()) !== box.dataset.date ? T('A new puzzle is ready')
     : T('Next puzzle in {time}', { time: `${Math.floor(s / 3600)}:${fmt(s % 3600).padStart(5, '0')}` });
 }
 setInterval(winClock, 1000);

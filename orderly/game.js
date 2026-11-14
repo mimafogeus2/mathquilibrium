@@ -246,23 +246,27 @@ function giveUp() {
   sfx.erase();
   $('#play').hidden = true;
   $('#result').hidden = false;
-  $('#res-stars').innerHTML = '';
-  $('#res-stars').removeAttribute('aria-label');
-  $('#res-text').textContent = T("Here's the right order.");
-  $('#res-next').hidden = true;
+  $('#res-note').textContent = T("Here's the right order.");
+  $('#btn-result').hidden = true;
 }
 
+// The win dialog: opened a beat after a win (fresh), or only filled in for a solved daily seen again. Closing it leaves the cards on view,
+// with See result under them to bring it back.
 function showResult(fresh) {
-  const c = P.rows.length, s = stars(c);
+  const c = P.rows.length, s = stars(c), p = P;
   $('#play').hidden = true;
   $('#result').hidden = false;
+  $('#res-note').textContent = '';
+  $('#btn-result').hidden = false;
   starRow($('#res-stars'), s, fresh);
-  stamp($('#result'), { date: P.date, label: P.date ? '' : P.n ? T(DIFF[P.lv.d]) : T('Custom level'), value: checksText(c), fresh });
+  $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
+  stamp($('#dlg-win'), { date: P.date, label: P.date ? '' : P.n ? T(DIFF[P.lv.d]) : T('Custom level'), value: checksText(c), fresh });
   $('#res-text').innerHTML = T('Solved in <b>{checks}</b>', { checks: checksText(c) }) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
   $('#res-next').hidden = SOLO;
   $('#res-next b').textContent = T(P.date ? (navigator.share ? 'Share result' : 'Copy result') : 'Another puzzle  →');
-  $('#res-next').onclick = P.date ? () => share() : () => playRandom(true, P.lv.d);
-  $('#result').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  $('#res-next').onclick = P.date ? () => share() : () => { $('#dlg-win').close(); playRandom(true, P.lv.d); };
+  winDaily(P);
+  if (fresh) setTimeout(() => P === p && !$('#game').hidden && $('#dlg-win').showModal(), 900);
 }
 
 async function share() {
@@ -297,6 +301,7 @@ const remember = (patch) => {
   persist();
 };
 $('#btn-check').onclick = check;
+$('#btn-result').onclick = () => $('#dlg-win').showModal();
 $('#btn-giveup').onclick = giveUp;
 $('#btn-hint').onclick = hint;
 $('#list').addEventListener('pointerdown', drag);
@@ -362,7 +367,7 @@ if (SOLO) {
   $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
   const goHome = () => { save(); P = null; screen('home'); };
   $('#btn-back').onclick = goHome;
-  $('#res-home').onclick = () => { P = null; screen('home'); };
+  $('#res-home').onclick = () => { $('#dlg-win').close(); P = null; screen('home'); };
   router(route, goHome);
 }
 

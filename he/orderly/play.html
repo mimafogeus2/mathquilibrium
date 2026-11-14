@@ -61,13 +61,8 @@
     <button id="btn-giveup" class="give-up">לוותר</button>
   </div>
   <div id="result" class="result" hidden>
-    <div id="res-stars" class="stars" role="img"></div>
-    <p id="res-text" class="stats"></p>
-    <div class="win-actions">
-      <button id="res-next" class="btn primary center"><b></b></button>
-      <button id="res-home" class="btn ghost center"><b>לתפריט</b></button>
-    </div>
-    <a id="res-make" class="foot-link" href="editor.html">הכינו חידה משלכם</a>
+    <p id="res-note" class="stats"></p>
+    <button id="btn-result" class="btn primary center"><b>לתוצאה</b></button>
   </div>
 </main>
 
@@ -81,6 +76,18 @@
     <li>פתרון ב־<b>2 בדיקות</b> שווה שלושה כוכבים, ב־<b>4</b> — שניים.</li>
   </ol>
   <form method="dialog"><button class="btn primary center"><b>הבנתי</b></button></form>
+</dialog>
+
+<dialog id="dlg-win">
+  <div id="res-stars" class="stars" role="img"></div>
+  <h2 id="win-title"></h2>
+  <p id="res-text" class="stats"></p>
+  <div class="win-actions">
+    <button id="res-next" class="btn primary center"><b></b></button>
+    <button id="res-home" class="btn ghost center"><b>לתפריט</b></button>
+  </div>
+  <a id="res-make" class="foot-link" href="editor.html">הכינו חידה משלכם</a>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="סגירה"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
 </dialog>
 
 <canvas id="fx" aria-hidden="true"></canvas>

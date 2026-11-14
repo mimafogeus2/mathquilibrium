@@ -533,7 +533,6 @@ dialog .win-actions::before {
 
 /* the inspector's stamp (stamp() in core.js), in the game's ink, overprinted, its coverage patchy like a real one.
    .seal: a daily's round edition seal; .tag: a level's small rectangle */
-#result { position: relative; } /* Orderly shows its result under the cards, not in a dialog */
 .stamp {
   --tilt: -11deg; position: absolute; top: 12px; inset-inline-start: 12px; z-index: 1; pointer-events: none;
   color: var(--brand-text); mix-blend-mode: var(--blend); opacity: .88; rotate: var(--tilt);
