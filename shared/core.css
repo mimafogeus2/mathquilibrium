@@ -91,7 +91,13 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 }
 
 /* ---------- home ---------- */
-#home { justify-content: center; position: relative; max-width: 460px; }
+/* every game's home lays out the same: content starts below the corner icons, the logo sits at the bottom of a fixed slot,
+   so the wordmark lands at the same height in every game */
+#home {
+  display: grid; grid-template-rows: 140px; align-content: start; justify-items: center; position: relative; max-width: 460px;
+  padding-top: calc(max(12px, env(safe-area-inset-top)) + 60px);
+}
+#home #logo { align-self: end; }
 .corner, .corner-start { position: absolute; top: max(12px, env(safe-area-inset-top)); inset-inline-end: 10px; display: flex; gap: 2px; }
 .corner-start { inset-inline: 10px auto; color: inherit; }
 .corner-start + .corner-start { inset-inline-start: 56px; } /* Settings, beside the back arrow (theme.js) */
@@ -327,7 +333,7 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
   #game:has(.board-wrap) .tools { grid-column: 2; grid-row: 5; justify-self: center; margin: 18px 0 0; }
 }
 
-@media (max-height: 760px) { #logo { display: none; } .wordmark { margin-top: 0; } .tagline { margin-bottom: 16px; } }
+@media (max-height: 760px) { #home { grid-template-rows: none; } #home #logo { display: none; } .wordmark { margin-top: 0; } .tagline { margin-bottom: 16px; } }
 
 /* ---------- difficulty ---------- */
 /* difficulty is marked typographically (pips), so colour stays the game's own */

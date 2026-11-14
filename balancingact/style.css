@@ -72,8 +72,6 @@
 .carry svg { width: 100%; height: 100%; overflow: visible; }
 
 #logo { width: 150px; margin: 0 auto 4px; transform: rotate(-3deg); }
-/* logo hides on short screens (core.css); keep the wordmark clear of the corner icons, as Alien Chess does */
-@media (max-height: 760px) { .wordmark { margin-top: 44px; } }
 #help-rig { width: 220px; margin: 0 auto; }
 .rig.mini { max-height: none; }
 .rig.mini .hit, .rig.mini .tot { display: none; }

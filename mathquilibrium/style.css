@@ -125,7 +125,7 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 .intro-keys { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
 .intro-keys .key { display: grid; place-items: center; width: 52px; height: 48px; animation: pop .4s .15s both var(--ease); }
 
-#logo { --cell: 32px; --gap: 4px; }
+#logo { --cell: 24px; --gap: 4px; } /* fits the 140px logo slot (core.css) */
 
 /* ---------- print ---------- */
 .p-ops { margin: 0; font-size: 12pt; display: flex; align-items: center; gap: 4mm; }
