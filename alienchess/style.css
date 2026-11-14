@@ -99,5 +99,16 @@
   .card { width: 112px; }
 }
 
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board { width: min(600px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 520px)); border-radius: 14px; }
+  .cards { gap: 14px; max-width: 560px; }
+  .card { width: 160px; padding: 10px 10px 12px; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  .board { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 500px)); }
+  #game .cards { grid-column: 2; grid-row: 4; max-width: 420px; }
+  .card { width: 128px; }
+}
+
 /* logo hides on short screens; keep the wordmark clear of the corner icons */
 @media (max-height: 760px) { .wordmark { margin-top: 44px; } }

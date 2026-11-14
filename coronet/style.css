@@ -12,7 +12,7 @@
 }
 
 .board {
-  width: min(620px, calc(100 * var(--vw) - 24px), calc(100 * var(--dvh) - 230px)); height: auto; aspect-ratio: 1; overflow: visible;
+  width: min(620px, calc(100 * var(--vw) - 24px), calc(100 * var(--dvh) - 230px)); max-width: 100%; height: auto; aspect-ratio: 1; overflow: visible;
   fill: initial; stroke: none; stroke-width: 1;
   touch-action: none; user-select: none; -webkit-user-select: none;
   /* box-shadow, not filter: drop-shadow — a filter on the <svg> makes WebKit redraw every speck and stamp on each tap (~10x slower on iPhone) */
@@ -98,6 +98,13 @@
 
 @media (orientation: landscape) and (max-height: 540px) {
   .board:not(.mini) { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
+}
+
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board:not(.mini) { width: min(760px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 300px)); }
+}
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 480px)); }
 }
 
 /* keep board, tip and tools together in the middle instead of the tools stranded at the bottom */

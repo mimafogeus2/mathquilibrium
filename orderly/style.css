@@ -92,6 +92,30 @@
   .card { border-radius: 10px; }
 }
 
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .subject { max-width: 620px; }
+  .subject b { font-size: 36px; }
+  .end-label { font-size: 12.5px; }
+  .list { --gap: 8px; width: min(580px, 100%); max-height: 860px; }
+  .card { font-size: 20px; gap: 14px; padding-inline: 12px 18px; border-radius: 14px; }
+  .grip { width: 24px; height: 24px; }
+  .play, .result { width: min(580px, 100%); }
+  .status { font-size: 16.5px; }
+}
+/* tablet in landscape: the list takes the full height on the left, the subject and buttons sit beside it */
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  #game {
+    display: grid; height: calc(100 * var(--dvh)); max-width: 1100px; column-gap: 56px; justify-content: center;
+    grid-template-columns: minmax(0, 580px) 380px; grid-template-rows: auto auto 1fr auto 1fr auto;
+  }
+  .bar { grid-column: 1 / -1; }
+  #lbl-top { grid-column: 1; grid-row: 2; justify-self: center; }
+  .list { grid-column: 1; grid-row: 3 / 6; align-self: stretch; min-height: 0; max-height: none; }
+  #lbl-bottom { grid-column: 1; grid-row: 6; justify-self: center; }
+  .subject { grid-column: 2; grid-row: 3; align-self: end; margin-bottom: 16px; }
+  .play, .result { grid-column: 2; grid-row: 4; width: 100%; }
+}
+
 /* ---------- print ---------- */
 #print .subject b { font-size: 20pt; }
 .p-strips { width: 100%; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3.5mm; }
