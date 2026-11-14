@@ -107,13 +107,12 @@
   .game h2 span { color: var(--brand-text); }
   .game.lead h2 { font-size: clamp(36px, calc(5.4 * var(--vw)), 58px); }
   .game p { margin: 8px 0 12px; color: var(--muted); font-size: 15px; line-height: 1.45; max-width: 36ch; text-wrap: pretty; }
-  /* hover: the title's drums slip out of register for a moment and settle a hair off, two faint ghosts (pink, sunflower)
-     under the key ink. The ghost offset (--sep) is animated: a registered @property, so it tweens. */
-  .game h2, .b-name { --sep: 0em;
+  /* hover: the title's drums drift out of register, two faint ghosts (pink, sunflower) easing a hair off the key ink,
+     and drift back when the pointer leaves. --sep is a registered @property, so it transitions both ways. */
+  .game h2, .b-name { --sep: 0em; transition: --sep .7s cubic-bezier(.3, 0, .2, 1);
     text-shadow: calc(-1 * var(--sep)) calc(-.5 * var(--sep)) 0 color-mix(in srgb, var(--pink) 35%, transparent),
       var(--sep) calc(.6 * var(--sep)) 0 color-mix(in srgb, var(--sun) 45%, transparent); }
-  .game:hover h2, .banner:hover .b-name { --sep: .018em; animation: slip .55s var(--ease); }
-  @keyframes slip { 35% { --sep: .045em; } }
+  .game:hover h2, .banner:hover .b-name { --sep: .025em; }
   :root[data-contrast] :is(.game h2, .b-name) { text-shadow: none; }
   @property --sep { syntax: '<length>'; inherits: true; initial-value: 0em; }
   .game:hover h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
