@@ -331,6 +331,8 @@ function endDrag(e, cancel) {
   if (k === undefined) { G.sel = null; refresh(); } else moveItem(d.i, k);
 }
 addEventListener('pointerup', (e) => endDrag(e, false));
+// touch-action: none on the svg items isn't honoured everywhere (iOS): a held item must never scroll the page
+addEventListener('touchmove', (e) => { if (drag) e.preventDefault(); }, { passive: false });
 addEventListener('pointercancel', (e) => endDrag(e, true));
 
 // Taps: a plate (with an item picked up) takes it; the store takes back an item picked up from a plate; a used slot returns its item.
