@@ -124,10 +124,6 @@
 /* practice: each pack row resumes its puzzle or deals a new one; the row below always deals a new one */
 .pack-count { text-align: end; min-width: 6.2em; }
 .pack-count small { display: block; font-size: 11.5px; color: var(--brand-text); }
-.new-head { margin: 6px 2px -4px; }
-#new-row .btn { padding: 12px 8px; }
-#new-row .btn b { font-size: 15px; }
-#new-row .btn b::before { content: var(--pips); display: block; font-size: 8px; letter-spacing: 2px; color: var(--brand-text); margin-bottom: 3px; }
 
 /* ---------- print ---------- */
 /* regions as greys and textures, all light enough that pen shows on them */
