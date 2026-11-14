@@ -4,6 +4,10 @@
 // Loaded in <head>, before the body paints, so the page never flashes the wrong stock. Shared across games (same origin).
 (() => {
   const root = document.documentElement, mq = matchMedia('(prefers-color-scheme: dark)');
+  // The page's scripts sit at the end of <body>, and the browser can paint before they arrive: hold the screens (core.css) until they've run,
+  // so the entrance animation plays on the built page and not over a half-built one (Orderly's and WordSwipe's big pools, a generator's work)
+  root.classList.add('loading');
+  addEventListener('DOMContentLoaded', () => root.classList.remove('loading'));
   const T = (s) => (typeof I18N === 'object' && I18N[s]) || s; // core.js's T() isn't loaded yet
   const get = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
   const put = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
