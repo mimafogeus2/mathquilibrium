@@ -381,8 +381,10 @@ function giveUp() {
 async function share() {
   track('share');
   const r = store.daily[G.date][G.pack];
-  const text = `${T('{game} daily', { game: game.name })} · ${G.date} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${game.stars ? '⭐'.repeat(r.s) : r.h ? '💡'.repeat(r.h) : '⭐ ' + T('no hints')}` +
-    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(G.pack) : '');
+  const st = streak(), s = r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3); // results saved before stars were recorded: rate by hints, as the win screen does
+  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${'⭐'.repeat(s)}` +
+    (st ? `  🔥 ${T('{n}-day streak', { n: st })}` : '') +
+    (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); copied($('#win-next b')); }
