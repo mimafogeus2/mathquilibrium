@@ -27,6 +27,7 @@ function home() {
     b.className = `daily-btn tier-${k}${r ? ' done' : ''}`;
     b.style.setProperty('--i', i);
     b.innerHTML = `<b>${tierName(k)}</b><small>${r ? '✓ ' + T('{n} pts', { n: r.s }) : store.saves['D' + k + t] ? T('Resume') : T('{n}s', { n: TIME[k] })}</small>`;
+    rollIn(b, k);
     b.onclick = () => start(k, null, t);
     return b;
   }));
@@ -152,7 +153,7 @@ function finish() {
     pp.unlocked = Math.max(pp.unlocked, Math.min(R.n + 1, PACK_SIZE));
   }
   persist();
-  bump(st);
+  bump(st, R.date && R.pack);
   $('#game').classList.add('done');
   if (full) { sfx.win(); confetti(); }
   track(full ? 'finish' : 'timeout', mode(R.date, TIERS[R.pack]));
@@ -165,6 +166,7 @@ function showEnd(rec, { pack, n, date }) {
   if (date || !full) { $('#end-stars').innerHTML = ''; $('#end-stars').removeAttribute('aria-label'); }
   else starRow($('#end-stars'), stars(PAIRS - right));
   $('#end-title').textContent = T(!full ? "Time's up!" : right === PAIRS ? 'Flawless!' : right >= 8 ? 'Sharp!' : 'Done!');
+  stamp($('#dlg-end'), { date, label: date ? tierName(pack) : `${tierName(pack)} · ${n}`, value: T('{n} pts', { n: rec.s }) });
   $('#end-score').innerHTML = `${rec.s}<small>${T('points')}</small>`;
   $('#end-stats').innerHTML = T('<b>{n}/{total}</b> right', { n: right, total: PAIRS }) + ' · ' +
     (full ? T('<b>{n}s</b> left (+{bonus})', { n: rec.t, bonus: bonus(rec.t, right) }) : T('{n} unanswered', { n: PAIRS - rec.m.length }));

@@ -1,6 +1,7 @@
 // node test.js — checks the evaluator and that the generator produces valid, well-formed puzzles.
 const assert = require('assert');
 Object.assign(globalThis, require('../shared/common.js'));
+assert.deepStrictEqual([issueNo('2026-11-12'), issueNo('2026-11-14'), issueNo('2027-11-12')], [1, 3, 366]); // shared: the issue number
 const { checkEquation, evalExpr, nextInEquation, saveFits, levelConfig, generate, PACKS, packDifficulty } = require('./gen.js');
 
 assert(checkEquation([2, '+', 3, '×', 4, '=', 14]));

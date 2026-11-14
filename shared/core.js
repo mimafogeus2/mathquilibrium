@@ -34,18 +34,24 @@ const persist = () => { try { localStorage.setItem(game.storeKey, JSON.stringify
 
 const ymd = (d) => d.toISOString().slice(0, 10); // UTC: the daily rolls over at midnight UTC, the same moment everywhere
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-// The Today header: "Thu 12 Nov · 4-day streak". HTML: a streak that just grew (bumped) has its number stamped in.
-// The header shows it once, on the first menu after the win; then it's plain again.
-let bumped = 0;
+// The Today header: "No. 3 · Thu 12 Nov · 4-day streak". HTML: a streak that just grew (bumped) has its number stamped in.
+// The header shows it once, on the first menu after the win; then it's plain again. So does the ink roller on a daily just finished
+// (inked: its tier, or 'r' for a one-round game): the menu's renderer calls rollIn(button, tier) after todayLine().
+let bumped = 0, inked = '', rolled = '';
 const MILESTONES = [7, 30, 100];
 const streakText = (st) => (st ? ' · ' + T('{n}-day streak', { n: st === bumped ? `<b class="tick-n${MILESTONES.includes(st) ? ' lap' : ''}">${st}</b>` : st }) : '');
 const todayLine = (st) => {
-  const s = esc(new Date().toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })) + streakText(st);
-  bumped = 0;
+  const d = new Date(), s = esc(T('No. {n}', { n: issueNo(ymd(d)) }) + ' · ' + d.toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })) + streakText(st);
+  // the menu renders twice on the way back from a puzzle (show(), then the hashchange from history.back()): clear these once it has played
+  if (inked) { rolled = inked; inked = ''; }
+  clearTimeout(todayLine.t);
+  todayLine.t = setTimeout(() => { bumped = 0; rolled = ''; }, 1500);
   return s;
 };
 // Every finish calls this with the streak from before its result was recorded: a daily that grew the streak marks it as bumped.
-const bump = (before) => { const st = streak(); bumped = st > before ? st : 0; };
+// ink: the daily just finished (its tier, 'r' for a one-round game), so the menu rolls ink over its button; falsy for a level.
+const bump = (before, ink) => { const st = streak(); bumped = st > before ? st : 0; inked = ink || ''; };
+const rollIn = (b, k) => b.classList.toggle('inked', rolled === k);
 const shortDate = (date) => new Date(date + 'T12:00').toLocaleDateString(LOCALE, { month: 'short', day: 'numeric' });
 const hintsText = (h) => (h === 1 ? T('1 hint') : T('{n} hints', { n: h }));
 function streak() {
@@ -210,6 +216,7 @@ function renderHome() {
     b.className = `daily-btn tier-${k}${r ? ' done' : ''}`;
     b.style.setProperty('--i', i);
     b.innerHTML = `<b>${tierName(k)}</b><small>${r ? '✓ ' + fmt(r.t) : T(store.saves['D' + k + t] ? 'Resume' : 'Play')}</small>`;
+    rollIn(b, k);
     b.onclick = () => start(k, null, t);
     return b;
   }));
@@ -337,7 +344,7 @@ function win() {
     pp.unlocked = Math.max(pp.unlocked, Math.min(G.n + 1, PACK_SIZE));
   }
   persist();
-  bump(st);
+  bump(st, G.date && G.pack);
   $('#board').classList.add('solved');
   $('#game').classList.add('done');
   sfx.win();
@@ -351,6 +358,7 @@ function win() {
 // The win dialog for result r ({ t, h, s, m }): opened fresh after a win, or (fresh = false) only filled in for a solved daily seen again
 function winScreen(g, r, fresh) {
   starRow($('#win-stars'), r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3), fresh); // results saved before stars were recorded: rate by hints
+  stamp($('#dlg-win'), { date: g.date, label: g.date ? tierName(g.pack) : `${tierName(g.pack)} · ${game.random ? levelCode(g.n) : g.n}`, value: fmt(r.t), fresh });
   $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
   $('#win-stats').innerHTML = `<b>${fmt(r.t)}</b>` + (game.moves && r.m != null ? ` · ${T('{n} moves', { n: r.m })}` : '') + (game.stars ? '' : ` · ${r.h ? hintsText(r.h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
   const last = !g.date && !game.random && g.n === PACK_SIZE;
@@ -362,6 +370,24 @@ function winScreen(g, r, fresh) {
   winDaily(g);
 }
 
+// The win's rubber stamp, pressed into the top corner of its dialog (or Orderly's result panel). A daily gets the round edition
+// seal: the day's issue number and the result, ringed by the game's name; a level (or a shared custom one: no date) the small
+// rectangular stamp. label: the tier and level ('' for none); value: the time, score or checks. fresh: thump it down, else it's just there.
+function stamp(host, { date, label, value, fresh = true }) {
+  host.querySelector(':scope > .stamp')?.remove(); // a new element, so the thump plays again
+  const s = Object.assign(document.createElement('div'), { className: `stamp ${date ? 'seal' : 'tag'}${fresh ? ' fresh' : ''}` });
+  s.setAttribute('aria-hidden', 'true'); // the dialog says all of it in words
+  if (date) {
+    let ring = [game.name, T('Daily'), label].filter(Boolean).join(' · ') + ' · ';
+    if (ring.length < 26) ring += ring; // round twice when short, so the letters aren't strung out around the ring
+    s.innerHTML = `<div class="ink"><svg viewBox="0 0 100 100"><path id="stamp-ring" d="M14 50a36 36 0 1 1 72 0a36 36 0 1 1-72 0" fill="none"/>
+      <circle cx="50" cy="50" r="47"/><circle cx="50" cy="50" r="28.5"/>
+      <text class="ring"><textPath href="#stamp-ring" textLength="222" lengthAdjust="spacing">${esc(ring)}</textPath></text>
+      <text class="no" x="50" y="46">${esc(T('No. {n}', { n: issueNo(date) }))}</text><text class="val" x="50" y="61">${esc(value)}</text></svg></div>`;
+  } else s.innerHTML = `<div class="ink"><small>${esc(label)}</small><b>${esc(value)}</b></div>`;
+  host.prepend(s);
+}
+
 // Every game, for the win dialog's "Try …" after a daily: [folder, name, store key, daily tiers ('' for one round, daily.r), brand text color].
 // ponytail: kept in step by hand with index.html's data-store / data-tiers / --brand-text
 const LSUF = LANG === 'en' ? '' : '-' + LANG;
@@ -369,6 +395,15 @@ const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'p
   ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
   ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text'],
   ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text']];
+// The slug at the foot of a game's menu, as a print shop pencils on the job: the house, today's issue, and the drums it ran on
+// (the game's own ink and Federal Blue, the key ink everything shares). Riso's own ink names.
+const INKS = { 'pink-text': 'Fluoro Pink', 'orange-text': 'Orange', 'teal-text': 'Teal', 'sun-text': 'Sunflower', 'red-text': 'Bright Red' };
+{
+  const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), g = ALL_GAMES.find((x) => x[0] === me), home = $('#home');
+  if (g && home) home.insertAdjacentHTML('beforeend', `<p class="slug" aria-hidden="true"><svg class="reg-mark" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5"/><path d="M10 1v18M1 10h18"/></svg>` +
+    `<span>${esc([T('Games by Miki'), T('No. {n}', { n: issueNo(ymd(new Date())) }), [INKS[g[4]], 'Federal Blue'].filter(Boolean).map((i) => T(i)).join(' + ')].join('\u00a0· '))}</span></p>`);
+}
+
 // A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today
 function winDaily(g) {
   const box = $('#win-daily') || $('.win-actions').insertAdjacentElement('afterend', Object.assign(document.createElement('div'), { id: 'win-daily' }));
