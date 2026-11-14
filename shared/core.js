@@ -8,6 +8,7 @@
 //   reveal(G)      -> show the answer on the board (after giving up)
 //   random         -> optional: random levels per difficulty with share codes (playRandom), no unlocks or levels grid
 //   stars(G)       -> optional: the stars for a win (default: by hints); a game with it has no hints, and its results show stars instead
+//   ownIntro       -> optional: the game teaches in its own first-level intro, so How to play doesn't auto-open on a first visit
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
 // the waves are their own paths, so core.css can ripple them out (on) or draw them back in (muted: they stay, invisible)
@@ -508,5 +509,5 @@ function boot(g) {
 
   nudge(() => playing() && !$('#game').hidden);
   router((h) => openLevel(h, start), home);
-  if (!store.seenHelp) $('#dlg-help').showModal();
+  if (!store.seenHelp && !g.ownIntro) $('#dlg-help').showModal();
 }
