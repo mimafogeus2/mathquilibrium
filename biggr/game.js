@@ -176,6 +176,7 @@ function showEnd(rec, { pack, n, date }) {
   else if (!full) { next.querySelector('b').textContent = T('Try again'); next.onclick = () => { $('#dlg-end').close(); start(pack, n); }; }
   else { next.querySelector('b').textContent = T('Level {n}  →', { n: n + 1 }); next.onclick = () => { $('#dlg-end').close(); start(pack, n + 1); }; }
   $('#btn-result').hidden = false;
+  winDaily({ pack, date }, $('#dlg-end'));
   $('#dlg-end').showModal();
 }
 

@@ -203,6 +203,7 @@ function showEnd(rec, daily) {
   $('#end-next b').textContent = daily ? T(navigator.share ? 'Share result' : 'Copy result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); round ? play('C', round) : play('U' + store.n); };
   $('#btn-result').hidden = false;
+  winDaily({ date: daily && today() }, $('#dlg-end'));
   $('#dlg-end').showModal();
 }
 

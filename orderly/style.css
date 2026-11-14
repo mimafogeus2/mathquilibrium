@@ -57,7 +57,7 @@
 .card.held { transition: none; cursor: grabbing; z-index: 2; scale: 1.02; box-shadow: var(--float); }
 .grip { flex: none; width: 20px; height: 20px; stroke: var(--line); stroke-width: 2; }
 .name { flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
-.val { display: none; flex: none; max-width: 45%; text-align: end; font: italic 600 .9em var(--display); line-height: 1.05; color: var(--on-fill, var(--teal-text)); font-variant-numeric: tabular-nums; }
+.card .val { display: none; flex: none; max-width: 45%; text-align: end; font: italic 600 .9em var(--display); line-height: 1.05; color: var(--on-fill, var(--teal-text)); font-variant-numeric: tabular-nums; }
 /* grouped: overprinted with the teal drum */
 .card.ok { background: var(--speck), var(--teal); color: var(--on-teal); border-color: transparent; box-shadow: 2px 2px 0 var(--reg); --on-fill: var(--on-teal); }
 /* a group is one framed slab: inner corners squared, the gap filled, a faint rule between cards */
@@ -78,9 +78,8 @@
 
 .play, .result { width: min(420px, 100%); display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 8px; }
 .status { margin: 0; color: var(--muted); font-size: 14.5px; text-align: center; min-height: 1.3em; }
-.play .btn, .result .win-actions { width: 100%; }
+.play .btn { width: 100%; }
 .btn:disabled { opacity: .45; cursor: default; transform: none; }
-.result .stars { font-size: 36px; line-height: 1; }
 .result .stats { margin: 0 0 6px; }
 
 @media (max-height: 700px) {
