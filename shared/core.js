@@ -8,6 +8,7 @@
 //   reveal(G)      -> show the answer on the board (after giving up)
 //   random         -> optional: random levels per difficulty with share codes (playRandom), no unlocks or levels grid
 //   stars(G)       -> optional: the stars for a win (default: by hints); a game with it has no hints, and its results show stars instead
+//   moves(G)       -> optional: the moves a win took; a daily records it (m), and the win screen and share show it
 //   ownIntro       -> optional: the game teaches in its own first-level intro, so How to play doesn't auto-open on a first visit
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
@@ -318,7 +319,7 @@ function win() {
   clearInterval(timer);
   delete store.saves[G.key];
   const h = G.hinted.size, stars = game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1;
-  if (G.date) ((store.daily[G.date] ??= {})[G.pack] ??= { t: G.elapsed, h, s: stars });
+  if (G.date) ((store.daily[G.date] ??= {})[G.pack] ??= { t: G.elapsed, h, s: stars, m: game.moves?.(G) });
   else {
     const pp = store.packs[G.pack];
     pp.stars[G.n] = Math.max(pp.stars[G.n] || 0, stars);
@@ -337,7 +338,7 @@ function win() {
     if (G !== g) return;
     starRow($('#win-stars'), stars);
     $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
-    $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b>` + (game.stars ? '' : ` · ${h ? hintsText(h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
+    $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b>` + (game.moves ? ` · ${T('{n} moves', { n: game.moves(g) })}` : '') + (game.stars ? '' : ` · ${h ? hintsText(h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
     const last = !g.date && !game.random && g.n === PACK_SIZE;
     if (last) $('#win-title').textContent = T('{tier} pack complete!', { tier: tierName(g.pack) });
     $('#win-next').hidden = last;
@@ -403,7 +404,7 @@ async function share() {
   track('share');
   const r = store.daily[G.date][G.pack];
   const st = streak(), s = r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3); // results saved before stars were recorded: rate by hints, as the win screen does
-  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${'⭐'.repeat(s)}` +
+  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.m ? `👣 ${T('{n} moves', { n: r.m })}  ` : ''}${'⭐'.repeat(s)}` +
     (st ? `  🔥 ${T('{n}-day streak', { n: st })}` : '') +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   try {
