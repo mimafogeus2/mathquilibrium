@@ -352,7 +352,7 @@ function win() {
   track('finish');
 
   const g = G;
-  setTimeout(() => G === g && winScreen(g, rec, true), game.winDelay ?? 1100);
+  setTimeout(() => G === g && winScreen(g, rec, true), 1200); // one delay for every game: long enough for the solve animations to finish
 }
 
 // The win dialog for result r ({ t, h, s, m }): opened fresh after a win, or (fresh = false) only filled in for a solved daily seen again

@@ -403,7 +403,7 @@ for (const [id, key] of [['#logo', 'logo'], ['#help-rig', 'help']]) {
   $(id).append(el);
 }
 
-boot({ name: T('Balancing Act'), storeKey: 'balancingact', random: true, winDelay: 1400, glyphs: ['⚖', '½'], start: startLevel,
+boot({ name: T('Balancing Act'), storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
   save: (G) => ({ at: G.at, moves: G.moves }), key: onKey, moves: (G) => G.moves,
   reveal: () => { G.at = G.p.items.map((x) => x.plate); G.sel = null; refresh(); $('#board').classList.add('solved'); },
   stars: (G) => { const extra = G.moves - best(); return extra <= 1 ? 3 : extra <= Math.ceil(best() / 2) ? 2 : 1; } });

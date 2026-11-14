@@ -308,5 +308,5 @@ printable(() => {
 
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
-boot({ name: T('Coronet'), storeKey: 'coronet', random: true, winDelay: 3000, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+boot({ name: T('Coronet'), storeKey: 'coronet', random: true, glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });

@@ -297,6 +297,6 @@ try {
     localStorage.setItem('quadflip', JSON.stringify(s));
   }
 } catch {}
-boot({ name: T('Quadflip'), storeKey: 'quadflip', winDelay: 1600, glyphs: ['■', '▚'], start: startLevel,
+boot({ name: T('Quadflip'), storeKey: 'quadflip', glyphs: ['■', '▚'], start: startLevel,
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
   reveal: () => { G.placed = [...G.p.sol]; G.order = []; G.hinted = new Set(); refresh(); } });
