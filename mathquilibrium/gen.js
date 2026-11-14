@@ -13,6 +13,8 @@ const OPS = {
   // decimal point: 2 . 5 = 2.5, 3 . 25 = 3.25; binds tightest, can't chain
   '.': (a, b) => (Number.isInteger(a) && Number.isInteger(b) && a >= 0 && b >= 0 ? a + b / 10 ** String(b).length : NaN),
 };
+// Players may enter any true math: 11 ÷ 3 < 8 or 3 ^ 64 > 8 hold, though the generator never makes them.
+const LOOSE = { '÷': (a, b) => a / b, '^': (a, b) => a ** b };
 const PREC = { '.': 4, '^': 3, '×': 2, '÷': 2, '%': 2, '+': 1, '-': 1 };
 const REL = { '=': (l, r) => Math.abs(l - r) < 1e-9, '<': (l, r) => l < r - 1e-9, '>': (l, r) => l > r + 1e-9 };
 const FLIP = { '=': '=', '<': '>', '>': '<' };
@@ -24,8 +26,8 @@ function evalExpr(nums, ops, ok = null) {
   for (const p of [4, 3, 2, 1]) {
     for (let i = 0; i < o.length; ) {
       if (PREC[o[i]] !== p) { i++; continue; }
-      const v = OPS[o[i]](n[i], n[i + 1]);
-      if (!Number.isFinite(v) || Math.abs(v) > 1e9 || (ok && !ok(v))) return NaN;
+      const v = ((!ok && LOOSE[o[i]]) || OPS[o[i]])(n[i], n[i + 1]);
+      if (!Number.isFinite(v) || (ok && (Math.abs(v) > 1e9 || !ok(v)))) return NaN;
       n.splice(i, 2, v);
       o.splice(i, 1);
     }
