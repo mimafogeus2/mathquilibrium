@@ -233,7 +233,8 @@ dialog {
   background: var(--grain), var(--stock); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair), var(--float); text-align: center;
 }
 dialog[open] { animation: rise .32s var(--ease); }
-dialog::backdrop { background: rgb(20 28 60 / .38); backdrop-filter: blur(3px) saturate(.9); }
+/* no backdrop-filter: on Android Chrome it turns the page black under the share sheet the first time it opens (Share result) */
+dialog::backdrop { background: rgb(20 28 60 / .45); }
 dialog h2 { margin: 0 0 16px; font-size: 32px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
 dialog form { margin-top: 20px; }
 
