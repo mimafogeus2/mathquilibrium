@@ -130,6 +130,7 @@ $('#e-form').onsubmit = async (e) => {
   const url = await link(true);
   if (url) { track('make', 'test'); location.href = url; }
 };
+$('#e-share').hidden = !navigator.share;
 $('#e-share').onclick = async () => {
   const url = await link();
   if (!url) return;

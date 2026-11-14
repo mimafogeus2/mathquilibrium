@@ -100,6 +100,7 @@ async function makeLink() {
   if (d === JSON.stringify(draft)) shareUrl = url; // an older draft's link, finished late, doesn't win
 }
 $('#ed-copy').onclick = () => { if (!shareUrl) return; track('copy-link', 'custom'); copyLink(shareUrl, $('#ed-copy')); };
+$('#ed-share').hidden = !navigator.share;
 $('#ed-share').onclick = () => {
   if (!shareUrl) return;
   track('share', 'custom');

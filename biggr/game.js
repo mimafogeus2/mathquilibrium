@@ -170,7 +170,7 @@ function showEnd(rec, { pack, n, date }) {
     (full ? T('<b>{n}s</b> left (+{bonus})', { n: rec.t, bonus: bonus(rec.t, right) }) : T('{n} unanswered', { n: PAIRS - rec.m.length }));
   const next = $('#end-next');
   next.hidden = !date && full && n === PACK_SIZE;
-  if (date) { next.querySelector('b').textContent = T('Share result'); next.onclick = () => share(rec, pack, date); }
+  if (date) { next.querySelector('b').textContent = T(navigator.share ? 'Share result' : 'Copy result'); next.onclick = () => share(rec, pack, date); }
   else if (!full) { next.querySelector('b').textContent = T('Try again'); next.onclick = () => { $('#dlg-end').close(); start(pack, n); }; }
   else { next.querySelector('b').textContent = T('Level {n}  →', { n: n + 1 }); next.onclick = () => { $('#dlg-end').close(); start(pack, n + 1); }; }
   $('#btn-result').hidden = false;
@@ -181,10 +181,8 @@ async function share(rec, pack, date) {
   track('share', mode(date, TIERS[pack]));
   const text = `${T('{game} daily', { game: game.name })} · ${date} · ${tierName(pack)}\n${[...rec.m.padEnd(PAIRS, '.')].map((c) => (c === '1' ? '🟩' : c === '0' ? '🟥' : '⬜')).join('')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#' + levelHash(pack) : '');
-  try {
-    if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); copied($('#end-next b')); }
-  } catch {}
+  if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
+  copyLink(text, $('#end-next'));
 }
 
 // ---------- wiring ----------
