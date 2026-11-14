@@ -258,7 +258,7 @@ function showResult(fresh) {
   starRow($('#res-stars'), s, fresh);
   $('#res-text').innerHTML = T('Solved in <b>{checks}</b>', { checks: checksText(c) }) + (P.hints ? ` · ${hintsText(P.hints)}` : '') + (P.date ? streakText(streak()) : '');
   $('#res-next').hidden = SOLO;
-  $('#res-next b').textContent = T(P.date ? 'Share result' : 'Another puzzle  →');
+  $('#res-next b').textContent = T(P.date ? (navigator.share ? 'Share result' : 'Copy result') : 'Another puzzle  →');
   $('#res-next').onclick = P.date ? () => share() : () => playRandom(true, P.lv.d);
   $('#result').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
@@ -268,10 +268,8 @@ async function share() {
   const r = store.daily[P.date].r;
   const sp = special(SPECIAL, P.date), text = `${T('{game} daily', { game: game.name })} · ${P.date}${sp ? ' · ' + sp.occasion : ''}\n${P.lv.subject}\n${r.rows.map((row) => [...row].map((c) => (c === '1' ? '🟩' : '⬜')).join('')).join('\n')}\n` +
     `${checksText(r.c)} ${'⭐'.repeat(stars(r.c))}${r.h ? ' ' + '💡'.repeat(r.h) : ''}` + (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
-  try {
-    if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); copied($('#res-next b')); }
-  } catch {}
+  if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
+  copyLink(text, $('#res-next'));
 }
 
 // The link to the puzzle on screen: a random one's own code, or the daily (which is a different puzzle tomorrow).

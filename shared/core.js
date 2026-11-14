@@ -356,7 +356,7 @@ function winScreen(g, r, fresh) {
   const last = !g.date && !game.random && g.n === PACK_SIZE;
   if (last) $('#win-title').textContent = T('{tier} pack complete!', { tier: tierName(g.pack) });
   $('#win-next').hidden = last;
-  $('#win-next b').textContent = g.date ? T('Share result') : game.random ? T('Another puzzle  →') : T('Level {n}  →', { n: g.n + 1 });
+  $('#win-next b').textContent = g.date ? T(navigator.share ? 'Share result' : 'Copy result') : game.random ? T('Another puzzle  →') : T('Level {n}  →', { n: g.n + 1 });
   $('#btn-result').hidden = false; // the dialog can be closed to look at the board; this brings it back
   if (fresh) $('#dlg-win').showModal();
   winDaily(g);

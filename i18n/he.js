@@ -106,6 +106,7 @@ module.exports = {
       'Sharp!': 'חד כתער!',
       '{tier} pack complete!': 'חבילת {tier} הושלמה!',
       'Share result': 'שיתוף התוצאה',
+      'Copy result': 'העתקת התוצאה',
       'Another puzzle  →': 'חידה נוספת  ←',
       'Level {n}  →': 'שלב {n}  ←',
       "Give up and see the answer? This puzzle won't count as solved.": 'לוותר ולראות את הפתרון? החידה לא תיחשב כפתורה.',

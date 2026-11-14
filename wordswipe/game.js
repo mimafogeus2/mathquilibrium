@@ -198,7 +198,7 @@ function showEnd(rec, daily) {
       rec.misses.map((w) => `<span class="${w[0] === '+' ? 'yes' : 'no'}">${w[0] === '+' ? '✓' : '✗'} ${esc(w.slice(1))}</span>`).join('')
     : '';
   const round = !daily && R?.key === 'C' && R.round;
-  $('#end-next b').textContent = daily ? T('Share result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
+  $('#end-next b').textContent = daily ? T(navigator.share ? 'Share result' : 'Copy result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); round ? play('C', round) : play('U' + store.n); };
   $('#btn-result').hidden = false;
   $('#dlg-end').showModal();
@@ -210,10 +210,8 @@ async function shareDaily(rec) {
   const sp = special(SPECIAL, date), text = `${T('{game} daily', { game: game.name })} · ${date}${sp ? ' · ' + sp.occasion : ''}\n${[0, 6, 12, 18].map((i) => grid.slice(i, i + 6).join('')).join('\n')}\n` +
     T('{n} points', { n: rec.s }) + ' · ' + (rec.t ? T('{n}s left', { n: rec.t }) : '⏰ ' + T('out of time')) +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname + '#daily' : '');
-  try {
-    if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); copied($('#end-next b')); }
-  } catch {}
+  if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
+  copyLink(text, $('#end-next'));
 }
 
 // ---------- wiring ----------
