@@ -62,9 +62,9 @@
     text-shadow: .03em .025em 0 color-mix(in srgb, var(--pink) 60%, transparent);
     --mis: color-mix(in srgb, var(--pink) 60%, transparent);
     /* the pink drum lands well out of register and snaps in */
-    position: relative; animation: enter .5s var(--ease) both, register .45s .5s cubic-bezier(.5, 0, .2, 1) both;
+    position: relative; animation: enter .5s var(--ease) both, register .4s .2s cubic-bezier(.5, 0, .2, 1) both;
   }
-  .masthead span { color: var(--pink-text); text-shadow: .03em .025em 0 color-mix(in srgb, var(--sun) 75%, transparent); --mis: color-mix(in srgb, var(--sun) 75%, transparent); animation: register .45s .5s cubic-bezier(.5, 0, .2, 1) both; }
+  .masthead span { color: var(--pink-text); text-shadow: .03em .025em 0 color-mix(in srgb, var(--sun) 75%, transparent); --mis: color-mix(in srgb, var(--sun) 75%, transparent); animation: register .4s .2s cubic-bezier(.5, 0, .2, 1) both; }
   @keyframes register { from { text-shadow: .1em .075em 0 var(--mis); } }
   /* registration targets in the margins, level with the masthead, the second drum a hair off */
   .masthead::before, .masthead::after {
