@@ -588,11 +588,9 @@ dialog .win-actions::before {
 @keyframes roll-rtl { to { translate: -260% 0; } }
 [dir="rtl"] :is(.daily-btn, .btn.daily).inked::after { translate: 110% 0; animation-name: roll-rtl; }
 
-/* the slug at the foot of a game's menu: house and issue, beside a registration target printed slightly off */
+/* the slug at the foot of a game's menu: house and issue */
 .slug {
   justify-self: center; display: flex; align-items: center; gap: 8px; margin: 26px 0 0; text-align: center;
   font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
 }
 :lang(he) .slug { letter-spacing: normal; font-size: 12px; }
-svg.reg-mark { flex: none; width: 15px; height: 15px; stroke-width: 1.2; filter: drop-shadow(1.2px 1px 0 var(--brand)); }
-:root[data-contrast] svg.reg-mark { filter: none; }

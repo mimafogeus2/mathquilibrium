@@ -398,7 +398,7 @@ const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'p
 // The slug at the foot of a game's menu, as a print shop pencils on the job: the house and today's issue
 {
   const home = $('#home');
-  if (home) home.insertAdjacentHTML('beforeend', `<p class="slug" aria-hidden="true"><svg class="reg-mark" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5"/><path d="M10 1v18M1 10h18"/></svg>` +
+  if (home) home.insertAdjacentHTML('beforeend', `<p class="slug" aria-hidden="true">` +
     `<span>${esc([T('Games by Miki'), T('No. {n}', { n: issueNo(ymd(new Date())) })].join('\u00a0· '))}</span></p>`);
 }
 
