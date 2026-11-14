@@ -90,6 +90,7 @@ module.exports = {
       'Hard': 'קשה',
       '{game}: the answer': '{game}: הפתרון',
       '{n}-day streak': 'רצף: {n}',
+      '{n} moves': '{n} מהלכים',
       '1 hint': 'רמז אחד',
       '{n} hints': '{n} רמזים',
       'no hints': 'בלי רמזים',
