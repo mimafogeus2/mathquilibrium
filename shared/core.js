@@ -234,20 +234,31 @@ function renderHome() {
 
 // ---------- play ----------
 // start(pack, n) plays pack level n; start(pack, null, date) plays that day's daily of that difficulty.
+// A daily already solved isn't played again: its board shows the answer, and Results brings back its win screen (and share).
 function start(pack, n, date = null) {
-  const key = date ? 'D' + pack + date : pack + n, save = store.saves[key] || {};
-  G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: false, paused: false };
-  track('start');
+  const key = date ? 'D' + pack + date : pack + n, save = store.saves[key] || {}, rec = date && store.daily[date]?.[pack];
+  G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: !!rec, paused: false };
+  track(rec ? 'result' : 'start');
   $('#g-title').textContent = date ? T('Daily · {tier}', { tier: tierName(pack) }) : `${tierName(pack)} · ${game.random ? levelCode(n) : n}`;
   show('game');
   $('#game').classList.remove('done');
   $('#btn-result').hidden = true;
   toGame(levelHash(pack, n));
-  if (game.start(G, save)) G.elapsed = save.elapsed || 0;
+  clearInterval(timer);
+  if (rec) {
+    // ponytail: the answer, not the player's own moves; each puzzle has one answer, so it's the board they solved
+    game.start(G, {});
+    game.reveal(G);
+    G.elapsed = rec.t;
+    $('#board').classList.add('solved');
+    $('#game').classList.add('done');
+    winScreen(G, rec, false);
+  } else {
+    if (game.start(G, save)) G.elapsed = save.elapsed || 0;
+    timer = setInterval(tick, 1000);
+  }
   setPaused(false);
   $('#timer').textContent = fmt(G.elapsed);
-  clearInterval(timer);
-  timer = setInterval(tick, 1000);
 }
 
 const playing = () => G && !G.done && !G.paused;
@@ -318,11 +329,11 @@ function win() {
   G.done = true;
   clearInterval(timer);
   delete store.saves[G.key];
-  const h = G.hinted.size, stars = game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1;
-  if (G.date) ((store.daily[G.date] ??= {})[G.pack] ??= { t: G.elapsed, h, s: stars, m: game.moves?.(G) });
+  const h = G.hinted.size, rec = { t: G.elapsed, h, s: game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1, m: game.moves?.(G) };
+  if (G.date) (store.daily[G.date] ??= {})[G.pack] ??= rec;
   else {
     const pp = store.packs[G.pack];
-    pp.stars[G.n] = Math.max(pp.stars[G.n] || 0, stars);
+    pp.stars[G.n] = Math.max(pp.stars[G.n] || 0, rec.s);
     pp.unlocked = Math.max(pp.unlocked, Math.min(G.n + 1, PACK_SIZE));
   }
   persist();
@@ -334,19 +345,21 @@ function win() {
   track('finish');
 
   const g = G;
-  setTimeout(() => {
-    if (G !== g) return;
-    starRow($('#win-stars'), stars);
-    $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
-    $('#win-stats').innerHTML = `<b>${fmt(g.elapsed)}</b>` + (game.moves ? ` · ${T('{n} moves', { n: game.moves(g) })}` : '') + (game.stars ? '' : ` · ${h ? hintsText(h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
-    const last = !g.date && !game.random && g.n === PACK_SIZE;
-    if (last) $('#win-title').textContent = T('{tier} pack complete!', { tier: tierName(g.pack) });
-    $('#win-next').hidden = last;
-    $('#win-next b').textContent = g.date ? T('Share result') : game.random ? T('Another puzzle  →') : T('Level {n}  →', { n: g.n + 1 });
-    $('#btn-result').hidden = false; // the dialog can be closed to look at the board; this brings it back
-    $('#dlg-win').showModal();
-    winDaily(g);
-  }, game.winDelay ?? 1100);
+  setTimeout(() => G === g && winScreen(g, rec, true), game.winDelay ?? 1100);
+}
+
+// The win dialog for result r ({ t, h, s, m }): opened fresh after a win, or (fresh = false) only filled in for a solved daily seen again
+function winScreen(g, r, fresh) {
+  starRow($('#win-stars'), r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3), fresh); // results saved before stars were recorded: rate by hints
+  $('#win-title').textContent = T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
+  $('#win-stats').innerHTML = `<b>${fmt(r.t)}</b>` + (game.moves && r.m != null ? ` · ${T('{n} moves', { n: r.m })}` : '') + (game.stars ? '' : ` · ${r.h ? hintsText(r.h) : T('no hints')}`) + (g.date ? streakText(streak()) : '');
+  const last = !g.date && !game.random && g.n === PACK_SIZE;
+  if (last) $('#win-title').textContent = T('{tier} pack complete!', { tier: tierName(g.pack) });
+  $('#win-next').hidden = last;
+  $('#win-next b').textContent = g.date ? T('Share result') : game.random ? T('Another puzzle  →') : T('Level {n}  →', { n: g.n + 1 });
+  $('#btn-result').hidden = false; // the dialog can be closed to look at the board; this brings it back
+  if (fresh) $('#dlg-win').showModal();
+  winDaily(g);
 }
 
 // Every game, for the win dialog's "Try …" after a daily: [folder, name, store key, daily tiers ('' for one round, daily.r), brand text color].
