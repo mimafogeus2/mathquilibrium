@@ -110,6 +110,18 @@
   .answer { grid-column: 2; grid-row: 4; }
 }
 
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .subject small { font-size: 13px; }
+  .subject b { font-size: 40px; }
+  .stack { width: min(460px, 100%); max-height: 620px; margin: 18px 0 28px; }
+  .card { font-size: min(64px, calc(190cqi * var(--cq, 1) / (var(--len) + 2))); border-radius: 30px; }
+  .answer { gap: 48px; }
+  .vote { width: 96px; height: 96px; }
+  .vote svg { width: 42px; height: 42px; }
+  .tally b { font-size: 26px; }
+  .tally small { font-size: 16px; }
+}
+
 /* ---------- print ---------- */
 #print .subject b { font-size: 24pt; }
 #print .subject small { font-size: 9pt; color: #000; }

@@ -81,6 +81,16 @@
   .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
 }
 
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board:not(.mini) { width: min(620px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 480px)); border-radius: 22px; }
+  .tray { gap: 12px; max-width: 620px; margin-top: 20px; }
+  .piece { width: 72px; height: 72px; padding: 9px; border-radius: 14px; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 480px)); }
+  #game .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 400px; margin-bottom: 18px; }
+}
+
 /* help text per input: touch aims by press-and-drag, mouse/keyboard by hover/click */
 .touch { display: none; }
 @media (hover: none) { .touch { display: list-item; } .no-touch { display: none; } }

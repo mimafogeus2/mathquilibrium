@@ -295,6 +295,33 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
   #dlg-levels form, #dlg-levels .pager { margin-top: 6px; }
 }
 
+/* tablet (iPad and friends): the phone column grows into the screen, with bigger type and targets.
+   Touch only: a big desktop window keeps the compact layout. Each game's style.css sizes its own board under the same query. */
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  #game { max-width: 960px; padding-inline: 32px; }
+  .bar { margin-bottom: 14px; padding-bottom: 12px; }
+  .title b { font-size: 25px; }
+  .title small { font-size: 13px; }
+  #timer { font-size: 18px; }
+  .tip { max-width: 560px; font-size: 17px; }
+  .tools { gap: 12px; }
+  .chip { padding-block: 12px; padding-inline: 16px 20px; font-size: 16px; }
+  .chip svg { width: 20px; height: 20px; }
+  .give-up { padding: 10px 14px; font-size: 15px; }
+}
+/* tablet in landscape: the board games put the board left and the controls in a column on the right */
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  #game:has(.board-wrap) {
+    max-width: 1280px; display: grid; column-gap: 48px; align-items: center;
+    grid-template-columns: 1fr auto; grid-template-rows: auto 1fr auto auto auto 1fr;
+  }
+  #game:has(.board-wrap) .bar { grid-column: 1 / -1; }
+  #game:has(.board-wrap) .board-wrap { grid-column: 1; grid-row: 2 / -1; height: 100%; margin: 0; }
+  #game:has(.board-wrap) .tip { grid-column: 2; grid-row: 3; max-width: 400px; margin: 0 0 14px; }
+  #game:has(.board-wrap) .palette { grid-column: 2; grid-row: 4; max-width: 400px; }
+  #game:has(.board-wrap) .tools { grid-column: 2; grid-row: 5; justify-self: center; margin: 18px 0 0; }
+}
+
 @media (max-height: 760px) { #logo { display: none; } .wordmark { margin-top: 0; } .tagline { margin-bottom: 16px; } }
 
 /* ---------- difficulty ---------- */

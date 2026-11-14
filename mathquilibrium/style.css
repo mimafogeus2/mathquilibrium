@@ -105,6 +105,18 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
   .board-wrap { max-height: calc(100 * var(--dvh) - 90px); align-self: start; }
 }
 
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board:not(.mini) { --cell: calc(var(--zoom, 1) * min(84px,
+    calc(100cqw * var(--cq, 1) / var(--cols) - var(--gap)),
+    calc(100cqh * var(--cq, 1) / var(--rows) - var(--gap)))); }
+  .palette { gap: 10px; }
+  .key { --fit: calc((100cqw * var(--cq, 1) - 5 * 10px - 1px) / 6); width: min(64px, var(--fit)); height: min(60px, var(--fit)); font-size: 28px; border-radius: 14px; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  .palette { gap: 8px; }
+  .key { width: 60px; height: 56px; } /* 6 per row in the 400px side column */
+}
+
 /* level intro modal */
 .intro section + section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair); }
 .intro .board.mini { margin: 0 auto; --cell: min(34px, var(--fit)); justify-content: center; }
