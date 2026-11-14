@@ -70,6 +70,17 @@ module.exports = {
     },
     // also the strings several games share
     'shared/core.js': {
+      '{tier} daily  →': 'היומי ה{tier}  ←',
+      'Next puzzle in {time}': 'החידה הבאה בעוד {time}',
+      'A new puzzle is ready': 'חידה חדשה מחכה',
+      'Try {game}  →': 'נסו את {game}  ←',
+      'Mathquilibrium': 'מאוזן',
+      'Biggr': 'כמה כמה',
+      'WordSwipe': 'שמאל ימין שמאל',
+      'Orderly': 'בסדר',
+      'Coronet': 'הכתרה',
+      'Quadflip': 'מהפכים',
+      'Alien Chess': 'שחמאדים',
       'Easy': 'קל',
       'Medium': 'בינוני',
       'Hard': 'קשה',

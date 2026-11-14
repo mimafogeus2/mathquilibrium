@@ -323,8 +323,46 @@ function win() {
     $('#win-next b').textContent = g.date ? T('Share result') : game.random ? T('Another puzzle  →') : T('Level {n}  →', { n: g.n + 1 });
     $('#btn-result').hidden = false; // the dialog can be closed to look at the board; this brings it back
     $('#dlg-win').showModal();
+    winDaily(g);
   }, game.winDelay ?? 1100);
 }
+
+// Every game, for the win dialog's "Try …" after a daily: [folder, name, store key, daily tiers ('' for one round, daily.r), brand text color].
+// ponytail: kept in step by hand with index.html's data-store / data-tiers / --brand-text
+const L = LANG === 'en' ? '' : '-' + LANG;
+const GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'pink-text'], ['biggr', T('Biggr'), 'biggr', 'EMH', 'orange-text'],
+  ['wordswipe', T('WordSwipe'), 'wordswipe' + L, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + L, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
+  ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text']];
+// A daily win also offers the next harder daily not yet solved, counts down to tomorrow's, and suggests another game with dailies left today
+function winDaily(g) {
+  const box = $('#win-daily') || $('.win-actions').insertAdjacentElement('afterend', Object.assign(document.createElement('div'), { id: 'win-daily' }));
+  const upBtn = $('#win-up') || $('#win-next').insertAdjacentElement('afterend', Object.assign(document.createElement('button'), { id: 'win-up', className: 'btn center' }));
+  const done = store.daily[g.date] || {}, tiers = Object.keys(TIERS), up = g.date && tiers.slice(tiers.indexOf(g.pack) + 1).find((k) => !done[k]);
+  box.hidden = !g.date;
+  upBtn.hidden = !up;
+  if (!g.date) return;
+  if (up) {
+    upBtn.innerHTML = `<b>${esc(T('{tier} daily  →', { tier: tierName(up) }))}</b>`;
+    upBtn.onclick = () => { $('#dlg-win').close(); start(up, null, g.date); };
+  }
+  const me = location.pathname.split('/').filter((s) => s && !s.endsWith('.html')).pop(), i = GAMES.findIndex((x) => x[0] === me);
+  const other = [...GAMES.slice(i + 1), ...GAMES.slice(0, i)].find(([, , key, ts]) => {
+    let d = {};
+    try { d = JSON.parse(localStorage.getItem(key))?.daily?.[g.date] || {}; } catch {}
+    return ts ? [...ts].some((k) => !d[k]) : !d.r;
+  });
+  box.innerHTML = '<p id="win-clock" class="stats"></p>' + (other ? `<a class="win-try" href="../${other[0]}/">${esc(T('Try {game}  →', { game: '{game}' })).replace('{game}', `<b style="color: var(--${other[4]})">${esc(other[1])}</b>`)}</a>` : '');
+  winClock();
+}
+// "Next puzzle in 7:42:10" to the next midnight UTC (when ymd() rolls over); past it, today's new puzzle is ready
+function winClock() {
+  const c = $('#win-clock');
+  if (!c || !G?.date || !$('#dlg-win').open) return;
+  const s = Math.ceil((864e5 - (Date.now() % 864e5)) / 1000);
+  c.textContent = ymd(new Date()) !== G.date ? T('A new puzzle is ready')
+    : T('Next puzzle in {time}', { time: `${Math.floor(s / 3600)}:${fmt(s % 3600).padStart(5, '0')}` });
+}
+setInterval(winClock, 1000);
 
 // Give up: the answer is shown, nothing is recorded (no stars, no daily), and the save is dropped.
 function giveUp() {
