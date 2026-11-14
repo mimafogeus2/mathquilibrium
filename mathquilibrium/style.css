@@ -6,7 +6,7 @@
 .zoom, .board, .p-grid, .palette, .intro-keys, #g-sub, .p-ops b { direction: ltr; unicode-bidi: isolate; }
 
 /* The board pinch-zooms (game.js sets --zoom) inside its own scroller; the page keeps one screen tall so the keys stay put. */
-#game { height: 100dvh; container-type: inline-size; } /* keys size from cqw, not vw */
+#game { height: calc(100 * var(--dvh)); container-type: inline-size; } /* keys size from cqw, not vw */
 .board-wrap { min-height: 0; grid-template: minmax(0, 1fr) / minmax(0, 1fr); container-type: size; }
 .zoom {
   place-self: stretch; overflow: auto; overscroll-behavior: contain;
@@ -20,17 +20,23 @@
 }
 .zoom * { touch-action: pan-x pan-y; /* beat the global `* { manipulation }`, which would let the tiles pinch the page */
 }
+/* a typed length, so it's worked out once on .board and the grid gets plain px: under the text & tile size zoom, WebKit
+   reads vw and cq units in grid-template-* differently from everywhere else (and from Chromium) */
+@property --cell { syntax: '<length>'; inherits: true; initial-value: 0px; }
 .board {
-  --gap: clamp(3px, 1vw, 6px);
+  --gap: clamp(3px, calc(1 * var(--vw)), 6px);
   /* fitted to the board area (the .board-wrap container), times the pinch zoom */
   --cell: calc(var(--zoom, 1) * min(62px,
-    calc(100cqw / var(--cols) - var(--gap)),
-    calc(100cqh / var(--rows) - var(--gap))));
+    calc(100cqw * var(--cq, 1) / var(--cols) - var(--gap)),
+    calc(100cqh * var(--cq, 1) / var(--rows) - var(--gap))));
   display: grid; gap: var(--gap);
   grid-template-columns: repeat(var(--cols), var(--cell));
   grid-template-rows: repeat(var(--rows), var(--cell));
 }
 .board.mini { --cell: 40px; --gap: 5px; }
+/* in a dialog (help, intro), a long line shrinks to fit its width: min(420px, 100vw - 32px), less 56px of padding (core.css) */
+/* (4px more for the tiles' shadows) */
+dialog .board.mini { --fit: calc((min(420px, 100 * var(--vw) - 32px) - 60px + 5px) / var(--cols) - 5px); --cell: min(40px, var(--fit)); }
 
 .cell {
   display: grid; place-items: center; padding: 0; border: 0;
@@ -79,7 +85,7 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
    cqw is #game's content box, i.e. the width the palette really gets (100vw drifts under zoom/text scaling);
    the 1px is slack so subpixel rounding can't push the 6th key onto a new row. */
 .key {
-  --fit: calc((100cqw - 5 * 6px - 1px) / 6);
+  --fit: calc((100cqw * var(--cq, 1) - 5 * 6px - 1px) / 6);
   width: min(52px, var(--fit)); height: min(48px, var(--fit));
   border: 0; border-radius: 12px; font-size: 24px; font-weight: 400;
   background: var(--speck), var(--brand); color: var(--on-brand); box-shadow: 2px 3px 0 var(--reg);
@@ -96,12 +102,12 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 @media (orientation: landscape) and (max-height: 540px) {
   .key { width: 44px; height: 44px; font-size: 22px; } /* 6 per row in the 300px side column */
   /* the controls column can run past the screen; keep the board in view (90px ≈ top bar + padding) */
-  .board-wrap { max-height: calc(100dvh - 90px); align-self: start; }
+  .board-wrap { max-height: calc(100 * var(--dvh) - 90px); align-self: start; }
 }
 
 /* level intro modal */
 .intro section + section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair); }
-.intro .board { margin: 0 auto; --cell: 34px; justify-content: center; }
+.intro .board.mini { margin: 0 auto; --cell: min(34px, var(--fit)); justify-content: center; }
 .intro p { margin: 12px 0 0; line-height: 1.45; text-wrap: balance; }
 .intro p b { font-weight: 600; }
 .intro-keys { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }

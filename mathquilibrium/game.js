@@ -204,13 +204,14 @@ function edges() {
   z.style.setProperty('--b', fade(z.scrollTop < z.scrollHeight - z.clientHeight - 1));
 }
 zoomer.addEventListener('scroll', edges, { passive: true });
+// pageScale(): touches and getBoundingClientRect are in zoomed px (text & tile size), scrolling in the page's own
 const touchMid = (t) => [(t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2];
 const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
 zoomer.addEventListener('touchstart', (e) => {
   if (e.touches.length !== 2) return;
   const [mx, my] = touchMid(e.touches), r = zoomer.getBoundingClientRect(), tile = $('#board').firstChild.offsetWidth / zoom;
   // the board point under the fingers, so it stays under them while zooming
-  pinch = { d: touchDist(e.touches), z: zoom, max: Math.max(1, 60 / tile), x: zoomer.scrollLeft + mx - r.left, y: zoomer.scrollTop + my - r.top };
+  pinch = { d: touchDist(e.touches), z: zoom, max: Math.max(1, 60 / tile), x: zoomer.scrollLeft + (mx - r.left) / pageScale(), y: zoomer.scrollTop + (my - r.top) / pageScale() };
 }, { passive: true });
 zoomer.addEventListener('touchmove', (e) => {
   if (e.touches.length < 2) return;
@@ -219,8 +220,8 @@ zoomer.addEventListener('touchmove', (e) => {
   const z = Math.min(pinch.max, Math.max(1, pinch.z * touchDist(e.touches) / pinch.d)), k = z / pinch.z;
   const [mx, my] = touchMid(e.touches), r = zoomer.getBoundingClientRect();
   setZoom(z);
-  zoomer.scrollLeft = pinch.x * k - (mx - r.left); // ponytail: ignores padding/gaps, close enough under a finger
-  zoomer.scrollTop = pinch.y * k - (my - r.top);
+  zoomer.scrollLeft = pinch.x * k - (mx - r.left) / pageScale(); // ponytail: ignores padding/gaps, close enough under a finger
+  zoomer.scrollTop = pinch.y * k - (my - r.top) / pageScale();
 }, { passive: false });
 zoomer.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = null; });
 // iOS Safari zooms the page off its own gesture events (touch-action alone doesn't stop it); touch events still drive ours.
@@ -233,7 +234,7 @@ function follow() {
   const a = zoomer.getBoundingClientRect(), b = el.getBoundingClientRect(), m = Math.min(b.width, a.width / 4);
   const off = (lo, hi, min, max) => (lo < min + m ? lo - min - m : hi > max - m ? Math.min(hi - max + m, lo - min - m) : 0);
   const left = off(b.left, b.right, a.left, a.right), top = off(b.top, b.bottom, a.top, a.bottom);
-  if (left || top) zoomer.scrollBy({ left, top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  if (left || top) zoomer.scrollBy({ left: left / pageScale(), top: top / pageScale(), behavior: document.documentElement.hasAttribute('data-calm') ? 'auto' : 'smooth' });
 }
 
 // ---------- spoken board ----------

@@ -28,6 +28,8 @@
   --display: 'Fraunces', 'Frank Ruhl Libre', Georgia, serif;
   --ease: cubic-bezier(.2, .8, .2, 1);
   --r: 14px;
+  /* viewport units that hold under the text & tile size zoom (--scale, set by theme.js): use these, not vw/dvh */
+  --vw: calc(1vw / var(--scale, 1)); --dvh: calc(1dvh / var(--scale, 1));
 
   font-family: 'Inter', 'Heebo', system-ui, -apple-system, sans-serif;
   font-feature-settings: 'cv11', 'ss01';
@@ -58,7 +60,8 @@
 /* read by screen readers, not shown */
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 [hidden] { display: none !important; }
-html, body { margin: 0; min-height: 100dvh; }
+html { zoom: var(--scale, 1); }
+html, body { margin: 0; min-height: calc(100 * var(--dvh)); }
 /* no double-tap zoom anywhere on mobile; pinch-zoom still works. On every element, not just html:
    touch-action only carries down to the nearest scroll container, and body (overflow-x: hidden) is one */
 * { touch-action: manipulation; }
@@ -69,15 +72,15 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 ::selection { background: var(--brand); color: var(--on-brand); }
 
 .screen {
-  max-width: 600px; margin: 0 auto; min-height: 100dvh;
+  max-width: 600px; margin: 0 auto; min-height: calc(100 * var(--dvh));
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
   display: flex; flex-direction: column; align-items: center;
   /* every time a screen is shown (display: none -> flex restarts it): the brand drum lands out of register, then snaps in */
   animation: print .32s var(--ease) backwards;
 }
 @keyframes print { from { opacity: 0; filter: drop-shadow(-8px 5px 0 var(--brand)); } 50% { opacity: 1; } }
-/* hub <-> game page loads: the browser's cross-fade between documents, where supported */
-@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }
+/* hub <-> game page loads: the browser's cross-fade between documents, where supported (theme.js skips it under data-calm) */
+@view-transition { navigation: auto; }
 
 /* ---------- type ---------- */
 .wordmark, dialog h2, .title b, .pause-cover > b, .daily-btn b, .pack-name, .btn.daily b, .big-score, .subject b {
@@ -91,8 +94,9 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 #home { justify-content: center; position: relative; max-width: 460px; }
 .corner, .corner-start { position: absolute; top: max(12px, env(safe-area-inset-top)); inset-inline-end: 10px; display: flex; gap: 2px; }
 .corner-start { inset-inline: 10px auto; color: inherit; }
+.corner-start + .corner-start { inset-inline-start: 56px; } /* Settings, beside the back arrow (theme.js) */
 .wordmark {
-  font-size: clamp(44px, 12vw, 68px); font-weight: 600; letter-spacing: -0.035em; line-height: .95;
+  font-size: clamp(36px, calc(12 * var(--vw)), 68px); font-weight: 600; letter-spacing: -0.035em; line-height: .95;
   margin: 14px 0 0; text-align: center;
   /* the brand drum, printed a hair out of register under the key ink */
   text-shadow: .035em .03em 0 color-mix(in srgb, var(--brand) 55%, transparent);
@@ -221,7 +225,7 @@ svg.tick { width: 1.1em; height: 1.1em; vertical-align: -.2em; stroke-width: 2.6
 
 /* ---------- dialogs ---------- */
 dialog {
-  border: 0; border-radius: 20px; padding: 30px 28px 26px; width: min(420px, calc(100vw - 32px));
+  border: 0; border-radius: 20px; padding: 30px 28px 26px; width: min(420px, calc(100 * var(--vw) - 32px));
   background: var(--grain), var(--stock); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair), var(--float); text-align: center;
 }
 dialog[open] { animation: rise .32s var(--ease); }
@@ -238,13 +242,13 @@ dialog form { margin-top: 20px; }
 kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 5px; box-shadow: inset 0 0 0 1px var(--line), 0 1px 0 var(--line); }
 
 /* only the level numbers scroll: the grid absorbs any height the viewport can't spare */
-#dlg-levels[open] { display: flex; flex-direction: column; overflow: hidden; max-height: calc(100dvh - 32px); }
-.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 55dvh; min-height: 0; overflow-y: auto; padding-block: 4px 8px; padding-inline: 4px 6px; }
+#dlg-levels[open] { display: flex; flex-direction: column; overflow: hidden; max-height: calc(100 * var(--dvh) - 32px); }
+.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: calc(55 * var(--dvh)); min-height: 0; overflow-y: auto; padding-block: 4px 8px; padding-inline: 4px 6px; }
 .lvl {
   aspect-ratio: 1; border: 0; border-radius: 10px; background: var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
 }
-.lvl span { font-size: clamp(14px, 4.4vw, 18px); font-weight: 600; font-variant-numeric: tabular-nums; }
+.lvl span { font-size: clamp(14px, calc(4.4 * var(--vw)), 18px); font-weight: 600; font-variant-numeric: tabular-nums; }
 .lvl small { font-size: 9px; color: var(--brand-text); letter-spacing: 1px; min-height: 12px; }
 .lvl.current { background: var(--speck), var(--brand); color: var(--on-brand); box-shadow: 2px 2px 0 var(--reg); }
 .lvl.current small { color: inherit; }
@@ -266,8 +270,9 @@ kbd { font: inherit; font-size: 12px; font-weight: 600; padding: 1px 6px; border
 
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+/* reduce motion: the system's setting or the Settings switch (theme.js sets data-calm from either) */
+:root[data-calm], :root[data-calm] *, :root[data-calm] *::before, :root[data-calm] *::after {
+  animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition: none !important;
 }
 
 /* phone in landscape: board left, controls right */
@@ -375,6 +380,43 @@ span[dir="ltr"] { white-space: nowrap; }
   .daily-btn::before, .pack-name::after, #new-row .btn b::before { content: var(--pips) / ""; }
 }
 
+/* ---------- settings ---------- */
+#dlg-settings { max-height: calc(100% - 32px); overflow-y: auto; }
+.set-list { text-align: start; margin-top: -4px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--hair); }
+label.set-row { cursor: pointer; }
+.set-row:last-child { border-bottom: 0; }
+.set-row.col { flex-direction: column; align-items: stretch; gap: 10px; }
+.set-row b { display: block; font-weight: 600; }
+.set-row small { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.4; margin-top: 2px; }
+.set-row .row { gap: 10px; }
+.set-row .btn { padding: 11px 16px; }
+.set-row .give-up { align-self: center; }
+/* a switch: a printed pill, its knob slid across and inked in the game's colour when on */
+.switch {
+  appearance: none; flex: none; position: relative; width: 46px; height: 28px; margin: 0; border-radius: 999px; cursor: pointer;
+  background: var(--slot); box-shadow: inset 0 0 0 1.5px var(--line); transition: background-color .15s, box-shadow .15s;
+}
+.switch::before { content: ''; position: absolute; top: 4px; inset-inline-start: 4px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); transition: translate .18s var(--ease), background-color .15s; }
+.switch:checked { background: var(--brand); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.switch:checked::before { translate: 18px; background: var(--on-brand); }
+[dir="rtl"] .switch:checked::before { translate: -18px; }
+.seg { display: flex; gap: 4px; padding: 4px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); }
+.seg label { flex: 1; position: relative; padding: 9px 6px; border-radius: 999px; text-align: center; font-weight: 600; font-size: 14px; cursor: pointer; transition: background-color .15s; }
+.seg label:hover { background: var(--slot); }
+.seg input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.seg label:has(:checked) { background: var(--speck), var(--brand); color: var(--on-brand); }
+.seg label:has(:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* high contrast: plain paper. No grain, speckle or misregistration (--reg's offset shadows go clear), darker greys and rules */
+:root[data-contrast] {
+  --grain: none; --speck: none; --reg: transparent;
+  --muted: #3a4166; --hair: rgb(38 54 107 / .4); --line: rgb(38 54 107 / .7); --dot: rgb(38 54 107 / .5);
+}
+:root[data-contrast][data-theme="dark"] { --muted: #dde1ee; --hair: rgb(244 236 220 / .4); --line: rgb(244 236 220 / .7); --dot: rgb(244 236 220 / .5); }
+:root[data-contrast] :is(.wordmark, .big-score, .stars .on) { text-shadow: none; }
+:root[data-contrast] [filter] { filter: none; }
+
 /* ---------- print ---------- */
 /* #print is the paper version of the puzzle on screen, filled by printable() in core.js just before printing.
    One A4 sheet (plus one for the answer), black ink on white: no grain, no shadows, no motion. Game sheets style their own body in style.css. */
@@ -387,6 +429,7 @@ span[dir="ltr"] { white-space: nowrap; }
     --ink: #000; --muted: #444; --paper: #fff; --stock: #fff; --line: #000; --hair: #888;
     color-scheme: light;
   }
+  html { --scale: 1 !important; } /* text & tile size is for the screen (theme.js sets it inline): paper keeps its own measures */
   html, body { min-height: 0; }
   body.printing { background: none; }
   body.printing > :not(#print) { display: none !important; }

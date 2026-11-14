@@ -146,12 +146,12 @@ function penalty() {
 function drag(e) {
   const el = e.target.closest('.card');
   if (!el || el !== topCard() || R.over) return;
-  const x0 = e.clientX, t0 = performance.now();
+  const x0 = e.clientX, t0 = performance.now(), sc = pageScale();
   let dx = 0;
   el.setPointerCapture(e.pointerId);
   el.classList.add('held');
   const move = (ev) => {
-    dx = ev.clientX - x0;
+    dx = (ev.clientX - x0) / sc; // in the page's px, like --dx and offsetWidth
     el.style.setProperty('--dx', dx + 'px');
     el.style.setProperty('--lean', Math.max(-1, Math.min(1, dx / 120)));
   };
@@ -220,7 +220,7 @@ async function shareDaily(rec) {
 // Each language has its own rounds, so its own progress
 game = { name: T('WordSwipe'), storeKey: LANG === 'en' ? 'wordswipe' : 'wordswipe-' + LANG, glyphs: ['✓', '✗'] };
 try { store = JSON.parse(localStorage.getItem(game.storeKey)) || {}; } catch { store = {}; }
-store = { daily: {}, n: 0, best: 0, muted: false, seenHelp: false, ...store };
+store = { daily: {}, n: 0, best: 0, seenHelp: false, ...store };
 
 // Leave the round: the menu here; editor.html and play.html set their own.
 const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
@@ -232,7 +232,6 @@ $('#stack').addEventListener('pointerdown', drag);
 $('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The round ends now, scored as it stands.'))) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#dlg-help')?.addEventListener('close', () => { store.seenHelp = true; persist(); });
-for (const b of document.querySelectorAll('.js-sound')) b.onclick = () => { store.muted = !store.muted; persist(); syncSound(true); sfx.tap(); };
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
   if (!R || $('#game').hidden || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -258,7 +257,6 @@ function words(solved) {
   return `<div class="p-words">${[0, 8, 16].map((i) => `<ul><li class="p-key"><b>✓</b><b>✗</b></li>${R.cards.slice(i, i + 8).map((c) =>
     `<li>${box(c.yes ? '✓' : '')}${box(c.yes ? '' : '✗')}${esc(c.w)}</li>`).join('')}</ul>`).join('')}</div>`;
 }
-syncSound();
 // The rest is the game's own page (index.html), with its menu: editor.html and play.html have no #home.
 if ($('#home')) {
   $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
