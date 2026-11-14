@@ -87,28 +87,49 @@
   .today i { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line); }
   .today i.on { background: var(--brand); box-shadow: 1px 1px 0 var(--reg); }
   .today i + span { margin-inline-start: 5px; }
-  /* a small "try a random game" strip, atop the right column (Mathquilibrium spans both rows beside it) */
-  .game.lead { grid-row: span 2; }
-  .contents { grid-template-rows: auto 1fr; } /* the lead's extra height goes to Biggr's row, not the strip's */
-  .random {
-    grid-column: span 2; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px;
-    color: inherit; text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); background: var(--grain), var(--stock);
-    font: italic 600 18px/1.1 var(--display); animation: enter .45s 155ms both var(--ease); transition: box-shadow .15s;
+  /* the banner: a random game above the games, its lead-in over it and a rule under it (the script below deals it) */
+  .cover { container-name: cover; } /* named: inside the banner the nearest container is .b-text */
+  .pick { padding-bottom: clamp(20px, calc(3 * var(--vw)), 30px); margin-bottom: clamp(20px, calc(3 * var(--vw)), 30px); border-bottom: 1px solid var(--ink); animation: enter .45s 60ms both var(--ease); }
+  .b-ask { margin: 0 0 8px; font: italic 600 20px/1.1 var(--display); letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .banner {
+    --h: clamp(112px, 14cqw * var(--cq, 1), 136px); /* its height; the art is three times as wide */
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: var(--h); border-radius: 6px; overflow: clip;
+    color: inherit; text-decoration: none; background: var(--grain), var(--plate); box-shadow: inset 0 0 0 1px var(--hair);
   }
-  .random svg { flex: none; color: var(--pink-text); transition: transform .35s var(--ease); }
-  .random b { margin-inline-start: auto; font: inherit; color: var(--pink-text); }
-  [dir="rtl"] .random b { scale: -1 1; }
-  .random:hover { box-shadow: inset 0 0 0 1.5px var(--pink); }
-  .random:hover svg { transform: rotate(-20deg); }
+  :root[data-theme="dark"] .banner { --plate: var(--stock) !important; }
+  .b-text { container-type: inline-size; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 14px clamp(14px, 2.6cqw * var(--cq, 1), 26px); padding-inline-end: 8px; }
+  .b-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 14px; }
+  /* sized to its length (--n, set by the script), so Mathquilibrium fits the column and Biggr doesn't look lost in it */
+  .b-name { font: 600 min(46px, 130cqi * var(--cq, 1) / var(--n, 10))/1 var(--display); letter-spacing: -0.03em; font-variation-settings: 'SOFT' 60; }
+  .b-name span { color: var(--brand-text); }
+  .b-blurb { color: var(--muted); font-size: 14.5px; line-height: 1.4; max-width: 46ch; text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .b-go { font: italic 600 17px/1 var(--display); color: var(--brand-text); white-space: nowrap; }
+  [dir="rtl"] .b-go b { display: inline-block; scale: -1 1; }
+  .b-art { width: calc(3 * var(--h)); }
+  .b-art svg { stroke: none; display: block; width: 100%; height: 100%; transition: transform .35s var(--ease); }
+  .b-art .narrow { display: none; }
+  .banner:hover .b-art svg { transform: translate(-2px, -2px) rotate(-.6deg); }
+  .banner:hover .b-name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
+  /* portrait phones: a less wide banner, only the art's main motif, no blurb */
+  @container cover (max-width: 560px) {
+    .banner { grid-template-columns: minmax(0, 1fr) 40%; min-height: 0; aspect-ratio: 3 / 1; }
+    .b-art { width: auto; position: relative; }
+    .b-art .wide { display: none; }
+    /* out of the flow, so the banner's height comes from its ratio and not from the art */
+    .b-art .narrow { display: block; position: absolute; top: 10px; inset-inline-end: 12px; height: calc(100% - 20px); width: auto; max-width: calc(100% - 12px); } /* its frame's shape (the viewBox), so nothing around the frame shows */
+    .b-text { gap: 4px; padding-block: 10px; }
+    .b-head { flex-direction: column; align-items: start; row-gap: 4px; }
+    .b-blurb { display: none; }
+    .b-name { font-size: min(34px, 170cqi * var(--cq, 1) / var(--n, 10)); }
+    .b-ask { font-size: 17px; margin-bottom: 6px; }
+    .b-go { font-size: 15px; }
+  }
   .colophon { margin-top: 36px; text-align: center; font: italic 400 15px var(--display); color: var(--muted); }
 
   @container (max-width: 700px) {
     .contents { grid-template-columns: 1fr; gap: 22px; }
     /* a big text size leaves a narrow page: the plate gives up room first, then the name shrinks to fit its column (Mathquilibrium is long) */
     .game > div:last-child { min-width: 0; container-type: inline-size; }
-    .contents { grid-template-rows: none; }
-    .game.lead { grid-row: auto; }
-    .random { grid-column: auto; order: -1; } /* first thing on a phone */
     .game, .game.lead, .game.side, .game.wide { grid-column: auto; grid-template-columns: auto 1fr; grid-template-rows: none; align-items: center; gap: 16px; }
     /* its width here, not in the grid's columns: WebKit reads vw in grid-template-* wrongly under the zoom */
     .plate, .game.side .plate { width: clamp(80px, calc(100 * var(--vw) - 270px), 112px); aspect-ratio: 1; height: auto; min-height: 0; }
@@ -136,6 +157,13 @@
     <p class="issue"><span><b id="issue-no">No. 1</b></span><span id="issue-date"></span><span class="hide-sm">Price: one coffee break</span></p>
   </header>
 
+  <section class="pick">
+    <p class="kicker b-ask"></p>
+    <a class="banner" href="mathquilibrium/">
+      <span class="b-text"><span class="b-head"><span class="b-name"></span><span class="b-go">Play <b aria-hidden="true">→</b></span></span><span class="b-blurb"></span></span>
+      <span class="b-art"></span>
+    </a>
+  </section>
   <nav class="contents" aria-label="Games">
     <a class="game lead" href="mathquilibrium/" data-store="crossum2" style="--brand: var(--pink); --brand-text: var(--pink-text); --plate: #f7e0e8">
       <div class="plate">
@@ -159,7 +187,6 @@
         <div class="today"></div>
       </div>
     </a>
-    <a class="random" href="biggr/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r=".6" fill="currentColor"/><circle cx="15" cy="15" r=".6" fill="currentColor"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg><span>Try a random game</span><b aria-hidden="true">→</b></a>
     <a class="game side" href="biggr/" data-store="biggr" style="--brand: var(--orange); --brand-text: var(--orange-text); --plate: #f8e2d5; --d: 70ms">
       <div class="plate">
         <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
@@ -310,6 +337,130 @@
   <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
   <feComposite in="SourceGraphic" operator="out"/>
 </filter></svg>
+<!-- Banner art, one per game (data-for: its card's href). Drawn 360×120 for wide screens; phones show only the main motif,
+     framed whole by data-narrow (a viewBox). No words in the art: it isn't translated. -->
+<template id="banner-art">
+  <svg class="art" data-for="mathquilibrium/" data-narrow="118 6 112 108" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g filter="url(#speck)">
+      <circle class="ov" cx="58" cy="90" r="22" fill="var(--pink)" opacity=".7"/>
+      <rect class="card" x="30" y="20" width="28" height="28" rx="6"/><text x="44" y="34">8</text>
+      <rect x="64" y="20" width="28" height="28" rx="6" fill="none" stroke="var(--pink)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <rect class="card" x="126" y="46" width="28" height="28" rx="6"/><text x="140" y="60">4</text>
+      <rect x="162" y="48" width="28" height="28" rx="6" fill="var(--reg)" opacity=".9"/>
+      <rect x="160" y="46" width="28" height="28" rx="6" fill="var(--pink)"/><text class="on-ink" x="174" y="60">+</text>
+      <rect class="card" x="194" y="46" width="28" height="28" rx="6"/><text x="208" y="60">3</text>
+      <rect class="card" x="160" y="12" width="28" height="28" rx="6"/><text x="174" y="26">5</text>
+      <rect x="160" y="80" width="28" height="28" rx="6" fill="none" stroke="var(--pink)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text x="238" y="60" style="font: italic 600 24px Fraunces, serif">=</text>
+      <rect class="card" x="254" y="46" width="28" height="28" rx="6"/><text x="268" y="60">7</text>
+      <circle class="ov" cx="316" cy="32" r="20" fill="var(--sun)"/>
+      <rect class="card" x="300" y="78" width="28" height="28" rx="6" transform="rotate(8 314 92)"/><text x="314" y="92" transform="rotate(8 314 92)">2</text>
+    </g>
+  </svg>
+  <svg class="art" data-for="biggr/" data-narrow="112 4 120 112" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g style="fill: var(--orange-text); opacity: .5"><text x="56" y="36">6+7</text><text x="92" y="92">3×9</text><text x="290" y="36">48÷6</text><text x="320" y="94">11+5</text></g>
+    <g filter="url(#speck)">
+      <rect class="ov" x="122" y="50" width="54" height="56" rx="7" fill="var(--pink)"/>
+      <rect class="ov" x="158" y="12" width="64" height="94" rx="7" fill="var(--orange)"/>
+      <text x="190" y="36" class="on-ink" style="font-size: 16px">9×6</text>
+      <text x="140" y="80" class="on-ink" style="font-size: 14px">7×8</text>
+      <circle class="ov" cx="258" cy="84" r="14" fill="var(--sun)"/>
+    </g>
+  </svg>
+  <svg class="art" data-for="wordswipe/" data-narrow="140 8 84 100" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="4 3" stroke-linecap="round"><path d="M136 34Q112 22 96 30"/><path d="M226 34Q250 22 266 32"/></g>
+    <g filter="url(#speck)">
+      <g transform="rotate(-22 60 58)"><rect class="card" x="40" y="30" width="40" height="56" rx="7"/><circle cx="60" cy="58" r="11" fill="var(--pink)"/></g>
+      <g transform="rotate(20 300 60)"><rect class="card" x="280" y="32" width="40" height="56" rx="7"/><circle cx="300" cy="60" r="11" fill="var(--teal)"/></g>
+      <rect class="ov" x="154" y="24" width="48" height="68" rx="8" fill="var(--pink)" transform="rotate(-14 178 58)"/>
+      <rect class="ov" x="162" y="22" width="48" height="68" rx="8" fill="var(--teal)" transform="rotate(12 186 56)"/>
+      <rect class="card" x="156" y="28" width="48" height="68" rx="8"/>
+      <rect x="166" y="48" width="28" height="4" rx="2" fill="var(--line)"/><rect x="170" y="58" width="20" height="4" rx="2" fill="var(--line)"/>
+      <text x="180" y="78" style="font: italic 600 16px var(--display)">?</text>
+    </g>
+    <g fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M55 53l10 10M65 53l-10 10" transform="rotate(-22 60 58)"/><path d="M294 60l4 4 8-8" transform="rotate(20 300 60)"/></g>
+  </svg>
+  <svg class="art" data-for="orderly/" data-narrow="101 6 160 104" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M80 64H98" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/><path d="M92 59l7 5-7 5" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g filter="url(#speck)">
+      <rect class="card" x="26" y="30" width="16" height="44" rx="4" transform="rotate(-18 34 52)"/>
+      <rect x="50" y="46" width="16" height="56" rx="4" fill="var(--sun)" transform="rotate(14 58 74)"/>
+      <rect x="18" y="80" width="16" height="30" rx="4" fill="var(--ink)" transform="rotate(-6 26 95)"/>
+      <rect class="card" x="104" y="84" width="16" height="20" rx="4"/>
+      <rect class="card" x="126" y="72" width="16" height="32" rx="4"/>
+      <rect class="card" x="148" y="60" width="16" height="44" rx="4"/>
+      <rect x="172" y="50" width="16" height="56" rx="4" fill="var(--reg)"/><rect x="170" y="48" width="16" height="56" rx="4" fill="var(--sun)"/>
+      <rect x="194" y="38" width="16" height="68" rx="4" fill="var(--reg)"/><rect x="192" y="36" width="16" height="68" rx="4" fill="var(--sun)"/>
+      <rect x="216" y="26" width="16" height="80" rx="4" fill="var(--sun)"/><rect x="214" y="24" width="16" height="80" rx="4" fill="var(--ink)"/>
+      <rect x="238" y="14" width="16" height="92" rx="4" fill="var(--sun)"/><rect x="236" y="12" width="16" height="92" rx="4" fill="var(--ink)"/>
+      <circle class="ov" cx="316" cy="36" r="18" fill="var(--sun)"/>
+    </g>
+  </svg>
+  <svg class="art" data-for="coronet/" data-narrow="126 4 110 112" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".45"><circle cx="20" cy="60" r="72"/><circle cx="340" cy="60" r="72"/></g>
+    <g filter="url(#speck)">
+      <circle class="ov" cx="44" cy="94" r="14" fill="var(--sun)"/><circle class="ov" cx="318" cy="26" r="12" fill="var(--orange)"/>
+    </g>
+    <path transform="translate(70 34) scale(.9)" fill="var(--pink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+    <path transform="translate(296 90) scale(.9)" fill="var(--teal)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+    <g transform="translate(180 59) scale(1.05)">
+      <circle r="46" cx="2" cy="3" fill="var(--reg)"/>
+      <g filter="url(#speck)">
+        <circle r="45" fill="var(--stock)"/>
+        <path d="M0-45A45 45 0 0 1 45 0H10A10 10 0 0 0 0-10Z" fill="var(--pink)"/>
+        <path d="M45 0A45 45 0 0 1 0 45V10A10 10 0 0 0 10 0Z" fill="var(--teal)"/>
+        <path d="M0 45A45 45 0 0 1-45 0H-10A10 10 0 0 0 0 10Z" fill="var(--sun)"/>
+        <path d="M-45 0A45 45 0 0 1 0-45V-10A10 10 0 0 0-10 0Z" fill="var(--orange)"/>
+      </g>
+      <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle r="45"/><circle r="27.5" stroke-width=".7" opacity=".5"/><path d="M0-45V-10M45 0H10M0 45V10M-45 0H-10"/></g>
+      <path transform="translate(22 -22) scale(.85)" fill="var(--ink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+      <path transform="translate(-14 14) scale(.6)" fill="var(--ink)" d="M-9 4.5-10.5-6.5-4.5-1.5 0-10 4.5-1.5 10.5-6.5 9 4.5ZM-9 7h18v3h-18Z"/>
+      <circle r="10" fill="var(--stock)" stroke="var(--ink)" stroke-width="1.6"/>
+    </g>
+  </svg>
+  <svg class="art" data-for="quadflip/" data-narrow="106 16 144 88" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g filter="url(#speck)">
+      <path d="M164 18H192V102H164V74H136V46H164Z" fill="var(--sun)" opacity=".5"/>
+      <rect class="card" x="-2" y="20" width="24" height="24" rx="5"/><rect x="26" y="20" width="24" height="24" rx="5" fill="var(--teal)"/><rect x="54" y="20" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="82" y="20" width="24" height="24" rx="5"/><rect x="110" y="20" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="138" y="20" width="24" height="24" rx="5"/><rect class="card" x="166" y="20" width="24" height="24" rx="5"/><rect x="194" y="20" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="222" y="20" width="24" height="24" rx="5"/><rect x="250" y="20" width="24" height="24" rx="5" fill="var(--teal)"/><rect x="278" y="20" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="306" y="20" width="24" height="24" rx="5"/><rect x="334" y="20" width="24" height="24" rx="5" fill="var(--teal)"/>
+      <rect x="-2" y="48" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="26" y="48" width="24" height="24" rx="5"/><rect x="54" y="48" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="82" y="48" width="24" height="24" rx="5"/><rect class="card" x="110" y="48" width="24" height="24" rx="5"/><rect x="138" y="48" width="24" height="24" rx="5" fill="var(--teal)"/><rect x="166" y="48" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="194" y="48" width="24" height="24" rx="5"/><rect class="card" x="222" y="48" width="24" height="24" rx="5"/><rect x="250" y="48" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="278" y="48" width="24" height="24" rx="5"/><rect x="306" y="48" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="334" y="48" width="24" height="24" rx="5"/>
+      <rect class="card" x="-2" y="76" width="24" height="24" rx="5"/><rect x="26" y="76" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="54" y="76" width="24" height="24" rx="5"/><rect x="82" y="76" width="24" height="24" rx="5" fill="var(--teal)"/><rect x="110" y="76" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="138" y="76" width="24" height="24" rx="5"/><rect x="166" y="76" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="194" y="76" width="24" height="24" rx="5"/><rect x="222" y="76" width="24" height="24" rx="5" fill="var(--teal)"/><rect class="card" x="250" y="76" width="24" height="24" rx="5"/><rect class="card" x="278" y="76" width="24" height="24" rx="5"/><rect x="306" y="76" width="24" height="24" rx="5" fill="var(--teal)"/><rect x="334" y="76" width="24" height="24" rx="5" fill="var(--teal)"/>
+    </g>
+    <path d="M164 18H192V102H164V74H136V46H164Z" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4 3"/>
+  </svg>
+  <svg class="art" data-for="alienchess/" data-narrow="120 0 120 120" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g filter="url(#speck)">
+      <rect class="card" width="360" height="120"/>
+      <path d="M30 0h30v30h-30zM90 0h30v30h-30zM150 0h30v30h-30zM210 0h30v30h-30zM270 0h30v30h-30zM330 0h30v30h-30zM0 30h30v30h-30zM60 30h30v30h-30zM120 30h30v30h-30zM180 30h30v30h-30zM240 30h30v30h-30zM300 30h30v30h-30zM30 60h30v30h-30zM90 60h30v30h-30zM150 60h30v30h-30zM210 60h30v30h-30zM270 60h30v30h-30zM330 60h30v30h-30zM0 90h30v30h-30zM60 90h30v30h-30zM120 90h30v30h-30zM180 90h30v30h-30zM240 90h30v30h-30zM300 90h30v30h-30z" fill="var(--red)" opacity=".2"/>
+      <circle class="ov" cx="45" cy="45" r="18" fill="var(--sun)"/><circle class="ov" cx="315" cy="75" r="14" fill="var(--teal)"/>
+      <g transform="translate(212.6 31) scale(.62)" fill="var(--red)" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"><path d="M8 45h24l-2-5H10zM14 40l2-11h8l2 11zM12 29h16v-3.5H12zM9 26c-2-6 0-10 3-13 2-7 14-7 16 0 3 3 5 7 3 13z"/><circle cx="20" cy="15" r="4.6" fill="var(--stock)"/><circle cx="20.8" cy="15.6" r="2.1" fill="var(--navy)" stroke="none"/><path d="M1 12L0 3l4.5 3.5L8 0l3.5 6.5L16 3l-1 9z" fill="var(--sun)"/></g>
+      <g transform="translate(152.6 91) scale(.62)" fill="var(--stock)" stroke="var(--ink)" stroke-width="2.4" stroke-linejoin="round"><path d="M20 10V5" fill="none"/><circle cx="20" cy="4" r="2.2"/><path d="M8 45h24l-2-5H10zM14 40l2-11h8l2 11zM12 29h16v-3.5H12zM12 26V10h16v16z"/><path d="M14.5 14h11v5h-11z" fill="var(--ink)" stroke="none"/></g>
+    </g>
+    <ellipse cx="315" cy="75" rx="24" ry="6" fill="none" stroke="var(--ink)" stroke-width="1.4" transform="rotate(-18 315 75)"/>
+    <path d="M166 92Q170 52 210 50" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/><path d="M203 45l8 5-8 4" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <svg class="art" data-for="balancingact/" data-narrow="120 0 124 100" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="var(--ink)" stroke-width="1"><path d="M52 52q-5 14 2 30M300 40q5 12-2 26"/></g>
+    <g filter="url(#speck)">
+      <circle cx="52" cy="40" r="12" fill="var(--teal)"/><circle cx="300" cy="30" r="10" fill="var(--teal)"/>
+      <circle class="ov" cx="330" cy="70" r="9" fill="var(--pink)"/>
+      <path d="M78 104l3-12h16l3 12z" fill="var(--ink)"/><path d="M262 104l3-10h10l3 10z" fill="var(--orange)"/>
+    </g>
+    <g transform="translate(126 2) scale(1.18)">
+      <g fill="none" stroke="var(--ink)" stroke-width="1.2"><path d="M32 4v18M12 26v26M12 52L3 70M12 52l9 18M72 26v14M58 44v8M58 52l-9 18M58 52l9 18M88 44v12"/></g>
+      <g filter="url(#speck)">
+        <rect x="9" y="21" width="66" height="6" rx="3" fill="var(--ink)"/>
+        <path d="M32 21l-4-6h8z" fill="var(--ink)"/>
+        <rect x="55" y="39" width="36" height="5" rx="2.5" fill="var(--ink)"/>
+        <path d="M0 70h24q-2 7-12 7T0 70z" fill="var(--orange)"/>
+        <path d="M46 70h24q-2 7-12 7t-12-7z" fill="var(--orange)"/>
+        <path d="M6 69l2-8h8l2 8zM50 69l2-8h12l2 8z" fill="var(--ink)"/>
+        <circle cx="88" cy="62" r="7" fill="var(--teal)"/>
+      </g>
+      <text x="20" y="17" font-size="10" font-weight="700" font-family="Fraunces, serif" text-anchor="middle" style="fill: var(--orange-text)">1</text>
+      <text x="52" y="17" font-size="10" font-weight="700" font-family="Fraunces, serif" text-anchor="middle" style="fill: var(--orange-text)">2</text>
+    </g>
+  </svg>
+</template>
 <script src="wordswipe/special.js"></script>
 <script>
   const d = new Date(), today = d.toISOString().slice(0, 10); // UTC, like the games
@@ -332,19 +483,34 @@
       `<span>${n === tiers.length ? 'All dailies done' : n ? `${n} of ${tiers.length} dailies today` : `${tiers.length} new dailies today`}</span>`;
   }
 
-  // "Try a random game": a real link (so it opens in a new tab too), re-picked on every press: a page restored by Back
-  // (the back/forward cache) doesn't rerun this script, so a pick made once on load would stick
-  const games = document.querySelectorAll('.game'), random = document.querySelector('.random');
-  const pick = () => { random.href = games[Math.floor(Math.random() * games.length)].getAttribute('href'); };
-  pick();
-  random.addEventListener('pointerdown', pick); // before a click, a middle click or a long press
-  random.addEventListener('keydown', (e) => e.key === 'Enter' && pick());
+  // The banner: a random game with its own art and a random lead-in; its name, blurb and colors come from the game's card.
+  // Dealt again when Back restores the page from the back/forward cache (which doesn't rerun this script).
+  const ASK = ['Did you try…', "Let's play…", 'Have you considered…'], pick = document.querySelector('.pick'), banner = pick.querySelector('.banner');
+  const any = (list) => list[Math.floor(Math.random() * list.length)];
+  const deal = () => {
+    const art = any(document.getElementById('banner-art').content.children), card = document.querySelector(`.game[href='${art.dataset.for}']`); // single quotes: build.js would rewrite a double-quoted href as a link
+    const name = banner.querySelector('.b-name');
+    banner.href = art.dataset.for;
+    pick.setAttribute('style', card.getAttribute('style'));
+    pick.querySelector('.b-ask').textContent = any(ASK);
+    name.innerHTML = card.querySelector('h2').innerHTML;
+    name.style.setProperty('--n', Math.max(7, name.textContent.length));
+    banner.querySelector('.b-blurb').textContent = card.querySelector('p').textContent;
+    const wide = art.cloneNode(true), narrow = art.cloneNode(true);
+    wide.classList.add('wide');
+    narrow.classList.add('narrow');
+    narrow.setAttribute('viewBox', art.dataset.narrow);
+    narrow.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    banner.querySelector('.b-art').replaceChildren(wide, narrow);
+  };
+  deal();
+  addEventListener('pageshow', (e) => e.persisted && deal());
 
   // On a WordSwipe special day (holidays, see wordswipe/special.js) its card shows a word that fits that day's subject:
   // the first short one (the lists lead with the most iconic), else the shortest, shrunk if still too wide for the card.
   const sp = SPECIAL.find((l) => l.startsWith(today + '|'));
   if (sp) {
-    const fits = sp.split('|')[3].split(','), t = document.querySelector('a[href="wordswipe/"] text');
+    const fits = sp.split('|')[3].split(','), t = document.querySelector('.game[href="wordswipe/"] text');
     t.textContent = (fits.find((w) => w.length <= 7) ?? fits.reduce((a, b) => (b.length < a.length ? b : a))) + '?';
     document.fonts.ready.then(() => { const w = t.getComputedTextLength(); if (w > 38) t.style.fontSize = 15 * 38 / w + 'px'; });
   }

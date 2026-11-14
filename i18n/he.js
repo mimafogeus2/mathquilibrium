@@ -440,7 +440,6 @@ module.exports = {
       ['<span class="kicker">01 <em>Math</em></span>', '<span class="kicker">01 <em>חשבון</em></span>'],
       ['<h2>Math<span>quilibrium</span></h2>', '<h2>מאו<span>זן</span></h2>'],
       ['<p>The numbers are given. Fill in the operators so every line is true.</p>', '<p>המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.</p>'],
-      ['<span>Try a random game</span>', '<span>נסו משחק אקראי</span>'],
       ['<span class="kicker">02 <em>Math</em></span>', '<span class="kicker">02 <em>חשבון</em></span>'],
       ['<h2>Bigg<span>r</span></h2>', '<h2><span>כ</span>מה <span>כ</span>מה</h2>'],
       ['<p>Two sums, no answers. Pick the bigger one, fast.</p>', '<p>שני תרגילים, בלי תשובות. בחרו את הגדול יותר, מהר.</p>'],
@@ -466,7 +465,9 @@ module.exports = {
       ['<h2>Balancing <span>Act</span></h2>', '<h2>על כפות <span>המאזניים</span></h2>'],
       ['<p>Hang every weight on the right plate until the whole contraption hangs level.</p>', '<p>תלו כל משקולת על הכף הנכונה, עד שכל המתקן התלוי מאוזן.</p>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
+      ['<span class="b-go">Play <b', '<span class="b-go">שחקו <b'],
       // the inline script
+      [`['Did you try…', "Let's play…", 'Have you considered…']`, "['ניסיתם את…', 'בואו נשחק…', 'שווה לנסות:']"],
       ['`No. ${no.toLocaleString()}`', '`גיליון ${no.toLocaleString()}`'],
       ['d.toLocaleDateString(undefined,', "d.toLocaleDateString('he',"],
       ["`Today: ${done.r.c ? `${done.r.c} check${done.r.c > 1 ? 's' : ''}` : `${done.r.s} points`}` : 'New round today'",
