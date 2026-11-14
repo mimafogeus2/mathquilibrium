@@ -199,6 +199,80 @@ if (helpPages.length > 1) {
 // Opening focuses Next / Got it, not the × that comes first (showModal skips the hidden one)
 for (const b of document.querySelectorAll('#dlg-help form:not(.dlg-x) .btn.primary')) b.autofocus = true;
 
+// ---------- tutorial ----------
+// coach(steps, opts) teaches on a real board: one line at a time under the screen's top bar. A step is [html, done?(), target?]:
+// done() is checked after every tap, key and drag, and when it holds the next line takes over; target (a selector or an element, or
+// a function returning one) gets a pulsing ring. A step without done() waits for coachEnd(), called on the tutorial puzzle's win,
+// which says so and offers opts.onEnd (back to the menu). coach(null) takes it down.
+let coached = null;
+function coach(steps, { screen = $('#game'), onEnd } = {}) {
+  coached?.el.remove();
+  for (const e of document.querySelectorAll('.coach-at')) e.classList.remove('coach-at');
+  coached = null;
+  screen?.classList.toggle('tut', !!steps);
+  if (!steps) return;
+  const el = Object.assign(document.createElement('div'), { id: 'coach', className: 'coach' });
+  el.setAttribute('role', 'status');
+  screen.querySelector('.bar').after(el);
+  coached = { steps, at: -1, el, onEnd };
+  coachGo(0);
+}
+function coachGo(n) {
+  const c = coached;
+  if (n > c.at) { c.at = n; if (n) sfx.tap(); }
+  const [html, , target] = c.steps[c.at];
+  c.el.innerHTML = `<small>${T('Tutorial · {n} of {k}', { n: c.at + 1, k: c.steps.length })}</small><p>${html}</p>`;
+  flash(c.el, 'pop');
+  coachRing(target);
+}
+function coachRing(target) {
+  for (const e of document.querySelectorAll('.coach-at')) e.classList.remove('coach-at');
+  const t = typeof target === 'function' ? target() : target, e = typeof t === 'string' ? $(t) : t;
+  e?.classList.add('coach-at');
+}
+// after the game has handled the input (and redrawn), see whether the step is done; several can pass at once
+const coachCheck = () => setTimeout(() => {
+  const c = coached;
+  if (!c) return;
+  let n = c.at;
+  while (c.steps[n]?.[1]?.() && n < c.steps.length - 1) n++;
+  if (n !== c.at) coachGo(n); else coachRing(c.steps[n][2]); // a redraw may have replaced the ringed element
+}, 60);
+for (const t of ['pointerup', 'keyup', 'click']) addEventListener(t, coachCheck);
+function coachEnd() {
+  const c = coached;
+  if (!c) return;
+  c.el.innerHTML = `<small>${T('Tutorial')}</small><p>${T("That's it — you know how to play. Have fun!")}</p>`;
+  flash(c.el, 'pop');
+  coachRing(null);
+  const d = Object.assign(document.createElement('dialog'), { className: 'coach-done' });
+  d.innerHTML = `<h2>${T('Tutorial complete!')}</h2><p>${T("That's all there is to it. The real puzzles are waiting.")}</p>` +
+    `<form method="dialog"><button class="btn primary center"><b>${T("Let's play")}</b></button></form>`;
+  d.addEventListener('close', () => { d.remove(); coach(null); c.onEnd?.(); });
+  setTimeout(() => { if (coached === c) { document.body.append(d); d.showModal(); } }, 1400);
+}
+// A "Tutorial" link beside How to play on the menu, running play()
+function tutorialLink(play) {
+  const help = $('#btn-help');
+  help?.insertAdjacentHTML('beforebegin', `<button id="btn-tutorial" class="foot-link">${T('Tutorial')}</button>`);
+  if (help) $('#btn-tutorial').onclick = () => { track('tutorial', ''); play(); };
+}
+// boot() games: game.tutorial = steps (above, read with G in scope). #tutorial plays it: G.tut is set, and game.start builds the
+// tutorial's own small puzzle for it. Nothing is saved or recorded, and the clock stays out of it.
+function startTutorial() {
+  G = { pack: Object.keys(TIERS)[0], n: 0, date: null, key: 'tutorial', elapsed: 0, hinted: new Set(), done: false, paused: false, tut: true };
+  $('#g-title').textContent = T('Tutorial');
+  show('game');
+  $('#game').classList.remove('done');
+  $('#btn-result').hidden = true;
+  toGame('tutorial');
+  clearInterval(timer);
+  game.start(G, {});
+  setPaused(false);
+  $('#timer').textContent = fmt(0);
+  coach(game.tutorial, { onEnd: () => show('home') });
+}
+
 function flash(el, cls) {
   el.classList.remove('pop', 'shake', 'psst');
   void el.getBoundingClientRect();
@@ -244,6 +318,7 @@ function router(open, home) {
 const levelCode = (n) => ((n * 9973) % 46656).toString(36).padStart(3, '0');
 const levelHash = (pack, n) => (n ? '' : 'daily-') + TIERS[pack].toLowerCase() + (n ? '-' + (game.random ? levelCode(n) : n) : '');
 function openLevel(h, start) {
+  if (h === 'tutorial' && game.tutorial) { startTutorial(); return true; }
   const [a, b] = h.split('-'), tier = (s) => Object.keys(TIERS).find((k) => TIERS[k].toLowerCase() === s), p = tier(a);
   const n = game.random ? Array.from({ length: PACK_SIZE }, (_, i) => i + 1).find((i) => levelCode(i) === b) : +b;
   if (a === 'daily' && tier(b)) start(tier(b), null, ymd(new Date()));
@@ -268,7 +343,7 @@ function playRandom(pack, fresh) {
 // ---------- screens ----------
 function show(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') { renderHome(); toMenu(); }
+  if (id === 'home') { coach(null); renderHome(); toMenu(); }
 }
 
 function renderHome() {
@@ -310,6 +385,7 @@ function renderHome() {
 function start(pack, n, date = null) {
   const key = date ? 'D' + pack + date : pack + n, save = store.saves[key] || {}, rec = date && store.daily[date]?.[pack];
   G = { pack, n, date, key, elapsed: 0, hinted: new Set(), done: !!rec, paused: false };
+  coach(null);
   track(rec ? 'result' : 'start');
   $('#g-title').textContent = date ? T('Daily · {tier}', { tier: tierName(pack) }) : `${tierName(pack)} · ${game.random ? levelCode(n) : n}`;
   show('game');
@@ -356,13 +432,13 @@ function setPaused(v) {
 }
 
 function saveGame() {
-  if (G.done) return;
+  if (G.done || G.tut) return;
   store.saves[G.key] = { ...game.save(G), elapsed: G.elapsed };
   persist();
 }
 
 function tick() {
-  if (!G || G.done || G.paused || document.hidden || $('#game').hidden || document.querySelector('dialog[open], :popover-open')) return;
+  if (!G || G.done || G.tut || G.paused || document.hidden || $('#game').hidden || document.querySelector('dialog[open], :popover-open')) return;
   G.elapsed++;
   $('#timer').textContent = fmt(G.elapsed);
   if (G.elapsed % 5 === 0) saveGame();
@@ -399,6 +475,13 @@ function copyLink(url, btn) {
 function win() {
   const st = streak();
   G.done = true;
+  if (G.tut) {
+    $('#board').classList.add('solved');
+    $('#game').classList.add('done');
+    sfx.win();
+    confetti();
+    return coachEnd();
+  }
   clearInterval(timer);
   delete store.saves[G.key];
   const h = G.hinted.size, rec = { t: G.elapsed, h, s: IMP ? game.impossible?.stars?.(G) ?? 3 : game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1, m: game.moves?.(G) };
@@ -656,6 +739,7 @@ function boot(g) {
     for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(b.dataset.pack, true);
   } else $('#btn-levels').onclick = () => openLevels();
   $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
+  if (g.tutorial) tutorialLink(startTutorial);
   const home = () => { if (G && !G.done) saveGame(); clearInterval(timer); show('home'); };
   $('#btn-back').onclick = home;
   $('#btn-pause').onclick = () => setPaused(!G.paused);
@@ -685,5 +769,5 @@ function boot(g) {
 
   nudge(() => playing() && !$('#game').hidden);
   router((h) => openLevel(h, start), home);
-  if (!store.seenHelp && !g.ownIntro) $('#dlg-help').showModal();
+  if (!store.seenHelp && !g.ownIntro && !coached) $('#dlg-help').showModal();
 }

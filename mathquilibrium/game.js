@@ -63,6 +63,21 @@ function intro(ids) {
   persist();
 }
 
+// ---------- tutorial ----------
+// A 5×5 cross: 3 _ 5 = 8 across, 2 _ 4 _ 6 down, sharing the first blank (+). Built like generate()'s output.
+function tutorialPuzzle() {
+  const rows = [[, 2], [3, '+', 5, '=', 8], [, 4], [, '='], [, 6]], cells = [];
+  rows.forEach((row, r) => row.forEach((val, c) => {
+    if (val === undefined) return;
+    const op = typeof val === 'string';
+    cells.push({ i: cells.length, r, c, val, key: r + ',' + c, op, given: !op, eqs: [] });
+  }));
+  const at = (k) => cells.find((c) => c.key === k), across = ['1,0', '1,1', '1,2', '1,3', '1,4'], down = ['0,1', '1,1', '2,1', '3,1', '4,1'];
+  [across, down].forEach((line, e) => line.forEach((k) => at(k).eqs.push(e)));
+  return { rows: 5, cols: 5, cells, eqs: [across, down].map((l) => l.map((k) => at(k).i)), ops: ['+', '-', '×', '÷'], rels: ['='] };
+}
+const tile = (k) => () => G.p.cells.find((c) => c.key === k).el;
+
 // ---------- game ----------
 const editable = (c) => c.op && !c.given && !G.hinted.has(c.key);
 const valOf = (c) => (c.op && !c.given ? G.fills.get(c.key) : c.val);
@@ -70,8 +85,7 @@ const valOf = (c) => (c.op && !c.given ? G.fills.get(c.key) : c.val);
 // Shell hook: build pack level / daily G.key; returns true if the save was restored.
 function startLevel(G, save) {
   const { pack, n, date, key } = G;
-  const diff = date ? PACKS[pack].daily : packDifficulty(pack, n);
-  const p = generate(hash(key), levelConfig(diff));
+  const p = G.tut ? tutorialPuzzle() : generate(hash(key), levelConfig(date ? PACKS[pack].daily : packDifficulty(pack, n)));
   const s = saveFits(p, save) ? save : {};
   Object.assign(G, { p, fills: new Map(s.fills), hinted: new Set(s.hinted), sel: null, states: [], history: [] });
 
@@ -80,7 +94,7 @@ function startLevel(G, save) {
   // intros (how to play, then each operator) show once ever, on the first level that uses them
   const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val)), seen = store.intros || [];
   const todo = ['first', ...Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)))].filter((k) => !seen.includes(k));
-  if (todo.length) intro(todo);
+  if (todo.length && !G.tut) intro(todo);
   buildBoard();
   buildPalette();
   balancePalette();
@@ -397,7 +411,12 @@ printable(() => {
 mini($('#logo'), ['.5.8.', '4+3=7', '.1.1.', '.=.+.', '.6.7.']);
 mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,3']);
 // ponytail: storage key keeps the old name so existing saves survive the rename.
-boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true, glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
+boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true,
+  tutorial: [
+    [T('Every row and column has to be a <b>true equation</b>. The ringed tile sits in 3 _ 5 = 8: pick the operator that fits from the keys below.'), () => G.fills.get('1,1') === '+', tile('1,1')],
+    [T('That tile is <b>shared</b>: the column reads 2 + 4 _ 6 now. One symbol has to work both ways. Finish the row: tap its last blank and pick <b>=</b>.'), () => G.fills.get('1,3') === '=', tile('1,3')],
+    [T('A line turns green when it\'s true. Now finish the column.'), null, tile('3,1')],
+  ], glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); },
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 600 ? 3 : G.elapsed <= 1200 ? 2 : 1) } });
