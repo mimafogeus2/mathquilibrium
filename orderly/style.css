@@ -12,10 +12,6 @@
 #btn-random b { font-size: 17px; }
 
 /* new puzzle: a quiet row of difficulties, pips above the name */
-.new-head { margin: 6px 2px -4px; }
-#new-row .btn { padding: 12px 8px; }
-#new-row .btn b { font-size: 15px; }
-#new-row .btn b::before { content: var(--pips); display: block; font-size: 8px; letter-spacing: 2px; color: var(--brand-text); margin-bottom: 3px; }
 
 /* topic picker */
 .t-all { margin-bottom: 12px; }
