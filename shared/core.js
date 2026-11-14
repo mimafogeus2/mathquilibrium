@@ -407,10 +407,10 @@ async function share() {
   const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.m ? `👣 ${T('{n} moves', { n: r.m })}  ` : ''}${'⭐'.repeat(s)}` +
     (st ? `  🔥 ${T('{n}-day streak', { n: st })}` : '') +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
-  try {
-    if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); copied($('#win-next b')); }
-  } catch {}
+  // Android's in-app browsers (Telegram, Gmail…) have no navigator.share, or a share that rejects: copy instead, down to the
+  // copy-by-hand box, so the button never silently does nothing. Only a cancelled share sheet stays quiet.
+  if (navigator.share) try { return await navigator.share({ text }); } catch (e) { if (e.name === 'AbortError') return; }
+  copyLink(text, $('#win-next'));
 }
 
 // Cut paper in the page's inks, overprinted (multiply on cream, screen on blue stock). A special day passes its own glyphs (its emoji);
