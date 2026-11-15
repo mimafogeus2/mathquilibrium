@@ -166,7 +166,6 @@ function undo() {
 function cycle(i, toQueen = false) {
   if (!playing() || G.hinted.has(i)) return;
   const k = shown(i);
-  toQueen ||= !!G.tut && G.p.queens.includes(i); // the tutorial never marks an answer arc ×: one tap crowns it
   if (!coachAllows({ i, to: k === 'q' ? '' : k || toQueen ? 'q' : 'm' })) return;
   G.history.push(snap());
   if (k === 'q') { G.queens.delete(i); sfx.erase(); refresh(true); }
@@ -321,18 +320,19 @@ const arc = (i) => () => {
 // lime is one arc (14) -> its slice takes blue's other two, so blue is arc 1 -> yellow is down to arc 8, so ring 3's
 // other open arc (11) is out -> the queen on 8 -> the last ring, slice and color meet at 7.
 const only = (i, to) => (m) => m.i === i && m.to === to;
+const crown = (i) => (m) => m.i === i && (m.to === 'm' || m.to === 'q'); // as in play: × first, then the queen
 boot({ name: T('Coronet'), storeKey: 'coronet', random: true,
   tutorial: [
-    [T('Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there: tap it.'),
-      () => G.queens.has(14), arc(14), only(14, 'q')],
-    [T('The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen\'s slice. Tap the last blue one.'),
-      () => G.queens.has(1), arc(1), only(1, 'q')],
+    [T('Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there. One tap marks an arc <b>×</b>, a second crowns it: tap the ringed arc twice.'),
+      () => G.queens.has(14), arc(14), crown(14)],
+    [T('The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen\'s slice. Crown the last blue one.'),
+      () => G.queens.has(1), arc(1), crown(1)],
     [T('Now yellow has just one arc left, so the queen of its ring (the third from the centre) goes there. That rules out the ringed arc in the same ring: tap it <b>once</b> to mark it ×.'),
       () => G.marks.has(11), arc(11), only(11, 'm')],
     [T('Mark × wherever you\'ve worked out a queen can\'t go. Now crown the yellow arc.'),
-      () => G.queens.has(8), arc(8), only(8, 'q')],
+      () => G.queens.has(8), arc(8), crown(8)],
     [T('One ring, one slice and one color are left, and they meet on one arc: the last queen. In a real puzzle <b>Hint</b> places a queen when you\'re stuck, but hints cost stars.'),
-      null, arc(7), only(7, 'q')],
+      null, arc(7), crown(7)],
   ], glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 300 ? 3 : G.elapsed <= 720 ? 2 : 1) },

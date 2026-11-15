@@ -100,7 +100,7 @@ function startLevel(G, save) {
   buildBoard();
   buildPalette();
   balancePalette();
-  G.sel = nextEmpty(null);
+  G.sel = G.tut ? null : nextEmpty(null);
   refresh(false);
   return s === save;
 }
@@ -278,7 +278,7 @@ function nextEmpty(from) {
 
 function place(op) {
   if (!playing()) return;
-  if (!G.sel || !editable(G.sel)) G.sel = nextEmpty(null);
+  if (!G.sel || !editable(G.sel)) { if (G.tut) return coachAllows({}); G.sel = nextEmpty(null); } // the tutorial picks its tiles by hand
   const cell = G.sel;
   if (!cell || !coachAllows({ key: cell.key, op })) return;
   if (op) {
@@ -288,7 +288,7 @@ function place(op) {
     flash(cell.el, 'pop');
     const next = nextInEquation(G.p, cell, G.eq, (c) => editable(c) && !G.fills.has(c.key));
     G.eq = next ? next.eq : null;
-    G.sel = next ? next.cell : nextEmpty(cell) || cell;
+    G.sel = G.tut ? cell : next ? next.cell : nextEmpty(cell) || cell; // the tutorial has the next tile tapped, not jumped to
   } else {
     if (!G.fills.has(cell.key)) return;
     remember();
@@ -304,7 +304,7 @@ function place(op) {
 // ponytail: history lives in memory only, a reload starts it fresh.
 const remember = () => G.history.push([[...G.fills], G.sel]);
 function undo() {
-  if (!playing() || !G.history.length) return;
+  if (!playing() || !G.history.length || !coachAllows({ undo: true })) return;
   const [fills, sel] = G.history.pop();
   G.fills = new Map(fills);
   G.sel = sel;
@@ -325,11 +325,11 @@ function move(dr, dc) {
     const score = along + 2 * (Math.abs(c.r - s.r) * Math.abs(dc) + Math.abs(c.c - s.c) * Math.abs(dr));
     if (score < bs) { bs = score; best = c; }
   }
-  if (best) { G.sel = best; G.eq = null; sfx.tap(); refresh(false); }
+  if (best && coachAllows({ sel: best.key })) { G.sel = best; G.eq = null; sfx.tap(); refresh(false); }
 }
 
 function hint() {
-  if (!playing()) return;
+  if (!playing() || !coachAllows({ hint: true })) return;
   const wrong = G.p.cells.filter((c) => editable(c) && G.fills.get(c.key) !== c.val);
   const c = wrong.includes(G.sel) ? G.sel : wrong[Math.floor(Math.random() * wrong.length)];
   if (!c) return;
@@ -346,7 +346,7 @@ function hint() {
 }
 
 function reset() {
-  if (!playing() || G.fills.size === G.hinted.size) return;
+  if (!playing() || G.fills.size === G.hinted.size || !coachAllows({ reset: true })) return;
   if (!confirm(T('Restart this level? Your tiles are cleared; the clock keeps running.'))) return;
   remember();
   for (const k of [...G.fills.keys()]) if (!G.hinted.has(k)) G.fills.delete(k);
@@ -371,7 +371,7 @@ $('.board-wrap').addEventListener('click', (e) => {
       if (d < bd) { bd = d; best = c; }
     }
   }
-  if (best && bd < 1.6 && best !== G.sel) { G.sel = best; G.eq = null; sfx.tap(); refresh(false); }
+  if (best && bd < 1.6 && best !== G.sel && coachAllows({ sel: best.key })) { G.sel = best; G.eq = null; sfx.tap(); refresh(false); }
 });
 $('#btn-undo').onclick = undo;
 $('#btn-hint').onclick = hint;
@@ -415,11 +415,17 @@ mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,
 // ponytail: storage key keeps the old name so existing saves survive the rename.
 boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true,
   tutorial: [
-    [T('Every row and column has to be a <b>true equation</b>. The ringed tile sits in 3 _ 5 = 8: pick the operator that fits from the keys below.'),
-      () => G.fills.get('1,1') === '+', tile('1,1'), (m) => m.key === '1,1' && m.op === '+'],
-    [T('That tile is <b>shared</b>: the column reads 2 + 4 _ 6 now. One symbol has to work both ways. Finish the row: tap its last blank and pick <b>=</b>.'),
+    [T('Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours to fill. Tap the ringed one.'),
+      () => G.sel?.key === '1,1', tile('1,1'), (m) => m.sel === '1,1'],
+    [T('It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below.'),
+      () => G.fills.get('1,1') === '+', '#palette', (m) => m.key === '1,1' && m.op === '+'],
+    [T('3 + 5 = 8. That tile is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Tap the row\'s other blank.'),
+      () => G.sel?.key === '1,3', tile('1,3'), (m) => m.sel === '1,3'],
+    [T('Between 3 + 5 and 8 goes <b>=</b>. Pick it.'),
       () => G.fills.get('1,3') === '=', opKey('1,3', '='), (m) => m.key === '1,3' && m.op === '='],
-    [T('A line turns green when it\'s true. Now finish the column. In a real puzzle, <b>Hint</b> fills in a tile when you\'re stuck, but hints cost you stars.'),
+    [T('The row is true, so it turns green. Now tap the blank in the column.'),
+      () => G.sel?.key === '3,1', tile('3,1'), (m) => m.sel === '3,1'],
+    [T('Finish 2 + 4 _ 6 with <b>=</b>. In a real puzzle, <b>Hint</b> fills in a tile when you\'re stuck, but hints cost you stars.'),
       null, opKey('3,1', '='), (m) => m.key === '3,1' && m.op === '='],
   ], glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); },

@@ -216,6 +216,9 @@ function coach(steps, { screen = $('#game'), onEnd } = {}) {
   const el = Object.assign(document.createElement('div'), { id: 'coach', className: 'coach' });
   el.setAttribute('role', 'status');
   screen.querySelector('.bar').after(el);
+  // every line is laid in the same grid cell, unseen, so the box is as tall as the longest one and the board below never shifts
+  const lines = [...steps.map((s) => s[0]), T("That's it — you know how to play. Have fun!")].map((h) => `<p aria-hidden="true">${h}</p>`).join('');
+  el.innerHTML = `<small></small><div class="coach-lines"><p class="now"></p>${lines}</div>`;
   coached = { steps, at: -1, el, onEnd };
   coachGo(0);
 }
@@ -223,9 +226,13 @@ function coachGo(n) {
   const c = coached;
   if (n > c.at) { c.at = n; if (n) sfx.tap(); }
   const [html, , target] = c.steps[c.at];
-  c.el.innerHTML = `<small>${T('Tutorial · {n} of {k}', { n: c.at + 1, k: c.steps.length })}</small><p>${html}</p>`;
+  coachText(T('Tutorial · {n} of {k}', { n: c.at + 1, k: c.steps.length }), html);
   flash(c.el, 'pop');
   coachRing(target);
+}
+function coachText(head, html) {
+  coached.el.querySelector('small').textContent = head;
+  coached.el.querySelector('.now').innerHTML = html;
 }
 function coachRing(target) {
   for (const e of document.querySelectorAll('.coach-at')) e.classList.remove('coach-at');
@@ -253,7 +260,7 @@ function coachEnd() {
   const c = coached;
   if (!c) return;
   c.ended = true;
-  c.el.innerHTML = `<small>${T('Tutorial')}</small><p>${T("That's it — you know how to play. Have fun!")}</p>`;
+  coachText(T('Tutorial'), T("That's it — you know how to play. Have fun!"));
   flash(c.el, 'pop');
   coachRing(null);
   const d = Object.assign(document.createElement('dialog'), { className: 'coach-done' });

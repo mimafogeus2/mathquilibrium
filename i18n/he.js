@@ -342,9 +342,12 @@ module.exports = {
     },
     'mathquilibrium/game.js': {
       'Mathquilibrium': 'מאוזן',
-      'Every row and column has to be a <b>true equation</b>. The ringed tile sits in 3 _ 5 = 8: pick the operator that fits from the keys below.': 'כל שורה וכל עמודה חייבות להיות <b>משוואה נכונה</b>. המשבצת המסומנת נמצאת ב־<span dir="ltr">3 _ 5 = 8</span>: בחרו מהמקשים למטה את הסימן שמתאים.',
-      'That tile is <b>shared</b>: the column reads 2 + 4 _ 6 now. One symbol has to work both ways. Finish the row: tap its last blank and pick <b>=</b>.': 'המשבצת הזאת <b>משותפת</b>: בעמודה כתוב עכשיו <span dir="ltr">2 + 4 _ 6</span>. סימן אחד צריך לעבוד בשני הכיוונים. סיימו את השורה: הקישו על המשבצת הריקה האחרונה בה ובחרו <b>=</b>.',
-      "A line turns green when it's true. Now finish the column. In a real puzzle, <b>Hint</b> fills in a tile when you're stuck, but hints cost you stars.": 'שורה נכונה נצבעת בירוק. עכשיו סיימו את העמודה. בחידה אמיתית, <b>רמז</b> ממלא משבצת כשנתקעים, אבל רמזים עולים בכוכבים.',
+      'Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours to fill. Tap the ringed one.': 'כל שורה וכל עמודה הן משוואה, וכל אחת חייבת לצאת <b>נכונה</b>. את המשבצות הריקות אתם ממלאים. הקישו על המסומנת.',
+      'It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below.': 'היא נמצאת בשורה <b dir="ltr">3 _ 5 = 8</b>. איזה סימן הופך את 3 ו־5 ל־8? בחרו אותו מהמקשים למטה.',
+      "3 + 5 = 8. That tile is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Tap the row's other blank.": '<span dir="ltr">3 + 5 = 8</span>. המשבצת הזאת <b>משותפת</b> לעמודה, שבה כתוב עכשיו <span dir="ltr">2 + 4 _ 6</span>: סימן אחד צריך לעבוד בשני הכיוונים. הקישו על המשבצת הריקה השנייה בשורה.',
+      'Between 3 + 5 and 8 goes <b>=</b>. Pick it.': 'בין <span dir="ltr">3 + 5</span> ל־8 בא <b>=</b>. בחרו אותו.',
+      'The row is true, so it turns green. Now tap the blank in the column.': 'השורה נכונה, אז היא נצבעת בירוק. עכשיו הקישו על המשבצת הריקה בעמודה.',
+      "Finish 2 + 4 _ 6 with <b>=</b>. In a real puzzle, <b>Hint</b> fills in a tile when you're stuck, but hints cost you stars.": 'השלימו את <span dir="ltr">2 + 4 _ 6</span> עם <b>=</b>. בחידה אמיתית, <b>רמז</b> ממלא משבצת כשנתקעים, אבל רמזים עולים בכוכבים.',
       'plus': 'פלוס',
       'minus': 'מינוס',
       'times': 'כפול',
@@ -390,10 +393,10 @@ module.exports = {
     },
     'coronet/game.js': {
       'Coronet': 'הכתרה',
-      'Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there: tap it.':
-        'בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b> יש בדיוק מלכה אחת. הקשת הירוקה המסומנת היא היחידה בצבע שלה, אז המלכה הירוקה חייבת להיות שם: הקישו עליה.',
-      "The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen's slice. Tap the last blue one.":
-        'סימני ה־× האפורים הם מה שהמלכה הזאת פוסלת: שאר הטבעת, הפלח והצבע שלה. לכחול היו שלוש קשתות, אבל שתיים מהן בפלח של המלכה. הקישו על הכחולה האחרונה.',
+      'Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there. One tap marks an arc <b>×</b>, a second crowns it: tap the ringed arc twice.':
+        'בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b> יש בדיוק מלכה אחת. הקשת הירוקה המסומנת היא היחידה בצבע שלה, אז המלכה הירוקה חייבת להיות שם. הקשה אחת מסמנת בקשת <b>×</b>, והקשה שנייה מכתירה: הקישו פעמיים על הקשת המסומנת.',
+      "The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen's slice. Crown the last blue one.":
+        'סימני ה־× האפורים הם מה שהמלכה הזאת פוסלת: שאר הטבעת, הפלח והצבע שלה. לכחול היו שלוש קשתות, אבל שתיים מהן בפלח של המלכה. הכתירו את הכחולה האחרונה.',
       'Now yellow has just one arc left, so the queen of its ring (the third from the centre) goes there. That rules out the ringed arc in the same ring: tap it <b>once</b> to mark it ×.':
         'עכשיו לצהוב נשארה רק קשת אחת, אז המלכה של הטבעת שלה (השלישית מהמרכז) נמצאת שם. זה פוסל את הקשת המסומנת באותה טבעת: הקישו עליה <b>פעם אחת</b> כדי לסמן בה ×.',
       "Mark × wherever you've worked out a queen can't go. Now crown the yellow arc.": 'סמנו × בכל מקום שהבנתם שאין בו מלכה. עכשיו הכתירו את הקשת הצהובה.',
