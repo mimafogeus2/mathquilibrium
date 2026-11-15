@@ -94,3 +94,9 @@
 /* help text per input: touch aims by press-and-drag, mouse/keyboard by hover/click */
 .touch { display: none; }
 @media (hover: none) { .touch { display: list-item; } .no-touch { display: none; } }
+/* the tutorial's stamp spot: a dashed outline, ringed (pulsing) while the coach points at it */
+.tut-spot { display: none; z-index: 3; outline: none !important; animation: none !important; }
+.tut-spot.coach-at { display: block; }
+.tut-spot path { stroke: var(--ink); stroke-width: 4px; stroke-dasharray: 6 5; animation: tut-spot 1.2s ease-in-out infinite; }
+@keyframes tut-spot { 50% { stroke-opacity: .35; } }
+[data-calm] .tut-spot path { animation: none; }

@@ -31,11 +31,13 @@ function light(sound) {
 }
 
 // The tutorial (key 'T'): five words in a fixed order, no fuse, nothing saved; coach() (core.js) talks it through.
+// Only the right answer goes through: answer() asks coachAllows(saidYes) first.
 const TUTORIAL = () => ({ subject: T('Fruit'), cards: [[T('Apple'), true], [T('Carrot'), false], [T('Banana'), true], [T('Bread'), false], [T('Mango'), true]].map(([w, yes]) => ({ w, yes })) });
+const rightAnswer = (y) => y === R.cards[R.marks.length].yes;
 const TUT_STEPS = () => [
-  [T('Does <b>{word}</b> fit <b>{subject}</b>? It does: swipe it <b>right</b>, or tap ✓.', { word: T('Apple'), subject: T('Fruit') }), () => R?.marks.length >= 1, '#btn-yes'],
-  [T('<b>{word}</b> doesn\'t fit: swipe it <b>left</b>, or tap ✗.', { word: T('Carrot') }), () => R?.marks.length >= 2, '#btn-no'],
-  [T('Each right answer scores points; a wrong one costs 3 seconds. A real round is 24 words against a 60-second fuse. Finish these three.')],
+  [T('Does <b>{word}</b> fit <b>{subject}</b>? It does: swipe it <b>right</b>, or tap ✓.', { word: T('Apple'), subject: T('Fruit') }), () => R?.marks.length >= 1, '#btn-yes', rightAnswer],
+  [T('<b>{word}</b> doesn\'t fit: swipe it <b>left</b>, or tap ✗.', { word: T('Carrot') }), () => R?.marks.length >= 2, '#btn-no', rightAnswer],
+  [T('A real round is 24 words against a 60-second fuse. Each right answer scores 10 points, and every second left at the end 5 more, so a wrong one, which burns <b>3 seconds</b>, costs you points too. Finish these three.'), null, null, rightAnswer],
 ];
 
 const parse = (line) => { const [s, y, n] = line.split('|'); return { s, y: y.split(','), n: n.split(',') }; };
@@ -147,7 +149,7 @@ function refill() {
 const topCard = () => [...$('#stack').querySelectorAll('.card:not(.gone)')].pop();
 
 function answer(saidYes) {
-  if (!R || R.over || $('#game').hidden) return;
+  if (!R || R.over || $('#game').hidden || !coachAllows(saidYes)) return false;
   const card = R.cards[R.marks.length], el = topCard(), right = card.yes === (flipped() ? !saidYes : saidYes);
   R.marks.push(right);
   el.classList.add('gone', right ? 'right' : 'wrong');
@@ -162,10 +164,11 @@ function answer(saidYes) {
     penalty();
   }
   hud();
-  if (R.marks.length === R.cards.length || R.left <= 0) return finish();
+  if (R.marks.length === R.cards.length || R.left <= 0) { finish(); return true; }
   refill();
   light(true);
   save();
+  return true;
 }
 
 function penalty() {
@@ -193,8 +196,8 @@ function drag(e) {
     el.removeEventListener('pointermove', move);
     el.classList.remove('held');
     const fast = Math.abs(dx) / (performance.now() - t0) > 0.6 && Math.abs(dx) > 30;
-    if (Math.abs(dx) > el.offsetWidth / 3 || fast) answer(dx > 0);
-    else { el.style.setProperty('--dx', '0px'); el.style.setProperty('--lean', 0); }
+    // not far enough, or the tutorial turned it down: back to the middle
+    if (!((Math.abs(dx) > el.offsetWidth / 3 || fast) && answer(dx > 0))) { el.style.setProperty('--dx', '0px'); el.style.setProperty('--lean', 0); }
   };
   el.addEventListener('pointermove', move);
   el.addEventListener('pointerup', up, { once: true });

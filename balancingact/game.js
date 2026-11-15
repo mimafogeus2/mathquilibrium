@@ -242,6 +242,7 @@ const levelCount = () => torques(G.p.tree, masses(G.p, G.at)).filter((t) => t.to
 // Item i to plate k (-1: back to the store). Counts as a move if it changes where the item is.
 function moveItem(i, k) {
   if (!playing() || i === null) return;
+  if (!coachAllows({ i, k })) { G.sel = null; refresh(); return; }
   G.sel = null;
   if (G.at[i] === k) { refresh(); return; }
   const before = levelCount();
@@ -264,7 +265,7 @@ function moveItem(i, k) {
 }
 
 function select(i) {
-  if (!playing()) return;
+  if (!playing() || !coachAllows({ sel: i })) return;
   G.sel = G.sel === i ? null : i;
   if (G.sel !== null) sfx.tap();
   refresh();
@@ -422,11 +423,16 @@ for (const [id, key] of [['#logo', 'logo'], ['#help-rig', 'help']]) {
 // Tutorial: one beam, arms 2 and 1, and a store of 2, 1 and 6: (2 + 1) × 2 on the left balances 6 × 1 on the right
 const TUTORIAL = { tree: { a: 2, b: 1, l: 0, r: 1 }, plates: 2, fixed: [], items: [{ v: 2, plate: 0 }, { v: 1, plate: 0 }, { v: 6, plate: 1 }], target: [3, 6] };
 
+// ring the weight to pick up, then (once it's picked) the plate it goes on
+const hangOn = (i, k) => () => (G.sel === i ? $(`#board .plate[data-plate="${k}"]`) : $(`#tray [data-item="${i}"]`));
+const hang = (i, k) => (m) => m.sel === i || (m.i === i && m.k === k);
+
 boot({ name: T('Balancing Act'),
   tutorial: [
-    [T('Drag a weight from the store onto a plate, or tap it, then tap a plate.'), () => G.at.some((x) => x >= 0), '#tray'],
-    [T('The numbers on the beam are its <b>arm lengths</b>. It hangs level when <b>weight × arm</b> is the same on both sides. Hang the <b>6</b> on the short arm.'), () => G.at[2] === 1],
-    [T('6 × 1 is 6, so the long arm needs 3, as 3 × 2 is 6 too. Hang the rest on the left plate.')],
+    [T('The numbers on the beam are its <b>arm lengths</b>. A beam hangs level when <b>weight × arm</b> is the same on both sides. Drag the <b>6</b> onto the plate on the short arm, or tap it, then tap the plate.'),
+      () => G.at[2] === 1, hangOn(2, 1), hang(2, 1)],
+    [T('6 × 1 is 6, so the long arm needs 3, as 3 × 2 is 6 too. Hang the <b>2</b> on the left plate.'), () => G.at[0] === 0, hangOn(0, 0), hang(0, 0)],
+    [T('And the <b>1</b> with it. Every move counts: stars are for solving in as few moves as you can.'), null, hangOn(1, 0), hang(1, 0)],
   ], storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
   save: (G) => ({ at: G.at, moves: G.moves }), key: onKey, moves: (G) => G.moves,
   reveal: () => { G.at = G.p.items.map((x) => x.plate); G.sel = null; refresh(); $('#board').classList.add('solved'); },

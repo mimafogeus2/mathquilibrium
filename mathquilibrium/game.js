@@ -77,6 +77,8 @@ function tutorialPuzzle() {
   return { rows: 5, cols: 5, cells, eqs: [across, down].map((l) => l.map((k) => at(k).i)), ops: ['+', '-', '×', '÷'], rels: ['='] };
 }
 const tile = (k) => () => G.p.cells.find((c) => c.key === k).el;
+// ring the tile until it's picked, then the key to press
+const opKey = (k, op) => () => (G.sel?.key === k ? $(`#palette [data-op="${op}"]`) : tile(k)());
 
 // ---------- game ----------
 const editable = (c) => c.op && !c.given && !G.hinted.has(c.key);
@@ -278,7 +280,7 @@ function place(op) {
   if (!playing()) return;
   if (!G.sel || !editable(G.sel)) G.sel = nextEmpty(null);
   const cell = G.sel;
-  if (!cell) return;
+  if (!cell || !coachAllows({ key: cell.key, op })) return;
   if (op) {
     if (G.fills.get(cell.key) !== op) remember();
     G.fills.set(cell.key, op);
@@ -413,9 +415,12 @@ mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,
 // ponytail: storage key keeps the old name so existing saves survive the rename.
 boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true,
   tutorial: [
-    [T('Every row and column has to be a <b>true equation</b>. The ringed tile sits in 3 _ 5 = 8: pick the operator that fits from the keys below.'), () => G.fills.get('1,1') === '+', tile('1,1')],
-    [T('That tile is <b>shared</b>: the column reads 2 + 4 _ 6 now. One symbol has to work both ways. Finish the row: tap its last blank and pick <b>=</b>.'), () => G.fills.get('1,3') === '=', tile('1,3')],
-    [T('A line turns green when it\'s true. Now finish the column.'), null, tile('3,1')],
+    [T('Every row and column has to be a <b>true equation</b>. The ringed tile sits in 3 _ 5 = 8: pick the operator that fits from the keys below.'),
+      () => G.fills.get('1,1') === '+', tile('1,1'), (m) => m.key === '1,1' && m.op === '+'],
+    [T('That tile is <b>shared</b>: the column reads 2 + 4 _ 6 now. One symbol has to work both ways. Finish the row: tap its last blank and pick <b>=</b>.'),
+      () => G.fills.get('1,3') === '=', opKey('1,3', '='), (m) => m.key === '1,3' && m.op === '='],
+    [T('A line turns green when it\'s true. Now finish the column. In a real puzzle, <b>Hint</b> fills in a tile when you\'re stuck, but hints cost you stars.'),
+      null, opKey('3,1', '='), (m) => m.key === '3,1' && m.op === '='],
   ], glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); },
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest

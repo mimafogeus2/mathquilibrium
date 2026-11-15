@@ -109,6 +109,7 @@ function deal() {
 function answer(side) {
   if (!R || R.over || R.hold || $('#game').hidden) return;
   const [lt, lv, rt, rv] = R.pairs[R.marks.length], right = (lv > rv) === (side === 0);
+  if (!coachAllows(right)) return;
   R.marks.push(right);
   R.hold = true;
   sides().forEach((el, i) => {
@@ -141,8 +142,9 @@ function answer(side) {
 }
 
 // ---------- tutorial ----------
-// Three easy pairs with the clock stopped (frame() never runs, and the stylesheet hides it): pick, see what a miss costs, finish.
-// Nothing is saved or recorded.
+// Three easy pairs with the clock stopped (frame() never runs, and the stylesheet hides it): pick, hear what a miss costs, finish.
+// Only the right pick counts (coachAllows): a wrong one shakes the coach line instead. Nothing is saved or recorded.
+const ok = (right) => right;
 function tutorial() {
   coach(null);
   R = { key: 'tutorial', pack: 'E', tut: true, pairs: [['3 + 4', 7, '2 + 9', 11], ['6 × 2', 12, '5 + 5', 10], ['9 − 3', 6, '2 × 4', 8]],
@@ -157,9 +159,9 @@ function tutorial() {
   deal();
   hud();
   coach([
-    [T('Two sums, no answers. Work them out and tap the <b>bigger</b> one (or press <b>←</b> / <b>→</b>).'), () => R.marks.length >= 1, '.pair'],
-    [T('In a real round a clock runs, and a wrong pick costs <b>3 seconds</b>. Quick, but not too quick: try this one.'), () => R.marks.length >= 2, '.pair'],
-    [T('A round is 10 pairs; seconds left at the end add to your score. Last one!'), null, '.pair'],
+    [T('Two sums, no answers. Work them out and tap the <b>bigger</b> one (or press <b>←</b> / <b>→</b>).'), () => R.marks.length >= 1, '.pair', ok],
+    [T('In a real round a clock runs, and the <b>seconds left at the end add to your score</b>. A wrong pick costs <b>3 seconds</b>, so every miss costs points. Take care with this one.'), () => R.marks.length >= 2, '.pair', ok],
+    [T('A round is 10 pairs. Last one!'), null, '.pair', ok],
   ], { onEnd: () => { R = null; screen('home'); } });
 }
 

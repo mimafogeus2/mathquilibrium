@@ -118,3 +118,8 @@
 .p-store .bal .shine { display: none; }
 .p-store .tether { stroke: #000; }
 .p-store .bal text { fill: #000; }
+/* Tutorial: the plate to hang on, ringed (an SVG group takes no outline) */
+.plate.coach-at .hit { stroke: var(--brand); stroke-width: 3; stroke-dasharray: none; animation: plate-ring 1.2s ease-in-out infinite; }
+@keyframes plate-ring { 50% { stroke-opacity: .35; } }
+[data-calm] .plate.coach-at .hit { animation: none; }
+.tut #btn-reset { visibility: hidden; } /* a restart would strand the steps */

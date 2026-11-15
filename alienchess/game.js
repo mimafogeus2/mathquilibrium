@@ -168,7 +168,9 @@ function checkOut() {
 // ---------- moves ----------
 function onSquare(i) {
   if (!playing() || G.busy || G.out) return;
-  if (G.sel !== null && moves(G.p, G.b, 1).some((m) => m[0] === G.sel && m[1] === i)) return yourMove([G.sel, i]);
+  const go = G.sel !== null && moves(G.p, G.b, 1).some((m) => m[0] === G.sel && m[1] === i);
+  if (!coachAllows(go ? { from: G.sel, to: i } : { sel: i })) return;
+  if (go) return yourMove([G.sel, i]);
   G.sel = G.b[i] > 0 && G.sel !== i ? i : null;
   if (G.sel !== null) sfx.tap();
   refresh();
@@ -284,7 +286,7 @@ $('#board').addEventListener('focus', () => { if (playing() && $('#board').match
 $('#cards').addEventListener('click', (e) => { // a card shows where its pieces stand
   const c = e.target.closest('.card');
   if (!c) return;
-  const t = +c.dataset.t;
+  const t = (G.card = +c.dataset.t);
   G.units.forEach((u, i) => u && Math.abs(G.b[i]) - 1 === t && flash(u, 'pop'));
 });
 
@@ -320,11 +322,19 @@ const TUTORIAL = { N: 4, K: 2, king: [false, false], first: [13, 1], board: [0, 
     { look: 2, king: false, rules: [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1, m: 'any' }] }] };
 const enemies = () => G.b.filter((x) => x < 0).length;
 
+const sqEl = (i) => $(`#board .sq[data-i="${i}"]`), cardEl = (t) => $(`#cards .card[data-t="${t}"]`);
+// ring the piece to pick up, then (once it's picked) the square it goes to
+const goTo = (f, t) => () => (G.sel === f ? sqEl(t) : G.units[f]);
+
 boot({ name: T('Alien Chess'),
   tutorial: [
-    [T('Your pieces are at the bottom, the computer\'s at the top. Each kind moves the way its <b>card</b> shows. Tap your piece.'), () => G.sel !== null || G.log.length, () => G.units[13]],
-    [T('Its card lights up: it slides straight, as far as it likes. The board marks where it can go. Take the enemy piece at the top of its column.'), () => enemies() < 2, () => G.units[1]],
-    [T('The computer answers every move. Take its last piece to win.'), null, () => G.units.find((u, i) => u && G.b[i] < 0)],
+    [T('Every kind of piece has a <b>card</b> showing how it moves. The colored square in the middle is the piece; a <b>dot</b> is a square it can land on. A <b>line</b> means it slides there square by square, and can be blocked; an <b>arrow</b> runs on to the edge of the board. Tap your Zib\'s card.'),
+      () => G.card === 0, () => cardEl(0), () => false],
+    [T('Cards point up the board. The enemy\'s pieces read theirs <b>upside down</b>: its Gromfs step one square diagonally <b>down</b>, toward you. Tap the Gromf\'s card.'),
+      () => G.card === 1, () => cardEl(1), () => false],
+    [T('Your Zib slides straight, as far as it likes. Tap it: the board marks where it can go.'), () => G.sel === 13, goTo(13, 1), (m) => m.sel === 13],
+    [T('Take the Gromf at the top of its column.'), () => enemies() < 2, goTo(13, 1), (m) => m.sel === 13 || m.to === 1],
+    [T('The computer answers every move: its other Gromf stepped down, diagonally. Take it to win. Win fast: stars are for speed.'), null, goTo(1, 9), (m) => m.sel === 1 || m.to === 9],
   ], storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1; } });

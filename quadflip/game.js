@@ -94,6 +94,9 @@ function startLevel(G, save) {
 function landing(x, y) {
   const [h, w] = dims(G.p.pieces[G.sel]), N = G.p.N;
   const clamp = (v, max) => Math.max(0, Math.min(max, v));
+  // the tutorial: a point on one of the answer's tiles for this piece lands it there, wherever on the piece it's touched
+  const sol = G.tut && G.p.sol[G.sel], cell = clamp(Math.floor(y), N - 1) * N + clamp(Math.floor(x), N - 1);
+  if (G.tut && flip(N, G.p.pieces[G.sel], sol) >> cell & 1) return sol;
   return clamp(Math.round(y - h / 2), N - h) * N + clamp(Math.round(x - w / 2), N - w);
 }
 
@@ -120,7 +123,7 @@ function refresh() {
 
 // ---------- moves ----------
 function pickPiece(k) {
-  if (!playing() || G.hinted.has(k)) return;
+  if (!playing() || G.hinted.has(k) || !coachAllows(G.placed[k] >= 0 ? { lift: k } : { pick: k })) return;
   if (G.placed[k] >= 0) { lift(k); return; } // a used piece comes back off the board, ready to place again
   G.sel = k;
   sfx.tap();
@@ -130,6 +133,7 @@ function pickPiece(k) {
 function stamp(pos) {
   const k = G.sel;
   if (!playing() || G.placed[k] >= 0) return;
+  if (!coachAllows({ k, pos })) { G.at = null; return refresh(); } // the tutorial's wrong spot: no ghost left behind
   G.placed[k] = pos;
   G.order.push(k);
   sfx.place();
@@ -167,13 +171,13 @@ function lift(k) {
 }
 
 function undo() {
-  if (!playing() || !G.order.length) return;
+  if (!playing() || !G.order.length || !coachAllows({ undo: true })) return;
   lift(G.order[G.order.length - 1]);
 }
 
 // A hint stamps one piece where the answer has it. Twins are interchangeable, so match by shape and spot.
 function hint() {
-  if (!playing()) return;
+  if (!playing() || !coachAllows({ hint: true })) return;
   const { pieces, sol } = G.p, K = pieces.length;
   const right = new Set(); // pieces already on a spot the answer uses for their shape
   const missing = []; // answer slots nobody fills yet
@@ -198,7 +202,7 @@ function hint() {
 }
 
 function reset() {
-  if (!playing() || !G.order.length) return;
+  if (!playing() || !G.order.length || !coachAllows({ reset: true })) return;
   if (!confirm(T('Restart this level? Your pieces come back off the board; the clock keeps running.'))) return;
   for (const k of G.order) G.placed[k] = -1;
   G.order = [];
@@ -298,10 +302,21 @@ try {
     localStorage.setItem('quadflip', JSON.stringify(s));
   }
 } catch {}
+// The tutorial's spot for piece k at pos: its outline, drawn like the used pieces' marks, ringed by the coach (style.css)
+const spot = (k, pos) => () => {
+  const N = G.p.N, el = G.view.spot ??= $('#board').appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
+  el.setAttribute('class', 'marks tut-spot');
+  el.setAttribute('viewBox', `0 0 ${N} ${N}`);
+  el.innerHTML = `<path d="${outline(G.p.pieces[k], pos, N, .04)}"/>`;
+  return el;
+};
+const only = (k, pos) => (m) => m.pick === k || (m.k === k && m.pos === pos);
 boot({ name: T('Quadflip'), storeKey: 'quadflip', glyphs: ['■', '▚'], start: startLevel,
   tutorial: [
-    [T('Every tile has to end up <b>light</b>. The picked piece flips the four tiles under it: tap the board to stamp it.'), () => G.order.length || G.placed.some((v) => v >= 0), '#board'],
-    [T('Now stamp the other piece: <b>every piece</b> is used once. A tile flipped twice turns light again. Wrong spot? Tap a used piece in the tray to lift it off.')],
+    [T('Every tile has to end up <b>light</b>. The picked piece, the square, flips the four tiles under it. Tap the ringed spot to stamp it there.'),
+      () => G.placed[0] === 0, spot(0, 0), only(0, 0)],
+    [T('Two of those tiles were light, so they turned dark. The T fixes that: <b>every piece</b> is used once, and a tile flipped twice is light again. Stamp it on the ringed spot. (Stuck in a real puzzle? <b>Hint</b> places a piece, but hints cost stars.)'),
+      null, spot(1, 3), only(1, 3)],
   ],
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest

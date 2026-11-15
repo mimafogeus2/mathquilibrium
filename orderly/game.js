@@ -32,14 +32,26 @@ function dailyIndex(date) {
 // On a special day (special.js) its themed level replaces the pool's.
 const dailyLine = (date) => (IMP ? LEVELS[impIndex(date)] : special(SPECIAL, date)?.line ?? LEVELS[dailyIndex(date)]);
 
-// The tutorial: 4 cards dealt so two already sit right (they group on the first check) and one drag finishes it.
-// P.tut: nothing is saved or recorded, and coach() (core.js) talks it through.
+// The tutorial: 5 inventions (card i belongs at i), dealt so the lesson goes in a fixed order: drag the light bulb under the telephone,
+// check (they group), drag that group under the printing press, drag the smartphone to the bottom, check again. P.tut: nothing is
+// saved or recorded. Every move asks coachAllows() (core.js) first: a drag is { unit } on pickup and { unit, order } on the drop
+// (keyboard moves only { unit }), Check { check }, Hint { hint }; each step lets through only its own move.
 const TUTORIAL = () => ({ d: 1, subject: T('Inventions'), top: T('Oldest'), bottom: T('Newest'),
-  items: [[T('Printing press'), 1440], [T('Telephone'), 1876], [T('Airplane'), 1903], [T('Smartphone'), 2007]].map(([name, val]) => ({ name, val })) });
+  items: [[T('Printing press'), 1440], [T('Telephone'), 1876], [T('Light bulb'), 1879], [T('Airplane'), 1903], [T('Smartphone'), 2007]].map(([name, val]) => ({ name, val })) });
+const TUT_DEAL = [1, 4, 2, 0, 3];
+const under = (o, a, b) => o.indexOf(b) === o.indexOf(a) + 1; // card b sits right under card a
+const cardOf = (i) => cardEls()[i];
+// drag card (or its group) `c` until ok(order): ring it, then (while it's held) the card it goes next to
+const tutDrag = (c, next, ok) => [() => ok(P.order), () => ($('.card.held') ? cardOf(next) : cardOf(c)), (m) => m.unit?.[0] === c && (!m.order || ok(m.order))];
 const TUT_STEPS = [
-  [T('Put the cards in order: <b>oldest</b> at the top, <b>newest</b> at the bottom. Drag a card to move it.'), () => P?.moved, () => $('#list .card')],
-  [T('Not sure yet? <b>Check</b> anyway: cards that sit right next to each other turn green and show their value.'), () => P?.rows.length, '#btn-check'],
-  [T('Green cards are joined into a <b>group</b> that moves as one. Get every card in order and check again.')],
+  [T('Put the cards in order: <b>oldest</b> at the top, <b>newest</b> at the bottom. The <b>light bulb</b> came just after the <b>telephone</b>: drag it up to sit right under it.'),
+    ...tutDrag(2, 1, (o) => under(o, 1, 2))],
+  [T('Press <b>Check</b>: cards that sit right next to each other turn green and show their value. Every check counts: solve a puzzle in <b>2 checks</b> for three stars, <b>4</b> for two.'),
+    () => P.rows.length, '#btn-check', (m) => m.check],
+  [T('The telephone and the light bulb are joined into a <b>group</b> now, and it moves as one. Both came after the <b>printing press</b>: drag the group to sit right under it.'),
+    ...tutDrag(1, 0, (o) => under(o, 0, 1))],
+  [T('The <b>smartphone</b> is the newest of them all: drag it to the bottom.'), ...tutDrag(4, 3, (o) => o.at(-1) === 4)],
+  [T('All in order. <b>Check</b> again to finish.'), null, '#btn-check', (m) => m.check],
 ];
 
 function parse(line) {
@@ -114,7 +126,7 @@ function play(key, custom) {
   const date = key[0] === 'D' ? key.slice(1) : null, n = date || custom ? null : +key.slice(1);
   const lv = custom || parse(date ? dailyLine(date) : LEVELS[n - 1]), sp = date && !IMP && special(SPECIAL, date), rec = date && store.daily[date]?.r, sv = store.saves[key];
   P = rec ? { key, date, lv, order: [...Array(N).keys()], links: Array(N).fill(true), rows: rec.rows, hints: rec.h || 0, lost: rec.lost, done: true }
-    : { key, date, n, lv, tut, order: tut ? [2, 0, 1, 3] : sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: tut ? false : sv?.moved ?? true, hints: sv?.hints || 0, done: false };
+    : { key, date, n, lv, tut, order: tut ? [...TUT_DEAL] : sv?.order || deal(hash(key)), links: sv?.links || Array(N).fill(false), rows: sv?.rows || [], moved: tut ? false : sv?.moved ?? true, hints: sv?.hints || 0, done: false };
   if (!custom || tut) toGame(tut ? 'tutorial' : date ? 'daily' : code(n));
   track(tut ? 'tutorial' : 'start', pmode());
   $('#g-title').textContent = tut ? T('Tutorial') : T(date ? 'Daily' : custom ? 'Custom level' : 'Random');
@@ -182,12 +194,15 @@ function drag(e) {
   if (!el || P.done || e.button) return;
   e.preventDefault();
   const all = units(), unit = all.find((u) => u.includes(+el.dataset.i)), rest = all.filter((u) => u !== unit);
+  if (!coachAllows({ unit })) return;
+  const before = [...P.order], wasMoved = P.moved;
   const cards = cardEls(), els = unit.map((c) => cards[c]), start = P.order.indexOf(unit[0]), y0 = e.clientY, sc = pageScale();
   const pitch = el.offsetHeight + parseFloat(getComputedStyle($('#list')).rowGap || 0);
   // tops[j] = where the unit's top card sits if inserted at index j
   const tops = rest.reduce((t, u) => [...t, t.at(-1) + u.length], [0]);
   el.setPointerCapture(e.pointerId);
   els.forEach((c) => c.classList.add('held'));
+  if (P.tut) coachRing(coached.steps[coached.at][2]); // now the card it goes next to
   const moveTo = (ev) => {
     const dy = (ev.clientY - y0) / sc, want = start + dy / pitch;
     const j = tops.reduce((b, t, k) => (Math.abs(t - want) < Math.abs(tops[b] - want) ? k : b), 0);
@@ -197,6 +212,7 @@ function drag(e) {
   const up = () => {
     el.removeEventListener('pointermove', moveTo);
     els.forEach((c) => { c.classList.remove('held'); c.style.setProperty('--dy', '0px'); });
+    if (P.order.indexOf(unit[0]) !== start && !coachAllows({ unit, order: P.order })) { P.order = before; P.moved = wasMoved; }
     layout();
     if (P.order.indexOf(unit[0]) !== start) { sfx.place(); status(); save(); }
   };
@@ -206,7 +222,7 @@ function drag(e) {
 }
 
 function check() {
-  if (!P || P.done || !P.moved) return;
+  if (!P || P.done || !P.moved || !coachAllows({ check: true })) return;
   const was = new Set(units().filter((u) => u.length > 1).flat());
   P.order.forEach((c, p) => { if (P.order[p + 1] === c + 1) P.links[c] = true; });
   const row = P.order.map((c, p) => (P.order[p + 1] === c + 1 || P.order[p - 1] === c - 1 ? '1' : '0')).join('');
@@ -227,7 +243,7 @@ function check() {
 // Hint: pick two cards that belong next to each other but aren't joined, slide the lower one's unit up under the upper one's, and join them.
 // Prefers a pair that isn't already adjacent, so a hint is never wasted on a pair the player got right.
 function hint() {
-  if (!P || P.done || P.hints >= HINTS) return;
+  if (!P || P.done || P.hints >= HINTS || !coachAllows({ hint: true })) return;
   const open = [...Array(N - 1).keys()].filter((c) => !P.links[c]), apart = open.filter((c) => P.order[P.order.indexOf(c) + 1] !== c + 1);
   if (!open.length) return;
   const c = pick(Math.random, apart.length ? apart : open), all = units(), lower = all.find((u) => u[0] === c + 1), rest = all.filter((u) => u !== lower);
@@ -358,7 +374,7 @@ document.addEventListener('keydown', (e) => {
   const el = document.activeElement?.closest?.('.card');
   if (el && !P.done && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
     const all = units(), k = all.findIndex((u) => u.includes(+el.dataset.i)), to = k + (e.key === 'ArrowUp' ? -1 : 1);
-    if (to >= 0 && to < all.length) { place(all.filter((_, x) => x !== k), all[k], to); layout(); el.focus(); sfx.place(); status(); save(); }
+    if (to >= 0 && to < all.length && coachAllows({ unit: all[k] })) { place(all.filter((_, x) => x !== k), all[k], to); layout(); el.focus(); sfx.place(); status(); save(); }
   } else if (e.key === 'Escape') $('#btn-back').click();
   else if (e.key === 'Enter' && !document.activeElement?.matches?.('button, a, input')) check(); // focused controls handle their own Enter
   else return;

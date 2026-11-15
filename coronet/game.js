@@ -153,7 +153,7 @@ function act(fn, before = snap()) {
   if (snap() !== before) { G.history.push(before); refresh(false); }
 }
 function undo() {
-  if (!playing() || !G.history.length) return;
+  if (!playing() || !G.history.length || !coachAllows({ undo: true })) return;
   const [q, m] = JSON.parse(G.history.pop());
   G.queens = new Set([...q, ...G.hinted]);
   G.marks = new Set(m);
@@ -166,6 +166,8 @@ function undo() {
 function cycle(i, toQueen = false) {
   if (!playing() || G.hinted.has(i)) return;
   const k = shown(i);
+  toQueen ||= !!G.tut && G.p.queens.includes(i); // the tutorial never marks an answer arc ×: one tap crowns it
+  if (!coachAllows({ i, to: k === 'q' ? '' : k || toQueen ? 'q' : 'm' })) return;
   G.history.push(snap());
   if (k === 'q') { G.queens.delete(i); sfx.erase(); refresh(true); }
   else if (k || toQueen) { G.marks.delete(i); G.queens.add(i); sfx.place(); refresh(true, i); }
@@ -174,14 +176,14 @@ function cycle(i, toQueen = false) {
 }
 
 function setMark(i, on) {
-  if (G.queens.has(i) || G.marks.has(i) === on || (on && auto(i))) return;
+  if (G.queens.has(i) || G.marks.has(i) === on || (on && auto(i)) || !coachAllows({ i, to: on ? 'm' : '' })) return;
   on ? G.marks.add(i) : G.marks.delete(i);
   sfx.tap();
   refresh(false);
 }
 
 function hint() {
-  if (!playing()) return;
+  if (!playing() || !coachAllows({ hint: true })) return;
   const N = N_(), missing = G.p.queens.filter((q) => !G.queens.has(q));
   const q = missing.find((m) => Math.floor(m / N) === Math.floor(G.sel / N)) ?? missing[Math.floor(Math.random() * missing.length)];
   if (q === undefined) return;
@@ -198,7 +200,7 @@ function hint() {
 }
 
 function reset() {
-  if (!playing() || (G.queens.size === G.hinted.size && !G.marks.size)) return;
+  if (!playing() || (G.queens.size === G.hinted.size && !G.marks.size) || !coachAllows({ reset: true })) return;
   if (!confirm(T('Restart this level? Your queens and marks are cleared; the clock keeps running.'))) return;
   act(() => { G.queens = new Set(G.hinted); G.marks.clear(); });
   sfx.erase();
@@ -229,7 +231,7 @@ $('#board').addEventListener('pointerdown', (e) => {
   drag = { from: i, last: i, mode: null, before: snap() };
 });
 $('#board').addEventListener('pointermove', (e) => {
-  if (!drag || !playing()) return;
+  if (!drag || !playing() || G.tut) return; // no drag-marking in the tutorial: one arc at a time
   const i = hit(e);
   if (i < 0 || i === drag.last) return;
   if (drag.mode === null) {
@@ -315,11 +317,22 @@ const arc = (i) => () => {
   v.ring.setAttribute('d', v.els[i].getAttribute('d'));
   return v.ring;
 };
+// The tutorial's chain, each move forced (answer: queens 14, 1, 8, 7; colors 0 pink, 1 yellow, 2 blue, 3 lime):
+// lime is one arc (14) -> its slice takes blue's other two, so blue is arc 1 -> yellow is down to arc 8, so ring 3's
+// other open arc (11) is out -> the queen on 8 -> the last ring, slice and color meet at 7.
+const only = (i, to) => (m) => m.i === i && m.to === to;
 boot({ name: T('Coronet'), storeKey: 'coronet', random: true,
   tutorial: [
-    [T('Tap the ringed arc once to mark it <b>×</b>: a reminder that it can\'t hold a queen.'), () => G.marks.size || G.queens.size, arc(0)],
-    [T('Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed arc is the only one of its color, so it must be a queen: tap it until the crown shows.'), () => G.queens.has(14), arc(14)],
-    [T('Its ring, slice and color are ruled out now. Place the other three queens: one in every ring, slice and color.')],
+    [T('Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there: tap it.'),
+      () => G.queens.has(14), arc(14), only(14, 'q')],
+    [T('The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen\'s slice. Tap the last blue one.'),
+      () => G.queens.has(1), arc(1), only(1, 'q')],
+    [T('Now yellow has just one arc left, so the queen of its ring (the third from the centre) goes there. That rules out the ringed arc in the same ring: tap it <b>once</b> to mark it ×.'),
+      () => G.marks.has(11), arc(11), only(11, 'm')],
+    [T('Mark × wherever you\'ve worked out a queen can\'t go. Now crown the yellow arc.'),
+      () => G.queens.has(8), arc(8), only(8, 'q')],
+    [T('One ring, one slice and one color are left, and they meet on one arc: the last queen. In a real puzzle <b>Hint</b> places a queen when you\'re stuck, but hints cost stars.'),
+      null, arc(7), only(7, 'q')],
   ], glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 300 ? 3 : G.elapsed <= 720 ? 2 : 1) },

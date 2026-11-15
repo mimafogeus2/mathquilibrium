@@ -200,10 +200,12 @@ if (helpPages.length > 1) {
 for (const b of document.querySelectorAll('#dlg-help form:not(.dlg-x) .btn.primary')) b.autofocus = true;
 
 // ---------- tutorial ----------
-// coach(steps, opts) teaches on a real board: one line at a time under the screen's top bar. A step is [html, done?(), target?]:
+// coach(steps, opts) teaches on a real board: one line at a time under the screen's top bar. A step is [html, done?(), target?, allow?(move)]:
 // done() is checked after every tap, key and drag, and when it holds the next line takes over; target (a selector or an element, or
 // a function returning one) gets a pulsing ring. A step without done() waits for coachEnd(), called on the tutorial puzzle's win,
 // which says so and offers opts.onEnd (back to the menu). coach(null) takes it down.
+// Only the right move: a game asks coachAllows(move) before making one (move is whatever the game describes it with);
+// the step's allow(move) says yes or no, and a no shakes the coach line and its ring instead. No allow(): anything goes.
 let coached = null;
 function coach(steps, { screen = $('#game'), onEnd } = {}) {
   coached?.el.remove();
@@ -233,15 +235,24 @@ function coachRing(target) {
 // after the game has handled the input (and redrawn), see whether the step is done; several can pass at once
 const coachCheck = () => setTimeout(() => {
   const c = coached;
-  if (!c) return;
+  if (!c || c.ended) return;
   let n = c.at;
   while (c.steps[n]?.[1]?.() && n < c.steps.length - 1) n++;
   if (n !== c.at) coachGo(n); else coachRing(c.steps[n][2]); // a redraw may have replaced the ringed element
 }, 60);
 for (const t of ['pointerup', 'keyup', 'click']) addEventListener(t, coachCheck);
+function coachAllows(move) {
+  const allow = coached?.steps[coached.at]?.[3];
+  if (!allow || allow(move)) return true;
+  sfx.bad();
+  flash(coached.el, 'shake');
+  coachRing(coached.steps[coached.at][2]);
+  return false;
+}
 function coachEnd() {
   const c = coached;
   if (!c) return;
+  c.ended = true;
   c.el.innerHTML = `<small>${T('Tutorial')}</small><p>${T("That's it — you know how to play. Have fun!")}</p>`;
   flash(c.el, 'pop');
   coachRing(null);
