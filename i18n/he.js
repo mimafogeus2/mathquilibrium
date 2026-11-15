@@ -395,6 +395,7 @@ module.exports = {
     'balancingact/game.js': {
       'Balancing Act': 'על כפות המאזניים',
       'weight {n}': 'משקולת {n}',
+      'Total: {t}': 'סך הכול: {t}',
       'balloon {n}': 'בלון {n}',
       '{item} back in the store.': '{item}: בחזרה במחסן.',
       '{item} on plate {n}: it now holds {t}.': '{item} על כף {n}: עכשיו יש בה {t}.',

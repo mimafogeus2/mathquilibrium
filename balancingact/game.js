@@ -211,7 +211,7 @@ function startLevel(G, save) {
     t.dataset.item = i;
     t.innerHTML = `<svg viewBox="-14 -12 28 25" aria-hidden="true">${token(it.v)}</svg>`;
     return t;
-  }));
+  }), storeTotal(p));
   refresh();
   return fits || !Object.keys(save).length;
 }
@@ -371,9 +371,17 @@ function onKey(e) {
 
 $('#btn-reset').onclick = reset;
 
+// The store's items added up (balloons count negative): every plate's targets together
+function storeTotal(p) {
+  const el = document.createElement('p');
+  el.className = 'tray-total';
+  el.textContent = T('Total: {t}', { t: num(p.items.reduce((s, it) => s + it.v, 0)) });
+  return el;
+}
+
 // ---------- paper ----------
 // The contraption hanging level, a box on every plate to write its items in, and the store to cross off. Answer: the plates filled.
-const storeRow = (p) => `<div class="p-store">${p.items.map((it) => `<svg viewBox="-14 -12 28 25" aria-hidden="true">${token(it.v)}</svg>`).join('')}</div>`;
+const storeRow = (p) => `<div class="p-store">${p.items.map((it) => `<svg viewBox="-14 -12 28 25" aria-hidden="true">${token(it.v)}</svg>`).join('')}${storeTotal(p).outerHTML}</div>`;
 printable(() => {
   const p = G.p, rig = () => document.createElementNS(SVGNS, 'svg');
   const q = rig(), a = rig();

@@ -52,6 +52,7 @@
 
 /* ---------- the store ---------- */
 .tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; max-width: 460px; min-height: 52px; padding: 6px; border-radius: 14px; transition: background-color .15s; }
+.tray-total { flex-basis: 100%; margin: 0; text-align: center; font-size: .85rem; color: var(--muted); }
 .tray.aiming { box-shadow: inset 0 0 0 1px var(--line); }
 .tray.over { background: color-mix(in srgb, var(--sun) 30%, transparent); }
 .slot {
@@ -109,6 +110,7 @@
 .p-rig .hit, .p-rig .tot, .p-rig .no { display: none; }
 .p-rig .wbox { fill: #fff; stroke: #000; stroke-width: 1; }
 .p-store { display: flex; flex-wrap: wrap; justify-content: center; gap: 3mm; }
+.p-store .tray-total { color: #000; }
 .p-store svg { width: 12mm; height: 11mm; overflow: visible; }
 .p-store .wt path:not(.hd) { fill: #000; }
 .p-store .wt .hd { stroke: #000; }
