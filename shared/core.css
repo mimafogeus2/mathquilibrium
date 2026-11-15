@@ -648,7 +648,9 @@ dialog .win-actions::before {
   box-shadow: 0 0 18px -4px var(--pink); animation: thump .34s .3s both cubic-bezier(.3, 0, .2, 1);
 }
 :lang(he) .imp-stamp { letter-spacing: .04em; }
-:root[data-impossible] :is(.masthead, .wordmark) > span:last-child { position: relative; }
+:root[data-impossible] .wordmark > span:last-child { position: relative; }
+/* the hub: centred under the whole title, held by the masthead itself */
+.masthead .imp-stamp { inset-inline: 0; top: auto; bottom: 2px; width: fit-content; margin-inline: auto; }
 :root[data-impossible] .masthead { padding-bottom: 54px !important; }
 :root[data-impossible] .wordmark { margin-bottom: 46px; }
 
