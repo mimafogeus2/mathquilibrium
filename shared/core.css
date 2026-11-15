@@ -687,8 +687,9 @@ dialog .win-actions::before {
 .peel.roll > span { animation: peel-in .8s .35s both cubic-bezier(.3, 1.3, .5, 1); }
 @keyframes peel-in { from { width: 0; height: 0; } }
 :root[data-calm] .peel > span { transition: none; animation: none; }
-/* the fire along the foot of the menus, behind the page's content */
+/* the fire along the foot of the menus: tall flames behind the page's content, lower ones in front of it */
 .fire-band { position: fixed; left: 0; bottom: 0; z-index: -1; width: 100%; height: 150px; pointer-events: none; mask: linear-gradient(to top, #000 55%, transparent), var(--speck); mask-composite: subtract; }
+.fire-band.front { z-index: 50; height: 80px; mask-image: linear-gradient(to top, #000 25%, transparent), var(--speck); }
 :root[data-impossible] body { padding-bottom: 70px; }
 body:has(#game:not([hidden])) :is(.peel, .fire-band) { display: none; }
 @media print { .peel, .fire-band { display: none !important; } }

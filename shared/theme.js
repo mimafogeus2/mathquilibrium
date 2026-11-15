@@ -236,10 +236,13 @@
     };
     if (!on) return;
     pregen();
-    const band = Object.assign(document.createElement('canvas'), { className: 'fire-band' });
-    band.setAttribute('aria-hidden', 'true');
-    document.body.append(band);
-    fire(band, () => true);
+    // two fires, one behind the page and a lower one in front of it: scrolled content sinks into the flames and rises out of them
+    for (const cls of ['fire-band', 'fire-band front']) {
+      const band = Object.assign(document.createElement('canvas'), { className: cls });
+      band.setAttribute('aria-hidden', 'true');
+      document.body.append(band);
+      fire(band, () => true);
+    }
     // under the title's last word ("Miki", "flip")
     document.querySelector(':is(.masthead, .wordmark) > span:last-child')?.insertAdjacentHTML('beforeend', `<span class="imp-stamp" aria-hidden="true">${T('Impossible')}</span>`);
   }
