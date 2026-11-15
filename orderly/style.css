@@ -35,7 +35,7 @@
 .list {
   --gap: 6px;
   position: relative; list-style: none; margin: 0; padding: 0; row-gap: var(--gap);
-  width: min(420px, 100%); flex: 1; min-height: 380px; max-height: 620px;
+  width: min(420px, 100%); flex: 1; min-height: calc(38px * var(--k, 10)); max-height: calc(62px * var(--k, 10)); /* --k: cards, 10 but the tutorial's 4 */
   touch-action: none; user-select: none; -webkit-user-select: none;
 }
 /* .name clips (overflow: hidden), so it's a scroll container: the list's touch-action stops there and the global
@@ -44,7 +44,7 @@
 .list.shake { animation: shake .4s; }
 .card {
   --pos: 0; --dy: 0px;
-  position: absolute; inset-inline: 0; top: 0; height: calc((100% - 9 * var(--gap)) / 10);
+  position: absolute; inset-inline: 0; top: 0; height: calc((100% - (var(--k, 10) - 1) * var(--gap)) / var(--k, 10));
   display: flex; align-items: center; gap: 10px; padding-block: 0; padding-inline: 8px 14px;
   border-radius: 12px; background: var(--grain), var(--stock); border: 1px solid var(--hair); box-shadow: var(--lift);
   font-size: clamp(15px, calc(4.2 * var(--vw)), 17px); font-weight: 550; line-height: 1.15;

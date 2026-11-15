@@ -191,3 +191,6 @@ a.btn { text-decoration: none; color: inherit; }
 :lang(he) .rev span { letter-spacing: .04em; font-size: 13px; }
 .rev.on i { background: radial-gradient(circle at 38% 32%, #fff 0 10%, #ffc2e4 22%, var(--pink) 58%); box-shadow: 0 0 26px 8px rgb(255 79 178 / .65), 0 0 0 3px var(--pink); }
 .rev.on span { color: var(--pink); text-shadow: 0 0 10px rgb(255 79 178 / .7); }
+
+/* the tutorial has no fuse */
+.tut :is(#clock, .fuse) { visibility: hidden; }

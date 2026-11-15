@@ -104,3 +104,4 @@
   .card { width: 128px; }
 }
 
+.tut :is(#btn-undo, #btn-reset) { visibility: hidden; } /* tutorial: undoing would strand the steps */

@@ -64,7 +64,7 @@ const sqName = (i) => 'abcdefgh'[i % G.p.N] + (G.p.N - Math.floor(i / G.p.N));
 const replay = (log) => log.reduce((b, m) => play(b, m), G.p.board);
 
 function startLevel(G, save) {
-  const p = (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
+  const p = G.tut ? TUTORIAL : (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
   // a save is the move list: it must replay legally, you and the computer in turn (null: a pass, only with no move), with the game still on
   let ok = Array.isArray(save.log), b = p.board;
   if (ok) for (const [k, m] of save.log.entries()) {
@@ -168,7 +168,9 @@ function checkOut() {
 // ---------- moves ----------
 function onSquare(i) {
   if (!playing() || G.busy || G.out) return;
-  if (G.sel !== null && moves(G.p, G.b, 1).some((m) => m[0] === G.sel && m[1] === i)) return yourMove([G.sel, i]);
+  const go = G.sel !== null && moves(G.p, G.b, 1).some((m) => m[0] === G.sel && m[1] === i);
+  if (!coachAllows(go ? { from: G.sel, to: i } : { sel: i })) return;
+  if (go) return yourMove([G.sel, i]);
   G.sel = G.b[i] > 0 && G.sel !== i ? i : null;
   if (G.sel !== null) sfx.tap();
   refresh();
@@ -284,7 +286,7 @@ $('#board').addEventListener('focus', () => { if (playing() && $('#board').match
 $('#cards').addEventListener('click', (e) => { // a card shows where its pieces stand
   const c = e.target.closest('.card');
   if (!c) return;
-  const t = +c.dataset.t;
+  const t = (G.card = +c.dataset.t);
   G.units.forEach((u, i) => u && Math.abs(G.b[i]) - 1 === t && flash(u, 'pop'));
 });
 
@@ -313,7 +315,27 @@ $('#help-card').innerHTML = card({ look: 1, king: false, rules: [{ k: 'slide', v
 // help, page 2: a king's card (its head shows the piece as you'd see yours and the enemy's)
 $('#help-king').innerHTML = card({ look: 0, king: true, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 1, m: 'any' }] });
 
-boot({ name: T('Alien Chess'), storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
+// Tutorial: 4×4, no kings. Your Zib (slides straight, any distance) on b1 takes the Gromf on b4; the other Gromf (one step
+// diagonally forward) comes to b2, and the Zib takes it down the file. The computer's reply is its own, and on this board it's that one.
+const TUTORIAL = { N: 4, K: 2, king: [false, false], first: [13, 1], board: [0, -2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+  types: [{ look: 1, king: false, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 9, m: 'any' }] },
+    { look: 2, king: false, rules: [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1, m: 'any' }] }] };
+const enemies = () => G.b.filter((x) => x < 0).length;
+
+const sqEl = (i) => $(`#board .sq[data-i="${i}"]`), cardEl = (t) => $(`#cards .card[data-t="${t}"]`);
+// ring the piece to pick up, then (once it's picked) the square it goes to
+const goTo = (f, t) => () => (G.sel === f ? sqEl(t) : G.units[f]);
+
+boot({ name: T('Alien Chess'),
+  tutorial: [
+    [T('Every kind of piece has a <b>card</b> showing how it moves. The colored square in the middle is the piece; a <b>dot</b> is a square it can land on. A <b>line</b> means it slides there square by square, and can be blocked; an <b>arrow</b> runs on to the edge of the board. Tap your Zib\'s card.'),
+      () => G.card === 0, () => cardEl(0), () => false],
+    [T('Cards point up the board. The enemy\'s pieces read theirs <b>upside down</b>: its Gromfs step one square diagonally <b>down</b>, toward you. Tap the Gromf\'s card.'),
+      () => G.card === 1, () => cardEl(1), () => false],
+    [T('Your Zib slides straight, as far as it likes. Tap it: the board marks where it can go.'), () => G.sel === 13, goTo(13, 1), (m) => m.sel === 13],
+    [T('Take the Gromf at the top of its column.'), () => enemies() < 2, goTo(13, 1), (m) => m.sel === 13 || m.to === 1],
+    [T('The computer answers every move: its other Gromf stepped down, diagonally. Take it to win. Win fast: stars are for speed.'), null, goTo(1, 9), (m) => m.sel === 1 || m.to === 9],
+  ], storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1; } });
 game.impossible = { stars: game.stars }; // the same rule in Impossible Mode, on its own times

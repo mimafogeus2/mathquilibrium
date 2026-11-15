@@ -12,11 +12,11 @@ const score = (r) => { const right = r.marks.filter(Boolean).length; return righ
 // R = the round on screen: { key, pack, n?, date?, pairs, marks: [right?], left: ms, hold (revealing), over }
 let R = null, raf = 0, last = 0;
 const today = () => ymd(new Date());
-const save = () => { if (R && !R.over) store.saves[R.key] = { marks: R.marks, left: R.left }; persist(); };
+const save = () => { if (R && !R.over && !R.tut) store.saves[R.key] = { marks: R.marks, left: R.left }; persist(); };
 
 function screen(id) {
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  if (id === 'home') { home(); toMenu(); }
+  if (id === 'home') { coach(null); home(); toMenu(); }
 }
 
 function home() {
@@ -44,6 +44,7 @@ function home() {
 
 // Same name and signature as core.js's start(), which this replaces, so core's openLevels() lands here.
 function start(pack, n, date = null) {
+  coach(null);
   const key = date ? 'D' + pack + date : pack + n;
   // A finished daily shows its result over the menu.
   if (date && store.daily[date]?.[pack]) { toMenu(false); screen('home'); return showEnd(store.daily[date][pack], { pack, date }); }
@@ -85,7 +86,7 @@ function hud() {
   $('#clock').textContent = secs;
   $('#fuse').style.width = (R.left / (TIME[R.pack] * 1000)) * 100 + '%';
   $('#game').classList.toggle('hurry', secs <= 5);
-  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, PAIRS), total: PAIRS });
+  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, R.pairs.length), total: R.pairs.length });
   $('#score').textContent = T('{n} pts', { n: R.marks.filter(Boolean).length * PER_RIGHT });
 }
 
@@ -108,6 +109,7 @@ function deal() {
 function answer(side) {
   if (!R || R.over || R.hold || $('#game').hidden) return;
   const [lt, lv, rt, rv] = R.pairs[R.marks.length], right = (lv > rv) === (side === 0);
+  if (!coachAllows(right)) return;
   R.marks.push(right);
   R.hold = true;
   sides().forEach((el, i) => {
@@ -133,10 +135,34 @@ function answer(side) {
     if (R !== r || r.over) return;
     r.hold = false;
     last = performance.now();
-    if (r.marks.length === PAIRS || r.left <= 0) return finish();
+    if (r.marks.length === r.pairs.length || r.left <= 0) return finish();
     deal();
     hud();
   }, REVEAL);
+}
+
+// ---------- tutorial ----------
+// Three easy pairs with the clock stopped (frame() never runs, and the stylesheet hides it): pick, hear what a miss costs, finish.
+// Only the right pick counts (coachAllows): a wrong one shakes the coach line instead. Nothing is saved or recorded.
+const ok = (right) => right;
+function tutorial() {
+  coach(null);
+  R = { key: 'tutorial', pack: 'E', tut: true, pairs: [['3 + 4', 7, '2 + 9', 11], ['6 × 2', 12, '5 + 5', 10], ['9 − 3', 6, '2 × 4', 8]],
+    marks: [], left: TIME.E * 1000, hold: false, over: false };
+  $('#g-title').textContent = T('Tutorial');
+  $('#g-sub').textContent = '';
+  $('#game').className = 'screen tier-E';
+  $('#btn-result').hidden = true;
+  screen('game');
+  toGame('tutorial');
+  cancelAnimationFrame(raf);
+  deal();
+  hud();
+  coach([
+    [T('Two sums, no answers. Work them out and tap the <b>bigger</b> one (or press <b>←</b> / <b>→</b>).'), () => R.marks.length >= 1, '.pair', ok],
+    [T('In a real round a clock runs, and the <b>seconds left at the end add to your score</b>. A wrong pick costs <b>3 seconds</b>, so every miss costs points. Take care with this one.'), () => R.marks.length >= 2, '.pair', ok],
+    [T('A round is 10 pairs. Last one!'), null, '.pair', ok],
+  ], { onEnd: () => { R = null; screen('home'); } });
 }
 
 // ---------- end ----------
@@ -144,6 +170,7 @@ function finish() {
   const st = streak();
   R.over = true;
   cancelAnimationFrame(raf);
+  if (R.tut) { $('#game').classList.add('done'); sfx.win(); confetti(); return coachEnd(); }
   delete store.saves[R.key];
   const full = R.marks.length === PAIRS, wrong = R.marks.filter((m) => !m).length;
   const rec = { s: score(R), m: R.marks.map(Number).join(''), t: full ? Math.ceil(R.left / 1000) : 0 };
@@ -197,6 +224,7 @@ store = { packs: {}, daily: {}, saves: {}, seenHelp: false, ...store };
 for (const k in TIERS) store.packs[k] ??= { unlocked: 1, stars: {} };
 
 $('#btn-levels').onclick = () => openLevels();
+tutorialLink(tutorial);
 $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
 const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home'); };
 $('#btn-back').onclick = goHome;
@@ -225,5 +253,5 @@ printable(() => R && {
   body: `<ol class="p-pairs">${R.pairs.map(([lt, , rt]) => `<li><span>${esc(lt)}</span><i></i><span>${esc(rt)}</span></li>`).join('')}</ol>`,
   answer: `<ol class="p-pairs">${R.pairs.map(([lt, lv, rt, rv]) => `<li><span>${esc(lt)} <small>(${lv})</small></span><i>${lv > rv ? '&gt;' : '&lt;'}</i><span><small>(${rv})</small> ${esc(rt)}</span></li>`).join('')}</ol>`,
 }, (k, date) => { R = { pairs: generate(hash('D' + k + date), k) }; });
-router((h) => openLevel(h, start), goHome);
-if (!store.seenHelp) $('#dlg-help').showModal();
+router((h) => (h === 'tutorial' ? (tutorial(), true) : openLevel(h, start)), goHome);
+if (!store.seenHelp && !R?.tut) $('#dlg-help').showModal();

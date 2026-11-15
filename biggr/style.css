@@ -90,3 +90,6 @@
 .p-pairs span:first-child { text-align: right; }
 .p-pairs i { height: 11mm; border-bottom: 1.2pt solid #000; text-align: center; font-style: normal; }
 .p-pairs small { font-size: 11pt; font-weight: 400; }
+
+/* Tutorial: no clock (core.css hides the shared ones) */
+.tut :is(#clock, .fuse) { visibility: hidden; }
