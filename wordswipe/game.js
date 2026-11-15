@@ -222,7 +222,16 @@ function finish() {
   $('#game').classList.add('done');
   if (rec.t) { sfx.win(); confetti(sp ? sp.occasion.split(' ', 1) : undefined); } // a special day throws its own emoji
   track(R.marks.length === 24 ? 'finish' : 'timeout', custom ? 'custom' : mode(R.date));
-  setTimeout(() => showEnd(rec, !!R.date), rec.t ? 700 : 300);
+  setTimeout(() => { if (R) results(); showEnd(rec, !!R?.date); }, rec.t ? 700 : 300); // after the last card has flown
+}
+
+// Behind the result: every word, ✓ if it fits, ✗ if not, inked by how you answered it (unanswered ones stay blank).
+function results() {
+  const HOW = { skip: T('unanswered'), right: T('right'), wrong: T('wrong') };
+  $('#stack').innerHTML = `<ul class="results">${R.cards.map((c, i) => {
+    const how = R.marks[i] === undefined ? 'skip' : R.marks[i] ? 'right' : 'wrong';
+    return `<li class="${how}" aria-label="${esc(c.w)}: ${c.yes ? T('fits') : T("doesn't fit")}, ${HOW[how]}"><i>${c.yes ? '✓' : '✗'}</i>${esc(c.w)}</li>`;
+  }).join('')}</ul>`;
 }
 
 function showEnd(rec, daily) {
