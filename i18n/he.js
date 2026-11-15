@@ -309,6 +309,11 @@ module.exports = {
       "Tick <b>✓</b> if the word fits, <b>✗</b> if it doesn't. One box per word.": 'סמנו <b>✓</b> אם המילה מתאימה ו־<b>✗</b> אם לא. משבצת אחת לכל מילה.',
       'Custom round': 'סבב אישי',
       'Play again': 'לשחק שוב',
+      'fits': 'מתאים',
+      "doesn't fit": 'לא מתאים',
+      'right': 'צדקתם',
+      'wrong': 'טעיתם',
+      'unanswered': 'בלי תשובה',
     },
     'wordswipe/editor.js': {
       'Too long for a card ({n} letters at most)': 'ארוך מדי לקלף (עד {n} אותיות)',

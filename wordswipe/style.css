@@ -101,6 +101,15 @@
 .misses .yes { box-shadow: inset 0 0 0 1px var(--teal); color: var(--teal-text); }
 .misses .no { box-shadow: inset 0 0 0 1px var(--pink); color: var(--pink-text); }
 
+/* the finished round: every word, how you answered it */
+#game.done .stack { touch-action: auto; user-select: text; -webkit-user-select: text; overflow-y: auto; }
+.results { list-style: none; margin: 0; padding: 2px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+.results li { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 6px 10px; border-radius: 10px; font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; animation: pop-in .2s var(--ease) both; }
+.results i { font-style: normal; flex: none; }
+.results .right { box-shadow: inset 0 0 0 1px var(--teal); color: var(--teal-text); }
+.results .wrong { background: var(--speck), var(--red); color: var(--on-red); }
+.results .skip { box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); }
+
 /* phone in landscape: card left, buttons right */
 @media (orientation: landscape) and (max-height: 540px) {
   #game { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto 1fr auto; column-gap: 24px; }
