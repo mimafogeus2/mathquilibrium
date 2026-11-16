@@ -564,7 +564,7 @@ module.exports = {
       ['class="give-up">Give up</button>', 'class="give-up">לוותר</button>'],
       ['aria-label="WordSwipe menu"', 'aria-label="לתפריט של שמאל ימין שמאל"'],
       ['<b>Play WordSwipe</b>', '<b>לשחק שמאל ימין שמאל</b>'],
-      ['>Make your own round</a>', '>צרו סבב משלכם</a>'],
+      ['<b>Make your own round</b>', '<b>צרו סבב משלכם</b>'],
     ],
 
     'index.html': [
@@ -680,7 +680,7 @@ module.exports = {
       ...WORDSWIPE_GAME,
       WORDSWIPE_HELP,
       WORDSWIPE_HELP_FOOT,
-      ['>Make a round</a>', '>צרו סבב</a>'],
+      ['<b>Make a round</b>', '<b>צרו סבב</b>'], ['<small>Write your own and send it to a friend</small>', '<small>כתבו סבב משלכם ושלחו לחברים</small>'],
     ],
 
     'wordswipe/editor.html': [
@@ -726,7 +726,7 @@ module.exports = {
 
     'orderly/index.html': [
       ...ORDERLY_GAME,
-      ['href="editor.html">Make a level</a>', 'href="editor.html">הכינו חידה</a>'],
+      ['<b>Make a level</b><small>Write your own and send it to a friend</small>', '<b>הכינו חידה</b><small>כתבו חידה משלכם ושלחו לחברים</small>'],
       ['Orderly — put ten things in order', 'בסדר — עשרה דברים, סדר אחד'],
       ['A subject and ten cards. Drag them into order: oldest to newest, smallest to largest, mildest to hottest. A new daily puzzle every day.',
         'נושא אחד ועשרה קלפים. גררו אותם לסדר הנכון: מהישן לחדש, מהקטן לגדול, מהעדין לחריף. חידה יומית חדשה בכל יום.'],
@@ -748,7 +748,7 @@ module.exports = {
       ["<p class=\"tagline\">This link is broken. It may have been cut short when it was copied: ask for it again, or try today's puzzle.</p>",
         '<p class="tagline">הקישור הזה שבור. אולי הוא נקטע כשהעתיקו אותו: בקשו אותו שוב, או נסו את החידה של היום.</p>'],
       ['<b>Play Orderly</b>', '<b>לחידה של היום</b>'],
-      ['href="editor.html">Make your own level</a>', 'href="editor.html">הכינו חידה משלכם</a>'],
+      ['<b>Make your own level</b>', '<b>הכינו חידה משלכם</b>'],
     ],
 
     'orderly/editor.html': [

@@ -126,8 +126,6 @@
 
 /* ---------- play.html: a shared level ---------- */
 .broken { margin: auto 0; width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.broken .btn { text-decoration: none; }
-#res-make { margin-top: 2px; }
 
 /* ---------- editor ---------- */
 #editor { max-width: 560px; }
