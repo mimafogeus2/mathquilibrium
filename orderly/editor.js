@@ -4,6 +4,7 @@
 const N = CUSTOM.cards, MIN = CUSTOM.min, DRAFT = 'orderly-editor' + (LANG === 'en' ? '' : '-' + LANG);
 const PRESETS = [['Earliest', 'Latest'], ['First', 'Last'], ['Smallest', 'Largest'], ['Fewest', 'Most'], ['Shortest', 'Longest'], ['Lowest', 'Highest'], ['Slowest', 'Fastest']];
 const pair = (t, b) => T('{top} → {bottom}', { top: t, bottom: b }); // a preset's chip
+const preset = () => PRESETS.some(([t, b]) => T(t) === D.t.trim() && T(b) === D.b.trim());
 const GRIP = '<svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg>';
 const DEL = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const UP = '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>', DOWN = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
@@ -70,7 +71,12 @@ $('#e-presets').replaceChildren(...PRESETS.map(([t, b]) => {
   c.textContent = pair(T(t), T(b));
   c.onclick = () => { D.t = T(t); D.b = T(b); fill(); changed(); };
   return c;
-}));
+}), Object.assign(document.createElement('button'), { type: 'button', className: 'chip', id: 'e-custom', textContent: T('Custom') }));
+// Custom is pressed whenever the labels match no preset; picking it from a preset clears them to write your own
+$('#e-custom').onclick = () => {
+  if (preset()) { D.t = D.b = ''; fill(); changed(); }
+  fields.t.focus();
+};
 $('#e-add').onclick = () => {
   D.c.push(['', '']);
   fill();
@@ -96,7 +102,7 @@ function changed() {
   keep();
   $('#e-lbl-top').textContent = '▲ ' + (D.t.trim() || '…');
   $('#e-lbl-bottom').textContent = '▼ ' + (D.b.trim() || '…');
-  for (const c of $('#e-presets').children) c.setAttribute('aria-pressed', String(c.textContent === pair(D.t, D.b)));
+  for (const c of $('#e-presets').children) c.setAttribute('aria-pressed', String(c.id === 'e-custom' ? !preset() : c.textContent === pair(D.t.trim(), D.b.trim())));
   preview();
   check();
 }

@@ -261,6 +261,7 @@ module.exports = {
       'Shortest': 'הקצר ביותר', 'Longest': 'הארוך ביותר',
       'Lowest': 'הנמוך ביותר', 'Highest': 'הגבוה ביותר',
       'Slowest': 'האיטי ביותר', 'Fastest': 'המהיר ביותר',
+      'Custom': 'משלכם',
       'Card {n}': 'קלף {n}',
       'Value': 'ערך',
       'Card {n} name': 'השם של קלף {n}',
