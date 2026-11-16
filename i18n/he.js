@@ -109,6 +109,7 @@ module.exports = {
       'How to play': 'איך משחקים',
       // the tutorial: its menu link, the coach line, and the dialog at its end
       'Tutorial': 'מדריך',
+      'Try the tutorial': 'נסו את המדריך',
       'Tutorial · {n} of {k}': 'מדריך · {n} מתוך {k}',
       "That's it — you know how to play. Have fun!": 'זהו — אתם יודעים לשחק. תיהנו!',
       'Tutorial complete!': 'סיימתם את המדריך!',

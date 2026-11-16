@@ -269,11 +269,14 @@ function coachEnd() {
   d.addEventListener('close', () => { d.remove(); coach(null); c.onEnd?.(); });
   setTimeout(() => { if (coached === c) { document.body.append(d); d.showModal(); } }, 1400);
 }
-// A "Tutorial" link beside How to play on the menu, running play()
+// A "Tutorial" link beside How to play on the menu, and one under How to play's own buttons, running play()
+// (from the game screen too: the puzzle left behind is saved, as Back would)
 function tutorialLink(play) {
-  const help = $('#btn-help');
+  const help = $('#btn-help'), dlg = $('#dlg-help');
   help?.insertAdjacentHTML('beforebegin', `<button id="btn-tutorial" class="foot-link">${T('Tutorial')}</button>`);
   if (help) $('#btn-tutorial').onclick = () => { track('tutorial', ''); play(); };
+  dlg?.insertAdjacentHTML('beforeend', `<button class="foot-link help-tut">${T('Try the tutorial')}</button>`);
+  if (dlg) dlg.querySelector('.help-tut').onclick = () => { dlg.close(); if (G) saveGame(); track('tutorial', 'help'); play(); };
 }
 // boot() games: game.tutorial = steps (above, read with G in scope). #tutorial plays it: G.tut is set, and game.start builds the
 // tutorial's own small puzzle for it. Nothing is saved or recorded, and the clock stays out of it.
