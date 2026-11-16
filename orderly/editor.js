@@ -64,14 +64,15 @@ for (const [k, el] of Object.entries(fields)) {
 }
 fields.s.maxLength = CUSTOM.subject;
 fields.t.maxLength = fields.b.maxLength = CUSTOM.label;
-$('#e-presets').replaceChildren(...PRESETS.map(([t, b]) => {
+// Custom first: the row scrolls sideways, and it's the one chip that must never be out of sight
+$('#e-presets').replaceChildren(Object.assign(document.createElement('button'), { type: 'button', className: 'chip', id: 'e-custom', textContent: T('Custom') }), ...PRESETS.map(([t, b]) => {
   const c = document.createElement('button');
   c.type = 'button';
   c.className = 'chip';
   c.textContent = pair(T(t), T(b));
   c.onclick = () => { D.t = T(t); D.b = T(b); fill(); changed(); };
   return c;
-}), Object.assign(document.createElement('button'), { type: 'button', className: 'chip', id: 'e-custom', textContent: T('Custom') }));
+}));
 // Custom is pressed whenever the labels match no preset; picking it from a preset clears them to write your own
 $('#e-custom').onclick = () => {
   if (preset()) { D.t = D.b = ''; fill(); changed(); }
