@@ -396,7 +396,10 @@ function renderHome() {
       b.onclick = () => playRandom(k);
       return b;
     }
-    const next = firstUnsolved(pp);
+    // a level left mid-way (saves go on a win) is what the button resumes, else the first unsolved one
+    const left = +Object.keys(store.saves).find((s) => s[0] === k && /^\d+$/.test(s.slice(1)))?.slice(1);
+    if (left) b.querySelector('.pack-count').insertAdjacentHTML('beforeend', `<small>${T('Resume')}</small>`);
+    const next = left || firstUnsolved(pp);
     b.onclick = () => (next ? start(k, next) : openLevels(k));
     return b;
   }));
