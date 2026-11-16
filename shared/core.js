@@ -430,10 +430,12 @@ function start(pack, n, date = null) {
 const playing = () => G && !G.done && !G.paused;
 
 // Pause stops the clock and hides the board, so it can't be studied for free.
-function setPaused(v) {
+// instant: pause without the flip (leaving the tab/window); resuming always flips, since .instant only holds while paused
+function setPaused(v, instant) {
   if (!G || (v && G.done)) return;
   const changed = G.paused !== v;
   G.paused = v;
+  $('#game').classList.toggle('instant', v && !!instant);
   $('#game').classList.toggle('paused', v);
   // the cover is the board's back: same size and corners, so the flip reads as one sheet turning over (core.css animates it)
   const c = $('#pause-cover'), b = $('#board');
@@ -763,7 +765,7 @@ function boot(g) {
   $('#btn-pause').onclick = () => setPaused(!G.paused);
   $('#btn-resume').onclick = () => setPaused(false);
   // leaving the tab or window pauses, so the board isn't left showing on the clock; the player resumes by hand
-  const away = () => { if (playing() && !G.tut && !$('#game').hidden) setPaused(true); };
+  const away = () => { if (playing() && !G.tut && !$('#game').hidden) setPaused(true, true); };
   addEventListener('blur', away);
   document.addEventListener('visibilitychange', () => document.hidden && away());
   $('#btn-giveup').onclick = giveUp;
