@@ -50,7 +50,9 @@
 
   .z-head { margin: 44px 0 12px; border-bottom: 1px solid var(--hair); padding-bottom: 6px; }
   #z-preview { width: 100%; display: flow-root; } /* keeps #sheets' negative margin (the preview's shrink) inside */
-  #z-msg { text-align: center; color: var(--muted); padding: 40px 0; }
+  /* the paper keeps its own measures: undo the text & tile size zoom (--scale on html), or it fits nothing to its slots */
+  #z-preview, #measure { zoom: calc(1 / var(--scale, 1)); }
+  #z-msg { zoom: var(--scale, 1); text-align: center; color: var(--muted); padding: 40px 0; }
   #sheets { display: flex; flex-direction: column; align-items: center; gap: 4mm; transform-origin: top center; }
   .z-cap { margin: 8mm 0 0; font-size: 13pt; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
   .bar a { color: inherit; }
