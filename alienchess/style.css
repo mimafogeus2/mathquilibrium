@@ -59,10 +59,13 @@
 }
 .card:nth-child(2) { animation-delay: 60ms; } .card:nth-child(3) { animation-delay: 120ms; }
 .card.on { transform: translateY(-3px); box-shadow: inset 0 0 0 2px var(--ink), 2px 3px 0 var(--reg); }
-.card-head { display: flex; align-items: center; gap: 0; margin-bottom: 6px; min-height: 30px; }
-.card-head .pc { width: 18px; height: 24px; flex: none; }
-.card-head .pc + .pc { margin-inline-start: -7px; }
-.card-head b { margin-inline-start: 5px; font: 600 14.5px/1.1 var(--display); letter-spacing: -0.01em; }
+/* head: your piece big, the enemy's half size beside it, the name at the far end, all standing on one baseline.
+   A flex item with no baseline (the svg) gets its box bottom as one; the pedestal ends 2.2 of the viewBox's 50 above
+   that bottom, so each piece drops by that share of its height to put its pedestal exactly on the line. */
+.card-head { display: flex; align-items: baseline; margin-bottom: 8px; }
+.card-head .pc { --h: 44px; width: calc(var(--h) * .8); height: var(--h); flex: none; position: relative; top: calc(var(--h) * .044); }
+.card-head .pc.foe { --h: 22px; margin-inline-start: 1px; }
+.card-head b { margin-inline-start: auto; padding-inline-start: 4px; text-align: end; font: 600 14.5px/1.1 var(--display); letter-spacing: -0.01em; }
 .card.king { box-shadow: inset 0 0 0 1.5px var(--sun), var(--lift); }
 .card.king.on { box-shadow: inset 0 0 0 2px var(--ink), 2px 3px 0 var(--reg); }
 .card { position: relative; }
@@ -91,17 +94,20 @@
   .board { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 420px)); }
   .cards { grid-column: 2; grid-row: 4; max-width: 400px; }
   .card { width: 112px; }
+  .card-head .pc { --h: 36px; } .card-head .pc.foe { --h: 18px; }
 }
 
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
   .board { width: min(600px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 520px)); border-radius: 14px; }
   .cards { gap: 14px; max-width: 560px; }
   .card { width: 160px; padding: 10px 10px 12px; }
+  .card-head .pc { --h: 52px; } .card-head .pc.foe { --h: 26px; }
 }
 @media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
   .board { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 500px)); }
   #game .cards { grid-column: 2; grid-row: 4; max-width: 420px; }
   .card { width: 128px; }
+  .card-head .pc { --h: 44px; } .card-head .pc.foe { --h: 22px; }
 }
 
 .tut :is(#btn-undo, #btn-reset) { visibility: hidden; } /* tutorial: undoing would strand the steps */
