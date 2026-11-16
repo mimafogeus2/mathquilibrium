@@ -101,11 +101,13 @@ const muted = () => { try { return localStorage.getItem('muted') === '1'; } catc
 try { if (localStorage.getItem('muted') === null && Object.values(localStorage).some((v) => v.includes('"muted":true'))) localStorage.setItem('muted', '1'); } catch {}
 const sfx = (() => {
   let ctx;
+  // iOS leaves a backgrounded context "interrupted" (or "running" but silent): drop it on hide, the next tap makes a fresh one
+  document.addEventListener('visibilitychange', () => { if (document.hidden && ctx) { ctx.close().catch(() => {}); ctx = null; } });
   function tone(freq, { dur = 0.12, type = 'sine', vol = 0.15, at = 0, slide } = {}) {
     if (muted()) return;
     try {
       ctx ??= new (window.AudioContext || window.webkitAudioContext)();
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state !== 'running') ctx.resume();
       const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain();
       o.type = type;
       o.frequency.setValueAtTime(freq, t);
