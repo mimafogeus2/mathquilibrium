@@ -201,9 +201,9 @@ function hint() {
   saveGame();
 }
 
-function reset() {
+async function reset() {
   if (!playing() || !G.order.length || !coachAllows({ reset: true })) return;
-  if (!confirm(T('Restart this level? Your pieces come back off the board; the clock keeps running.'))) return;
+  if (!(await ask(T('Restart this level? Your pieces come back off the board; the clock keeps running.')))) return;
   for (const k of G.order) G.placed[k] = -1;
   G.order = [];
   G.sel = Math.max(0, nextFree());

@@ -345,9 +345,9 @@ function hint() {
   saveGame();
 }
 
-function reset() {
+async function reset() {
   if (!playing() || G.fills.size === G.hinted.size || !coachAllows({ reset: true })) return;
-  if (!confirm(T('Restart this level? Your tiles are cleared; the clock keeps running.'))) return;
+  if (!(await ask(T('Restart this level? Your tiles are cleared; the clock keeps running.')))) return;
   remember();
   for (const k of [...G.fills.keys()]) if (!G.hinted.has(k)) G.fills.delete(k);
   sfx.erase();

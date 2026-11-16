@@ -77,8 +77,8 @@ for (const list of document.querySelectorAll('.ed-list')) {
 $('#ed-subject').value = draft.s;
 $('#ed-subject').addEventListener('input', () => { draft.s = $('#ed-subject').value.trim(); changed(); });
 
-$('#ed-clear').onclick = () => {
-  if (!confirm(T('Start over? The subject and all the words are cleared.'))) return;
+$('#ed-clear').onclick = async () => {
+  if (!(await ask(T('Start over? The subject and all the words are cleared.')))) return;
   draft = { s: '', y: [], n: [] };
   $('#ed-subject').value = '';
   changed();

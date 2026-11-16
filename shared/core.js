@@ -489,7 +489,7 @@ function copyLink(url, btn) {
     ta.select();
     const ok = document.execCommand('copy');
     ta.remove();
-    if (ok) done(); else prompt(T('Copy this link:'), url);
+    if (ok) done(); else ask(T('Copy this link:'), { ok: 'Done', cancel: null, text: url });
   };
   if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url).then(done, old);
   else old();
@@ -607,8 +607,8 @@ function winClock() {
 setInterval(winClock, 1000);
 
 // Give up: the answer is shown, nothing is recorded (no stars, no daily), and the save is dropped.
-function giveUp() {
-  if (!playing() || !confirm(T("Give up and see the answer? This puzzle won't count as solved."))) return;
+async function giveUp() {
+  if (!playing() || !(await ask(T("Give up and see the answer? This puzzle won't count as solved."))) || !playing()) return;
   G.done = true;
   clearInterval(timer);
   delete store.saves[G.key];

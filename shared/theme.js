@@ -25,6 +25,27 @@
   root.toggleAttribute('data-impossible', IMP_PAGE && get('impossible') === '1' && !location.hash);
   document.addEventListener('DOMContentLoaded', () => IMP_PAGE && !location.hash && impossible());
 
+  // ask(): the site's own confirm() / alert() / prompt(), a dialog on the same paper. Resolves true on OK; Cancel, Esc or a
+  // screen change (core.js closes open dialogs) resolve false. The question up to its first "?" is the heading, the rest the body.
+  // { cancel: null }: an alert, OK only. { text }: a read-only field, selected, to copy by hand. Cancel takes the focus, so a stray
+  // Enter never confirms a reset.
+  window.ask = (msg, { ok = 'OK', cancel = 'Cancel', text } = {}) => new Promise((done) => {
+    const dlg = Object.assign(document.createElement('dialog'), { className: 'ask' });
+    dlg.innerHTML = `<h2></h2><p></p><input readonly hidden><form method="dialog" class="row">${
+      cancel ? '<button class="btn ghost center" value="" autofocus><b></b></button>' : ''}<button class="btn primary center" value="ok"><b></b></button></form>`;
+    const [, head, body] = msg.match(/^([^?]*\?)\s*([^]*)$/) || [, '', msg];
+    const [h, p, input] = dlg.querySelectorAll('h2, p, input'), labels = dlg.querySelectorAll('b');
+    Object.assign(h, { textContent: head, hidden: !head });
+    Object.assign(p, { textContent: body, hidden: !body });
+    labels[labels.length - 1].textContent = T(ok);
+    if (cancel) labels[0].textContent = T(cancel);
+    if (text != null) Object.assign(input, { value: text, hidden: false, onfocus: () => input.select() });
+    dlg.addEventListener('close', () => { done(dlg.returnValue === 'ok'); dlg.remove(); });
+    document.body.append(dlg);
+    dlg.showModal();
+    if (text != null) input.focus();
+  });
+
   const pref = () => get('theme') || 'auto';
   function apply() {
     const p = pref(), dark = p === 'dark' || (p === 'auto' && mq.matches), imp = root.hasAttribute('data-impossible');
@@ -168,14 +189,14 @@
       try { d = JSON.parse(await f.text()); } catch {}
       const data = d?.app === 'games-by-miki' && d.data && typeof d.data === 'object' ? d.data : null;
       const ok = data && Object.entries(data).filter(([k, v]) => (GAMES.test(k) || PREFS.includes(k)) && typeof v === 'string');
-      if (!ok?.length) return alert(T("That file isn't a Games by Miki export."));
-      if (!confirm(T('Replace the progress in this browser with the one in this file?'))) return;
+      if (!ok?.length) return ask(T("That file isn't a Games by Miki export."), { cancel: null });
+      if (!(await ask(T('Replace the progress in this browser with the one in this file?')))) return;
       for (const k of progress()) put(k);
       for (const [k, v] of ok) put(k, v);
       reload();
     };
-    $('#set-reset').onclick = () => {
-      if (!confirm(T("Erase all progress, streaks and saved games, in every game? This can't be undone. (Export first to keep a copy.)"))) return;
+    $('#set-reset').onclick = async () => {
+      if (!(await ask(T("Erase all progress, streaks and saved games, in every game? This can't be undone. (Export first to keep a copy.)")))) return;
       for (const k of progress()) put(k);
       reload();
     };
