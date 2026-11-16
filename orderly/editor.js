@@ -1,31 +1,35 @@
 'use strict';
-// The level editor: a subject, the two ends of the order, and 10 cards (custom.js has the shape and limits).
+// The level editor: a subject, the two ends of the order, and 4 to 10 cards (custom.js has the shape and limits).
 // The draft is kept in localStorage as you type; Test it / Share / Copy link pack it into a play.html link (shared/link.js).
-const N = CUSTOM.cards, DRAFT = 'orderly-editor' + (LANG === 'en' ? '' : '-' + LANG);
+const N = CUSTOM.cards, MIN = CUSTOM.min, DRAFT = 'orderly-editor' + (LANG === 'en' ? '' : '-' + LANG);
 const PRESETS = [['Earliest', 'Latest'], ['First', 'Last'], ['Smallest', 'Largest'], ['Fewest', 'Most'], ['Shortest', 'Longest'], ['Lowest', 'Highest'], ['Slowest', 'Fastest']];
 const pair = (t, b) => T('{top} → {bottom}', { top: t, bottom: b }); // a preset's chip
+const preset = () => PRESETS.some(([t, b]) => T(t) === D.t.trim() && T(b) === D.b.trim());
 const GRIP = '<svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg>';
+const DEL = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const UP = '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>', DOWN = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
 
-const blank = () => ({ s: '', t: T('Earliest'), b: T('Latest'), c: Array.from({ length: N }, () => ['', '']) });
+const blank = () => ({ s: '', t: T('Earliest'), b: T('Latest'), c: Array.from({ length: MIN }, () => ['', '']) }); // a new level starts at the minimum; Add a card goes up to N
 let D;
 try { D = JSON.parse(localStorage.getItem(DRAFT)); } catch {}
 const str = (x) => typeof x === 'string';
-if (!(D && str(D.s) && str(D.t) && str(D.b) && Array.isArray(D.c) && D.c.length === N && D.c.every((c) => Array.isArray(c) && str(c[0]) && str(c[1])))) D = blank();
+if (!(D && str(D.s) && str(D.t) && str(D.b) && Array.isArray(D.c) && D.c.length >= MIN && D.c.length <= N && D.c.every((c) => Array.isArray(c) && str(c[0]) && str(c[1])))) D = blank();
 const keep = () => { try { localStorage.setItem(DRAFT, JSON.stringify(D)); } catch {} };
 
 let cur = 0, tried = false; // cur = the card the preview shows; tried = Test/Share was pressed, so every problem shows, not just the touched ones
 const touched = new Set();
 
 // ---------- the form ----------
+// All N rows are built once; only the first D.c.length show.
 const list = $('#e-list'), rows = [];
 for (let i = 0; i < N; i++) {
   const li = document.createElement('li');
   li.className = 'e-row';
   li.innerHTML = `<span class="e-grip" aria-hidden="true">${GRIP}</span><span class="e-n" aria-hidden="true"></span>
     <span class="e-fields"><input class="e-name" maxlength="${CUSTOM.name}" autocomplete="off"><input class="e-val" maxlength="${CUSTOM.value}" autocomplete="off"></span>
-    <span class="e-move"><button type="button" class="icon e-up">${UP}</button><button type="button" class="icon e-down">${DOWN}</button></span>`;
-  const [name, val] = li.querySelectorAll('input'), [up, down] = li.querySelectorAll('button');
+    <span class="e-move"><button type="button" class="icon e-up">${UP}</button><button type="button" class="icon e-down">${DOWN}</button></span>
+    <button type="button" class="icon e-del">${DEL}</button>`;
+  const [name, val] = li.querySelectorAll('input'), [up, down, del] = li.querySelectorAll('button');
   li.querySelector('.e-n').textContent = i + 1;
   name.placeholder = T('Card {n}', { n: i + 1 });
   val.placeholder = T('Value');
@@ -33,8 +37,8 @@ for (let i = 0; i < N; i++) {
   val.setAttribute('aria-label', T('Card {n} value', { n: i + 1 }));
   up.setAttribute('aria-label', T('Move card {n} up', { n: i + 1 }));
   down.setAttribute('aria-label', T('Move card {n} down', { n: i + 1 }));
+  del.setAttribute('aria-label', T('Remove card {n}', { n: i + 1 }));
   up.disabled = i === 0;
-  down.disabled = i === N - 1;
   name.oninput = () => { D.c[i][0] = name.value; changed(); };
   val.oninput = () => { D.c[i][1] = val.value; changed(); };
   name.onfocus = val.onfocus = () => { cur = i; preview(); };
@@ -42,8 +46,15 @@ for (let i = 0; i < N; i++) {
   val.onblur = () => { touched.add(val); check(); };
   // focus follows the card (onto its other arrow at the ends, where this one is disabled)
   up.onclick = () => { move(i, i - 1); (i > 1 ? rows[i - 1].up : rows[0].down).focus(); };
-  down.onclick = () => { move(i, i + 1); (i < N - 2 ? rows[i + 1].down : rows[N - 1].up).focus(); };
-  rows.push({ li, name, val, up, down });
+  down.onclick = () => { const n = D.c.length; move(i, i + 1); (i < n - 2 ? rows[i + 1].down : rows[n - 1].up).focus(); };
+  del.onclick = () => {
+    D.c.splice(i, 1);
+    cur = Math.min(cur, D.c.length - 1);
+    fill();
+    changed();
+    rows[Math.min(i, D.c.length - 1)].name.focus();
+  };
+  rows.push({ li, name, val, up, down, del });
   list.append(li);
 }
 const fields = { s: $('#e-subject'), t: $('#e-top'), b: $('#e-bottom') };
@@ -53,7 +64,8 @@ for (const [k, el] of Object.entries(fields)) {
 }
 fields.s.maxLength = CUSTOM.subject;
 fields.t.maxLength = fields.b.maxLength = CUSTOM.label;
-$('#e-presets').replaceChildren(...PRESETS.map(([t, b]) => {
+// Custom first: the row scrolls sideways, and it's the one chip that must never be out of sight
+$('#e-presets').replaceChildren(Object.assign(document.createElement('button'), { type: 'button', className: 'chip', id: 'e-custom', textContent: T('Custom') }), ...PRESETS.map(([t, b]) => {
   const c = document.createElement('button');
   c.type = 'button';
   c.className = 'chip';
@@ -61,18 +73,54 @@ $('#e-presets').replaceChildren(...PRESETS.map(([t, b]) => {
   c.onclick = () => { D.t = T(t); D.b = T(b); fill(); changed(); };
   return c;
 }));
+// Custom is pressed whenever the labels match no preset; picking it from a preset clears them to write your own
+$('#e-custom').onclick = () => {
+  if (preset()) { D.t = D.b = ''; fill(); changed(); }
+  fields.t.focus();
+};
+$('#e-add').onclick = () => {
+  D.c.push(['', '']);
+  fill();
+  changed();
+  rows[D.c.length - 1].name.focus();
+};
+// The preset row scrolls sideways with no scrollbar: fade the edge(s) with more chips past them, and let a mouse wheel scroll it
+{
+  const row = $('#e-presets');
+  const edges = () => {
+    const x = Math.abs(row.scrollLeft), max = row.scrollWidth - row.clientWidth; // RTL scrollLeft runs negative
+    row.classList.toggle('more-start', x > 1);
+    row.classList.toggle('more-end', x < max - 1);
+  };
+  row.addEventListener('scroll', edges, { passive: true });
+  addEventListener('resize', edges);
+  row.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) || row.scrollWidth <= row.clientWidth) return;
+    e.preventDefault();
+    row.scrollLeft += (getComputedStyle(row).direction === 'rtl' ? -1 : 1) * e.deltaY;
+  }, { passive: false });
+  edges();
+}
 $('#e-swap').onclick = () => { [D.t, D.b] = [D.b, D.t]; fill(); changed(); };
 
-// D → the inputs (on load, after a reorder, a preset or Start over)
+// D → the inputs (on load, after a reorder, add/remove, a preset or Start over)
 function fill() {
+  const n = D.c.length;
   for (const k in fields) fields[k].value = D[k];
-  rows.forEach((r, i) => { r.name.value = D.c[i][0]; r.val.value = D.c[i][1]; });
+  rows.forEach((r, i) => {
+    r.li.hidden = i >= n;
+    r.name.value = D.c[i]?.[0] ?? '';
+    r.val.value = D.c[i]?.[1] ?? '';
+    r.down.disabled = i >= n - 1;
+    r.del.hidden = n <= MIN;
+  });
+  $('#e-add').disabled = n >= N;
 }
 function changed() {
   keep();
   $('#e-lbl-top').textContent = '▲ ' + (D.t.trim() || '…');
   $('#e-lbl-bottom').textContent = '▼ ' + (D.b.trim() || '…');
-  for (const c of $('#e-presets').children) c.setAttribute('aria-pressed', String(c.textContent === pair(D.t, D.b)));
+  for (const c of $('#e-presets').children) c.setAttribute('aria-pressed', String(c.id === 'e-custom' ? !preset() : c.textContent === pair(D.t.trim(), D.b.trim())));
   preview();
   check();
 }
@@ -83,7 +131,7 @@ function preview() {
 }
 // Card i moves to j; the others close up behind it.
 function move(i, j) {
-  if (j < 0 || j >= N || i === j) return;
+  if (j < 0 || j >= D.c.length || i === j) return;
   D.c.splice(j, 0, ...D.c.splice(i, 1));
   cur = j;
   fill();
@@ -98,7 +146,7 @@ function problems() {
   if (!v(fields.t)) out.push([fields.t, T('Name the top of the order.')]);
   if (!v(fields.b)) out.push([fields.b, T('Name the bottom of the order.')]);
   const seen = {};
-  rows.forEach((r, i) => {
+  rows.slice(0, D.c.length).forEach((r, i) => {
     const name = v(r.name).toLowerCase();
     if (!name) out.push([r.name, T('Card {n} needs a name.', { n: i + 1 })]);
     else if (name in seen) out.push([r.name, T('Cards {a} and {b} have the same name.', { a: seen[name] + 1, b: i + 1 }), true]);
@@ -166,7 +214,7 @@ list.addEventListener('pointerdown', (e) => {
   li.classList.add('held');
   const moveTo = (ev) => {
     const dy = ev.clientY - y0;
-    to = Math.max(0, Math.min(N - 1, from + Math.round(dy / pitch)));
+    to = Math.max(0, Math.min(D.c.length - 1, from + Math.round(dy / pitch)));
     rows.forEach((r, i) => {
       r.li.style.translate = i === from ? `0 ${dy}px` : `0 ${i > from && i <= to ? -pitch : i < from && i >= to ? pitch : 0}px`;
     });

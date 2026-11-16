@@ -440,14 +440,14 @@ if (SOLO) {
   router(route, goHome);
 }
 
-// Paper version: the 10 cards as cut-out strips, in the dealt order (never the player's progress or the answer).
+// Paper version: the cards as cut-out strips, in the dealt order (never the player's progress or the answer).
 // Bound in the zine they stay on the page: numbered where they are.
 printable((bound) => P && {
   top: `<p class="subject"><b>${esc(P.lv.subject)}</b></p>`,
-  rules: bound ? [T('Number the cards <b>1 to 10</b>, from <b>{top}</b> to <b>{bottom}</b>.', { top: esc(P.lv.top), bottom: esc(P.lv.bottom) })] : [
-    T('<b>Cut out</b> the 10 cards along the dashed lines.'),
+  rules: bound ? [T('Number the cards <b>1 to {n}</b>, from <b>{top}</b> to <b>{bottom}</b>.', { n: P.lv.items.length, top: esc(P.lv.top), bottom: esc(P.lv.bottom) })] : [
+    T('<b>Cut out</b> the {n} cards along the dashed lines.', { n: P.lv.items.length }),
     T('<b>Sort them on the table</b>, from <b>{top}</b> at the top to <b>{bottom}</b> at the bottom.', { top: esc(P.lv.top), bottom: esc(P.lv.bottom) }),
-    T('Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.'),
+    T('Happy with the order? Number the cards <b>1 to {n}</b> on their lines, top to bottom.', { n: P.lv.items.length }),
   ],
   body: `<ul class="p-strips${bound ? ' bound' : ''}">${deal(hash(P.key)).map((i) => `<li><i></i>${esc(P.lv.items[i].name)}</li>`).join('')}</ul>`,
   answer: `<ol class="p-order">${P.lv.items.map((it) => `<li><b>${esc(it.name)}</b> <span>${esc(it.val)}</span></li>`).join('')}</ol>`,

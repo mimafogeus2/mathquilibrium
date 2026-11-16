@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Orderly — make your own level</title>
-<meta name="description" content="Make your own Orderly level: a subject and ten cards in the right order. Send the link to a friend and see if they can sort it.">
+<meta name="description" content="Make your own Orderly level: a subject and four to ten cards in the right order. Send the link to a friend and see if they can sort it.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Games by Miki">
 <meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/orderly/editor.html">
 <meta property="og:title" content="Orderly — make your own level">
-<meta property="og:description" content="Make your own Orderly level: a subject and ten cards in the right order. Send the link to a friend and see if they can sort it.">
+<meta property="og:description" content="Make your own Orderly level: a subject and four to ten cards in the right order. Send the link to a friend and see if they can sort it.">
 <meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/orderly/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -32,7 +32,7 @@
     <div class="title"><b>Make a level</b><small>Orderly</small></div>
     <div class="bar-end"><button class="icon js-theme" aria-label="Theme"></button></div>
   </header>
-  <p class="tagline e-intro">Pick a subject, write ten cards in the right order, and send the link to a friend.</p>
+  <p class="tagline e-intro">Pick a subject, write four to ten cards in the right order, and send the link to a friend.</p>
   <form id="e-form" class="e-form" novalidate>
     <label class="e-field"><span class="kicker">Subject</span>
       <input id="e-subject" maxlength="80" autocomplete="off" placeholder="The planets, by distance from the Sun"></label>
@@ -48,10 +48,11 @@
     </fieldset>
     <div class="e-field">
       <span class="kicker">Cards, in the right order</span>
-      <small class="e-hint">Players sort the names. A card's value is revealed once it's placed right.</small>
+      <small class="e-hint">4 to 10 cards. Players sort the names. A card's value is revealed once it's placed right.</small>
       <span id="e-lbl-top" class="end-label"></span>
       <ol id="e-list" class="e-list"></ol>
       <span id="e-lbl-bottom" class="end-label"></span>
+      <button type="button" id="e-add" class="btn ghost center"><b>Add a card</b></button>
     </div>
     <div class="e-field">
       <span class="kicker">Preview</span>
