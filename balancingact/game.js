@@ -271,9 +271,9 @@ function select(i) {
   refresh();
 }
 
-function reset() {
+async function reset() {
   if (!playing() || G.at.every((x) => x < 0)) return;
-  if (!confirm(T('Restart this level? Everything goes back to the store; your moves still count.'))) return;
+  if (!(await ask(T('Restart this level? Everything goes back to the store; your moves still count.')))) return;
   G.at.fill(-1);
   G.sel = null;
   delete $('#tip').dataset.warn;

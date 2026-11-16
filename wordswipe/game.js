@@ -278,7 +278,7 @@ $('#btn-yes').onclick = () => answer(true);
 $('#btn-no').onclick = () => answer(false);
 $('#stack').addEventListener('pointerdown', drag);
 // Giving up runs the clock out: the round ends as if time were up.
-$('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The round ends now, scored as it stands.'))) { R.left = 0; hud(); finish(); } };
+$('#btn-giveup').onclick = async () => { if (R && !R.over && (await ask(T('Give up? The round ends now, scored as it stands.'))) && !R.over) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#dlg-help')?.addEventListener('close', () => { store.seenHelp = true; persist(); });
 document.addEventListener('visibilitychange', () => document.hidden && save());

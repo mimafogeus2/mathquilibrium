@@ -296,8 +296,8 @@ function lose() {
 }
 
 // Give up: the cards snap into the right order, nothing is recorded, and the save is dropped.
-function giveUp() {
-  if (!P || P.done || !confirm(T("Give up and see the right order? This puzzle won't count as solved."))) return;
+async function giveUp() {
+  if (!P || P.done || !(await ask(T("Give up and see the right order? This puzzle won't count as solved."))) || P.done) return;
   P.done = true;
   if (!SOLO) { delete store.saves[P.key]; persist(); }
   track('giveup', pmode());

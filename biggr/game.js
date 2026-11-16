@@ -230,7 +230,7 @@ const goHome = () => { save(); cancelAnimationFrame(raf); R = null; screen('home
 $('#btn-back').onclick = goHome;
 sides().forEach((el, i) => (el.onclick = () => answer(i)));
 // Giving up runs the clock out: the round ends as if time were up.
-$('#btn-giveup').onclick = () => { if (R && !R.over && confirm(T('Give up? The round ends now, scored as it stands.'))) { R.left = 0; hud(); finish(); } };
+$('#btn-giveup').onclick = async () => { if (R && !R.over && (await ask(T('Give up? The round ends now, scored as it stands.'))) && !R.over) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();
 $('#end-home').onclick = () => { $('#dlg-end').close(); R = null; screen('home'); };
 $('#dlg-help').addEventListener('close', () => { store.seenHelp = true; persist(); });

@@ -198,9 +198,9 @@ function hint() {
   saveGame();
 }
 
-function reset() {
+async function reset() {
   if (!playing() || (G.queens.size === G.hinted.size && !G.marks.size) || !coachAllows({ reset: true })) return;
-  if (!confirm(T('Restart this level? Your queens and marks are cleared; the clock keeps running.'))) return;
+  if (!(await ask(T('Restart this level? Your queens and marks are cleared; the clock keeps running.')))) return;
   act(() => { G.queens = new Set(G.hinted); G.marks.clear(); });
   sfx.erase();
   saveGame();

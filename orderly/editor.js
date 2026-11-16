@@ -142,8 +142,8 @@ $('#e-copy').onclick = async () => {
   const url = await link();
   if (url) { track('make', 'copy'); copyLink(url, $('#e-copy')); }
 };
-$('#e-clear').onclick = () => {
-  if (!confirm(T('Clear every field and start over?'))) return;
+$('#e-clear').onclick = async () => {
+  if (!(await ask(T('Clear every field and start over?')))) return;
   D = blank();
   cur = 0;
   tried = false;

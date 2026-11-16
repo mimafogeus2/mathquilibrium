@@ -97,6 +97,8 @@ module.exports = {
       'Import': 'ייבוא',
       'Reset all progress': 'איפוס כל ההתקדמות',
       'Done': 'סיום',
+      'OK': 'אישור',
+      'Cancel': 'ביטול',
       "That file isn't a Games by Miki export.": 'הקובץ הזה אינו ייצוא של מדף המשחקים של מיקי.',
       'Replace the progress in this browser with the one in this file?': 'להחליף את ההתקדמות בדפדפן הזה בזו שבקובץ?',
       'Impossible Mode': 'מצב בלתי אפשרי',
