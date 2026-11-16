@@ -762,6 +762,10 @@ function boot(g) {
   $('#btn-back').onclick = home;
   $('#btn-pause').onclick = () => setPaused(!G.paused);
   $('#btn-resume').onclick = () => setPaused(false);
+  // leaving the tab or window pauses, so the board isn't left showing on the clock; the player resumes by hand
+  const away = () => { if (playing() && !G.tut && !$('#game').hidden) setPaused(true); };
+  addEventListener('blur', away);
+  document.addEventListener('visibilitychange', () => document.hidden && away());
   $('#btn-giveup').onclick = giveUp;
   $('#btn-result').onclick = () => $('#dlg-win').showModal();
   $('#win-home').onclick = () => { $('#dlg-win').close(); show('home'); };
