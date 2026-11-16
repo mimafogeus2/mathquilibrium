@@ -176,6 +176,7 @@
 .e-del { grid-column: 5; width: 32px; height: 40px; border-radius: 8px; color: var(--muted); }
 .e-del svg { width: 16px; height: 16px; }
 #e-add { margin-top: 2px; }
+#e-add:disabled { opacity: .38; cursor: default; box-shadow: inset 0 0 0 1px var(--line); background: transparent; }
 #editor .end-label { text-align: center; }
 
 .e-preview { display: grid; gap: 6px; }

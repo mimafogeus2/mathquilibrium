@@ -766,7 +766,7 @@ module.exports = {
       ['aria-label="Swap top and bottom"', 'aria-label="החלפה בין למעלה ולמטה"'],
       ['The labels above the first card and below the last.', 'התוויות שמעל הקלף הראשון ומתחת לאחרון.'],
       ['<span class="kicker">Cards, in the right order</span>', '<span class="kicker">הקלפים, בסדר הנכון</span>'],
-      ["Players sort the names. A card's value is revealed once it's placed right.", 'השחקנים מסדרים את השמות. הערך של קלף נחשף כשהוא מונח נכון.'],
+      ["4 to 10 cards. Players sort the names. A card's value is revealed once it's placed right.", 'בין 4 ל־10 קלפים. השחקנים מסדרים את השמות. הערך של קלף נחשף כשהוא מונח נכון.'],
       ['<b>Add a card</b>', '<b>הוספת קלף</b>'],
       ['<span class="kicker">Preview</span>', '<span class="kicker">תצוגה מקדימה</span>'],
       ['<b>Test it</b>', '<b>נסו אותה</b>'],

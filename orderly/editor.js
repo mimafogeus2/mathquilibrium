@@ -8,7 +8,7 @@ const GRIP = '<svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></svg>';
 const DEL = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const UP = '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>', DOWN = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
 
-const blank = () => ({ s: '', t: T('Earliest'), b: T('Latest'), c: Array.from({ length: N }, () => ['', '']) });
+const blank = () => ({ s: '', t: T('Earliest'), b: T('Latest'), c: Array.from({ length: MIN }, () => ['', '']) }); // a new level starts at the minimum; Add a card goes up to N
 let D;
 try { D = JSON.parse(localStorage.getItem(DRAFT)); } catch {}
 const str = (x) => typeof x === 'string';
@@ -90,7 +90,7 @@ function fill() {
     r.down.disabled = i >= n - 1;
     r.del.hidden = n <= MIN;
   });
-  $('#e-add').hidden = n >= N;
+  $('#e-add').disabled = n >= N;
 }
 function changed() {
   keep();
