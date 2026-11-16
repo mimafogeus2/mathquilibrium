@@ -84,6 +84,23 @@ $('#e-add').onclick = () => {
   changed();
   rows[D.c.length - 1].name.focus();
 };
+// The preset row scrolls sideways with no scrollbar: fade the edge(s) with more chips past them, and let a mouse wheel scroll it
+{
+  const row = $('#e-presets');
+  const edges = () => {
+    const x = Math.abs(row.scrollLeft), max = row.scrollWidth - row.clientWidth; // RTL scrollLeft runs negative
+    row.classList.toggle('more-start', x > 1);
+    row.classList.toggle('more-end', x < max - 1);
+  };
+  row.addEventListener('scroll', edges, { passive: true });
+  addEventListener('resize', edges);
+  row.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) || row.scrollWidth <= row.clientWidth) return;
+    e.preventDefault();
+    row.scrollLeft += (getComputedStyle(row).direction === 'rtl' ? -1 : 1) * e.deltaY;
+  }, { passive: false });
+  edges();
+}
 $('#e-swap').onclick = () => { [D.t, D.b] = [D.b, D.t]; fill(); changed(); };
 
 // D → the inputs (on load, after a reorder, add/remove, a preset or Start over)
