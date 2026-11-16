@@ -132,6 +132,7 @@ a.foot-link { display: inline-flex; align-items: center; }
 .btn b { font-size: 17px; font-weight: 650; }
 .btn small { font-size: 13.5px; }
 .btn.center { align-items: center; text-align: center; }
+a.btn { text-decoration: none; color: inherit; }
 .btn.primary { --fill: var(--brand); --on-fill: var(--on-brand); }
 .btn.primary, .btn.daily { background: var(--speck), var(--fill); color: var(--on-fill); box-shadow: 2px 3px 0 var(--reg); transition: transform .14s var(--ease), box-shadow .14s var(--ease); }
 .btn.primary:active, .btn.daily:active { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--reg); }
