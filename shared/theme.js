@@ -31,7 +31,7 @@
     // Impossible Mode always prints on dark stock (so every dark-stock rule applies); the on-peel shows the page's real stock under it
     root.dataset.theme = dark || imp ? 'dark' : 'light';
     root.style.setProperty('--real-paper', dark ? '#1d2a55' : '#f3ede1');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', imp ? '#140a10' : dark ? '#1d2a55' : '#f3ede1');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', imp ? '#120b08' : dark ? '#1d2a55' : '#f3ede1');
     const label = T(`Theme: ${p}`);
     for (const b of document.querySelectorAll('.js-theme')) {
       b.innerHTML = ICONS[p];
@@ -209,7 +209,7 @@
       '<filter id="peel-p" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="4"/>' +
       '<feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 .62"/><feComposite in2="SourceGraphic" operator="in"/>' +
       '<feMerge><feMergeNode in="SourceGraphic"/><feMergeNode/></feMerge></filter>' +
-      grad('peel-l', '<stop offset=".4" stop-color="#ff4fb2" stop-opacity="0"/><stop offset=".85" stop-color="#ff4fb2" stop-opacity=".22"/><stop offset="1" stop-color="#ff6fc0" stop-opacity=".5"/>') +
+      grad('peel-l', '<stop offset=".4" stop-color="#ff6a2b" stop-opacity="0"/><stop offset=".85" stop-color="#ff6a2b" stop-opacity=".22"/><stop offset="1" stop-color="#ff8f5a" stop-opacity=".5"/>') +
       `<path d="${FLAP}" fill="url(#peel-g)" filter="url(#peel-p)"/><path class="lit" d="${FLAP}" fill="url(#peel-l)"/></svg></span>`;
     document.body.append(b);
     let ss = null;
@@ -266,7 +266,7 @@
   }
 
   // Fire, Doom style: a coarse grid of heat fed from its bottom row; each cell rises, drifts sideways and cools. Printed riso style:
-  // two flat inks, pink for the flames and sun for their hot core, each screened into dots (a 4×4 ordered dither) and the sun drum a
+  // two flat inks, ember for the flames and sun for their hot core, each screened into dots (a 4×4 ordered dither) and the sun drum a
   // cell out of register; overprinted where they meet. Drawn at 1/3 size, scaled up crisp (core.css), speckled by core.css's mask.
   // Runs ~30fps while live() and on screen; reduced motion draws one still frame.
   const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
@@ -279,9 +279,9 @@
       cv.width = W; cv.height = H;
       heat = new Uint8Array(W * H); img = ctx.createImageData(W, H);
       cool = Math.max(1, Math.ceil(90 / H)); // flames die out about two thirds of the way up, whatever the height
-      const pink = rgb('--pink', ['ff', '4f', 'b2']), sun = rgb('--sun', ['ff', 'd2', '3f']);
-      // [none, pink, sun, both]: screen, as the inks overprint on dark stock
-      inks = [[0, 0, 0, 0], [...pink, 255], [...sun, 255], [...pink.map((v, i) => 255 - ((255 - v) * (255 - sun[i])) / 255), 255]];
+      const ember = rgb('--ember', ['ff', '6a', '2b']), sun = rgb('--sun', ['ff', 'd2', '3f']);
+      // [none, ember, sun, both]: screen, as the inks overprint on dark stock
+      inks = [[0, 0, 0, 0], [...ember, 255], [...sun, 255], [...ember.map((v, i) => 255 - ((255 - v) * (255 - sun[i])) / 255), 255]];
       for (let i = 0; i < 90; i++) step();
     }
     function step() {
