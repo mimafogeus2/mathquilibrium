@@ -172,6 +172,10 @@
 .e-move .icon { width: 36px; height: 30px; border-radius: 8px; }
 .e-move .icon svg { width: 18px; height: 18px; }
 .e-move .icon:disabled { opacity: .25; cursor: default; }
+/* a 5th, implicit column: gone (no gap either) while the card count is at its minimum */
+.e-del { grid-column: 5; width: 32px; height: 40px; border-radius: 8px; color: var(--muted); }
+.e-del svg { width: 16px; height: 16px; }
+#e-add { margin-top: 2px; }
 #editor .end-label { text-align: center; }
 
 .e-preview { display: grid; gap: 6px; }

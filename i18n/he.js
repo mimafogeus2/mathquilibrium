@@ -9,8 +9,7 @@ const ORDERLY_GAME = [
       ['<span class="name">Light bulb</span>', '<span class="name">נורה</span>'],
       ['<span class="name">Television</span>', '<span class="name">טלוויזיה</span>'],
       ['<button id="btn-hint" class="btn ghost center"><b>Hint</b>', '<button id="btn-hint" class="btn ghost center"><b>רמז</b>'],
-      [`<li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>
-    <li><b>Drag</b> the cards into order, top to bottom.<span class="kbd-hint"> Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
+      [`<li><b>Drag</b> the cards into order, top to bottom.<span class="kbd-hint"> Keyboard: focus a card and move it with <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
   </ol>
   </div>
   <div class="help-page">
@@ -28,8 +27,7 @@ const ORDERLY_GAME = [
   <ol class="rules" start="4">
     <li>Stuck? Use up to <b>3 hints</b>. Each one slides two cards that belong together into place and joins them.</li>
     <li>Solve it in <b>2 checks</b> for three stars, <b>4</b> for two.</li>`,
-      `<li>בכל חידה יש <b>נושא</b> ו־<b>10 קלפים</b>.</li>
-    <li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה.<span class="kbd-hint"> במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
+      `<li><b>גררו</b> את הקלפים לסדר הנכון, מלמעלה למטה.<span class="kbd-hint"> במקלדת: עמדו על קלף והזיזו אותו עם <kbd>↑</kbd> <kbd>↓</kbd>.</span></li>
   </ol>
   </div>
   <div class="help-page">
@@ -248,10 +246,10 @@ module.exports = {
       'Easy puzzle': 'חידה קלה',
       'Medium puzzle': 'חידה בינונית',
       'Hard puzzle': 'חידה קשה',
-      '<b>Cut out</b> the 10 cards along the dashed lines.': '<b>גזרו</b> את 10 הקלפים לאורך הקווים המקווקווים.',
+      '<b>Cut out</b> the {n} cards along the dashed lines.': '<b>גזרו</b> את {n} הקלפים לאורך הקווים המקווקווים.',
       '<b>Sort them on the table</b>, from <b>{top}</b> at the top to <b>{bottom}</b> at the bottom.': '<b>סדרו אותם על השולחן</b>: <b>{top}</b> למעלה, <b>{bottom}</b> למטה.',
-      'Happy with the order? Number the cards <b>1 to 10</b> on their lines, top to bottom.': 'מרוצים מהסדר? מספרו את הקלפים <b>1 עד 10</b> על הקווים, מלמעלה למטה.',
-      'Number the cards <b>1 to 10</b>, from <b>{top}</b> to <b>{bottom}</b>.': 'מספרו את הקלפים <b>1 עד 10</b>, מ<b>{top}</b> ועד <b>{bottom}</b>.',
+      'Happy with the order? Number the cards <b>1 to {n}</b> on their lines, top to bottom.': 'מרוצים מהסדר? מספרו את הקלפים <b>1 עד {n}</b> על הקווים, מלמעלה למטה.',
+      'Number the cards <b>1 to {n}</b>, from <b>{top}</b> to <b>{bottom}</b>.': 'מספרו את הקלפים <b>1 עד {n}</b>, מ<b>{top}</b> ועד <b>{bottom}</b>.',
     },
     'orderly/editor.js': {
       'Orderly': 'בסדר',
@@ -269,6 +267,7 @@ module.exports = {
       'Card {n} value': 'הערך של קלף {n}',
       'Move card {n} up': 'הזזת קלף {n} למעלה',
       'Move card {n} down': 'הזזת קלף {n} למטה',
+      'Remove card {n}': 'מחיקת קלף {n}',
       'Give the level a subject.': 'תנו לחידה נושא.',
       'Name the top of the order.': 'כתבו מה בראש הסדר.',
       'Name the bottom of the order.': 'כתבו מה בתחתית הסדר.',
@@ -726,6 +725,7 @@ module.exports = {
 
     'orderly/index.html': [
       ...ORDERLY_GAME,
+      ['<li>Each puzzle has a <b>subject</b> and <b>10 cards</b>.</li>', '<li>בכל חידה יש <b>נושא</b> ו־<b>10 קלפים</b>.</li>'],
       ['<b>Make a level</b><small>Write your own and send it to a friend</small>', '<b>הכינו חידה</b><small>כתבו חידה משלכם ושלחו לחברים</small>'],
       ['Orderly — put ten things in order', 'בסדר — עשרה דברים, סדר אחד'],
       ['A subject and ten cards. Drag them into order: oldest to newest, smallest to largest, mildest to hottest. A new daily puzzle every day.',
@@ -742,9 +742,10 @@ module.exports = {
 
     'orderly/play.html': [
       ...ORDERLY_GAME,
+      ['<li>Each level has a <b>subject</b> and <b>4 to 10 cards</b>.</li>', '<li>בכל חידה יש <b>נושא</b> ו־<b>4 עד 10 קלפים</b>.</li>'],
       ['Orderly — a level made for you', 'בסדר — חידה שהוכנה בשבילכם'],
-      ['Someone made an Orderly level and sent it to you: ten cards, one subject. Can you put them in order?',
-        'מישהו הכין חידת בסדר ושלח אותה אליכם: עשרה קלפים, נושא אחד. תצליחו לסדר אותם?'],
+      ['Someone made an Orderly level and sent it to you: one subject, a few cards. Can you put them in order?',
+        'מישהו הכין חידת בסדר ושלח אותה אליכם: נושא אחד, כמה קלפים. תצליחו לסדר אותם?'],
       ["<p class=\"tagline\">This link is broken. It may have been cut short when it was copied: ask for it again, or try today's puzzle.</p>",
         '<p class="tagline">הקישור הזה שבור. אולי הוא נקטע כשהעתיקו אותו: בקשו אותו שוב, או נסו את החידה של היום.</p>'],
       ['<b>Play Orderly</b>', '<b>לחידה של היום</b>'],
@@ -753,10 +754,10 @@ module.exports = {
 
     'orderly/editor.html': [
       ['Orderly — make your own level', 'בסדר — הכינו חידה משלכם'],
-      ['Make your own Orderly level: a subject and ten cards in the right order. Send the link to a friend and see if they can sort it.',
-        'הכינו חידת בסדר משלכם: נושא ועשרה קלפים בסדר הנכון. שלחו את הקישור לחברים ובדקו אם יצליחו לסדר.'],
+      ['Make your own Orderly level: a subject and four to ten cards in the right order. Send the link to a friend and see if they can sort it.',
+        'הכינו חידת בסדר משלכם: נושא וארבעה עד עשרה קלפים בסדר הנכון. שלחו את הקישור לחברים ובדקו אם יצליחו לסדר.'],
       ['<div class="title"><b>Make a level</b><small>Orderly</small></div>', '<div class="title"><b>הכנת חידה</b><small>בסדר</small></div>'],
-      ['Pick a subject, write ten cards in the right order, and send the link to a friend.', 'בחרו נושא, כתבו עשרה קלפים בסדר הנכון, ושלחו את הקישור לחברים.'],
+      ['Pick a subject, write four to ten cards in the right order, and send the link to a friend.', 'בחרו נושא, כתבו ארבעה עד עשרה קלפים בסדר הנכון, ושלחו את הקישור לחברים.'],
       ['<span class="kicker">Subject</span>', '<span class="kicker">נושא</span>'],
       ['placeholder="The planets, by distance from the Sun"', 'placeholder="כוכבי הלכת, לפי המרחק מהשמש"'],
       ['<legend class="kicker">Order, from top to bottom</legend>', '<legend class="kicker">הסדר, מלמעלה למטה</legend>'],
@@ -766,6 +767,7 @@ module.exports = {
       ['The labels above the first card and below the last.', 'התוויות שמעל הקלף הראשון ומתחת לאחרון.'],
       ['<span class="kicker">Cards, in the right order</span>', '<span class="kicker">הקלפים, בסדר הנכון</span>'],
       ["Players sort the names. A card's value is revealed once it's placed right.", 'השחקנים מסדרים את השמות. הערך של קלף נחשף כשהוא מונח נכון.'],
+      ['<b>Add a card</b>', '<b>הוספת קלף</b>'],
       ['<span class="kicker">Preview</span>', '<span class="kicker">תצוגה מקדימה</span>'],
       ['<b>Test it</b>', '<b>נסו אותה</b>'],
       ['<b>Share</b>', '<b>שיתוף</b>'],
