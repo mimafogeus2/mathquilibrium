@@ -86,15 +86,28 @@ function hud() {
   $('#clock').textContent = secs;
   $('#fuse').style.width = (R.left / (TIME[R.pack] * 1000)) * 100 + '%';
   $('#game').classList.toggle('hurry', secs <= 5);
-  $('#progress').textContent = T('{n} / {total}', { n: Math.min(R.marks.length + 1, R.pairs.length), total: R.pairs.length });
-  $('#score').textContent = T('{n} pts', { n: R.marks.filter(Boolean).length * PER_RIGHT });
+}
+
+// Progress where the eyes are: a pip per pair on the cards' top edge (right, wrong, this one, to come), redrawn on each pick and deal.
+function pips() {
+  const n = R.marks.length;
+  $('#pips').replaceChildren(...R.pairs.map((_, i) => {
+    const p = document.createElement('i');
+    p.className = i < n ? (R.marks[i] ? 'right' : 'wrong') : i === n ? 'now' : '';
+    return p;
+  }));
+  $('#pips').setAttribute('aria-label', T('{n} / {total}', { n: Math.min(n + 1, R.pairs.length), total: R.pairs.length }));
 }
 
 // ---------- pairs ----------
 const sides = () => [$('#side-l'), $('#side-r')];
 function deal() {
-  const p = R.pairs[R.marks.length];
+  const p = R.pairs[R.marks.length], under = R.pairs.length - R.marks.length - 1;
+  // the pairs still to come, as a deck under each card that thins with every deal
+  const deck = Array.from({ length: under }, (_, k) => `0 ${(k + 1) * 3}px 0 -1px var(--stock), 0 ${(k + 1) * 3}px 0 0 var(--line)`).join(', ');
+  pips();
   sides().forEach((el, i) => {
+    el.style.setProperty('--deck', deck || '0 0 transparent');
     const text = p[i * 2];
     el.className = 'side';
     el.querySelector('.expr').textContent = text;
@@ -129,6 +142,7 @@ function answer(side) {
     setTimeout(() => m.remove(), 900);
   }
   hud();
+  pips();
   save();
   const r = R;
   setTimeout(() => {

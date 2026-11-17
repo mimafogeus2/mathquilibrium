@@ -1,4 +1,4 @@
-/* Biggr: the two sides, fuse and tally. Everything else is in shared/core.css. */
+/* Biggr: the two sides, fuse and pips. Everything else is in shared/core.css. */
 :root { --brand: var(--orange); --brand-text: var(--orange-text); --on-brand: var(--on-orange); }
 
 /* Sums read left to right in every language, and ← / → pick the left / right side, so the pairs never mirror */
@@ -39,16 +39,17 @@
 
 .ask { margin: 14px 0 0; font: italic 500 22px var(--display); letter-spacing: -0.01em; }
 
-.pair { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; min-height: 180px; max-height: 280px; margin: 6px 0 12px; }
+.pair { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; min-height: 180px; max-height: 280px; margin: 6px 0 36px; }
 .side {
+  --deck: 0 0 transparent; /* set per deal: the pairs still to come, stacked underneath */
   position: relative; container-type: inline-size; min-width: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px;
-  border: 0; border-radius: 20px; background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), 3px 4px 0 var(--reg);
+  border: 0; border-radius: 20px; background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), 3px 4px 0 var(--reg), var(--deck);
   transition: transform .14s var(--ease), box-shadow .14s var(--ease), background-color .2s;
   user-select: none; -webkit-user-select: none;
 }
-.side:active { transform: translate(3px, 4px); box-shadow: inset 0 0 0 1px var(--hair), 0 0 0 var(--reg); }
-@media (hover: hover) { .side:hover { box-shadow: inset 0 0 0 1.5px var(--brand), 3px 4px 0 var(--reg); } }
+.side:active { transform: translate(3px, 4px); box-shadow: inset 0 0 0 1px var(--hair), 0 0 0 var(--reg), var(--deck); }
+@media (hover: hover) { .side:hover { box-shadow: inset 0 0 0 1.5px var(--brand), 3px 4px 0 var(--reg), var(--deck); } }
 .expr {
   /* long sums wrap onto two balanced lines rather than shrink */
   font-size: min(44px, calc(300cqi * var(--cq, 1) / (var(--len) + 4))); font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;
@@ -58,25 +59,30 @@
 .side kbd { position: absolute; bottom: 10px; opacity: .6; }
 @media (hover: none) { .side kbd { display: none; } }
 .side.pop { animation: enter .25s var(--ease); }
-.side.big { box-shadow: inset 0 0 0 2px var(--teal), 3px 4px 0 var(--reg); }
+.side.big { box-shadow: inset 0 0 0 2px var(--teal), 3px 4px 0 var(--reg), var(--deck); }
 .side.big .val { color: var(--ink); }
-.side.small:not(.picked) { box-shadow: inset 0 0 0 1px var(--hair); }
+.side.small:not(.picked) { box-shadow: inset 0 0 0 1px var(--hair), var(--deck); }
 .side.right { background: var(--speck), var(--teal); color: var(--on-teal); opacity: 1; }
 .side.wrong { background: var(--speck), var(--red); color: var(--on-red); animation: shake .4s; }
 .side.right .val, .side.wrong .val { color: inherit; }
 
-.tally { margin: 0 0 8px; display: flex; flex-direction: column; align-items: center; font-variant-numeric: tabular-nums; }
-.tally b { font-family: var(--display); font-size: 20px; font-weight: 600; }
-.tally small { color: var(--muted); font-size: 14px; }
+/* wrong is a diamond as well as red, so it doesn't rest on colour alone */
+.pips { display: flex; justify-content: center; gap: 7px; margin-top: 8px; }
+.pips i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line); transition: transform .2s var(--ease), background-color .2s; }
+.pips .now { box-shadow: inset 0 0 0 2.5px var(--brand); transform: scale(1.3); }
+.pips .right { background: var(--teal); box-shadow: none; }
+.pips .wrong { background: var(--red); box-shadow: none; border-radius: 2px; transform: rotate(45deg) scale(.85); }
+
+.tally { margin: 0 0 8px; display: flex; flex-direction: column; align-items: center; }
 
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
   .ask { margin-top: 24px; font-size: 32px; }
-  .pair { gap: 20px; min-height: 260px; max-height: 560px; margin: 14px 0 20px; }
+  .pair { gap: 20px; min-height: 260px; max-height: 560px; margin: 14px 0 44px; }
   .side { border-radius: 28px; }
   .expr { font-size: min(76px, calc(300cqi * var(--cq, 1) / (var(--len) + 4))); }
   .val { font-size: 32px; }
-  .tally b { font-size: 26px; }
-  .tally small { font-size: 16px; }
+  .pips { gap: 10px; }
+  .pips i { width: 14px; height: 14px; }
 }
 
 /* ---------- end ---------- */
