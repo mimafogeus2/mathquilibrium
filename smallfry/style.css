@@ -4,9 +4,9 @@
    ink a hair out of register. */
 :root {
   --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal);
-  --k-blue: #3255a4; --k-pink: #ff48b0; --k-yellow: #ffd21f; --k-teal: #00838a;
+  --k-blue: #3255a4; --k-pink: #ff48b0; --k-yellow: #ffd21f; --k-teal: #00838a; --k-orange: #ff6c2f;
 }
-:root[data-theme="dark"] { --k-blue: #8fb2ff; --k-pink: #ff6cc4; --k-yellow: #ffe14d; --k-teal: #3fd0c2; }
+:root[data-theme="dark"] { --k-blue: #8fb2ff; --k-pink: #ff6cc4; --k-yellow: #ffe14d; --k-teal: #3fd0c2; --k-orange: #ff8a4c; }
 
 /* the tank is hit-tested in its own coordinates: it never mirrors */
 .board { direction: ltr; }
@@ -28,6 +28,7 @@
 .pl.pink { color: var(--k-pink); translate: .35px -.3px; } .ink-pink { fill: var(--k-pink); }
 .pl.yellow { color: var(--k-yellow); translate: -.3px .35px; } .ink-yellow { fill: var(--k-yellow); }
 .pl.teal { color: var(--k-teal); translate: .25px .3px; } .ink-teal { fill: var(--k-teal); }
+.pl.orange { color: var(--k-orange); translate: -.25px -.3px; }
 .paper, .paper * { fill: var(--stock); }
 .paper .crack { fill: none; stroke: var(--stock); stroke-width: .5; stroke-linecap: round; }
 .water { opacity: .7; }
@@ -58,7 +59,7 @@
 .items .locked + .tag circle { fill: var(--sun-text); }
 
 /* species, by their first ink: a look is dotted in its fish's ink */
-.fry { --c: var(--orange); } .minnow, .shark, .angler { --c: var(--k-blue); } .perch { --c: var(--sun-text); } .pike, .grouper { --c: var(--k-pink); }
+.fry, .angler { --c: var(--orange); } .minnow, .shark { --c: var(--k-teal); } .perch { --c: var(--sun-text); } .pike, .grouper { --c: var(--k-pink); }
 
 /* looks: a row of dots from the eye; one that ends on something its fish wants turns to a running dash */
 .look { fill: none; stroke: var(--c, var(--ink)); stroke-width: 1.05; stroke-dasharray: 0 2.1; stroke-linecap: round; stroke-linejoin: round; opacity: .85; mix-blend-mode: var(--blend); }
@@ -72,6 +73,7 @@
 .fish { transition: opacity .35s .15s, scale .35s .15s; }
 .fish.gone { opacity: 0; scale: .4; }
 .fish .over .tint { opacity: .55; }
+.fish.angler .over .tint { opacity: .22; }
 .fish .halo, .fish .halo * { fill: var(--stock); stroke: var(--stock); stroke-width: 2.2; stroke-linejoin: round; }
 .fish .stroke { fill: none; stroke: currentColor; stroke-width: .5; stroke-linecap: round; }
 .fish .paper .cut { fill: none; stroke: var(--stock); stroke-width: .55; stroke-linecap: round; }
