@@ -158,12 +158,14 @@ function tankSvg(L) {
     } else if (g[c] === 'X') {
       // daylight: a yellow burst screened onto the water just inside the gap, and arrows pointing out
       const d = c < W ? 0 : c >= W * (W - 1) ? 2 : c % W === 0 ? 3 : 1, mx = x + 5, my = y + 5, rot = [0, 90, 180, 270][d];
-      exit = `<rect class="paper" x="${x}" y="${y}" width="10" height="10"/>` +
-        `<g transform="translate(${mx - DC[d] * 2.2} ${my - DR[d] * 2.2}) rotate(${rot})" class="pl blue chevs"><path class="chev" d="M-2.2 1.6L0-.6L2.2 1.6"/><path class="chev c2" d="M-2.2-.4L0-2.6L2.2-.4"/></g>`;
+      // the gap: daylight in the rock, rounded where it opens into the tank, with a small arrow drifting out through it
+      const ox = x + Math.min(0, DC[d]) * 4 + (DC[d] > 0 ? 0 : 0), oy = y + Math.min(0, DR[d]) * 4;
+      exit = `<rect class="pl yellow daylight" x="${d % 2 ? ox : x + .4}" y="${d % 2 ? y + .4 : oy}" width="${d % 2 ? 14 : 9.2}" height="${d % 2 ? 9.2 : 14}" rx="3"/>` +
+        `<g transform="translate(${mx - DC[d] * 1.2} ${my - DR[d] * 1.2}) rotate(${rot})"><g class="way-out"><path d="M0 2.6V-1.8M-1.9 .2L0-1.9L1.9 .2"/></g></g>`;
       burst = `<g transform="translate(${mx + DC[d] * 5} ${my + DR[d] * 5}) rotate(${rot})"><path d="${[-34, -18, -6, 6, 18, 34].map((a) => {
         const r1 = (a - 3) * Math.PI / 180, r2 = (a + 3) * Math.PI / 180, l = 22;
         return `M0 0L${(Math.sin(r1) * l).toFixed(1)} ${(Math.cos(r1) * l).toFixed(1)}L${(Math.sin(r2) * l).toFixed(1)} ${(Math.cos(r2) * l).toFixed(1)}Z`; }).join('')}" fill="url(#ht-sun)"/>` +
-        `<circle r="6" class="pl yellow"/></g>`;
+        '</g>';
     }
   }
   // Sand: one strip per ledge (a run of rock tops under water), so a long ledge reads as one bank. Its surface rolls gently;
