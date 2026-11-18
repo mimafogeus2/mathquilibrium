@@ -57,6 +57,20 @@ assert.deepStrictEqual(S.spots(T, S.initial(T), 'B'), [9, 14, 15, 16]);
 T = tank(['######', '#....X', '#0...#', '######'], [R], {});
 { const st = S.initial(T); S.place(st, 'B', 16); assert.strictEqual(S.run(T, st), 'stop'); assert.strictEqual(st.nb, 0); assert.strictEqual(st.fish[0].p, 16); }
 
+// a patroller swims back and forth along its axis whenever anything else swims, turning at rock, and eats what it runs into
+{
+  const P = tank(['#######', '#..0..X', '#.....#', '#2....#', '#######'], [R, R]);
+  P.fish[1].w = true; // the 2, heading right along the bottom row
+  const st = S.initial(P);
+  assert.deepStrictEqual(S.spots(P, st, '/'), [11, 12]); // only the fry looks: a patroller looks at nothing
+  assert.strictEqual(S.run(P, st), 'win'); // the fry takes 3 ticks to get out; the patroller swims 3 cells meanwhile
+  assert.strictEqual(st.fish[1].p, 25);
+  const Q = tank(['#####', '#0..X', '#.#.#', '#..2#', '#####'], [R, U]);
+  Q.fish[1].w = true; // the 2 patrols the right column, up into the fry's row as the fry swims through it
+  assert.strictEqual(S.run(Q, S.initial(Q)), 'lose');
+  assert.strictEqual(S.parse(S.line({ ...Q, items: ['/'], sol: [['/', 7]] })).fish[1].w, true); // stored with a p
+}
+
 // levels
 if (process.argv[2] === 'rules') { console.log('rules ok'); process.exit(); }
 const { LEVELS, DAILY } = require('./levels.js');
@@ -67,17 +81,18 @@ for (const [key, tier, line] of lines) {
   const lv = S.parse(line), t = S.TIER[tier];
   assert(lv.items.length >= t.items[0] && lv.items.length <= t.items[1], key + ' hand size');
   assert.strictEqual(S.replay(lv, lv.sol), 'win', key + ' answer');
-  const s = S.solve(lv);
-  assert(!s.spare, key + ' a smaller hand wins');
-  assert.deepStrictEqual(s.answers, [lv.sol.map(([ty, at]) => ty + '@' + at).sort().join(' ')], key + ' not unique');
-  // no scenery: every predator swims in some play, or (standing still) is all that keeps a predator from seeing the fry
+  const v = S.verdict(lv, lv.items, Infinity);
+  assert(!v.spare, key + ' a smaller hand wins');
+  assert(v.orders.length >= 1, key + ' no answer');
+  // every fish has a job: it swims in every answer found, or it shields the fry at the start, or without it a smaller hand wins
   lv.fish.forEach((f, i) => {
-    if (!i || s.movers.has(i)) return;
+    if (!i || v.orders.every((o) => S.trace(lv, o).movers.has(i))) return;
     const M = { ...lv, fish: lv.fish.filter((_, j) => j !== i) };
-    assert(S.tick(M, S.initial(M)).moved.length, key + ' predator ' + i + ' is scenery');
+    if (S.tick(M, S.initial(M)).moved.length) return;
+    const vm = S.verdict(M, lv.items, Infinity);
+    assert(vm.spare || !vm.orders.length, key + ' fish ' + i + ' has no job');
   });
-  assert([...s.movers].filter((i) => i > 0).length >= t.active, key + ' too few predators in play');
   assert.strictEqual(S.line(lv), line, key + ' round trip');
 }
-assert.deepStrictEqual(S.generate(hash('E1'), 'E'), S.generate(hash('E1'), 'E')); // same seed, same level
+assert.deepStrictEqual(S.line(S.generate(hash('E1'), 'E')), S.line(S.generate(hash('E1'), 'E'))); // same seed, same level
 console.log('ok', lines.length, 'levels', Date.now() - t0, 'ms');

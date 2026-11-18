@@ -2,7 +2,7 @@
 // game.js (as the global Fry), build-levels.js and test.js all use it. The generator uses rng/int/pick from shared/common.js (a global).
 //
 // The tank is W×W cells, its border all rock. A cell is rock '#', water '.', or the exit 'X' (a gap in the border).
-// Fish: { p: cell, d: facing (0 up, 1 right, 2 down, 3 left), s: size (the fry is 1), f: fast }. fish[0] is the fry.
+// Fish: { p: cell, d: facing (0 up, 1 right, 2 down, 3 left), s: size (the fry is 1), f: fast, w: patroller }. fish[0] is the fry.
 // Mirrors: diagonal ones ('/' '\') sit on water cells; flat ones are bolted to a rock face, kept per water cell as a bitmask
 // of the directions it has one toward (a look heading into that face turns right round).
 // Items the player places: '/' '\' (on a water cell), 'F' (a flat mirror, on a rock face), 'B' (bait, on a water cell).
@@ -11,14 +11,15 @@
 const Fry = (() => {
 const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];
 const TURN = { '/': [1, 0, 3, 2], '\\': [3, 2, 1, 0] };
-// W: the tank with its rock border. items: how many in hand. preds: predators. fixed: bolted-on diagonal mirrors.
-// fast: chances at a fast predator. rock: rock runs grown inside. budget: positions the uniqueness search may visit.
-// active: predators that must swim in some play (the rest, scenery, are taken out).
+// W: the tank with its rock border; water: how much of the inside the cave opens up; rooms, turn: how roomy and winding it is.
+// items: hand size; beats: complications added to the escape; preds: fish besides the fry, at least. fixed, fast, patrol: whether
+// bolted mirrors, fast fish and patrollers can be complications. tries: complications tried per beat; open: extra pockets tried.
+// budget: positions a search may visit. minStates: positions the finished level's search must reach (room to go wrong).
 const TIER = {
-  E: { W: 8, items: [2, 3], preds: [1, 2], types: '/\\', fixed: [0, 0], fast: 0, rock: [3, 6], budget: 2e4, active: 1 },
-  M: { W: 10, items: [4, 5], preds: [2, 4], types: '/\\FB', fixed: [0, 2], fast: 0, rock: [6, 12], budget: 2e5, active: 1 },
-  H: { W: 12, items: [5, 6], preds: [3, 5], types: '/\\FB', fixed: [1, 2], fast: 2, rock: [10, 18], budget: 3e4, active: 2 },
-  I: { W: 14, items: [5, 6], preds: [4, 6], types: '/\\FB', fixed: [2, 3], fast: 3, rock: [14, 24], budget: 1e5, active: 2 },
+  E: { W: 8, water: .45, rooms: .15, turn: .35, items: [2, 3], beats: [1, 1], preds: [1, 2], types: '/\\', fixed: 0, fast: 0, patrol: 0, tries: 40, open: 4, budget: 2e4, minStates: 0 },
+  M: { W: 10, water: .5, rooms: .2, turn: .3, items: [3, 5], beats: [2, 3], preds: [2, 4], types: '/\\FB', fixed: 1, fast: 0, patrol: 1, tries: 40, open: 6, budget: 1e5, minStates: 60 },
+  H: { W: 12, water: .52, rooms: .25, turn: .3, items: [5, 6], beats: [3, 4], preds: [3, 5], types: '/\\FB', fixed: 1, fast: .3, patrol: 1, tries: 50, open: 8, budget: 2e5, minStates: 300 },
+  I: { W: 14, water: .55, rooms: .25, turn: .3, items: [6, 7], beats: [4, 5], preds: [4, 6], types: '/\\FB', fixed: 1, fast: .4, patrol: 1, tries: 60, open: 10, budget: 3e5, minStates: 800 },
 };
 
 // ---------- state ----------
@@ -98,16 +99,25 @@ function tick(L, S) {
     moving.add(i);
   };
   for (let i = 0; i < S.fish.length; i++) {
-    if (!S.fish[i].a) continue;
+    if (!S.fish[i].a || S.fish[i].w) continue;
     looks[i] = look(L, S, i, occ);
     if (looks[i].t >= 0) go(i, looks[i], looks[i].t);
+  }
+  // Patrollers (w) want nothing and chase nothing: whenever anything else swims, each swims one cell along its axis, turning
+  // back at rock (and at the exit). They still eat what they run into, and get eaten.
+  if (plan.length) for (let i = 0; i < S.fish.length; i++) {
+    const f = S.fish[i];
+    if (!f.a || !f.w) continue;
+    const step = (d) => f.p + DR[d] * L.W + DC[d], open = (c) => L.grid[c] === '.';
+    const d = open(step(f.d)) ? f.d : open(step(f.d ^ 2)) ? f.d ^ 2 : -1;
+    if (d >= 0) { plan.push({ i, old: f.p, from: f.d, cells: [step(d)], dirs: [d], d }); moving.add(i); }
   }
   // A fish sees a smaller one swimming into its look as it starts to swim, and goes for it in the same tick: the first cell
   // of its look that a smaller fish is entering is its target. Whoever sets off that way can set off a bigger fish in turn.
   for (let more = plan.length > 0; more;) {
     more = false;
     for (let i = 0; i < S.fish.length; i++) {
-      if (!S.fish[i].a || moving.has(i)) continue;
+      if (!S.fish[i].a || moving.has(i) || S.fish[i].w) continue;
       const v = looks[i], t = v.sc.findIndex((c) => plan.some((m) => S.fish[m.i].s < S.fish[i].s && m.cells.includes(c)));
       if (t >= 0) { go(i, v, t); more = true; }
     }
@@ -150,7 +160,7 @@ function run(L, S, cap = 500, movers = null) {
 function spots(L, S, type) {
   const occ = occupancy(L, S), out = new Set();
   for (let i = 0; i < S.fish.length; i++) {
-    if (!S.fish[i].a) continue;
+    if (!S.fish[i].a || S.fish[i].w) continue; // a patroller looks at nothing
     const v = look(L, S, i, occ);
     if (type === 'F') { if (v.end >= 0 && L.grid[v.end >> 2] === '.') out.add(v.end); continue; }
     for (const c of v.sc) if (L.grid[c] === '.' && occ[c] < 0 && !S.mir[c] && !S.bait[c]) out.add(c);
@@ -169,7 +179,7 @@ function place(S, type, at) {
 // (the same placements and the same fish, in any order) are skipped. Returns { wins: Map(sorted item types -> Map(answer key ->
 // a working order)), movers: the fish that swam in any of it, states, over (gave up past `budget`) }. An answer key lists the
 // placements sorted ('/@23 F@97 …').
-function search(L, left, max, budget, S0 = initial(L)) {
+function search(L, left, max, budget, S0 = initial(L), keep = 2) {
   const seen = new Set(), wins = new Map(), placed = [], movers = new Set();
   let states = 0, over = false;
   (function dfs(S) {
@@ -188,7 +198,7 @@ function search(L, left, max, budget, S0 = initial(L)) {
         if (r === 'win') {
           const ms = placed.map((p) => p[0]).sort().join(''), ans = [...placed].sort().join(' ');
           if (!wins.has(ms)) wins.set(ms, new Map());
-          if (wins.get(ms).size < 2 && !wins.get(ms).has(ans)) wins.get(ms).set(ans, [...placed]);
+          if (wins.get(ms).size < keep && !wins.get(ms).has(ans)) wins.get(ms).set(ans, [...placed]);
         } else if (r === 'stop' && placed.length < max) dfs(T);
         left[type]++;
         placed.pop();
@@ -208,63 +218,191 @@ function solve(L, items = L.items, budget = Infinity) {
 }
 
 // ---------- generating ----------
-// A random tank: a rock border with one exit gap, short rock runs inside, the fry and the predators placed and facing random
-// ways, and (Medium on) a few bolted mirrors. Nobody may see what they want yet. A quick random play-through has to win first
-// (cheap, and most tanks can't be won at all); then a full search finds every way to win with up to the most items, and the
-// level takes the biggest hand of items that wins exactly one way, with no smaller part of it winning.
-function tank(r, t) {
-  const W = t.W, g = Array(W * W).fill('.');
-  for (let i = 0; i < W; i++) g[i] = g[W * (W - 1) + i] = g[i * W] = g[i * W + W - 1] = '#';
-  for (let k = int(r, t.rock[0], t.rock[1]); k > 0; k--) {
-    let c = 1 + int(r, 0, W - 3) + W * (1 + int(r, 0, W - 3)), d = int(r, 0, 3);
-    for (let j = int(r, 1, 3); j > 0; j--) {
-      g[c] = '#';
-      const n = c + DR[d] * W + DC[d];
-      if (n % W === 0 || n % W === W - 1 || n < W || n >= W * (W - 1)) break;
-      c = n;
-      if (r() < 0.4) d = int(r, 0, 3);
-    }
+// A level is built as a story, beat by beat, so every part has a job:
+// 1. Carve a cave out of solid rock (W×W, corridors and pockets), cut an exit, put the fry in it, and find its simplest way out
+//    with the fewest items (the escape: one or two mirrors).
+// 2. Add a complication: a guard watching the fry's route, a fish parked in the way, a patroller crossing it, a bigger fish set
+//    near a smaller one, rock in the way, a bolted mirror. It's kept only if the current answer no longer works and the hand
+//    plus one more item (any kind the tier allows) wins again, with no smaller hand winning. So whatever it added either takes
+//    part in the new answer or is what rules out the easier one.
+// 3. Repeat for the tier's beats, preferring complications that leave more to try (more spots in view), not just longer ones.
+// 4. Open a few extra pockets where that keeps the level sound and gives more room to go wrong, then drop anything that turned
+//    idle along the way: a fish that never swims in any answer and whose removal lets no smaller hand win, a bolted mirror no
+//    answer needs.
+// Several answers are fine; each must use the whole hand. Budgets bound every search: a candidate that needs more is dropped.
+const SAFE = 3;
+function cave(r, t) {
+  const W = t.W, g = Array(W * W).fill('#'), inner = (c) => c % W > 0 && c % W < W - 1 && c >= W && c < W * (W - 1);
+  let c = W * int(r, 2, W - 3) + int(r, 2, W - 3), open = 0, d = int(r, 0, 3);
+  const want = Math.round((W - 2) * (W - 2) * t.water);
+  for (let n = 0; open < want && n < 5000; n++) {
+    if (g[c] === '#') { g[c] = '.'; open++; }
+    // pockets: now and then a 2×2 room
+    if (r() < t.rooms) for (const k of [c + 1, c + W, c + W + 1]) if (inner(k) && g[k] === '#') { g[k] = '.'; open++; }
+    if (r() < t.turn) d = int(r, 0, 3);
+    const n2 = c + DR[d] * W + DC[d];
+    if (inner(n2)) c = n2; else d = int(r, 0, 3);
   }
-  const gaps = []; // border cells (not corners) with water just inside
-  for (let i = 1; i < W - 1; i++) for (const [c, n] of [[i, i + W], [W * (W - 1) + i, W * (W - 2) + i], [i * W, i * W + 1], [i * W + W - 1, i * W + W - 2]]) if (g[n] === '.') gaps.push(c);
+  const gaps = [];
+  for (let i = 1; i < W - 1; i++) for (const [e, n] of [[i, i + W], [W * (W - 1) + i, W * (W - 2) + i], [i * W, i * W + 1], [i * W + W - 1, i * W + W - 2]]) if (g[n] === '.') gaps.push(e);
   if (!gaps.length) return null;
   g[pick(r, gaps)] = 'X';
   return g.join('');
 }
-
-function candidate(r, tier) {
-  const t = TIER[tier], W = t.W, grid = tank(r, t);
-  if (!grid) return null;
-  const water = [...grid].map((ch, i) => (ch === '.' ? i : -1)).filter((i) => i >= 0);
-  const np = int(r, t.preds[0], t.preds[1]), cells = [];
-  if (water.length < np + 8) return null;
-  while (cells.length < np + 1) { const c = pick(r, water); if (!cells.includes(c)) cells.push(c); }
-  const sizes = [2, 3, 4, 5, 6, 7].slice(0, np);
-  for (let i = sizes.length - 1; i > 0; i--) { const j = int(r, 0, i); [sizes[i], sizes[j]] = [sizes[j], sizes[i]]; }
-  const fast = new Set();
-  for (let k = 0; k < t.fast; k++) if (r() < 0.6) fast.add(1 + int(r, 0, np - 1));
-  const fish = cells.map((p, i) => ({ p, d: int(r, 0, 3), s: i ? sizes[i - 1] : 1, f: fast.has(i) }));
-  const mir = [], free = water.filter((c) => !cells.includes(c));
-  for (let k = int(r, t.fixed[0], t.fixed[1]); k > 0; k--) { const c = pick(r, free); if (!mir.some((m) => m[0] === c)) mir.push([c, r() < 0.5 ? '/' : '\\']); }
-  const L = { W, grid, fish, mir, flat: [], items: [] }, S = initial(L);
-  if (tick(L, clone(S)).moved.length) return null;
-  // random play-throughs, until one wins: its moves, trimmed to the ones it needs, are the items in hand
-  for (let tries = 0; tries < 8; tries++) {
-    const P = clone(S), seq = [];
-    for (let n = 0; n < t.items[1] + 4; n++) {
-      const opts = [];
-      for (const type of t.types) for (const at of spots(L, P, type)) opts.push([type, at]);
-      if (!opts.length) break;
-      const m = pick(r, opts);
-      place(P, m[0], m[1]);
-      seq.push(m);
-      const res = run(L, P);
-      if (res === 'win') return { L, seq: trim(L, seq) };
-      if (res !== 'stop') break;
+// What playing seq does: the result, every cell each fish passes through, and who swam
+function trace(L, seq) {
+  const S = initial(L), cells = L.fish.map(() => []), movers = new Set();
+  let res = 'stop';
+  for (const [type, at] of seq) {
+    if (res !== 'stop' || !canPlace(L, S, type, at)) return { res: 'bad', cells, movers };
+    place(S, type, at);
+    for (let n = 0; n < 500; n++) {
+      const t = tick(L, S);
+      t.moved.forEach((i, k) => { movers.add(i); cells[i].push(...t.paths[k].slice(1)); });
+      if (t.lost) { res = 'lose'; break; }
+      if (t.won) { res = 'win'; break; }
+      if (!t.moved.length) break;
     }
   }
+  return { res, cells, movers };
+}
+// A level's verdict for a hand: its answers (working orders, up to a few), whether a smaller hand wins, the positions searched
+function verdict(L, items, budget) {
+  const s = search(L, count(items), items.length, budget, initial(L), 4), ms = [...items].sort().join('');
+  return { orders: [...(s.wins.get(ms)?.values() || [])].map((o) => o.map((p) => [p[0], +p.slice(2)])), spare: [...s.wins.keys()].some((k) => within(k, ms)), over: s.over, states: s.states };
+}
+const sound = (v) => !v.over && !v.spare && v.orders.length > 0;
+const still = (L) => !tick(L, initial(L)).moved.length; // nobody sees what they want before anything is placed
+const withFish = (L, f) => ({ ...L, fish: [...L.fish, f] });
+
+// One complication on L, around the fry's route (cells it swims through in the current answer). Returns a new L, or null.
+function complicate(r, L, t, route) {
+  const W = L.W, g = L.grid, water = [...g].map((ch, i) => (ch === '.' ? i : -1)).filter((i) => i >= 0);
+  const free = (c) => g[c] === '.' && !L.fish.some((f) => f.p === c) && !L.mir.some((m) => m[0] === c);
+  const used = new Set(L.fish.map((f) => f.s)), sizes = [2, 3, 4, 5, 6, 7].filter((s) => !used.has(s));
+  if (!sizes.length) return null;
+  const size = pick(r, sizes), fast = t.fast && r() < t.fast;
+  const kinds = ['guard', 'guard', 'block', 'rock', 'hunter', 'hunter', ...(t.patrol ? ['patrol'] : []), ...(t.fixed ? ['fixed'] : [])];
+  const kind = pick(r, kinds), pc = pick(r, route.length ? route : water);
+  if (kind === 'guard') { // a fish a few cells off the route, looking at it
+    const d = int(r, 0, 3), k = int(r, 1, 4);
+    let c = pc;
+    for (let i = 0; i < k; i++) { const n = c - DR[d] * W - DC[d]; if (g[n] !== '.') return null; c = n; }
+    return free(c) ? { ...withFish(L, { p: c, d, s: size, f: fast }), note: `a ${size} watching the fry's route` } : null;
+  }
+  if (kind === 'block') return free(pc) && pc !== L.fish[0].p ? { ...withFish(L, { p: pc, d: int(r, 0, 3), s: size, f: false }), note: `a ${size} parked on the fry's route` } : null;
+  if (kind === 'patrol') { // a patroller on a line through the route, a little way off it
+    const d = int(r, 0, 3), k = int(r, 1, 3);
+    let c = pc;
+    for (let i = 0; i < k; i++) { const n = c - DR[d] * W - DC[d]; if (g[n] !== '.') break; c = n; }
+    return free(c) && c !== pc ? { ...withFish(L, { p: c, d, s: size, f: false, w: true }), note: `a ${size} patrolling across the fry's route` } : null;
+  }
+  if (kind === 'hunter') { // a bigger fish looking at an existing one from a few cells off
+    const prey = pick(r, L.fish.slice(1));
+    if (!prey) return null;
+    const big = sizes.filter((s) => s > prey.s);
+    if (!big.length) return null;
+    const d = int(r, 0, 3);
+    let c = prey.p;
+    for (let i = int(r, 2, 4); i > 0; i--) { const n = c - DR[d] * W - DC[d]; if (g[n] !== '.') return null; c = n; }
+    // facing away: the player has to turn its look onto the prey
+    const hs = pick(r, big);
+    return free(c) ? { ...withFish(L, { p: c, d: int(r, 0, 3), s: hs, f: fast }), note: `a ${hs} near the ${prey.s}, looking elsewhere` } : null;
+  }
+  if (kind === 'rock') { // rock on the route: a detour
+    if (!free(pc) || pc === L.fish[0].p) return null;
+    const ng = g.slice(0, pc) + '#' + g.slice(pc + 1);
+    return { ...L, grid: ng, note: 'rock across the fry\'s route' };
+  }
+  if (kind === 'fixed') return free(pc) ? { ...L, mir: [...L.mir, [pc, r() < .5 ? '/' : '\\']], note: 'a bolted mirror on the fry\'s route' } : null;
   return null;
 }
+
+// drop parts that no answer uses: fish that never swim and rule nothing out, bolted mirrors no answer needs
+function prune(L, budget) {
+  let v = verdict(L, L.items, budget);
+  if (!sound(v)) return null;
+  for (let i = L.fish.length - 1; i >= 1; i--) {
+    if (v.orders.every((o) => trace(L, o).movers.has(i))) continue; // swims in every answer
+    const M = { ...L, fish: L.fish.filter((_, j) => j !== i) };
+    if (!still(M)) continue; // it shields the fry from the start
+    const vm = verdict(M, L.items, budget);
+    if (vm.over || vm.spare || !vm.orders.length) continue; // without it a smaller hand wins (or nothing does): it's doing its job
+    // it doesn't swim in every answer, and removing it changes nothing: take it out
+    L = { ...M, sol: vm.orders[0] };
+    v = vm;
+  }
+  for (let i = L.mir.length - 1; i >= 0; i--) {
+    const M = { ...L, mir: L.mir.filter((_, j) => j !== i) };
+    if (!still(M)) continue;
+    const vm = verdict(M, L.items, budget);
+    if (!vm.over && !vm.spare && vm.orders.length) { L = { ...M, sol: vm.orders[0] }; v = vm; }
+  }
+  return { L, v };
+}
+
+function generate(seed, tier, stats = {}) {
+  const r = rng(seed), t = TIER[tier];
+  for (let attempt = 0; ; attempt++) {
+    stats.tries = attempt + 1;
+    const grid = cave(r, t);
+    if (!grid) continue;
+    const water = [...grid].map((ch, i) => (ch === '.' ? i : -1)).filter((i) => i >= 0);
+    let L = { W: t.W, grid, fish: [{ p: pick(r, water), d: int(r, 0, 3), s: 1, f: false }], mir: [], flat: [], items: [], sol: [] };
+    if (!still(L)) continue;
+    // the escape: the smallest hand that wins
+    const left = {};
+    for (const ty of t.types) left[ty] = 2;
+    const s0 = search(L, left, 2, t.budget, initial(L), 1);
+    if (s0.over || !s0.wins.size) continue;
+    const ms = [...s0.wins.keys()].sort((a, b) => a.length - b.length)[0];
+    if ([...s0.wins.keys()].some((k) => within(k, ms))) continue;
+    L.items = [...ms];
+    L.sol = [...s0.wins.get(ms).values()][0].map((p) => [p[0], +p.slice(2)]);
+    const story = [`escape with ${ms}`];
+    // beats
+    const beats = int(r, t.beats[0], t.beats[1]);
+    let ok = true;
+    for (let b = 0; b < beats && ok; b++) {
+      ok = false;
+      const route = trace(L, L.sol).cells[0];
+      for (let k = 0; k < t.tries && !ok; k++) {
+        const M = complicate(r, L, t, route);
+        if (!M || !still(M) || trace(M, L.sol).res === 'win') continue; // it has to break the current answer
+        for (const ty of [...t.types].sort(() => r() - .5)) {
+          const items = [...M.items, ty].sort(), v = verdict(M, items, t.budget);
+          stats.states = (stats.states || 0) + v.states;
+          if (!sound(v)) continue;
+          story.push(`${M.note}: the old answer fails; now it takes one more ${ty}`);
+          L = { ...M, items, sol: v.orders[0] };
+          delete L.note;
+          ok = true;
+          break;
+        }
+      }
+    }
+    if (!ok || L.items.length < t.items[0] || L.items.length > t.items[1]) continue;
+    // extra room: open rock next to water where that keeps the level sound
+    for (let k = 0; k < t.open; k++) {
+      const W = L.W, cand = [...L.grid].map((ch, i) => i).filter((i) => L.grid[i] === '#' && i % W > 0 && i % W < W - 1 && i >= W && i < W * (W - 1) &&
+        [1, -1, W, -W].some((dd) => L.grid[i + dd] === '.'));
+      if (!cand.length) break;
+      const c = pick(r, cand), M = { ...L, grid: L.grid.slice(0, c) + '.' + L.grid.slice(c + 1) };
+      if (!still(M)) continue;
+      const v = verdict(M, M.items, t.budget);
+      if (sound(v)) L = { ...M, sol: v.orders[0] };
+    }
+    const p = prune(L, t.budget);
+    if (!p || p.L.fish.length - 1 < t.preds[0] || p.v.states < t.minStates) continue;
+    if (tier !== 'E' && !orderMatters(p.L, p.L.sol, r)) continue;
+    stats.answers = p.v.orders.length;
+    if (p.L.fish.length !== L.fish.length || p.L.mir.length !== L.mir.length) story.push('pruned what no answer needed');
+    stats.story = story;
+    stats.states = p.v.states;
+    return p.L;
+  }
+}
+
 // What a sequence of placements comes to from the start: 'win', 'lose', 'loop', 'stop', or 'bad' (a spot nobody was looking at)
 function replay(L, seq) {
   const S = initial(L);
@@ -276,12 +414,6 @@ function replay(L, seq) {
   }
   return res;
 }
-// drop every placement the win doesn't need
-function trim(L, seq) {
-  for (let i = seq.length - 1; i >= 0; i--) { const s = seq.filter((_, j) => j !== i); if (replay(L, s) === 'win') seq = s; }
-  return seq;
-}
-
 // Medium on: the order has to matter somewhere (some order of the answer fails), or "fish act after each item" never comes up.
 function orderMatters(L, sol, r) {
   for (let k = 0; k < 12; k++) {
@@ -292,47 +424,18 @@ function orderMatters(L, sol, r) {
   return false;
 }
 
-function generate(seed, tier, stats = {}) {
-  const r = rng(seed), t = TIER[tier];
-  for (;;) {
-    stats.tries = (stats.tries || 0) + 1;
-    const c = candidate(r, tier);
-    if (!c || c.seq.length < t.items[0] || c.seq.length > t.items[1]) continue;
-    const { seq } = c;
-    if (tier !== 'E' && !orderMatters(c.L, seq, r)) continue;
-    const items = seq.map((m) => m[0]).sort(), s = solve(c.L, items, t.budget);
-    stats.states = (stats.states || 0) + s.states;
-    if (s.over || s.spare || s.answers.length !== 1) continue;
-    let L = { ...c.L, items, sol: seq };
-    // scenery: predators that never swim, whatever you do with the hand. They go (unless one is all that keeps a predator from
-    // seeing the fry at the start); if the level then has another answer, it's dropped.
-    const keep = new Set([0, ...s.movers]);
-    for (let i = L.fish.length - 1; i >= 1; i--) {
-      if (keep.has(i)) continue;
-      const M = { ...L, fish: L.fish.filter((_, j) => j !== i) };
-      if (!tick(M, initial(M)).moved.length) L = M;
-    }
-    if ([...s.movers].filter((i) => i > 0).length < t.active) continue;
-    if (L.fish.length !== c.L.fish.length) {
-      const s2 = solve(L, items, t.budget);
-      if (s2.over || s2.spare || s2.answers.length !== 1 || s2.answers[0] !== s.answers[0]) continue;
-      if (tier !== 'E' && !orderMatters(L, seq, r)) continue;
-    }
-    return L;
-  }
-}
-
 // ---------- storing ----------
-// One level per line: W|grid|fish|mirrors|items|answer. fish: cell.facing.size, 'f' after a fast one; mirrors: cell then / or \;
+// One level per line: W|grid|fish|mirrors|items|answer. fish: cell.facing.size, then 'f' for a fast one, 'p' for a patroller
+// (facing: the way it's heading); mirrors: cell then / or \;
 // answer: type@spot in a working order. levels.js holds the lines build-levels.js wrote.
-const line = (L) => [L.W, L.grid, L.fish.map((f) => `${f.p}.${f.d}.${f.s}${f.f ? 'f' : ''}`).join(','), L.mir.map(([c, m]) => c + m).join(','),
+const line = (L) => [L.W, L.grid, L.fish.map((f) => `${f.p}.${f.d}.${f.s}${f.f ? 'f' : ''}${f.w ? 'p' : ''}`).join(','), L.mir.map(([c, m]) => c + m).join(','),
   L.items.join(''), L.sol.map(([t, at]) => t + '@' + at).join(',')].join('|');
 function parse(s) {
   const [W, grid, fish, mir, items, sol] = s.split('|');
-  return { W: +W, grid, fish: fish.split(',').map((x) => { const [p, d, z] = x.split('.'); return { p: +p, d: +d, s: parseInt(z), f: z.endsWith('f') }; }),
+  return { W: +W, grid, fish: fish.split(',').map((x) => { const [p, d, z] = x.split('.'); return { p: +p, d: +d, s: parseInt(z), f: z.includes('f'), w: z.includes('p') }; }),
     mir: mir ? mir.split(',').map((x) => [parseInt(x), x.slice(-1)]) : [], flat: [], items: [...items], sol: sol.split(',').map((x) => [x[0], +x.slice(2)]) };
 }
 
-return { DR, DC, TURN, TIER, initial, clone, look, tick, run, spots, canPlace, place, search, solve, within, generate, candidate, replay, line, parse, occupancy, fishKey };
+return { DR, DC, TURN, TIER, initial, clone, look, tick, run, spots, canPlace, place, search, solve, verdict, trace, within, generate, replay, line, parse, occupancy, fishKey };
 })();
 if (typeof module === 'object') module.exports = Fry;

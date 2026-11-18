@@ -98,6 +98,15 @@ const sparkle = (c) => calm() ? '' : `<path class="pl yellow spark" transform="t
 // an item in the tray, in a 10 × 10 box
 const trayIcon = (t) => (t === 'F' ? '<path class="pl blue" d="M0 7.4h10V10H0z"/><g transform="translate(5 6.4)">' + plate(8.4) + '</g>'
   : t === 'B' ? `<g transform="translate(5 5) scale(1.25)">${worm()}</g>` : `<g transform="translate(5 5) rotate(${t === '/' ? -45 : 45})">${plate(11)}</g>`);
+// A patroller's rail: a dashed track across the whole run of water along its axis, with a stop at each end
+function railsSvg(L) {
+  const W = L.W;
+  return L.fish.filter((f) => f.w).map((f) => {
+    const ax = f.d % 2 ? 1 : W, ends = [-ax, ax].map((step) => { let c = f.p; while (L.grid[c + step] === '.') c += step; return c; });
+    const [a, b] = ends.map((c) => [cx(c, W), cy(c, W)]), h = f.d % 2 ? [0, 1.6] : [1.6, 0];
+    return `<path class="rail ${speciesOf(f.s).name}" d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}"/><path class="rail-end ${speciesOf(f.s).name}" d="M${a[0] - h[0]} ${a[1] - h[1]}l${2 * h[0]} ${2 * h[1]}M${b[0] - h[0]} ${b[1] - h[1]}l${2 * h[0]} ${2 * h[1]}"/>`;
+  }).join('');
+}
 // a placed item's order, a small tag by it
 function orderTag(t, at, n, W) {
   const c = t === 'F' ? at >> 2 : at, d = t === 'F' ? at & 3 : -1;
@@ -247,7 +256,7 @@ function startLevel(G, save) {
   G.sel = G.tut ? null : firstLeft();
   const b = $('#board');
   b.classList.remove('solved', 'failed');
-  b.innerHTML = `<svg class="tank" viewBox="${CROP} ${CROP} ${L.W * CELL - 2 * CROP} ${L.W * CELL - 2 * CROP}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L)}<g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes"></g></svg>`;
+  b.innerHTML = `<svg class="tank" viewBox="${CROP} ${CROP} ${L.W * CELL - 2 * CROP} ${L.W * CELL - 2 * CROP}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes"></g></svg>`;
   G.fishEls = L.fish.map((f) => {
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', `fish ${speciesOf(f.s).name}${f.s === 1 ? ' fry' : ' pred'}${f.f ? ' fast' : ''}`);
@@ -290,7 +299,7 @@ function draw() {
   if (V !== S) Fry.place(V, G.sel, G.preview);
   const occ = Fry.occupancy(L, V);
   svg.querySelector('.looks').innerHTML = G.done && S.out ? '' : V.fish.map((f, i) => {
-    if (!f.a) return '';
+    if (!f.a || f.w) return ''; // a patroller looks at nothing
     const pts = [], v = Fry.look(L, V, i, occ, pts), wants = v.t >= 0;
     if (pts.length < 2) return '';
     const d = 'M' + pts.map(([x, y]) => `${(x * CELL).toFixed(1)} ${(y * CELL).toFixed(1)}`).join('L');
@@ -317,7 +326,7 @@ function draw() {
 // (the middle is the plate itself), heading along the curve.
 function restOf(f) {
   const W = G.L.W, m = G.S.mir[f.p];
-  if (!m) return { x: cx(f.p, W), y: cy(f.p, W), a: ANG[f.d] };
+  if (!m || f.w) return { x: cx(f.p, W), y: cy(f.p, W), a: ANG[f.d] }; // a patroller swims straight through mirrors
   const din = Fry.TURN[m][f.d ^ 2] ^ 2; // the way it came in: back along the mirror
   return arc(f.p, din, f.d, 45, W, ANG[din]);
 }
@@ -339,7 +348,7 @@ function placeFish(i, f) {
 // round the corner on the mirror's shiny side (an arc about that corner, so it never touches the plate), turning as it goes, and
 // if it stops there it stops halfway round; at a flat mirror it swings round just short of the rock. cells: where it starts,
 // then each cell it enters; dirs: its facing at the start, then on leaving each cell. a0: its heading now.
-function swimPath(cells, dirs, W, a0) {
+function swimPath(cells, dirs, W, a0, straight = false) {
   const pts = [], V = (d) => [DC[d], DR[d]], C = (c) => [cx(c, W), cy(c, W)];
   let a = a0;
   const at = ([x, y]) => pts.push({ x, y, a });
@@ -355,7 +364,7 @@ function swimPath(cells, dirs, W, a0) {
   const turnRound = (c, din, dout, ths) => { const a0 = near(a, ANG[din]); for (const th of ths) pts.push(arc(c, din, dout, th, W, a0)); a = pts[pts.length - 1].a; };
   const travel = (from, to) => { const d = to - from; return d === -W ? 0 : d === 1 ? 1 : d === W ? 2 : 3; };
   const start = restOf({ p: cells[0], d: dirs[0] });
-  if (G.S.mir[cells[0]]) { // resting halfway round a mirror: finish the curve
+  if (G.S.mir[cells[0]] && !straight) { // resting halfway round a mirror: finish the curve
     a = near(a, start.a);
     pts.push({ ...start, a });
     turnRound(cells[0], Fry.TURN[G.S.mir[cells[0]]][dirs[0] ^ 2] ^ 2, dirs[0], [67.5, 90]);
@@ -454,7 +463,7 @@ async function swim() {
     const ms = G.ff ? FAST_MS : TICK_MS, calm = document.documentElement.hasAttribute('data-calm');
     t.moved.forEach((i, k) => {
       const el = G.fishEls[i];
-      if (!calm) animateSwim(el, swimPath(t.paths[k], t.turns[k], L.W, el.angle), ms);
+      if (!calm) animateSwim(el, swimPath(t.paths[k], t.turns[k], L.W, el.angle, G.S.fish[i].w), ms);
       placeFish(i, G.S.fish[i]);
     });
     for (const i of t.eaten) { G.fishEls[i].classList.add('gone'); }

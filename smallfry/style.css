@@ -69,6 +69,10 @@
 [data-calm] .look.wants, [data-calm] .chev, [data-calm] .spot circle { animation: none; }
 .board.busy .looks { opacity: 0; }
 
+/* a patroller's rail, in its fish's ink */
+.rail, .rail-end { fill: none; stroke: var(--c); stroke-width: .7; stroke-linecap: round; mix-blend-mode: var(--blend); opacity: .6; }
+.rail { stroke-dasharray: 1.6 1.2; }
+
 /* fish */
 .fish { transition: opacity .35s .15s, scale .35s .15s; }
 .fish.gone { opacity: 0; scale: .4; }
