@@ -122,6 +122,11 @@
 @keyframes tremble { 0%, 100% { translate: -.18px 0; } 50% { translate: .18px 0; } }
 [data-calm] .fish .lid, [data-calm] .fish.scared .bob { animation: none; }
 
+/* in the abyss, the angler's lure is the only light */
+#game[data-tier="I"] .angler > .o .pl.yellow, #game[data-tier="I"] .angler .o > g > .pl.yellow { filter: drop-shadow(0 0 1.2px var(--k-yellow)) drop-shadow(0 0 2.5px var(--k-yellow)); animation: lure 2.4s ease-in-out infinite alternate; }
+@keyframes lure { from { opacity: .7; } to { opacity: 1; } }
+[data-calm] #game[data-tier="I"] .angler .pl.yellow { animation: none; }
+
 /* moments: ink drops from a gulp (in the eaten fish's ink), a flash and bubbles where the fry gets out, a ripple where an item lands */
 .fx { pointer-events: none; }
 .fx .drop { fill: var(--c); mix-blend-mode: var(--blend); }
