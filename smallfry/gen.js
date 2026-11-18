@@ -146,7 +146,7 @@ function tick(L, S) {
 function run(L, S, cap = 500, movers = null) {
   const seen = new Set();
   for (let n = 0; n < cap; n++) {
-    const key = fishKey(S) + '/' + S.nb;
+    const key = fz(S, 1) + ',' + fz(S, 2) + ',' + S.nb;
     if (seen.has(key)) return 'loop';
     seen.add(key);
     const t = tick(L, S);
@@ -182,34 +182,55 @@ function place(S, type, at) {
 // (the same placements and the same fish, in any order) are skipped. Returns { wins: Map(sorted item types -> Map(answer key ->
 // a working order)), movers: the fish that swam in any of it, states, over (gave up past `budget`) }. An answer key lists the
 // placements sorted ('/@23 F@97 …').
-function search(L, left, max, budget, S0 = initial(L), keep = 2) {
+// Positions are remembered by a 64-bit fingerprint (two 32-bit Zobrist hashes): each placement and each fish's cell and facing
+// has its own random-looking code, XORed together, so a position's key costs a few XORs instead of sorting and joining text.
+// stop(ms): called on every win with its sorted item types; returning true ends the search there.
+const mix = (n) => { n = Math.imul(n ^ (n >>> 16), 0x7feb352d); n = Math.imul(n ^ (n >>> 15), 0x846ca68b); return (n ^ (n >>> 16)) >>> 0; };
+const TYPE_ID = { '/': 1, '\\': 2, F: 3, B: 4 };
+// the fish part of a fingerprint: where each fish is and which way it faces (or that it's gone)
+function fz(S, salt) { let h = salt; for (let i = 0; i < S.fish.length; i++) { const f = S.fish[i]; h ^= mix((i * 4099 + (f.a ? f.p * 4 + f.d : 9999)) * 2 + salt); } return h; }
+function search(L, left, max, budget, S0 = initial(L), keep = 2, stop = null) {
   const seen = new Set(), wins = new Map(), placed = [], movers = new Set();
-  let states = 0, over = false;
+  let states = 0, over = false, halt = false, z1 = 0, z2 = 0;
   (function dfs(S) {
-    const key = [...placed].sort().join(' ') + '#' + fishKey(S);
+    const key = (z1 ^ fz(S, 1)) + ',' + (z2 ^ fz(S, 2)) + ',' + S.nb;
     if (seen.has(key)) return;
     seen.add(key);
     if (++states > budget) { over = true; return; }
     for (const type in left) {
       if (!left[type]) continue;
       for (const at of spots(L, S, type)) {
-        const T = clone(S);
+        // mirrors don't move while fish swim: place on the shared board and take it off after, copying only fish (and bait)
+        const T = { fish: S.fish.map((f) => ({ ...f })), mir: S.mir, flat: S.flat, bait: S.nb || type === 'B' ? S.bait.slice() : S.bait, nb: S.nb, out: S.out };
+        const code = TYPE_ID[type] * 100003 + at;
         place(T, type, at);
         left[type]--;
         placed.push(type + '@' + at);
+        z1 ^= mix(code * 2 + 1); z2 ^= mix(code * 2 + 2);
         const r = run(L, T, 500, movers);
         if (r === 'win') {
           const ms = placed.map((p) => p[0]).sort().join(''), ans = [...placed].sort().join(' ');
           if (!wins.has(ms)) wins.set(ms, new Map());
           if (wins.get(ms).size < keep && !wins.get(ms).has(ans)) wins.get(ms).set(ans, [...placed]);
+          if (stop && stop(ms)) halt = true;
         } else if (r === 'stop' && placed.length < max) dfs(T);
+        z1 ^= mix(code * 2 + 1); z2 ^= mix(code * 2 + 2);
+        if (type === 'F') S.flat[at >> 2] &= ~(1 << (at & 3)); else if (type !== 'B') S.mir[at] = '';
         left[type]++;
         placed.pop();
-        if (over) return;
+        if (over || halt) return;
       }
     }
   })(S0);
   return { wins, movers, states, over };
+}
+// A cheap look before the full proof: within a small budget, does the exact hand win ('win'), does a smaller part of it win
+// ('spare', and the candidate is out), or neither ('none')? Most dead-end candidates are dropped here for a fraction of the cost.
+function probe(L, items, budget) {
+  const target = [...items].sort().join('');
+  let res = 'none';
+  search(L, count(items), items.length, budget, initial(L), 1, (ms) => { res = ms === target ? 'win' : 'spare'; return true; });
+  return res;
 }
 const count = (s) => { const c = {}; for (const x of s) c[x] = (c[x] || 0) + 1; return c; };
 // a ⊂ b, as multisets of item types, and smaller
@@ -279,14 +300,14 @@ const still = (L) => !tick(L, initial(L)).moved.length; // nobody sees what they
 const withFish = (L, f) => ({ ...L, fish: [...L.fish, f] });
 
 // One complication on L, around the fry's route (cells it swims through in the current answer). Returns a new L, or null.
-function complicate(r, L, t, route, avoid = new Set()) {
+function complicate(r, L, t, route, avoid = new Set(), fishOnly = false) {
   const W = L.W, g = L.grid, water = [...g].map((ch, i) => (ch === '.' ? i : -1)).filter((i) => i >= 0);
   const free = (c) => g[c] === '.' && !L.fish.some((f) => f.p === c) && !L.mir.some((m) => m[0] === c);
   const used = new Set(L.fish.map((f) => f.s)), sizes = [2, 3, 4, 5, 6, 7].filter((s) => !used.has(s));
   if (!sizes.length) return null;
   const size = pick(r, sizes), fast = t.fast && r() < t.fast;
   const kinds = ['guard', 'guard', 'block', 'rock', 'hunter', 'hunter', ...(t.patrol ? ['patrol'] : []), ...(t.fixed ? ['fixed'] : [])];
-  const kind = pick(r, kinds.filter((k) => !avoid.has(k))), pc = pick(r, route.length ? route : water);
+  const kind = pick(r, kinds.filter((k) => !avoid.has(k) && (!fishOnly || !['rock', 'fixed'].includes(k)))), pc = pick(r, route.length ? route : water);
   if (!kind) return null;
   if (kind === 'guard') { // a fish a few cells off the route, looking at it
     const d = int(r, 0, 3), k = int(r, 1, 4);
@@ -364,30 +385,44 @@ function generate(seed, tier, stats = {}) {
     L.items = [...ms];
     L.sol = [...s0.wins.get(ms).values()][0].map((p) => [p[0], +p.slice(2)]);
     const story = [`escape with ${ms}`];
-    // beats
-    const beats = int(r, t.beats[0], t.beats[1]), kindsUsed = new Set();
-    let ok = true;
-    for (let b = 0; b < beats && ok; b++) {
-      ok = false;
-      const route = trace(L, L.sol).cells[0];
-      for (let k = 0; k < t.tries && !ok; k++) {
-        const M = complicate(r, L, t, route, t.distinct ? kindsUsed : undefined);
-        if (!M || !still(M) || trace(M, L.sol).res === 'win') continue; // it has to break the current answer
-        for (const ty of [...t.types].sort(() => r() - .5)) {
-          const items = [...M.items, ty].sort(), v = verdict(M, items, t.budget);
+    // beats. Each step on the stack is a level and its story so far; when no complication fits, back up a step and try another
+    // there (a few times) before giving up on the cave.
+    // plan the hand: pick its size, then as many complications as the escape leaves room for (each adds one item)
+    const beats = Math.min(t.beats[1], Math.max(t.beats[0], int(r, t.items[0], t.items[1]) - L.items.length)), stack = [{ L, story, kinds: new Set() }];
+    if (L.items.length + beats < t.items[0] || L.items.length + beats > t.items[1]) continue;
+    for (let backs = 0; stack.length <= beats;) {
+      const cur = stack[stack.length - 1], route = trace(cur.L, cur.L.sol).cells[0];
+      let next = null;
+      for (let k = 0; k < t.tries && !next; k++) {
+        // enough fish by the end: when the fish still missing match the steps left, only fish-adding complications
+        const fishOnly = t.preds[0] - (cur.L.fish.length - 1) >= beats - (stack.length - 1);
+        const M = complicate(r, cur.L, t, route, t.distinct ? cur.kinds : undefined, fishOnly);
+        if (!M || !still(M) || trace(M, cur.L.sol).res === 'win') continue; // it has to break the current answer
+        // a type listed twice in t.types comes up first more often; each is tried once
+        for (const ty of [...new Set([...t.types].sort(() => r() - .5))]) {
+          const items = [...M.items, ty].sort();
+          stats.probes = (stats.probes || 0) + 1;
+          if (probe(M, items, t.probe || 4000) !== 'win') continue;
+          const v = verdict(M, items, t.budget);
+          stats.verdicts = (stats.verdicts || 0) + 1;
+          if (sound(v)) stats.sound = (stats.sound || 0) + 1; else if (v.over) stats.overs = (stats.overs || 0) + 1;
           stats.states = (stats.states || 0) + v.states;
           if (!sound(v)) continue;
-          story.push(`${M.note}: the old answer fails; now it takes one more ${ty}`);
-          kindsUsed.add(M.kind);
-          L = { ...M, items, sol: v.orders[0] };
-          delete L.note;
-          delete L.kind;
-          ok = true;
+          const { note, kind, ...rest } = M;
+          next = { L: { ...rest, items, sol: v.orders[0] }, story: [...cur.story, `${note}: the old answer fails; now it takes one more ${ty}`], kinds: new Set([...cur.kinds, kind]) };
           break;
         }
       }
+      if (next) stack.push(next);
+      else if (stack.length > 1 && backs++ < 4) stack.pop();
+      else break;
     }
-    if (!ok || L.items.length < t.items[0] || L.items.length > t.items[1]) continue;
+    const ok = stack.length > beats;
+    ({ L } = stack[stack.length - 1]);
+    story.splice(0, story.length, ...stack[stack.length - 1].story);
+    const rej = (why) => { (stats.rej ??= {})[why] = (stats.rej[why] || 0) + 1; };
+    if (!ok) { rej('beats'); continue; }
+    if (L.items.length < t.items[0] || L.items.length > t.items[1]) { rej('hand size'); continue; }
     // extra room: open rock next to water where that keeps the level sound
     for (let k = 0; k < t.open; k++) {
       const W = L.W, cand = [...L.grid].map((ch, i) => i).filter((i) => L.grid[i] === '#' && i % W > 0 && i % W < W - 1 && i >= W && i < W * (W - 1) &&
@@ -399,8 +434,10 @@ function generate(seed, tier, stats = {}) {
       if (sound(v)) L = { ...M, sol: v.orders[0] };
     }
     const p = prune(L, t.budget);
-    if (!p || p.L.fish.length - 1 < t.preds[0] || p.v.states < t.minStates) continue;
-    if (r() < (t.order ?? 1) && !orderMatters(p.L, p.L.sol, r)) continue;
+    if (!p) { rej('prune'); continue; }
+    if (p.L.fish.length - 1 < t.preds[0]) { rej('too few fish'); continue; }
+    if (p.v.states < t.minStates) { rej('too little room'); continue; }
+    if (r() < (t.order ?? 1) && !orderMatters(p.L, p.L.sol, r)) { rej('order'); continue; }
     stats.answers = p.v.orders.length;
     if (p.L.fish.length !== L.fish.length || p.L.mir.length !== L.mir.length) story.push('pruned what no answer needed');
     stats.story = story;
