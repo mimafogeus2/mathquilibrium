@@ -146,6 +146,20 @@
   :root[data-calm] .game::after { animation: none; opacity: .6; }
   /* the banner: a random game above the games, its lead-in over it and a rule under it (the script below deals it) */
   .cover { container-name: cover; } /* named: inside the banner the nearest container is .b-text */
+  /* a new game, announced in one line above the banner; the whole strip is its link */
+  .new-game { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 10px; margin-bottom: clamp(14px, calc(2 * var(--vw)), 20px); border: 1px solid var(--ink); border-radius: 12px;
+    background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg); color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.35; animation: enter .45s 30ms both var(--ease); }
+  .new-fish { flex: none; width: 44px; height: 26px; overflow: visible; animation: new-swim 2.4s ease-in-out infinite alternate; }
+  @keyframes new-swim { from { translate: 0 -1.5px; rotate: -3deg; } to { translate: 2px 1.5px; rotate: 3deg; } }
+  .new-text { flex: 1; min-width: 0; }
+  .new-tag { font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--brand-text); margin-inline-end: 4px; }
+  .new-game b { font-family: var(--display); font-weight: 700; font-size: 17px; }
+  .new-go { flex: none; font-weight: 700; color: var(--brand-text); transition: translate .2s var(--ease); }
+  .new-game:hover .new-go { translate: 4px 0; }
+  .new-game:hover b { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
+  [dir="rtl"] .new-game:hover .new-go { translate: -4px 0; }
+  [dir="rtl"] .new-fish { scale: -1 1; } /* swims the way the line reads */
+  [data-calm] .new-fish { animation: none; }
   .pick { padding-bottom: clamp(20px, calc(3 * var(--vw)), 30px); margin-bottom: clamp(20px, calc(3 * var(--vw)), 30px); border-bottom: 1px solid var(--ink); animation: enter .45s 60ms both var(--ease); }
   .b-ask { margin: 0 0 8px; font: italic 600 20px/1.1 var(--display); letter-spacing: 0; text-transform: none; color: var(--ink); }
   .banner {
@@ -215,6 +229,11 @@
     <p class="issue"><span><b id="issue-no">No. 1</b></span><span id="issue-date"></span><span class="hide-sm">Price: one coffee break</span></p>
   </header>
 
+  <a class="new-game" href="smallfry/" style="--brand: var(--teal); --brand-text: var(--teal-text)">
+    <svg class="new-fish" viewBox="0 0 44 26" aria-hidden="true"><g filter="url(#speck)"><path d="M11 13L3 7q2 6 0 12z" fill="var(--sun)"/><path d="M9 13c5-9 20-10 30-1q2 1 0 2c-10 9-25 8-30-1z" fill="var(--orange)"/><path d="M21 6.6q4-4 8 0z" fill="var(--sun)"/></g><circle cx="32" cy="11.6" r="2.2" fill="var(--stock)"/><circle cx="32.7" cy="11.6" r="1.1" fill="var(--navy)"/></svg>
+    <span class="new-text"><span class="new-tag">New</span> <span>A new game: <b>Small Fry</b>. Bend the fishes' looks and get the little one out.</span></span>
+    <span class="new-go" aria-hidden="true">→</span>
+  </a>
   <section class="pick">
     <p class="kicker b-ask"></p>
     <a class="banner" href="mathquilibrium/">

@@ -634,6 +634,8 @@ module.exports = {
       ['<span class="kicker">09 <em>Logic</em></span>', '<span class="kicker">09 <em>היגיון</em></span>'],
       ['<h2>Small <span>Fry</span></h2>', '<h2>ר<span>קק</span></h2>'],
       [`<p>Bend the fishes' looks with mirrors until the little one slips out unseen.</p>`, '<p>כופפו את מבטי הדגים במראות, עד שהקטנטן יחמוק החוצה בלי להיראות.</p>'],
+      ['<span class="new-tag">New</span> <span>A new game: <b>Small Fry</b>. Bend the fishes\' looks and get the little one out.</span>', '<span class="new-tag">חדש</span> <span>משחק חדש: <b>רקק</b>. כופפו את מבטי הדגים והוציאו את הקטנטן.</span>'],
+      ['<span class="new-go" aria-hidden="true">→</span>', '<span class="new-go" aria-hidden="true">←</span>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
       ['<span class="b-go">Play <b', '<span class="b-go">שחקו <b'],
       // the inline script
