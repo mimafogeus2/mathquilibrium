@@ -347,23 +347,28 @@ function complicate(r, L, t, route, avoid = new Set(), fishOnly = false) {
 function prune(L, budget) {
   let v = verdict(L, L.items, budget);
   if (!sound(v)) return null;
-  for (let i = L.fish.length - 1; i >= 1; i--) {
-    if (v.orders.every((o) => trace(L, o).movers.has(i))) continue; // swims in every answer
-    const M = { ...L, fish: L.fish.filter((_, j) => j !== i) };
-    if (!still(M)) continue; // it shields the fry from the start
-    const vm = verdict(M, L.items, budget);
-    if (vm.over) return null; // can't tell within the budget: drop the level rather than keep a fish that may be idle
-    if (vm.spare || !vm.orders.length) continue; // without it a smaller hand wins (or nothing does): it's doing its job
-    // it doesn't swim in every answer, and removing it changes nothing: take it out
-    L = { ...M, sol: vm.orders[0] };
-    v = vm;
-  }
-  for (let i = L.mir.length - 1; i >= 0; i--) {
-    const M = { ...L, mir: L.mir.filter((_, j) => j !== i) };
-    if (!still(M)) continue;
-    const vm = verdict(M, L.items, budget);
-    if (vm.over) return null;
-    if (!vm.spare && vm.orders.length) { L = { ...M, sol: vm.orders[0] }; v = vm; }
+  // taking one part out can leave another without a job (a fish whose only job needed a bolted mirror, say): go round again,
+  // fish and mirrors, until nothing more comes out
+  for (let changed = true; changed;) {
+    changed = false;
+    for (let i = L.fish.length - 1; i >= 1; i--) {
+      if (v.orders.every((o) => trace(L, o).movers.has(i))) continue; // swims in every answer
+      const M = { ...L, fish: L.fish.filter((_, j) => j !== i) };
+      if (!still(M)) continue; // it shields the fry from the start
+      const vm = verdict(M, L.items, budget);
+      if (vm.over) return null; // can't tell within the budget: drop the level rather than keep a fish that may be idle
+      if (vm.spare || !vm.orders.length) continue; // without it a smaller hand wins (or nothing does): it's doing its job
+      L = { ...M, sol: vm.orders[0] }; // it doesn't swim in every answer, and taking it out changes nothing
+      v = vm;
+      changed = true;
+    }
+    for (let i = L.mir.length - 1; i >= 0; i--) {
+      const M = { ...L, mir: L.mir.filter((_, j) => j !== i) };
+      if (!still(M)) continue;
+      const vm = verdict(M, L.items, budget);
+      if (vm.over) return null;
+      if (!vm.spare && vm.orders.length) { L = { ...M, sol: vm.orders[0] }; v = vm; changed = true; }
+    }
   }
   return { L, v };
 }
