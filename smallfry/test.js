@@ -32,6 +32,10 @@ assert.strictEqual(go(T, [['F', 8 * 4 + R]]), 'win');
 T = tank(['###X#', '#..0#', '#...#', '#####'], [D], { mir: [[13, '\\']] });
 assert.deepStrictEqual(S.spots(T, S.initial(T), 'F'), [13 * 4 + R]);
 assert.strictEqual(go(T, [['F', 13 * 4 + R]]), 'win');
+// a predator sees the fry swimming into its look and sets off in the same tick: one cell away from the cell the fry is entering,
+// it gets there with the fry; two away, a cell short, and the fry has gone by when it looks again
+assert.strictEqual(S.run(tank(['#######', '#.0...X', '#..2..#', '#######'], [R, U]), S.initial(tank(['#######', '#.0...X', '#..2..#', '#######'], [R, U]))), 'lose');
+assert.strictEqual(S.run(tank(['#######', '#.0...X', '#.....#', '#..2..#', '#######'], [R, U]), S.initial(tank(['#######', '#.0...X', '#.....#', '#..2..#', '#######'], [R, U]))), 'win');
 // a predator that sees the fry eats it
 T = tank(['######', '#0..2#', '######'], [R, L]);
 assert.strictEqual(S.tick(T, S.initial(T)).moved.length, 1);

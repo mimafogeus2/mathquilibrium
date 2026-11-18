@@ -85,19 +85,32 @@ function look(L, S, i, occ = occupancy(L, S), pts = null) {
 
 // ---------- time ----------
 // One tick: every fish looks at once; each that sees what it wants swims one cell along its look (a fast one two), facing the
-// way it swims. Then any fish that met a bigger one is eaten: they end in the same cell, a fast fish's path crosses it, or the
-// two swim through each other head on. The fry swimming into the exit gets away; into bait, eats it.
+// way it swims; and one that sees a smaller fish swimming into its look this tick goes for it at the same moment. Then any fish
+// that met a bigger one is eaten: they end in the same cell, a fast fish's path crosses it, or the two swim through each other
+// head on. The fry swimming into the exit gets away; into bait, eats it.
 // Returns { moved: [i], eaten: [i], paths: [[cells, from the start]], turns: [[facing at the start, then on leaving each cell]],
 // won, lost }. S changes in place.
 function tick(L, S) {
-  const occ = occupancy(L, S), plan = [];
-  for (let i = 0; i < S.fish.length; i++) {
-    const f = S.fish[i];
-    if (!f.a) continue;
-    const v = look(L, S, i, occ);
-    if (v.t < 0) continue;
-    const k = Math.min(f.f ? 2 : 1, v.t + 1);
+  const occ = occupancy(L, S), plan = [], moving = new Set(), looks = [];
+  const go = (i, v, t) => {
+    const f = S.fish[i], k = Math.min(f.f ? 2 : 1, t + 1);
     plan.push({ i, old: f.p, from: f.d, cells: v.sc.slice(0, k), dirs: v.sd.slice(0, k), d: v.sd[k - 1] });
+    moving.add(i);
+  };
+  for (let i = 0; i < S.fish.length; i++) {
+    if (!S.fish[i].a) continue;
+    looks[i] = look(L, S, i, occ);
+    if (looks[i].t >= 0) go(i, looks[i], looks[i].t);
+  }
+  // A fish sees a smaller one swimming into its look as it starts to swim, and goes for it in the same tick: the first cell
+  // of its look that a smaller fish is entering is its target. Whoever sets off that way can set off a bigger fish in turn.
+  for (let more = plan.length > 0; more;) {
+    more = false;
+    for (let i = 0; i < S.fish.length; i++) {
+      if (!S.fish[i].a || moving.has(i)) continue;
+      const v = looks[i], t = v.sc.findIndex((c) => plan.some((m) => S.fish[m.i].s < S.fish[i].s && m.cells.includes(c)));
+      if (t >= 0) { go(i, v, t); more = true; }
+    }
   }
   const out = { moved: plan.map((m) => m.i), eaten: [], paths: plan.map((m) => [m.old, ...m.cells]), turns: plan.map((m) => [m.from, ...m.dirs]), won: false, lost: false };
   if (!plan.length) return out;
