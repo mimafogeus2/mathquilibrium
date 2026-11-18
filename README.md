@@ -72,6 +72,6 @@ python3 -m http.server
 
 Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js && node quadflip/test.js && node alienchess/test.js && node balancingact/test.js && node smallfry/test.js` (Alien Chess checks 150 levels a difficulty by default: `node alienchess/test.js 1000` for all; Small Fry checks 40 levels and 10 dailies per difficulty: `node smallfry/test.js all` for all)
 
-Small Fry's levels are pregenerated, since proving one has a single answer takes seconds on Hard: `node smallfry/build-levels.js [packs] [days]` (about 3½ hours on 12 cores) rewrites `smallfry/levels.js` from seeded keys, so a rerun with bigger numbers adds levels and keeps the existing ones. A daily past the built range falls back to a pack level picked by the date.
+Small Fry's levels are pregenerated, since proving one has a single answer takes seconds on Hard: `node smallfry/build-levels.js [packs] [days] [impossible days] [workers]` (defaults 1000, 365, 60, 6) writes `smallfry/levels.js` from seeded keys, so a rerun with bigger numbers adds levels and keeps the existing ones. Each level is saved to `smallfry/levels-cache.txt` (git-ignored) as it's made, so a stopped run resumes where it left off. A daily past the built range falls back to a pack level picked by the date.
 
 Hebrew: `node build.js --check && node wordswipe/test.js he && node orderly/test.js he`
