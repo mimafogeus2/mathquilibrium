@@ -84,10 +84,10 @@ const mix = (p, q, k) => ({ a: p.a + (q.a - p.a) * k, fx: p.fx + (q.fx - p.fx) *
 const plate = (len) => `<rect class="glass" x="${-len / 2}" y="-.9" width="${len}" height="1.8" rx=".5"/>` +
   `<path class="pl blue glare" d="M${-len / 2 + 1.6}-.1l.9-.5M${-len / 2 + 2.8}.3l1.2-.8M${len / 2 - 2.6}.1l.8-.5"/>`;
 // The bait wriggles: its body ripples through a few curves (the same path shape each time, so it morphs smoothly), head following
-const WORM = ['M-3.2 1.2C-2.2-1.4-.8 1.8.6-.2S2.6-1.6 3.2.2', 'M-3.3.5C-2 1.7-.7-1.3.8.5S2.5 1 3.3-.4', 'M-3.1-.2C-2.2-1.7-.9 1.4.7.7S2.4-1.3 3.2.7'];
-const HEAD = [[3.3, .1], [3.4, -.5], [3.3, .8]];
+const WORM = ['M-3.2.6C-2.2-.6-.8 1.1.6 0S2.6-.9 3.2.2', 'M-3.2.3C-2.1 1-.7-.6.7.3S2.5.6 3.2-.1', 'M-3.2.1C-2.2-.9-.9.9.7.4S2.5-.6 3.2.4'];
+const HEAD = [[3.3, .2], [3.3, -.1], [3.3, .4]];
 const worm = () => {
-  const spline = 'calcMode="spline" keyTimes="0;.33;.67;1" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1" dur="1.4s" repeatCount="indefinite"';
+  const spline = 'calcMode="spline" keyTimes="0;.33;.67;1" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1" dur="2.6s" repeatCount="indefinite"';
   const live = calm() ? ['', '', ''] : [`<animate attributeName="d" values="${[...WORM, WORM[0]].join(';')}" ${spline}/>`,
     `<animate attributeName="cx" values="${[...HEAD, HEAD[0]].map((h) => h[0]).join(';')}" ${spline}/>`, `<animate attributeName="cy" values="${[...HEAD, HEAD[0]].map((h) => h[1]).join(';')}" ${spline}/>`];
   return `<g class="pl pink bait"><path d="${WORM[0]}">${live[0]}</path><circle cx="${HEAD[0][0]}" cy="${HEAD[0][1]}" r=".8">${live[1]}${live[2]}</circle></g>`;
@@ -106,7 +106,7 @@ const sparkle = (c) => calm() ? '' : `<path class="pl yellow spark" transform="t
   `<animate attributeName="opacity" values="0;0;1;0;0" keyTimes="0;.7;.8;.9;1" dur="${4 + (h32(c) % 5)}s" begin="${(h32(c * 7) % 40) / 10}s" repeatCount="indefinite"/></path>`;
 // an item in the tray, in a 10 × 10 box
 const trayIcon = (t) => (t === 'F' ? '<path class="pl blue" d="M0 7.4h10V10H0z"/><g transform="translate(5 6.4)">' + plate(8.4) + '</g>'
-  : t === 'B' ? `<g transform="translate(5 5) scale(1.25)">${worm()}</g>` : `<g transform="translate(5 5) rotate(${t === '/' ? -45 : 45})">${plate(11)}</g>`);
+  : t === 'B' ? `<g transform="translate(4.6 5) scale(1.1)">${worm()}</g>` : `<g transform="translate(5 5) rotate(${t === '/' ? -45 : 45})">${plate(11)}</g>`);
 // A patroller's rail: a dashed track across the whole run of water along its axis, with a stop at each end
 function railsSvg(L) {
   const W = L.W;
