@@ -352,7 +352,8 @@ function prune(L, budget) {
     const M = { ...L, fish: L.fish.filter((_, j) => j !== i) };
     if (!still(M)) continue; // it shields the fry from the start
     const vm = verdict(M, L.items, budget);
-    if (vm.over || vm.spare || !vm.orders.length) continue; // without it a smaller hand wins (or nothing does): it's doing its job
+    if (vm.over) return null; // can't tell within the budget: drop the level rather than keep a fish that may be idle
+    if (vm.spare || !vm.orders.length) continue; // without it a smaller hand wins (or nothing does): it's doing its job
     // it doesn't swim in every answer, and removing it changes nothing: take it out
     L = { ...M, sol: vm.orders[0] };
     v = vm;
@@ -361,7 +362,8 @@ function prune(L, budget) {
     const M = { ...L, mir: L.mir.filter((_, j) => j !== i) };
     if (!still(M)) continue;
     const vm = verdict(M, L.items, budget);
-    if (!vm.over && !vm.spare && vm.orders.length) { L = { ...M, sol: vm.orders[0] }; v = vm; }
+    if (vm.over) return null;
+    if (!vm.spare && vm.orders.length) { L = { ...M, sol: vm.orders[0] }; v = vm; }
   }
   return { L, v };
 }

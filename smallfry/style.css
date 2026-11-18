@@ -98,7 +98,6 @@
 .spot.face line { stroke: var(--k-yellow); stroke-width: 1.4; stroke-dasharray: 1 .8; pointer-events: none; }
 .spot:hover circle, .spot.kbd circle { r: 2.1; }
 .board.failed .tank { filter: grayscale(.55); }
-.board.solved .tank { animation: pop .5s var(--ease); }
 
 /* ---------- tray ---------- */
 .tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; max-width: 620px; min-height: 52px; }
