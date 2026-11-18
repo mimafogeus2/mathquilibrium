@@ -15,8 +15,11 @@ const TURN = { '/': [1, 0, 3, 2], '\\': [3, 2, 1, 0] };
 // items: hand size; beats: complications added to the escape; preds: fish besides the fry, at least. fixed, fast, patrol: whether
 // bolted mirrors, fast fish and patrollers can be complications. tries: complications tried per beat; open: extra pockets tried.
 // budget: positions a search may visit. minStates: positions the finished level's search must reach (room to go wrong).
+// escape: item kinds the first escape may use (default: types). distinct: no two complications of the same kind.
+// order: the share of levels where the order of the answer must matter (default all). A type listed twice is tried first
+// twice as often.
 const TIER = {
-  E: { W: 8, water: .45, rooms: .15, turn: .35, items: [2, 3], beats: [1, 1], preds: [1, 2], types: '/\\', fixed: 0, fast: 0, patrol: 0, tries: 40, open: 4, budget: 2e4, minStates: 0 },
+  E: { W: 9, water: .45, rooms: .18, turn: .33, items: [3, 3], beats: [2, 2], preds: [1, 2], types: '//\\\\F', fixed: 0, fast: 0, patrol: 0, tries: 60, open: 5, budget: 3e4, minStates: 20, distinct: true, order: .5, escape: '/\\' },
   M: { W: 10, water: .5, rooms: .2, turn: .3, items: [3, 5], beats: [2, 3], preds: [2, 4], types: '/\\FB', fixed: 1, fast: 0, patrol: 1, tries: 40, open: 6, budget: 1e5, minStates: 60 },
   H: { W: 12, water: .52, rooms: .25, turn: .3, items: [5, 6], beats: [3, 4], preds: [3, 5], types: '/\\FB', fixed: 1, fast: .3, patrol: 1, tries: 50, open: 8, budget: 2e5, minStates: 300 },
   I: { W: 14, water: .55, rooms: .25, turn: .3, items: [6, 7], beats: [4, 5], preds: [4, 6], types: '/\\FB', fixed: 1, fast: .4, patrol: 1, tries: 60, open: 10, budget: 3e5, minStates: 800 },
@@ -276,26 +279,27 @@ const still = (L) => !tick(L, initial(L)).moved.length; // nobody sees what they
 const withFish = (L, f) => ({ ...L, fish: [...L.fish, f] });
 
 // One complication on L, around the fry's route (cells it swims through in the current answer). Returns a new L, or null.
-function complicate(r, L, t, route) {
+function complicate(r, L, t, route, avoid = new Set()) {
   const W = L.W, g = L.grid, water = [...g].map((ch, i) => (ch === '.' ? i : -1)).filter((i) => i >= 0);
   const free = (c) => g[c] === '.' && !L.fish.some((f) => f.p === c) && !L.mir.some((m) => m[0] === c);
   const used = new Set(L.fish.map((f) => f.s)), sizes = [2, 3, 4, 5, 6, 7].filter((s) => !used.has(s));
   if (!sizes.length) return null;
   const size = pick(r, sizes), fast = t.fast && r() < t.fast;
   const kinds = ['guard', 'guard', 'block', 'rock', 'hunter', 'hunter', ...(t.patrol ? ['patrol'] : []), ...(t.fixed ? ['fixed'] : [])];
-  const kind = pick(r, kinds), pc = pick(r, route.length ? route : water);
+  const kind = pick(r, kinds.filter((k) => !avoid.has(k))), pc = pick(r, route.length ? route : water);
+  if (!kind) return null;
   if (kind === 'guard') { // a fish a few cells off the route, looking at it
     const d = int(r, 0, 3), k = int(r, 1, 4);
     let c = pc;
     for (let i = 0; i < k; i++) { const n = c - DR[d] * W - DC[d]; if (g[n] !== '.') return null; c = n; }
-    return free(c) ? { ...withFish(L, { p: c, d, s: size, f: fast }), note: `a ${size} watching the fry's route` } : null;
+    return free(c) ? { ...withFish(L, { p: c, d, s: size, f: fast }), kind, note: `a ${size} watching the fry's route` } : null;
   }
-  if (kind === 'block') return free(pc) && pc !== L.fish[0].p ? { ...withFish(L, { p: pc, d: int(r, 0, 3), s: size, f: false }), note: `a ${size} parked on the fry's route` } : null;
+  if (kind === 'block') return free(pc) && pc !== L.fish[0].p ? { ...withFish(L, { p: pc, d: int(r, 0, 3), s: size, f: false }), kind, note: `a ${size} parked on the fry's route` } : null;
   if (kind === 'patrol') { // a patroller on a line through the route, a little way off it
     const d = int(r, 0, 3), k = int(r, 1, 3);
     let c = pc;
     for (let i = 0; i < k; i++) { const n = c - DR[d] * W - DC[d]; if (g[n] !== '.') break; c = n; }
-    return free(c) && c !== pc ? { ...withFish(L, { p: c, d, s: size, f: false, w: true }), note: `a ${size} patrolling across the fry's route` } : null;
+    return free(c) && c !== pc ? { ...withFish(L, { p: c, d, s: size, f: false, w: true }), kind, note: `a ${size} patrolling across the fry's route` } : null;
   }
   if (kind === 'hunter') { // a bigger fish looking at an existing one from a few cells off
     const prey = pick(r, L.fish.slice(1));
@@ -307,14 +311,14 @@ function complicate(r, L, t, route) {
     for (let i = int(r, 2, 4); i > 0; i--) { const n = c - DR[d] * W - DC[d]; if (g[n] !== '.') return null; c = n; }
     // facing away: the player has to turn its look onto the prey
     const hs = pick(r, big);
-    return free(c) ? { ...withFish(L, { p: c, d: int(r, 0, 3), s: hs, f: fast }), note: `a ${hs} near the ${prey.s}, looking elsewhere` } : null;
+    return free(c) ? { ...withFish(L, { p: c, d: int(r, 0, 3), s: hs, f: fast }), kind, note: `a ${hs} near the ${prey.s}, looking elsewhere` } : null;
   }
   if (kind === 'rock') { // rock on the route: a detour
     if (!free(pc) || pc === L.fish[0].p) return null;
     const ng = g.slice(0, pc) + '#' + g.slice(pc + 1);
-    return { ...L, grid: ng, note: 'rock across the fry\'s route' };
+    return { ...L, grid: ng, kind, note: 'rock across the fry\'s route' };
   }
-  if (kind === 'fixed') return free(pc) ? { ...L, mir: [...L.mir, [pc, r() < .5 ? '/' : '\\']], note: 'a bolted mirror on the fry\'s route' } : null;
+  if (kind === 'fixed') return free(pc) ? { ...L, mir: [...L.mir, [pc, r() < .5 ? '/' : '\\']], kind, note: 'a bolted mirror on the fry\'s route' } : null;
   return null;
 }
 
@@ -352,7 +356,7 @@ function generate(seed, tier, stats = {}) {
     if (!still(L)) continue;
     // the escape: the smallest hand that wins
     const left = {};
-    for (const ty of t.types) left[ty] = 2;
+    for (const ty of t.escape || t.types) left[ty] = 2;
     const s0 = search(L, left, 2, t.budget, initial(L), 1);
     if (s0.over || !s0.wins.size) continue;
     const ms = [...s0.wins.keys()].sort((a, b) => a.length - b.length)[0];
@@ -361,21 +365,23 @@ function generate(seed, tier, stats = {}) {
     L.sol = [...s0.wins.get(ms).values()][0].map((p) => [p[0], +p.slice(2)]);
     const story = [`escape with ${ms}`];
     // beats
-    const beats = int(r, t.beats[0], t.beats[1]);
+    const beats = int(r, t.beats[0], t.beats[1]), kindsUsed = new Set();
     let ok = true;
     for (let b = 0; b < beats && ok; b++) {
       ok = false;
       const route = trace(L, L.sol).cells[0];
       for (let k = 0; k < t.tries && !ok; k++) {
-        const M = complicate(r, L, t, route);
+        const M = complicate(r, L, t, route, t.distinct ? kindsUsed : undefined);
         if (!M || !still(M) || trace(M, L.sol).res === 'win') continue; // it has to break the current answer
         for (const ty of [...t.types].sort(() => r() - .5)) {
           const items = [...M.items, ty].sort(), v = verdict(M, items, t.budget);
           stats.states = (stats.states || 0) + v.states;
           if (!sound(v)) continue;
           story.push(`${M.note}: the old answer fails; now it takes one more ${ty}`);
+          kindsUsed.add(M.kind);
           L = { ...M, items, sol: v.orders[0] };
           delete L.note;
+          delete L.kind;
           ok = true;
           break;
         }
@@ -394,7 +400,7 @@ function generate(seed, tier, stats = {}) {
     }
     const p = prune(L, t.budget);
     if (!p || p.L.fish.length - 1 < t.preds[0] || p.v.states < t.minStates) continue;
-    if (tier !== 'E' && !orderMatters(p.L, p.L.sol, r)) continue;
+    if (r() < (t.order ?? 1) && !orderMatters(p.L, p.L.sol, r)) continue;
     stats.answers = p.v.orders.length;
     if (p.L.fish.length !== L.fish.length || p.L.mir.length !== L.mir.length) story.push('pruned what no answer needed');
     stats.story = story;
