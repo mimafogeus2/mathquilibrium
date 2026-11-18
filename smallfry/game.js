@@ -154,7 +154,7 @@ function tankSvg(L, vb = viewOf(L)) {
         if (g[c - W] !== '.') continue;
         if (hh % 4 === 0) {
           const k = x + 3 + (hh >> 6) % 4, sway = calm() ? '' : `<animateTransform attributeName="transform" type="rotate" values="-5 ${k} ${y};6 ${k} ${y};-5 ${k} ${y}" dur="${3 + (hh % 3)}s" repeatCount="indefinite"/>`;
-          kelp += `<g data-c="${c}" style="transform-box: fill-box; transform-origin: 50% 100%"><path d="M${k} ${y}q-1.6-2.4 0-4.4t0-4.2M${k + 1.6} ${y}q1.2-1.8 0-3.4t.2-2.8"/>${sway}</g>`;
+          kelp += `<g data-c="${c}" style="transform-origin: ${k + .8}px ${y}px"><g><path d="M${k} ${y + .6}q-1.6-2.4 0-4.4t0-4.2M${k + 1.6} ${y + .6}q1.2-1.8 0-3.4t.2-2.8"/>${sway}</g></g>`; // the bend on the outer group, the sway on the inner: each turns about the root
         } else if (hh % 9 === 1) { const sx = x + 3 + (hh >> 5) % 4; pink += `<path d="${star(sx, y + .1, 1.6)}" transform="rotate(${(hh >> 9) % 60} ${sx} ${y + .1})"/>`; }
         else if (hh % 9 === 5) { const sx = x + 3 + (hh >> 5) % 4; yellow += `<path d="M${sx - 1.6} ${y + .4}A1.6 1.6 0 0 1 ${sx + 1.6} ${y + .4}Z"/>`; }
         if (hh % 11 === 7 && !calm()) for (let k = 0; k < 3; k++) {
@@ -219,9 +219,9 @@ function tankSvg(L, vb = viewOf(L)) {
     `<g clip-path="url(#tank)"><rect class="sea" width="${S}" height="${S}"/><g class="deep"></g>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
     `<g class="pl yellow burst">${burst}</g>` +
-    `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
+    `<g class="pl blue bubbles">${bubbles}</g>` +
     `<path class="misreg" filter="url(#wobble)" transform="translate(.6 .5)" d="${rocks}${fill}"/><path class="pl blue rock" filter="url(#wobble)" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>${exit}` +
-    `<path class="sand" filter="url(#wobble)" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
+    `<path class="sand" filter="url(#wobble)" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl teal kelp">${kelp}</g><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
 // ---------- state ----------
