@@ -128,8 +128,6 @@ function tankSvg(L) {
       if (hh % 5 === 1) cracks += `M${x + 1.5 + ((hh >> 3) % 4)} ${y + 5 + ((hh >> 7) % 3)}q2-1.2 3.4 0t3 .4`;
       if (!dn && g[c + W] === '.') shade += `M${x0 + bl} ${y + 5}H${x1 - br}V${y1 - br}${br ? `A${br} ${br} 0 0 1 ${x1 - br} ${y1}` : ''}H${x0 + bl}${bl ? `A${bl} ${bl} 0 0 1 ${x0} ${y1 - bl}` : ''}Z`;
       if (!up) {
-        const a = x0 + tl * .6, b = x1 - tr * .6;
-        sand += `M${a} ${y0 + .2}Q${(a + b) / 2} ${y0 - 1} ${b} ${y0 + .2}Q${b - .4} ${y0 + 2.1} ${(a + b) / 2} ${y0 + 1.8}T${a} ${y0 + .2}Z`;
         if (g[c - W] !== '.') continue;
         if (hh % 4 === 0) {
           const k = x + 3 + (hh >> 6) % 4, sway = calm() ? '' : `<animateTransform attributeName="transform" type="rotate" values="-5 ${k} ${y};6 ${k} ${y};-5 ${k} ${y}" dur="${3 + (hh % 3)}s" repeatCount="indefinite"/>`;
@@ -159,6 +157,28 @@ function tankSvg(L) {
         `<circle r="6" class="pl yellow"/></g>`;
     }
   }
+  // Sand: one strip per ledge (a run of rock tops under water), so a long ledge reads as one bank. Its surface rolls gently;
+  // against a rock wall rising at an end it heaps up, at an open corner it tapers down round the curve. A dotted ripple runs along it.
+  let ripple = '';
+  const smooth = (pts) => 'M' + pts[0].join(' ') + pts.slice(1).map((p, i) => { const q = pts[i]; return `Q${q[0]} ${q[1]} ${((q[0] + p[0]) / 2).toFixed(2)} ${((q[1] + p[1]) / 2).toFixed(2)}`; }).join('') + `L${pts[pts.length - 1].join(' ')}`;
+  for (let r = 1; r < W; r++) for (let q = 0; q < W; q++) {
+    const c = r * W + q, top = (k) => k % W >= 0 && g[k] === '#' && g[k - W] === '.';
+    if (!top(c) || (q > 0 && top(c - 1))) continue;
+    let e = q;
+    while (e + 1 < W && top(r * W + e + 1)) e++;
+    const y = r * CELL, a = q * CELL, b = (e + 1) * CELL, hh = h32(c + seed);
+    const wallL = rock(c, 0, -1), wallR = rock(r * W + e, 0, 1); // rock rising beside the ledge: sand heaps against it
+    const pts = [];
+    pts.push(wallL ? [a, y - 2.2] : [a + 1.1, y + 1.3]);
+    pts.push(wallL ? [a + 1.6, y - 1.1] : [a + 2.4, y - .3]);
+    for (let x = a + 4.5, k = 0; x < b - 4; x += 4.5, k++) pts.push([x, y - .7 + ((h32(hh + k) % 9) - 4) * .07]);
+    pts.push(wallR ? [b - 1.6, y - 1.1] : [b - 2.4, y - .3]);
+    pts.push(wallR ? [b, y - 2.2] : [b - 1.1, y + 1.3]);
+    const under = [[wallR ? b : b - 2, y + 1.9], [(a + b) / 2, y + 2.3], [wallL ? a : a + 2, y + 1.9]];
+    sand += smooth(pts) + under.map((p) => 'L' + p.join(' ')).join('') + 'Z';
+    if (b - a > 7) ripple += `M${a + 2.6} ${y + .7}H${b - 2.6}`;
+  }
+
   let ridge = `M0 ${S}V${S * .7}`;
   for (let i = 0; i <= 8; i++) ridge += `Q${S * (i + .5) / 8} ${S * (.6 + ((h32(seed + i) % 100) / 100) * .14)} ${S * (i + 1) / 8} ${S * (.68 + ((h32(seed + i + 50) % 100) / 100) * .08)}`;
   ridge += `V${S}Z`;
@@ -176,8 +196,8 @@ function tankSvg(L) {
     `<g class="pl yellow burst">${burst}</g>${exit}` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
     `<path class="pl blue rock" d="${rocks}${fill}"/><path class="pl pink" d="${shade}" fill="url(#ht-pink)"/>` +
-    `<g class="paper cuts"><g>${pebbles}</g><path class="crack" d="${cracks}"/><path d="${sand}"/></g>` +
-    `<path class="pl yellow" d="${sand}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
+    `<g class="paper cuts"><g>${pebbles}</g><path class="crack" d="${cracks}"/></g>` +
+    `<path class="sand" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
 // ---------- state ----------

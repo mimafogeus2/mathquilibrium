@@ -31,6 +31,9 @@
 .paper, .paper * { fill: var(--stock); }
 .paper .crack { fill: none; stroke: var(--stock); stroke-width: .5; stroke-linecap: round; }
 .water { opacity: .7; }
+/* sand: a pale tint of the rock's blue, with a dotted ripple along each bank */
+.sand { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
+.ripple { fill: none; stroke: var(--k-blue); stroke-width: .4; stroke-dasharray: 0 1.5; stroke-linecap: round; opacity: .55; }
 .far { opacity: .28; }
 .burst { opacity: .55; }
 .shafts path { fill: var(--stock); opacity: .55; }
