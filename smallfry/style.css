@@ -1,116 +1,87 @@
 /* Small Fry: the tank, its fish, and the item tray. Everything else is in shared/core.css.
-   The tank is printed like the rest of the site: flat inks, speckled (#speck), with a misregistered shadow under fish and rock. */
+   The tank is a risograph print: four spot inks (blue, fluorescent pink, yellow, teal) on the page's own paper, overprinting where
+   they cross (multiply on cream, screen on blue stock: core.css --blend), halftone screens instead of gradients, grain, and each
+   ink a hair out of register. */
 :root {
   --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal);
-  --w0: #d6ece8; --w1: #93c6c5; --shaft: #ffffff; --rock: #8b8270; --rock-dark: #6f6757; --sand: #ead39c;
-  --kelp: #4f9a83; --far: #a9d2cf; --ht: #3f8f93; --star: #e2604f; --glass0: #ffffff; --glass1: #b9c6e0; --glass-edge: #50618f; --slate: #7b8ab0; --angler: #34406f;
+  --k-blue: #3255a4; --k-pink: #ff48b0; --k-yellow: #ffd21f; --k-teal: #00838a;
 }
-:root[data-theme="dark"] {
-  --w0: #22607a; --w1: #0f2c48; --shaft: #9fe3ff; --rock: #3d4466; --rock-dark: #2c3150; --sand: #8d7d55;
-  --kelp: #3f8f7c; --far: #1d4a64; --ht: #06182c; --star: #ff8a6b; --glass0: #f4f8ff; --glass1: #9fb0d8; --glass-edge: #c6d2f2; --slate: #a5b3da; --angler: #c9cff0;
-}
+:root[data-theme="dark"] { --k-blue: #8fb2ff; --k-pink: #ff6cc4; --k-yellow: #ffe14d; --k-teal: #3fd0c2; }
 
 /* the tank is hit-tested in its own coordinates: it never mirrors */
 .board { direction: ltr; }
 .board {
-  width: min(620px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 330px)); aspect-ratio: 1;
-  border-radius: 14px; box-shadow: 4px 5px 0 var(--reg), var(--lift); touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  width: min(568px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 330px)); aspect-ratio: 1; /* the screen is 600 wide, padding in */
+  border-radius: 14px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
 .tank { display: block; width: 100%; height: 100%; overflow: visible; border-radius: 14px; }
 /* core.css strokes every svg; here only what asks for one */
 .tank, .slot svg, #logo svg { stroke: none; fill: none; }
-.w0 { stop-color: var(--w0); } .w1 { stop-color: var(--w1); }
-.s0 { stop-color: var(--shaft); stop-opacity: .34; } .s1 { stop-color: var(--shaft); stop-opacity: 0; }
-:root[data-theme="dark"] .s0 { stop-opacity: .12; }
-.g0 { stop-color: var(--sun); stop-opacity: .85; } .g1 { stop-color: var(--sun); stop-opacity: 0; }
-.rock { fill: var(--rock); }
-.rock-shadow { fill: var(--reg); opacity: .35; }
-.pebbles { fill: var(--rock-dark); }
-.sand { fill: var(--sand); }
-.far path { fill: var(--far); opacity: .75; }
-.far .far-kelp { fill: none; stroke: var(--far); stroke-width: 1.4; stroke-linecap: round; opacity: .9; }
-.ht { fill: var(--ht); }
-.deep { opacity: .22; }
-:root[data-theme="dark"] .deep { opacity: .35; }
-.rock-shade { opacity: .3; }
-.cracks { fill: none; stroke: var(--rock-dark); stroke-width: .45; stroke-linecap: round; }
-.starfish { fill: var(--star); stroke: color-mix(in srgb, var(--star) 60%, var(--navy)); stroke-width: .2; }
-.shell path { fill: var(--sun); } .shell .rib { fill: none; stroke: var(--sun-text); stroke-width: .25; }
-.bubbles circle { fill: none; stroke: var(--stock); stroke-width: .3; opacity: 0; }
-.exit .beam { fill: var(--sun); opacity: .16; }
-.kelp path { stroke: var(--kelp); stroke-width: 1.1; stroke-linecap: round; opacity: .7; }
-.exit .chev { stroke: var(--navy); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; animation: chev 1.6s ease-in-out infinite; }
-.exit .c2 { animation-delay: .25s; }
-:root[data-theme="dark"] .exit .chev { stroke: var(--sun); }
-@keyframes chev { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
 
-/* items: bevelled silver plates. Bolted ones carry rivets; a placed one flashes once; the tag says its order */
-.glass { fill: var(--glass1); stroke: var(--glass-edge); stroke-width: .35; }
-.glint { stroke: var(--glass0); stroke-width: .5; stroke-linecap: round; }
-.item { filter: drop-shadow(.5px .6px 0 var(--reg)); }
-.item.fixed .glass { stroke-width: .6; fill: color-mix(in srgb, var(--glass1) 70%, var(--glass-edge)); }
-.rivet { fill: var(--navy); stroke: var(--glass0); stroke-width: .2; }
-.bracket { stroke: var(--glass-edge); stroke-width: .7; stroke-linecap: round; }
+/* inks: each layer (.pl) prints in one, overprinting what's under it, a little out of register */
+.pl { fill: currentColor; mix-blend-mode: var(--blend); }
+/* grain: one sheet of specks over the whole tank, where the ink missed the paper (cheap: a static image, not a filter per layer) */
+.board { position: relative; }
+.board::after { content: ''; position: absolute; inset: 0; border-radius: 14px; background: var(--speck); background-size: 140px; pointer-events: none; opacity: .7; }
+#logo svg .pl { filter: url(#speck); }
+.pl.blue { color: var(--k-blue); } .ink-blue { fill: var(--k-blue); }
+.pl.pink { color: var(--k-pink); translate: .35px -.3px; } .ink-pink { fill: var(--k-pink); }
+.pl.yellow { color: var(--k-yellow); translate: -.3px .35px; } .ink-yellow { fill: var(--k-yellow); }
+.pl.teal { color: var(--k-teal); translate: .25px .3px; } .ink-teal { fill: var(--k-teal); }
+.paper, .paper * { fill: var(--stock); }
+.paper .crack { fill: none; stroke: var(--stock); stroke-width: .5; stroke-linecap: round; }
+.water { opacity: .7; }
+.far { opacity: .45; }
+.shafts path { fill: var(--stock); opacity: .55; }
+.far-kelp { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.kelp path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
+.bubbles circle { fill: none; stroke: currentColor; stroke-width: .35; opacity: 0; }
+.chevs { fill: none; } .chev { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; animation: chev 1.6s ease-in-out infinite; }
+.chev.c2 { animation-delay: .25s; }
+@keyframes chev { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+
+/* items: paper plates edged in blue, a placed one flashes yellow once; the tag says its order */
+.glass { fill: var(--stock); stroke: var(--k-blue); stroke-width: .4; }
+.item.fixed .glass { fill: color-mix(in srgb, var(--k-blue) 28%, var(--stock)); stroke-width: .55; }
+.glare, .bracket { fill: none; stroke: currentColor; stroke-width: .35; stroke-linecap: round; }
+.bracket { stroke-width: .7; }
 .items .ghost { opacity: .5; }
 .items .placed .glass { animation: shine .6s var(--ease); }
-@keyframes shine { from { fill: var(--sun); } }
-.bait path { stroke: #e46a87; stroke-width: 1.3; stroke-linecap: round; }
-.bait circle { fill: #c94a6a; }
-.tag circle { fill: var(--navy); }
-.tag text { fill: #fff; font: 700 2.3px Inter, sans-serif; text-anchor: middle; }
+@keyframes shine { from { fill: var(--k-yellow); } }
+.bait path { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.tag circle { fill: var(--k-blue); }
+.tag text { fill: var(--stock); font: 700 2.3px Inter, sans-serif; text-anchor: middle; }
 .items .locked + .tag circle { fill: var(--sun-text); }
 
-/* species: --c the body ink, --a fins and marks. Looks are drawn in their fish's ink. */
-.fry { --c: var(--orange); --a: var(--sun); }
-.minnow { --c: var(--teal); --a: color-mix(in srgb, var(--teal) 55%, var(--navy)); }
-.perch { --c: var(--sun); --a: var(--red); }
-.pike { --c: var(--pink); --a: color-mix(in srgb, var(--pink) 50%, var(--navy)); }
-.grouper { --c: var(--red); --a: var(--orange); }
-.shark { --c: var(--slate); --a: color-mix(in srgb, var(--slate) 60%, var(--navy)); }
-.angler { --c: var(--angler); --a: var(--sun); }
+/* species, by their first ink: a look is dotted in its fish's ink */
+.fry { --c: var(--orange); } .minnow, .shark, .angler { --c: var(--k-blue); } .perch { --c: var(--sun-text); } .pike, .grouper { --c: var(--k-pink); }
 
-/* looks: a row of ink dots from the eye; one that ends on something its fish wants turns to a running dash */
-.look { fill: none; stroke: var(--c, var(--ink)); stroke-width: 1.05; stroke-dasharray: 0 2.1; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+/* looks: a row of dots from the eye; one that ends on something its fish wants turns to a running dash */
+.look { fill: none; stroke: var(--c, var(--ink)); stroke-width: 1.05; stroke-dasharray: 0 2.1; stroke-linecap: round; stroke-linejoin: round; opacity: .85; mix-blend-mode: var(--blend); }
 .look.wants { stroke: var(--red); stroke-width: .9; stroke-dasharray: 1.8 1.2; opacity: 1; animation: run .5s linear infinite; }
 .look.fry.wants { stroke: var(--orange); }
 @keyframes run { to { stroke-dashoffset: -3; } }
-[data-calm] .look.wants { animation: none; }
+[data-calm] .look.wants, [data-calm] .chev, [data-calm] .spot circle { animation: none; }
 .board.busy .looks { opacity: 0; }
 
 /* fish */
 .fish { transition: opacity .35s .15s, scale .35s .15s; }
 .fish.gone { opacity: 0; scale: .4; }
-.fish .ink path, .fish .tail path { fill: var(--c); }
-.fish .ink .fins { fill: var(--a); }
-.fish .reg { fill: var(--reg); opacity: .8; }
-.fish .shine { stroke: var(--stock); stroke-width: .7; stroke-linecap: round; opacity: .55; fill: none !important; }
-.fish .band { fill: var(--navy) !important; opacity: .55; }
-.fish .spot circle { fill: var(--navy); opacity: .45; }
-.fish .dot circle { fill: var(--stock); opacity: .5; }
-.fish .belly { fill: var(--stock) !important; opacity: .85; }
-.fish .line { stroke: var(--navy); stroke-width: .45; stroke-linecap: round; fill: none !important; opacity: .7; }
-.fish .teeth { fill: var(--stock) !important; }
-.fish .lure { stroke: var(--c); stroke-width: .7; fill: none !important; }
-.fish .bulb { fill: var(--sun); filter: drop-shadow(0 0 1px var(--sun)); }
-.fish .eye { fill: var(--stock); stroke: var(--navy); stroke-width: .2; } .fish .pupil { fill: var(--navy); } .fish .glint { fill: #fff; }
-.fish .gill { opacity: .45; }
-.fish .rays { stroke: var(--orange-text); stroke-width: .3; opacity: .55; }
-.spark { fill: #fff; filter: drop-shadow(0 0 .6px #fff); }
-.fish .speed { stroke: var(--sun-text); stroke-width: .9; stroke-linecap: round; }
-.fish .size circle { fill: var(--stock); stroke: var(--c); stroke-width: .5; }
-.fish .size text { fill: var(--ink); font: 700 2.3px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
+.fish .over .tint { opacity: .55; }
+.fish .stroke { fill: none; stroke: currentColor; stroke-width: .5; stroke-linecap: round; }
+.fish .paper .cut { fill: none; stroke: var(--stock); stroke-width: .55; stroke-linecap: round; }
+.fish .speed { fill: none; stroke: currentColor; stroke-width: .9; stroke-linecap: round; }
+.fish .size circle { fill: var(--stock); stroke: var(--k-blue); stroke-width: .45; }
+.fish .size text { fill: var(--k-blue); font: 700 2.3px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
 
 /* where the picked item can go: a pulsing dot in each cell, a dashed bar on each rock face */
 .spot .hit { fill: transparent; cursor: pointer; }
-.spot circle { fill: var(--sun); stroke: var(--navy); stroke-width: .4; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
+.spot circle { fill: var(--k-yellow); stroke: var(--k-blue); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
 @keyframes spot { 50% { opacity: .45; } }
-[data-calm] .spot circle, [data-calm] .exit .chev { animation: none; }
-.spot.face line { stroke: var(--sun); stroke-width: 1.4; stroke-dasharray: 1 .8; pointer-events: none; }
+.spot.face line { stroke: var(--k-yellow); stroke-width: 1.4; stroke-dasharray: 1 .8; pointer-events: none; }
 .spot:hover circle, .spot.kbd circle { r: 2.1; }
-.board.failed .tank { filter: saturate(.45); }
-
-/* solved: the water brightens */
-.board.solved .water { filter: brightness(1.12); transition: filter .6s; }
+.board.failed .tank { filter: grayscale(.55); }
+.board.solved .tank { animation: pop .5s var(--ease); }
 
 /* ---------- tray ---------- */
 .tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; max-width: 620px; min-height: 52px; }
@@ -120,7 +91,6 @@
   transition: transform .14s var(--ease), box-shadow .14s var(--ease), opacity .2s;
 }
 .slot svg { width: 100%; height: 100%; }
-.slot .rockbit { fill: var(--rock); }
 .slot[aria-pressed="true"] { background: var(--speck), var(--sun); box-shadow: 2px 3px 0 var(--reg); transform: translate(-1px, -2px); }
 .slot.used { background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px; box-shadow: inset 0 0 0 1px var(--hair); opacity: .5; }
 .slot:disabled { cursor: default; }

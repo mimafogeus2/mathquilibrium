@@ -16,80 +16,85 @@ const calm = () => document.documentElement.hasAttribute('data-calm');
 // a cheap, steady hash for cell decoration (pebbles, kelp): the same tank always looks the same
 const h32 = (n) => { n = Math.imul(n ^ (n >>> 15), 0x2c1b3c6d); n = Math.imul(n ^ (n >>> 12), 0x297a2d39); return (n ^ (n >>> 15)) >>> 0; };
 
-// Fish, one species per size, facing right with the middle at (0, 0). Drawn in their own units, `sc` brings them to tank size
-// (the fry about two thirds of a cell, a shark more than a cell). joint: where the tail swings from.
+// Fish, one species per size, facing right with the middle at (0, 0), printed riso style: a silhouette in one spot ink, a second
+// ink overprinted out of register (where pink lands on yellow it reads orange, on blue purple), and paper knocked out for eyes,
+// bellies and spots. sc brings each to tank size (the fry about two thirds of a cell, a shark more than a cell); joint: where the
+// tail swings from. a, b: the two inks; over(p, tail): what the second ink prints; paper: what's left unprinted.
 const SPECIES = {
-  1: { name: 'fry', sc: .44, joint: -4.4, gill: [1, 2.4],  eye: [2.6, -1, 1.45],
+  1: { name: 'fry', sc: .44, joint: -4.4, eye: [2.6, -1, 1.5], a: 'yellow', b: 'pink',
     body: 'M-5 0C-4.6-3.8 1.6-5 5.6-1.6Q6.6 0 5.6 1.6C1.6 5-4.6 3.8-5 0Z',
     tail: 'M-4.4 0C-6.5-1.2-8.6-4.6-9.4-4C-8.4-1.4-8.4 1.4-9.4 4C-8.6 4.6-6.5 1.2-4.4 0Z',
-    fins: 'M-1.8-3.6Q.4-5.8 2.2-3.8Z', marks: '<path class="shine" d="M-2.6 2Q1.2 3.4 4.2 1.3"/><path class="line rays" d="M-5.2 0L-8.4-2.6M-5.4 0H-8.8M-5.2 0L-8.4 2.6"/>' },
-  2: { name: 'minnow', sc: .4, joint: -7.2, gill: [4.2, 1.7],  eye: [5.6, -.9, 1.05],
+    fins: 'M-1.8-3.6Q.4-5.8 2.2-3.8Z',
+    over: (p, tail) => `<path class="tint" d="${p.body}"/>${tail}<path d="${p.fins}"/>`, paper: '<path class="cut" d="M-2.6 2.1Q1.2 3.5 4.2 1.4"/>' },
+  2: { name: 'minnow', sc: .42, joint: -7.2, eye: [5.6, -.9, 1.05], a: 'blue', b: 'teal',
     body: 'M-8 0C-6.4-2.8 2.4-3.6 8.2-.8Q9 0 8.2.8C2.4 3.6-6.4 2.8-8 0Z',
     tail: 'M-7.2 0L-11.4-3.6Q-10.2-1.2-9.4 0Q-10.2 1.2-11.4 3.6Z',
-    fins: 'M-1.5-2.8L.5-4.6L1.6-3ZM-.5 2.6L.6 4.2L1.8 2.8Z', marks: '<path class="shine" d="M-6 .3L6.8-.2"/>' },
-  3: { name: 'perch', sc: .5, joint: -6.6, gill: [3.4, 3],  eye: [5.2, -1.2, 1.05],
+    fins: 'M-1.5-2.8L.5-4.6L1.6-3ZM-.5 2.6L.6 4.2L1.8 2.8Z',
+    over: (p, tail) => `${tail}<path d="${p.fins}"/><path d="M-7 .2C-3 1.6 3 1.4 8 .2C3 .5-3 .4-7 .2Z"/>`, paper: '<path class="cut" d="M-6 -.6L6.4-.9"/>' },
+  3: { name: 'perch', sc: .5, joint: -6.6, eye: [5.2, -1.2, 1.1], a: 'yellow', b: 'blue',
     body: 'M-7.4 0C-6.6-4.6 1.8-6 7.8-1.4Q8.8 0 7.8 1.4C1.8 5.4-6.6 4.2-7.4 0Z',
     tail: 'M-6.6 0L-10.8-4.2Q-9.6 0-10.8 4.2Z',
     fins: 'M-3.6-3.9L-3-7L-1.8-4.6L-.9-7.4L.3-4.9L1.3-6.8L2.6-4.4ZM1.5 3.8L.6 6L3 4.2Z',
-    marks: '<path class="band" d="M-3.2-4.2Q-2.4 0-3.2 4L-1.8 4.4Q-1 0-1.8-4.7ZM.6-4.8Q1.4 0 .6 4.5L2 4.2Q2.8 0 2-4.4ZM4-3.6Q4.6 0 4 3.4L5.1 2.8Q5.6 0 5.1-2.9Z"/>' },
-  4: { name: 'pike', sc: .44, joint: -9.6, gill: [6.6, 1.7],  eye: [8.4, -1, .95],
+    over: (p) => `<path d="${p.fins}"/><path d="M-3.2-4.2Q-2.4 0-3.2 4L-1.8 4.4Q-1 0-1.8-4.7ZM.6-4.8Q1.4 0 .6 4.5L2 4.2Q2.8 0 2-4.4ZM4-3.6Q4.6 0 4 3.4L5.1 2.8Q5.6 0 5.1-2.9Z"/>`, paper: '' },
+  4: { name: 'pike', sc: .46, joint: -9.6, eye: [8.4, -1, 1], a: 'pink', b: 'blue',
     body: 'M-10.5 0C-8.6-2.6 3.4-3.4 10.4-1L12.8-.2L11.6.5L12.4 1C4 3.4-8.6 2.6-10.5 0Z',
     tail: 'M-9.6 0L-13.6-3.8L-12.4 0L-13.6 3.8Z',
     fins: 'M-6.5-2.3L-4.4-4.4L-3.4-2.6ZM-6.5 2.3L-4.4 4.2L-3.4 2.4Z',
-    marks: '<g class="spot"><circle cx="-5" cy="-.6" r=".7"/><circle cx="-2" cy=".9" r=".6"/><circle cx="1" cy="-1" r=".7"/><circle cx="4" cy=".6" r=".55"/><circle cx="-7.5" cy=".6" r=".5"/></g><path class="line" d="M9.4.3L12.2.2"/>' },
-  5: { name: 'grouper', sc: .56, joint: -7.6, gill: [3.4, 4],  eye: [5.8, -2.2, 1.2],
+    over: (p, tail) => `${tail}<path d="${p.fins}"/><circle cx="-5" cy="-.6" r=".8"/><circle cx="-2" cy=".9" r=".7"/><circle cx="1" cy="-1" r=".8"/><circle cx="4" cy=".6" r=".65"/><circle cx="-7.5" cy=".6" r=".6"/><path class="stroke" d="M9.4.3L12.2.2"/>`, paper: '' },
+  5: { name: 'grouper', sc: .56, joint: -7.6, eye: [5.8, -2.2, 1.25], a: 'pink', b: 'yellow',
     body: 'M-8.4 0C-8.4-6.6 4.2-7.6 9.6-2.4Q10.2-.6 9 .2Q10.4 1.2 9.4 2.4C4.2 7.6-8.4 6.6-8.4 0Z',
     tail: 'M-7.6 0C-10.4-4.6-12.8-4.4-12.4 0C-12.8 4.4-10.4 4.6-7.6 0Z',
     fins: 'M-5-5C-3-8 3-8 4.6-5Z',
-    marks: '<g class="dot"><circle cx="-3" cy="-2" r=".9"/><circle cx="0" cy="2" r=".8"/><circle cx="2.6" cy="-2.6" r=".7"/><circle cx="-5.6" cy="1.6" r=".7"/><circle cx="4.4" cy="1.6" r=".6"/></g><path class="line" d="M9.2.2Q7.4 1.6 6 .8"/>' },
-  6: { name: 'shark', sc: .52, joint: -9.8, eye: [8.6, -1, .75],
+    over: (p, tail) => `<path d="${p.body}"/>${tail}`, paper: '<circle cx="-3" cy="-2" r=".9"/><circle cx="0" cy="2" r=".8"/><circle cx="2.6" cy="-2.6" r=".7"/><circle cx="-5.6" cy="1.6" r=".7"/><circle cx="4.4" cy="1.6" r=".6"/><path class="cut" d="M9.2.2Q7.4 1.6 6 .8"/>' },
+  6: { name: 'shark', sc: .52, joint: -9.8, eye: [8.6, -1, .8], a: 'blue', b: 'pink',
     body: 'M-10.6.4C-7.4-3.8 5.6-4.8 11.6-1Q12.8 0 11.4.8C6 3.2-3.6 3.6-10.6 1Z',
     tail: 'M-9.8.6L-14.4-6.2Q-12.2 0-14.6 4.8Z',
     fins: 'M-1.6-3.6L1-8.8L3.2-3.9ZM2.6 2.4L1 6L4.8 2.8Z',
-    marks: '<path class="belly" d="M-6 1.8C-1 3.4 6 3 10.6.9C6 1.6-1 2.2-6 1.8Z"/><path class="line" d="M5.2-1.6l-.4 2.2M6.2-1.7l-.4 2.2M7.2-1.6l-.4 2"/>' },
-  7: { name: 'angler', sc: .62, joint: -6.8, gill: [1.2, 3.8],  eye: [3.6, -3, 1.3],
+    over: () => '<path class="stroke" d="M10.6.6Q11.4.9 12 .5"/>', paper: '<path d="M-6 1.8C-1 3.4 6 3 10.6.9C6 1.6-1 2.2-6 1.8Z"/><path class="cut" d="M5.2-1.6l-.4 2.2M6.2-1.7l-.4 2.2M7.2-1.6l-.4 2"/>' },
+  7: { name: 'angler', sc: .62, joint: -6.8, eye: [3.6, -3, 1.35], a: 'blue', b: 'pink',
     body: 'M-7.4 0C-7.4-7 6-8.2 8.8-2L7-.6L8.6.2L7 1L8.6 1.8C6 7.6-7.4 7-7.4 0Z',
     tail: 'M-6.8 0L-11-3.4Q-10 0-11 3.4Z',
     fins: 'M-3.6 4.6L-2.4 7L-.6 4.8Z',
-    marks: '<path class="teeth" d="M8.4-1.5L7.4-.9L8.2-.6ZM8.2 1.2L7.3 1.5L8.1 1.9Z"/><path class="lure" d="M4-5.4Q6.4-11 10.4-8.6"/><circle class="bulb" cx="10.6" cy="-8.4" r="1.3"/>' },
+    over: (p, tail) => `<path class="tint" d="${p.body}"/>${tail}<path class="stroke" d="M4-5.4Q6.4-11 10.4-8.6"/>`, paper: '<path d="M8.4-1.5L7.4-.9L8.2-.6ZM8.2 1.2L7.3 1.5L8.1 1.9Z"/>',
+    extra: '<circle class="pl yellow" cx="10.6" cy="-8.4" r="1.5"/>' },
 };
 const speciesOf = (s) => SPECIES[Math.min(s, 7)];
 function fishArt(s, fast) {
   const p = speciesOf(s), [ex, ey, er] = p.eye;
   const wag = calm() ? '' : `<animateTransform attributeName="transform" type="rotate" values="-9 ${p.joint} 0;9 ${p.joint} 0;-9 ${p.joint} 0" dur="${(.8 + s * .12).toFixed(2)}s" repeatCount="indefinite"/>`;
+  const tail = `<g><path d="${p.tail}"/>${wag}</g>`;
   return `<g transform="scale(${p.sc})">` +
-    (fast ? `<path class="speed" d="M${p.joint - 6.4}-2.4h-3.4M${p.joint - 7.4} 0h-4.6M${p.joint - 6.4} 2.4h-3.4"/>` : '') +
-    `<path class="reg" transform="translate(-.8 .9)" d="${p.body}"/>` +
-    `<g class="ink" filter="url(#speck)"><g class="tail"><path d="${p.tail}"/>${wag}</g><path class="body" d="${p.body}"/><path class="fins" d="${p.fins}"/>${p.marks}</g>` +
-    (p.gill ? `<path class="line gill" d="M${p.gill[0]}-${p.gill[1]}Q${p.gill[0] - 1.1} 0 ${p.gill[0]} ${p.gill[1]}"/>` : '') +
-    `<circle class="eye" cx="${ex}" cy="${ey}" r="${er}"/><circle class="pupil" cx="${ex + er * .3}" cy="${ey}" r="${er * .55}"/>` +
-    `<circle class="glint" cx="${ex + er * .05}" cy="${ey - er * .3}" r="${er * .24}"/></g>`;
+    (fast ? `<path class="pl yellow speed" d="M${p.joint - 6.4}-2.4h-3.4M${p.joint - 7.4} 0h-4.6M${p.joint - 6.4} 2.4h-3.4"/>` : '') +
+    `<g class="pl ${p.a}">${tail}<path d="${p.body}"/><path d="${p.fins}"/></g>` +
+    `<g class="pl ${p.b} over">${p.over(p, tail)}</g>` +
+    `<g class="paper">${p.paper}<circle cx="${ex}" cy="${ey}" r="${er}"/></g>` + (p.extra || '') +
+    `<circle class="pl blue pupil" cx="${ex + er * .3}" cy="${ey}" r="${er * .55}"/></g>`;
 }
 // A fish's heading as an angle (0 right, 90 down). Heading left it's turned over, not swum upside down.
 const ANG = [-90, 0, 90, 180];
 const orient = (a) => `rotate(${a}deg)` + (Math.cos((a * Math.PI) / 180) < -.01 ? ' scaleY(-1)' : '');
 const near = (from, to) => from + ((((to - from) % 360) + 540) % 360) - 180; // `to`, wound round to the nearest turn from `from`
 
-// Items. A mirror is a bevelled silver plate across the cell (bolted ones show rivets); a flat mirror a plate on brackets against
-// the rock face; bait a wriggling worm.
-const plate = (len, cls = '') => `<rect class="glass${cls}" x="${-len / 2}" y="-.85" width="${len}" height="1.7" rx=".6"/><path class="glint" d="M${-len / 2 + .9}-.3H${len / 2 - .9}"/>`;
-const worm = () => `<g class="bait"><path d="M-3.2 1.2C-2.2-1.4-.8 1.8.6-.2S2.6-1.6 3.2.2"/><circle cx="3.3" cy=".1" r=".75"/>` +
+// Items. A mirror is a bare paper plate edged in blue with a couple of glare strokes; a bolted one is tinted and riveted. A flat
+// mirror is the same plate on brackets against the rock; bait a pink worm.
+const plate = (len) => `<rect class="glass" x="${-len / 2}" y="-.9" width="${len}" height="1.8" rx=".5"/>` +
+  `<path class="pl blue glare" d="M${-len / 2 + 1.6}-.1l.9-.5M${-len / 2 + 2.8}.3l1.2-.8M${len / 2 - 2.6}.1l.8-.5"/>`;
+const worm = () => `<g class="pl pink bait"><path d="M-3.2 1.2C-2.2-1.4-.8 1.8.6-.2S2.6-1.6 3.2.2"/><circle cx="3.3" cy=".1" r=".8"/>` +
   (calm() ? '' : '<animateTransform attributeName="transform" type="rotate" values="-6;6;-6" dur="1.3s" repeatCount="indefinite"/>') + '</g>';
 function itemSvg(t, c, W, cls = '') {
   if (t === 'B') return `<g class="item ${cls}" transform="translate(${cx(c, W)} ${cy(c, W)})">${worm()}</g>`;
   if (t === 'F') {
-    const cell = c >> 2, d = c & 3, x = cx(cell, W) + DC[d] * 4.15, y = cy(cell, W) + DR[d] * 4.15;
-    return `<g class="item flat ${cls}" transform="translate(${x} ${y}) rotate(${d % 2 ? 90 : 0})">` +
-      `<path class="bracket" d="M-3.4 0V${d === 0 || d === 3 ? -1.6 : 1.6}M3.4 0V${d === 0 || d === 3 ? -1.6 : 1.6}"/>${plate(8.4)}</g>`;
+    const cell = c >> 2, d = c & 3, x = cx(cell, W) + DC[d] * 4.1, y = cy(cell, W) + DR[d] * 4.1, k = d === 0 || d === 3 ? -1.7 : 1.7;
+    return `<g class="item flat ${cls}" transform="translate(${x} ${y}) rotate(${d % 2 ? 90 : 0})"><path class="pl blue bracket" d="M-3.4 0V${k}M3.4 0V${k}"/>${plate(8.4)}</g>`;
   }
   return `<g class="item ${cls}" transform="translate(${cx(c, W)} ${cy(c, W)}) rotate(${t === '/' ? -45 : 45})">${plate(11)}` +
-    (cls.includes('fixed') ? '<circle class="rivet" cx="-4.6" r=".55"/><circle class="rivet" cx="4.6" r=".55"/>' : '') + (cls.includes('ghost') ? '' : sparkle(c)) + '</g>';
+    (cls.includes('fixed') ? '<circle class="pl blue" cx="-4.4" r=".55"/><circle class="pl blue" cx="4.4" r=".55"/>' : '') + (cls.includes('ghost') ? '' : sparkle(c)) + '</g>';
 }
-// now and then a mirror catches the light: a four-point glint near one end, each on its own beat
-const sparkle = (c) => calm() ? '' : `<path class="spark" transform="translate(3 -.5)" d="M0-1.5L.3-.3L1.5 0L.3.3L0 1.5L-.3.3L-1.5 0L-.3-.3Z" opacity="0">` +
+// now and then a mirror catches the light: a yellow four-point glint near one end, each on its own beat
+const sparkle = (c) => calm() ? '' : `<path class="pl yellow spark" transform="translate(3 -.5)" d="M0-1.7L.35-.35L1.7 0L.35.35L0 1.7L-.35.35L-1.7 0L-.35-.35Z" opacity="0">` +
   `<animate attributeName="opacity" values="0;0;1;0;0" keyTimes="0;.7;.8;.9;1" dur="${4 + (h32(c) % 5)}s" begin="${(h32(c * 7) % 40) / 10}s" repeatCount="indefinite"/></path>`;
 // an item in the tray, in a 10 × 10 box
-const trayIcon = (t) => (t === 'F' ? '<path class="rockbit" d="M0 7.2h10V10H0z"/><g transform="translate(5 6.3)">' + plate(8.4) + '</g>'
+const trayIcon = (t) => (t === 'F' ? '<path class="pl blue" d="M0 7.4h10V10H0z"/><g transform="translate(5 6.4)">' + plate(8.4) + '</g>'
   : t === 'B' ? `<g transform="translate(5 5) scale(1.25)">${worm()}</g>` : `<g transform="translate(5 5) rotate(${t === '/' ? -45 : 45})">${plate(11)}</g>`);
 // a placed item's order, a small tag by it
 function orderTag(t, at, n, W) {
@@ -98,15 +103,16 @@ function orderTag(t, at, n, W) {
   return `<g class="tag"><circle cx="${x}" cy="${y}" r="1.8"/><text x="${x}" y="${y + .7}">${n}</text></g>`;
 }
 
-// The tank, printed in a few inks: water deepening to halftone dots near the floor, a pale far range of rock and kelp behind,
-// light falling through, rock as rounded speckled masses (pebbles, cracks, sandy ledges, halftone shade under overhangs), kelp,
-// a starfish or shell on some ledges, bubbles rising off the floor, and daylight pouring in through the exit.
-// Everything decorative sits in rock or behind the water, never where it could pass for an item.
+// The tank, printed risograph style in four spot inks on the page's own paper. The water is the paper, screened with blue
+// halftone dots that grow toward the floor; light falls through as paper-white bands. Behind, a far ridge in a teal screen.
+// Rock is solid blue with grain, knocked-out pebbles and cracks, pink screened into the shade under overhangs (purple where they
+// overprint); ledges are yellow sand. Kelp is teal, starfish pink, shells yellow, and daylight comes in through the exit as a
+// yellow burst. Each ink sits a hair out of register. Nothing decorative is in open water, where it could pass for an item.
 const star = (x, y, r) => 'M' + Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + (i * Math.PI) / 5, k = i % 2 ? r * .42 : r; return `${(x + Math.cos(a) * k).toFixed(2)} ${(y + Math.sin(a) * k).toFixed(2)}`; }).join('L') + 'Z';
 function tankSvg(L) {
   const W = L.W, g = L.grid, S = CELL * W, R = 3.2, seed = h32([...g].reduce((a, ch, i) => a + (ch === '#' ? i * 31 : 0), W));
   const rock = (c, dr, dc) => { const r = Math.floor(c / W) + dr, q = (c % W) + dc; return r < 0 || q < 0 || r >= W || q >= W || g[r * W + q] === '#'; };
-  let rocks = '', fill = '', sand = '', pebbles = '', cracks = '', shade = '', kelp = '', life = '', bubbles = '', exit = '';
+  let rocks = '', fill = '', sand = '', pebbles = '', cracks = '', shade = '', kelp = '', pink = '', yellow = '', bubbles = '', exit = '', burst = '';
   for (let c = 0; c < W * W; c++) {
     const x = (c % W) * CELL, y = Math.floor(c / W) * CELL, hh = h32(c + seed);
     if (g[c] === '#') {
@@ -116,63 +122,60 @@ function tankSvg(L) {
       const tl = !up && !lf ? R : 0, tr = !up && !rt ? R : 0, br = !dn && !rt ? R : 0, bl = !dn && !lf ? R : 0;
       rocks += `M${x0 + tl} ${y0}H${x1 - tr}${tr ? `A${tr} ${tr} 0 0 1 ${x1} ${y0 + tr}` : ''}V${y1 - br}${br ? `A${br} ${br} 0 0 1 ${x1 - br} ${y1}` : ''}` +
         `H${x0 + bl}${bl ? `A${bl} ${bl} 0 0 1 ${x0} ${y1 - bl}` : ''}V${y0 + tl}${tl ? `A${tl} ${tl} 0 0 1 ${x0 + tl} ${y0}` : ''}Z`;
-      if (hh % 3) pebbles += `<ellipse cx="${x + 2 + (hh % 6)}" cy="${y + 3 + ((hh >> 4) % 5)}" rx="${1 + ((hh >> 8) % 3) * .4}" ry="${.7 + ((hh >> 10) % 2) * .3}"/>`;
+      if (hh % 3 === 1) pebbles += `<ellipse cx="${x + 2 + (hh % 6)}" cy="${y + 3 + ((hh >> 4) % 5)}" rx="${.7 + ((hh >> 8) % 3) * .3}" ry="${.5 + ((hh >> 10) % 2) * .25}"/>`;
       if (hh % 5 === 1) cracks += `M${x + 1.5 + ((hh >> 3) % 4)} ${y + 5 + ((hh >> 7) % 3)}q2-1.2 3.4 0t3 .4`;
-      if (!dn && g[c + W] === '.') shade += `M${x0 + bl} ${y + 6.4}H${x1 - br}V${y1 - br}${br ? `A${br} ${br} 0 0 1 ${x1 - br} ${y1}` : ''}H${x0 + bl}${bl ? `A${bl} ${bl} 0 0 1 ${x0} ${y1 - bl}` : ''}Z`;
+      if (!dn && g[c + W] === '.') shade += `M${x0 + bl} ${y + 5}H${x1 - br}V${y1 - br}${br ? `A${br} ${br} 0 0 1 ${x1 - br} ${y1}` : ''}H${x0 + bl}${bl ? `A${bl} ${bl} 0 0 1 ${x0} ${y1 - bl}` : ''}Z`;
       if (!up) {
         const a = x0 + tl * .6, b = x1 - tr * .6;
-        sand += `M${a} ${y0 + .2}Q${(a + b) / 2} ${y0 - .9} ${b} ${y0 + .2}Q${b - .4} ${y0 + 1.9} ${(a + b) / 2} ${y0 + 1.6}T${a} ${y0 + .2}Z`;
+        sand += `M${a} ${y0 + .2}Q${(a + b) / 2} ${y0 - 1} ${b} ${y0 + .2}Q${b - .4} ${y0 + 2.1} ${(a + b) / 2} ${y0 + 1.8}T${a} ${y0 + .2}Z`;
         if (g[c - W] !== '.') continue;
         if (hh % 4 === 0) {
           const k = x + 3 + (hh >> 6) % 4, sway = calm() ? '' : `<animateTransform attributeName="transform" type="rotate" values="-5 ${k} ${y};6 ${k} ${y};-5 ${k} ${y}" dur="${3 + (hh % 3)}s" repeatCount="indefinite"/>`;
           kelp += `<g><path d="M${k} ${y}q-1.6-2.4 0-4.4t0-4.2M${k + 1.6} ${y}q1.2-1.8 0-3.4t.2-2.8"/>${sway}</g>`;
-        } else if (hh % 9 === 1) life += `<path class="starfish" d="${star(x + 3 + (hh >> 5) % 4, y + .1, 1.5)}" transform="rotate(${(hh >> 9) % 60} ${x + 3 + (hh >> 5) % 4} ${y + .1})"/>`;
-        else if (hh % 9 === 5) { const sx = x + 3 + (hh >> 5) % 4; life += `<g class="shell"><path d="M${sx - 1.5} ${y + .4}A1.5 1.5 0 0 1 ${sx + 1.5} ${y + .4}Z"/><path class="rib" d="M${sx} ${y + .4}V${y - 1.1}M${sx} ${y + .4}L${sx - 1} ${y - .7}M${sx} ${y + .4}L${sx + 1} ${y - .7}"/></g>`; }
-        // now and then a few bubbles rise off a ledge
+        } else if (hh % 9 === 1) { const sx = x + 3 + (hh >> 5) % 4; pink += `<path d="${star(sx, y + .1, 1.6)}" transform="rotate(${(hh >> 9) % 60} ${sx} ${y + .1})"/>`; }
+        else if (hh % 9 === 5) { const sx = x + 3 + (hh >> 5) % 4; yellow += `<path d="M${sx - 1.6} ${y + .4}A1.6 1.6 0 0 1 ${sx + 1.6} ${y + .4}Z"/>`; }
         if (hh % 11 === 7 && !calm()) for (let k = 0; k < 3; k++) {
-          const bx = x + 4 + k * 1.3, dur = 3.4 + k * .9 + (hh % 3), r = .45 + k * .18;
-          bubbles += `<circle cx="${bx}" r="${r}"><animate attributeName="cy" values="${y - 1};${y - 34}" dur="${dur}s" begin="${k * 1.1}s" repeatCount="indefinite"/>` +
-            `<animate attributeName="cx" values="${bx};${bx + .8};${bx - .6};${bx}" dur="${dur}s" begin="${k * 1.1}s" repeatCount="indefinite"/>` +
-            `<animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.1;.8;1" dur="${dur}s" begin="${k * 1.1}s" repeatCount="indefinite"/></circle>`;
+          const bx = x + 4 + k * 1.3, dur = 3.4 + k * .9 + (hh % 3), r = .5 + k * .2, bg = `begin="${k * 1.1}s" dur="${dur}s" repeatCount="indefinite"`;
+          bubbles += `<circle cx="${bx}" r="${r}"><animate attributeName="cy" values="${y - 1};${y - 34}" ${bg}/><animate attributeName="cx" values="${bx};${bx + .8};${bx - .6};${bx}" ${bg}/>` +
+            `<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.8;1" ${bg}/></circle>`;
         }
       }
     } else if (g[c] === '.') {
-      // a water corner tucked between rock gets a small fillet, so rock reads as one carved mass
       for (const [dr, dc, ox, oy, sw] of [[-1, -1, 0, 0, 0], [-1, 1, 10, 0, 1], [1, 1, 10, 10, 0], [1, -1, 0, 10, 1]])
         if (rock(c, dr, 0) && rock(c, 0, dc) && rock(c, dr, dc)) {
           const sx = x + ox, sy = y + oy, ix = -Math.sign(ox - 5) * 1.6, iy = -Math.sign(oy - 5) * 1.6;
           fill += `M${sx} ${sy}H${sx + ix}A1.6 1.6 0 0 ${sw} ${sx} ${sy + iy}Z`;
         }
     } else if (g[c] === 'X') {
-      // daylight beyond the gap, falling in as a fan of beams
+      // daylight: a yellow burst screened onto the water just inside the gap, and arrows pointing out
       const d = c < W ? 0 : c >= W * (W - 1) ? 2 : c % W === 0 ? 3 : 1, mx = x + 5, my = y + 5, rot = [0, 90, 180, 270][d];
-      exit = `<g class="exit"><rect x="${x}" y="${y}" width="10" height="10" fill="url(#water)"/>` +
-        `<g transform="translate(${mx + DC[d] * 5} ${my + DR[d] * 5}) rotate(${rot})"><path class="beam" d="M-3 0L-11 26H-5ZM-1 0L-2 30H3ZM2 0L9 27H14Z"/></g>` +
-        `<circle cx="${mx + DC[d] * 4}" cy="${my + DR[d] * 4}" r="7" fill="url(#glow)"/>` +
-        `<g transform="translate(${mx - DC[d] * 2.2} ${my - DR[d] * 2.2}) rotate(${rot})"><path class="chev" d="M-2.2 1.6L0-.6L2.2 1.6"/><path class="chev c2" d="M-2.2-.4L0-2.6L2.2-.4"/></g></g>`;
+      exit = `<rect class="paper" x="${x}" y="${y}" width="10" height="10"/>` +
+        `<g transform="translate(${mx - DC[d] * 2.2} ${my - DR[d] * 2.2}) rotate(${rot})" class="pl blue chevs"><path class="chev" d="M-2.2 1.6L0-.6L2.2 1.6"/><path class="chev c2" d="M-2.2-.4L0-2.6L2.2-.4"/></g>`;
+      burst = `<g transform="translate(${mx + DC[d] * 5} ${my + DR[d] * 5}) rotate(${rot})"><path d="${[-34, -18, -6, 6, 18, 34].map((a) => {
+        const r1 = (a - 4) * Math.PI / 180, r2 = (a + 4) * Math.PI / 180, l = 30;
+        return `M0 0L${(Math.sin(r1) * l).toFixed(1)} ${(Math.cos(r1) * l).toFixed(1)}L${(Math.sin(r2) * l).toFixed(1)} ${(Math.cos(r2) * l).toFixed(1)}Z`; }).join('')}" fill="url(#ht-sun)"/>` +
+        `<circle r="7" class="pl yellow"/></g>`;
     }
   }
-  // the far range: a soft ridge and a few spires, pale, behind everything
   let ridge = `M0 ${S}V${S * .7}`;
   for (let i = 0; i <= 8; i++) ridge += `Q${S * (i + .5) / 8} ${S * (.6 + ((h32(seed + i) % 100) / 100) * .14)} ${S * (i + 1) / 8} ${S * (.68 + ((h32(seed + i + 50) % 100) / 100) * .08)}`;
   ridge += `V${S}Z`;
   for (let i = 0; i < 3; i++) { const sx = S * (.15 + i * .32 + (h32(seed + 9 * i) % 10) / 100), top = S * (.38 + (h32(seed + 7 * i) % 20) / 100), w = 5 + (h32(seed + i) % 5); ridge += `M${sx - w} ${S}V${top + w}A${w} ${w} 0 0 1 ${sx + w} ${top + w}V${S}Z`; }
   const farKelp = [.08, .3, .55, .82].map((f, i) => { const kx = S * f, ky = S * (.74 + (i % 2) * .05); return `M${kx} ${S}V${ky}q-2-4 0-8t0-8`; }).join('');
-  const shafts = [.18, .46, .74].map((f, i) => `<path class="shaft" d="M${S * f} 0h${S * (.07 + i * .02)}l${S * .16} ${S}h-${S * (.12 + i * .02)}Z"/>`).join('');
-  return `<defs><linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="w0"/><stop offset="1" class="w1"/></linearGradient>` +
-    `<linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="s0"/><stop offset="1" class="s1"/></linearGradient>` +
-    `<radialGradient id="glow"><stop offset="0" class="g0"/><stop offset="1" class="g1"/></radialGradient>` +
-    // halftone: a grid of dots, faded in toward the floor through a mask
-    `<pattern id="dots" width="1.9" height="1.9" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx=".95" cy=".95" r=".42" class="ht"/></pattern>` +
-    `<linearGradient id="deepfade" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".9"/></linearGradient>` +
-    `<mask id="deep"><rect width="${S}" height="${S}" fill="url(#deepfade)"/></mask>` +
+  const shafts = [.18, .46, .74].map((f, i) => `<path d="M${S * f} 0h${S * (.06 + i * .02)}l${S * .16} ${S}h-${S * (.1 + i * .02)}Z"/>`).join('');
+  // halftone screens: the water's dots grow with depth, band by band
+  const dots = (id, r, ink, step = 1.6) => `<pattern id="${id}" width="${step}" height="${step}" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="${step / 2}" cy="${step / 2}" r="${r}" class="ink-${ink}"/></pattern>`;
+  const BANDS = 7, deep = Array.from({ length: BANDS }, (_, i) => `<rect y="${(S * i) / BANDS}" width="${S}" height="${S / BANDS + .2}" fill="url(#ht${i})"/>`).join('');
+  return `<defs>${Array.from({ length: BANDS }, (_, i) => dots('ht' + i, .08 + i * .045, 'blue', 1.7)).join('')}${dots('ht-teal', .38, 'teal', 1.6)}${dots('ht-pink', .34, 'pink', 1.3)}${dots('ht-sun', .55, 'yellow', 1.4)}` +
     `<clipPath id="tank"><rect x="${CROP}" y="${CROP}" width="${S - 2 * CROP}" height="${S - 2 * CROP}" rx="5"/></clipPath></defs>` +
-    `<g clip-path="url(#tank)"><rect class="water" width="${S}" height="${S}" fill="url(#water)"/>` +
-    `<g class="far" filter="url(#speck)"><path d="${ridge}"/><path class="far-kelp" d="${farKelp}"/></g>` +
-    `<rect class="deep" width="${S}" height="${S}" fill="url(#dots)" mask="url(#deep)"/><g fill="url(#shaft)">${shafts}</g>${exit}` +
-    `<g class="bubbles">${bubbles}</g><g class="kelp">${kelp}</g><path class="rock-shadow" transform="translate(.7 .9)" d="${rocks}"/>` +
-    `<g filter="url(#speck)"><path class="rock" d="${rocks}${fill}"/><path class="rock-shade" d="${shade}" fill="url(#dots)"/><g class="pebbles">${pebbles}</g>` +
-    `<path class="cracks" d="${cracks}"/><path class="sand" d="${sand}"/>${life}</g></g>`;
+    `<g clip-path="url(#tank)"><rect class="paper" width="${S}" height="${S}"/>` +
+    `<g class="pl teal far"><path d="${ridge}" fill="url(#ht-teal)"/><path class="far-kelp" d="${farKelp}"/></g>` +
+    `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
+    `<g class="pl yellow">${burst}</g>${exit}` +
+    `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
+    `<path class="pl blue rock" d="${rocks}${fill}"/><path class="pl pink" d="${shade}" fill="url(#ht-pink)"/>` +
+    `<g class="paper cuts"><g>${pebbles}</g><path class="crack" d="${cracks}"/><path d="${sand}"/></g>` +
+    `<path class="pl yellow" d="${sand}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
 // ---------- state ----------
