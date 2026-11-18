@@ -132,6 +132,7 @@ module.exports = {
       'Quadflip': 'מהפכים',
       'Alien Chess': 'שחמאדים',
       'Balancing Act': 'על כפות המאזניים',
+      'Small Fry': 'רקק',
       'Easy': 'קל',
       'Medium': 'בינוני',
       'Hard': 'קשה',
@@ -453,6 +454,29 @@ module.exports = {
       'Not clear yet. <b>Tap a used piece</b> to lift it, or undo.': 'הלוח עוד לא נקי. <b>הקישו על צורה משומשת</b> כדי להרים אותה, או בטלו.',
       'Restart this level? Your pieces come back off the board; the clock keeps running.': 'להתחיל את השלב מחדש? הצורות יורדות מהלוח; השעון ממשיך לרוץ.',
     },
+    'smallfry/game.js': {
+      'Small Fry': 'רקק',
+      'mirror': 'מראה',
+      'flat mirror': 'מראה שטוחה',
+      'bait': 'פיתיון',
+      "Today's puzzle. A new one tomorrow.": 'החידה של היום. מחר תגיע חדשה.',
+      'Rays show where each fish looks. Put a <b>mirror</b> where the fry looks, to show it the <b>exit</b>.':
+        'הקווים מראים לאן כל דג מסתכל. שימו <b>מראה</b> במקום שהרקק מסתכל עליו, כדי להראות לו את <b>היציאה</b>.',
+      '{item}, placed': '{item}, במקום',
+      '{n} of {k} placed': '{n} מתוך {k} במקום',
+      'Small Fry tank, {w} by {w}. {p} predators. {n} items left.': 'אקווריום רקק, {w} על {w}. {p} טורפים. נשארו {n} פריטים.',
+      '{item} placed.': '{item} במקום.',
+      'Restart this level? Every item you placed comes back to the tray.': 'להתחיל את השלב מחדש? כל הפריטים שהנחתם יחזרו למגש.',
+      'Row {r}, column {c}': 'שורה {r}, עמודה {c}',
+      'Hint ({n} left)': 'רמז (נשארו {n})',
+      '<b>Eaten!</b> Undo and try another way.': '<b>נאכל!</b> בטלו ונסו דרך אחרת.',
+      '<b>Going in circles.</b> Undo and try another way.': '<b>מסתובבים במעגלים.</b> בטלו ונסו דרך אחרת.',
+      '<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.': '<b>תקועים:</b> כל הפריטים במקום, והרקק עדיין בפנים. בטלו ונסו דרך אחרת.',
+      'Each fish looks only straight ahead: the dotted lines show where. The fry (orange) is looking at rock. Pick the <b>mirror</b> below.':
+        'כל דג מסתכל רק ישר קדימה: הקווים המנוקדים מראים לאן. הרקק (הכתום) מסתכל על סלע. בחרו את ה<b>מראה</b> למטה.',
+      'Items go only where a fish is looking. Tap the ringed spot (once to see how the looks bend, again to place it): the fry will see the <b>exit</b> and swim for it.':
+        'פריטים מניחים רק במקום שדג מסתכל עליו. הקישו על הנקודה המסומנת (פעם אחת כדי לראות איך המבטים מתכופפים, ושוב כדי להניח): הרקק יראה את <b>היציאה</b> וישחה אליה.',
+    },
     'balancingact/game.js': {
       'Balancing Act': 'על כפות המאזניים',
       'The numbers on the beam are its <b>arm lengths</b>. A beam hangs level when <b>weight × arm</b> is the same on both sides. Drag the <b>6</b> onto the plate on the short arm, or tap it, then tap the plate.':
@@ -572,8 +596,8 @@ module.exports = {
       ['<span class="print-hint" aria-hidden="true"><span>Printable version here</span><svg', '<span class="print-hint" aria-hidden="true"><span>אפשר גם להדפיס</span><svg'],
       ['<title>Games by Miki — daily logic games</title>', '<title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>'],
       ['content="Games by Miki — daily logic games"', 'content="מדף המשחקים של מיקי — משחקי היגיון יומיים"'],
-      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess and Balancing Act. New puzzles every day."',
-        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים ועל כפות המאזניים. חידות חדשות בכל יום."'],
+      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act and Small Fry. New puzzles every day."',
+        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים ורקק. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
       // The Hebrew title is ~7.5em wide: size it to the header's width so it stays on one line (13cqi ≈ 100% / 7.6em, shadow included)
       ['<header>', '<header style="container-type: inline-size">'],
@@ -608,6 +632,11 @@ module.exports = {
       ['<span class="kicker">08 <em>Math</em></span>', '<span class="kicker">08 <em>חשבון</em></span>'],
       ['<h2>Balancing <span>Act</span></h2>', '<h2>על כפות <span>המאזניים</span></h2>'],
       ['<p>Hang every weight on the right plate until the whole contraption hangs level.</p>', '<p>תלו כל משקולת על הכף הנכונה, עד שכל המתקן התלוי מאוזן.</p>'],
+      ['<span class="kicker">09 <em>Logic</em></span>', '<span class="kicker">09 <em>היגיון</em></span>'],
+      ['<h2>Small <span>Fry</span></h2>', '<h2>ר<span>קק</span></h2>'],
+      [`<p>Bend the fishes' looks with mirrors until the little one slips out unseen.</p>`, '<p>כופפו את מבטי הדגים במראות, עד שהקטנטן יחמוק החוצה בלי להיראות.</p>'],
+      ['<span class="new-tag">New</span> <span>A new game: <b>Small Fry</b>. Bend the fishes\' looks and get the little one out.</span>', '<span class="new-tag">חדש</span> <span>משחק חדש: <b>רקק</b>. כופפו את מבטי הדגים והוציאו את הקטנטן.</span>'],
+      ['<span class="new-go" aria-hidden="true">→</span>', '<span class="new-go" aria-hidden="true">←</span>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
       ['<span class="b-go">Play <b', '<span class="b-go">שחקו <b'],
       // the inline script
@@ -862,6 +891,48 @@ module.exports = {
     <li>נצחו מהר ותקבלו <b>שלושה כוכבים</b>.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להרמה ולהנחה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+    ],
+    'smallfry/index.html': [
+      ['Small Fry — get the little one out', 'רקק — הוציאו את הקטנטן'],
+      ['Fish eat smaller fish they can see. Place mirrors and bait where fish are looking until the little fry slips out of the tank. New daily puzzles every day.',
+        'דגים אוכלים דגים קטנים מהם שהם רואים. הניחו מראות ופיתיונות במקומות שהדגים מסתכלים עליהם, עד שהרקק הקטן יחמוק מהאקווריום. חידות יומיות חדשות בכל יום.'],
+      ['<h1 class="wordmark">Small <span>Fry</span></h1>', '<h1 class="wordmark">ר<span>קק</span></h1>'],
+      ['<p class="tagline">Bend their looks. Get the little one out.</p>', '<p class="tagline">כופפו את המבטים. הוציאו את הקטנטן.</p>'],
+      ['aria-roledescription="tank"', 'aria-roledescription="אקווריום"'],
+      ['aria-label="Items"', 'aria-label="פריטים"'],
+      ['<p id="board-keys" class="sr-only">Number keys pick an item from the tray. Arrow keys step through the spots where a fish is looking. Enter or Space places the item, and the fish act. U or Backspace takes it back.</p>',
+        '<p id="board-keys" class="sr-only">מקשי המספרים בוחרים פריט מהמגש. החצים עוברים בין המקומות שדג מסתכל עליהם. Enter או רווח מניחים את הפריט, והדגים פועלים. U או Backspace מחזירים אותו.</p>'],
+      ['</svg>Faster', '</svg>מהר יותר'],
+      [`<li>Get the orange <b>fry</b> out through the <b>exit</b>, the glowing gap in the rock.</li>
+    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. A fish swims for the first thing it sees, if it wants it: a <b>bigger fish eats a smaller one</b> (each one's size is on its tag), and the fry swims for the exit or for bait.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
+    <li>Place the items in your tray where a fish is <b>looking</b>. A <b>mirror</b> turns a look round a corner. A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what's behind it. <b>Bait</b> lures the fry, which turns the way it swam to it.</li>
+    <li>After each item, the fish act. When they stop, place the next. A fish sees a smaller one swimming into its look and goes for it at once. A fast fish (with streaks) swims two cells at a time; a fish on a rail patrols back and forth whenever anything else moves.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
+    <li>Use <b>every item</b>. There's only <b>one way</b>, and order can matter.</li>
+    <li>Undo takes back the last item, even while the fish swim. Getting eaten, going in circles, running out of items, and undoing after the fish moved each count against your stars; hints cost a star too.</li>`,
+        `<li>הוציאו את ה<b>רקק</b> הכתום דרך ה<b>יציאה</b>, הפתח הזוהר בסלע.</li>
+    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. דג שוחה אל הדבר הראשון שהוא רואה, אם הוא רוצה אותו: <b>דג גדול אוכל דג קטן ממנו</b> (הגודל של כל דג כתוב על התווית שלו), והרקק שוחה אל היציאה או אל פיתיון.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
+    <li>הניחו את הפריטים מהמגש במקומות שדג <b>מסתכל</b> עליהם. <b>מראה</b> מסובבת מבט מעבר לפינה. <b>מראה שטוחה</b> נתלית על הסלע שדג בוהה בו, ומראה לו מה מאחוריו. <b>פיתיון</b> מושך את הרקק, והוא פונה לכיוון שבו שחה אליו.</li>
+    <li>אחרי כל פריט, הדגים פועלים. כשהם עוצרים, הניחו את הבא. דג שרואה דג קטן ממנו נכנס למבט שלו מסתער עליו מיד. דג מהיר (עם פסים) שוחה שתי משבצות בכל פעם; דג על מסילה מפטרל הלוך ושוב בכל פעם שמשהו אחר זז.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
+    <li>השתמשו ב<b>כל הפריטים</b>. יש רק <b>דרך אחת</b>, והסדר יכול לשנות.</li>
+    <li>„ביטול״ מחזיר את הפריט האחרון, גם בזמן שהדגים שוחים. להיאכל, להסתובב במעגלים, להיגמר מפריטים ולבטל אחרי שהדגים זזו — כל אחד מאלה עולה בכוכבים; גם רמזים עולים כוכב.</li>`],
+      ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>9</kbd> pick an item, arrows to choose a spot, <kbd>Enter</kbd> to place, <kbd>U</kbd> undo, <kbd>F</kbd> faster, <kbd>P</kbd> pause.</p>',
+        '<p class="muted small kbd-hint">מקלדת: <kbd>1</kbd>–<kbd>9</kbd> בוחרים פריט, החצים בוחרים מקום, <kbd>Enter</kbd> מניח, <kbd>U</kbd> ביטול, <kbd>F</kbd> מהר יותר, <kbd>P</kbd> השהיה.</p>'],
     ],
     'balancingact/index.html': [
       ['Balancing Act — hang it level', 'על כפות המאזניים — תלו ואזנו'],

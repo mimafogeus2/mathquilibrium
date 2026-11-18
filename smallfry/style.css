@@ -1,0 +1,205 @@
+/* Small Fry: the tank, its fish, and the item tray. Everything else is in shared/core.css.
+   The tank is a risograph print: four spot inks (blue, fluorescent pink, yellow, teal) on the page's own paper, overprinting where
+   they cross (multiply on cream, screen on blue stock: core.css --blend), halftone screens instead of gradients, grain, and each
+   ink a hair out of register. */
+:root {
+  --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal);
+  --k-blue: #3255a4; --k-pink: #ff48b0; --k-yellow: #ffd21f; --k-teal: #00838a; --k-orange: #ff6c2f;
+}
+:root[data-theme="dark"] { --k-blue: #8fb2ff; --k-pink: #ff6cc4; --k-yellow: #ffe14d; --k-teal: #3fd0c2; --k-orange: #ff8a4c; }
+
+/* the tank is hit-tested in its own coordinates: it never mirrors */
+.board { direction: ltr; }
+.board {
+  /* as big as fits: the screen's width (600 at most, padding in) and the height left by the bar, tray and tools; --ar is the cave's
+     own shape (game.js: viewOf) */
+  width: min(540px, calc(100 * var(--vw) - 60px), calc((100 * var(--dvh) - 330px) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
+  border-radius: 14px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.tank { display: block; width: 100%; height: 100%; }
+/* core.css strokes every svg; here only what asks for one */
+.tank, .slot svg, #logo svg { stroke: none; fill: none; }
+
+/* inks: each layer (.pl) prints in one, overprinting what's under it, a little out of register */
+.pl { fill: currentColor; mix-blend-mode: var(--blend); }
+/* grain: one sheet of specks over the whole tank, where the ink missed the paper (cheap: a static image, not a filter per layer) */
+.board { position: relative; overflow: hidden; } /* one rounded edge for everything in it */
+/* The tank is presented as a print: the sheet it's printed on (a deckle edge, the reg shadow under it), crop marks at its corners,
+   and the printer's slug, the level's name, in the margin under it */
+.print { position: relative; padding: 12px 12px 26px; }
+.print::before { content: ''; position: absolute; inset: 0; background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg);
+  clip-path: polygon(0 1%, 3% 0, 9% .6%, 17% 0, 26% .4%, 38% 0, 49% .7%, 61% .1%, 72% .6%, 84% 0, 93% .5%, 100% 0, 99.4% 9%, 100% 21%, 99.5% 34%, 100% 47%, 99.3% 60%, 100% 73%, 99.6% 86%, 100% 100%, 92% 99.3%, 80% 100%, 67% 99.4%, 55% 100%, 43% 99.5%, 31% 100%, 19% 99.4%, 7% 100%, 0 99.2%, .6% 87%, 0 74%, .5% 61%, 0 48%, .7% 35%, 0 22%, .4% 10%); }
+.crop { position: absolute; width: 10px; height: 10px; border: 0 solid var(--ink); opacity: .55; }
+.crop.tl { top: -6px; left: -6px; border-width: 0 1px 1px 0; } .crop.tr { top: -6px; right: -6px; border-width: 0 0 1px 1px; }
+.crop.bl { bottom: -6px; left: -6px; border-width: 1px 1px 0 0; } .crop.br { bottom: -6px; right: -6px; border-width: 1px 0 0 1px; }
+.print-slug { position: absolute; left: 14px; right: 14px; bottom: 6px; margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); text-align: end; }
+.print .board { box-shadow: inset 0 0 0 1px var(--hair); }
+
+/* every level a little different: a faint tint of one ink (--vary, --vamt: game.js) in its water and kelp */
+.sea { fill: color-mix(in srgb, var(--sea, var(--stock)), var(--vary, var(--stock)) var(--vamt, 0%)); }
+
+/* Moods: each difficulty prints on its own water. Easy is shallow and sunny, Medium the open sea, Hard deeper and greener, and
+   Impossible the abyss, where the light hardly reaches. --sea is the water's paper, --k-blue the rock, --shine the light shafts. */
+#game[data-tier="E"], #game[data-tier="T"] { --sea: color-mix(in srgb, var(--stock) 88%, var(--sun)); --k-blue: #3f72b9; --shine: .75; }
+#game[data-tier="H"] { --sea: color-mix(in srgb, var(--stock) 84%, var(--teal)); --k-blue: #284b8c; --shine: .35; }
+#game[data-tier="I"] { --sea: color-mix(in srgb, var(--stock) 78%, #000); --shine: .12; --k-blue: #3a4f8f; }
+:root[data-theme="dark"] #game[data-tier="E"] { --sea: color-mix(in srgb, var(--stock) 80%, #3d78a8); --k-blue: #9cc0ff; }
+:root[data-theme="dark"] #game[data-tier="H"] { --sea: color-mix(in srgb, var(--stock) 75%, #0b3a40); --k-blue: #7b9be0; }
+.shafts { opacity: var(--shine, .55); }
+
+/* the rock is the first ink down and fully covers the paper: the water's screen never shows through it */
+.pl.rock { mix-blend-mode: normal; }
+.board::after { content: ''; position: absolute; inset: 0; border-radius: 14px; background: var(--speck); background-size: 140px; pointer-events: none; opacity: .7; }
+#logo svg .pl { filter: url(#speck); }
+.pl.blue { color: var(--k-blue); } .ink-blue { fill: var(--k-blue); }
+.pl.pink { color: var(--k-pink); translate: .35px -.3px; } .ink-pink { fill: var(--k-pink); }
+.pl.yellow { color: var(--k-yellow); translate: -.3px .35px; } .ink-yellow { fill: var(--k-yellow); }
+.pl.teal { color: var(--k-teal); translate: .25px .3px; } .ink-teal { fill: var(--k-teal); }
+.pl.orange { color: var(--k-orange); translate: -.25px -.3px; }
+.paper, .paper * { fill: var(--stock); }
+.water { opacity: 1; }
+/* the water's screen: a pale tint of the rock's blue, so fish read clearly over it */
+.ink-water { fill: color-mix(in srgb, var(--k-blue) 38%, var(--stock)); }
+:root[data-theme="dark"] .ink-water { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
+.strata { fill: none; stroke: color-mix(in srgb, var(--k-blue) 55%, var(--navy)); stroke-width: .55; stroke-linecap: round; opacity: .45; }
+:root[data-theme="dark"] .strata { stroke: color-mix(in srgb, var(--k-blue) 60%, var(--stock)); }
+/* sand: a pale tint of the rock's blue, with a dotted ripple along each bank */
+.sand { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
+.ripple { fill: none; stroke: var(--k-blue); stroke-width: .4; stroke-dasharray: 0 1.5; stroke-linecap: round; opacity: .55; }
+.burst { opacity: .8; }
+.shafts path { fill: var(--stock); }
+.kelp path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
+.bubbles circle { fill: none; stroke: currentColor; stroke-width: .35; opacity: 0; }
+.way-out { fill: none; stroke: var(--k-blue); stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; animation: way-out 1.8s ease-in-out infinite; }
+@keyframes way-out { 0% { transform: translateY(1.2px); opacity: 0; } 35%, 65% { opacity: 1; } 100% { transform: translateY(-1.6px); opacity: 0; } }
+
+/* items: paper plates edged in blue, a placed one flashes yellow once; the tag says its order */
+.glass { fill: var(--stock); stroke: var(--k-blue); stroke-width: .4; }
+.item.fixed .glass { fill: color-mix(in srgb, var(--k-blue) 28%, var(--stock)); stroke-width: .55; }
+.glare, .bracket { fill: none; stroke: currentColor; stroke-width: .35; stroke-linecap: round; }
+.bracket { stroke-width: .7; }
+.items .ghost { opacity: .5; }
+.items .placed .glass { animation: shine .6s var(--ease); }
+@keyframes shine { from { fill: var(--k-yellow); } }
+.bait path { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.tag circle { fill: var(--k-blue); }
+.tag text { fill: var(--stock); font: 700 2.3px Inter, sans-serif; text-anchor: middle; }
+.items .locked + .tag circle { fill: var(--sun-text); }
+
+/* species, by their first ink: a look is dotted in its fish's ink */
+.fry, .angler { --c: var(--orange); } .minnow, .shark { --c: var(--k-teal); } .perch { --c: var(--sun-text); } .pike, .grouper { --c: var(--k-pink); }
+
+/* looks: a row of dots from the eye; one that ends on something its fish wants turns to a running dash */
+.look { fill: none; stroke: var(--c, var(--ink)); stroke-linecap: round; stroke-linejoin: round; mix-blend-mode: var(--blend); }
+/* a gaze: a soft band in its fish's ink, and a fine solid line down the middle. Wanting what it sees, both brighten and the band breathes */
+.look { stroke-width: .55; opacity: .8; }
+.gaze { mix-blend-mode: var(--blend); }
+.gaze.wants { animation: breathe 1.2s ease-in-out infinite alternate; }
+.look.wants { stroke: var(--red); stroke-width: .8; opacity: 1; }
+.look.fry.wants { stroke: var(--orange); }
+@keyframes breathe { from { opacity: 1.6; } to { opacity: .55; } }
+[data-calm] .gaze.wants, [data-calm] .way-out, [data-calm] .spot .ring { animation: none; }
+.board.busy .looks { opacity: 0; }
+
+/* a patroller's rail, in its fish's ink */
+.rail, .rail-end { fill: none; stroke: var(--c); stroke-width: .7; stroke-linecap: round; mix-blend-mode: var(--blend); opacity: .6; }
+.rail { stroke-dasharray: 1.6 1.2; }
+
+/* fish: an idle hover and a lazy tail at rest; while swimming the tail beats fast and wide. Each fish on its own beat (--ph). */
+.fish .bob { animation: bob 2.6s var(--ph, 0s) ease-in-out infinite alternate; }
+@keyframes bob { from { translate: 0 -.35px; } to { translate: 0 .35px; } }
+.fish .tailg { transform-box: fill-box; transform-origin: 100% 50%; animation: wag 1.5s var(--ph, 0s) ease-in-out infinite alternate; }
+@keyframes wag { from { rotate: -7deg; } to { rotate: 7deg; } }
+.fish.swimming .tailg { animation: beat .16s ease-in-out infinite alternate; }
+@keyframes beat { from { rotate: -17deg; } to { rotate: 17deg; } }
+[data-calm] .fish .bob, [data-calm] .fish .tailg { animation: none; }
+.fish { transition: opacity .35s .15s, scale .35s .15s; }
+.fish.gone { opacity: 0; scale: .4; }
+.fish.eaten { transition: none; } /* already swallowed: gone at once */
+.fish .over .tint { opacity: .55; }
+.fish.angler .over .tint { opacity: .22; }
+.fish .halo, .fish .halo * { fill: var(--stock); stroke: var(--stock); stroke-width: 2.2; stroke-linejoin: round; }
+.fish .stroke { fill: none; stroke: currentColor; stroke-width: .5; stroke-linecap: round; }
+.fish .paper .cut { fill: none; stroke: var(--stock); stroke-width: .55; stroke-linecap: round; }
+.fish .speed { fill: none; stroke: currentColor; stroke-width: .9; stroke-linecap: round; }
+.fish .size circle { fill: var(--stock); stroke: var(--ink); stroke-width: .45; }
+.fish .size text { fill: var(--ink); font: 700 2.3px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
+
+/* faces: lids blink now and then (each fish on its own beat); a hunter squints, the eager fry's eye widens, a scared fry trembles */
+.fish .lid { transform-box: fill-box; transform-origin: 50% 0; scale: 1 0; animation: blink 5.2s var(--ph, 0s) infinite; mix-blend-mode: normal; }
+@keyframes blink { 0%, 93%, 100% { scale: 1 0; } 96% { scale: 1 1; } }
+.fish.hunting .lid { animation: none; scale: 1 .5; transition: scale .25s; }
+.fish.hunting .pupil { scale: 1.25; transform-box: fill-box; transform-origin: center; }
+.fish.eager .pupil { scale: .8; transform-box: fill-box; transform-origin: center; }
+.fish.scared .bob { animation: tremble .12s linear infinite; }
+.fish.scared .pupil { scale: .6; transform-box: fill-box; transform-origin: center; }
+@keyframes tremble { 0%, 100% { translate: -.18px 0; } 50% { translate: .18px 0; } }
+[data-calm] .fish .lid, [data-calm] .fish.scared .bob { animation: none; }
+
+/* in the abyss, the angler's lure is the only light */
+#game[data-tier="I"] .angler > .o .pl.yellow, #game[data-tier="I"] .angler .o > g > .pl.yellow { filter: drop-shadow(0 0 1.2px var(--k-yellow)) drop-shadow(0 0 2.5px var(--k-yellow)); animation: lure 2.4s ease-in-out infinite alternate; }
+@keyframes lure { from { opacity: .7; } to { opacity: 1; } }
+[data-calm] #game[data-tier="I"] .angler .pl.yellow { animation: none; }
+
+/* the cone of view (filled, its alpha per segment from game.js) and a glint where a look turns */
+.gaze { stroke: none; fill: var(--c, var(--ink)); }
+.gaze.wants { fill: var(--red); } .gaze.fry.wants { fill: var(--orange); }
+.glint-turn { fill: var(--stock); opacity: .9; }
+/* the rock's second drum, pink, printed a hair off: it peeks out on one side */
+.misreg { fill: var(--k-pink); mix-blend-mode: var(--blend); opacity: .3; }
+/* near the exit, fish warm up in the daylight */
+.fish.warm .o { filter: drop-shadow(0 0 1.2px color-mix(in srgb, var(--k-yellow) 80%, transparent)); }
+/* the water stirring: sand puffs; the far ray */
+.fx .puff { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
+.ray path { fill: var(--k-blue); fill-opacity: .08; stroke: var(--k-blue); stroke-opacity: .08; stroke-width: .6; }
+
+/* moments: bubbles and the prey's scales from a gulp, a flash and bubbles where the fry gets out, a ripple where an item lands */
+.fx { pointer-events: none; }
+.fx .scale { fill: var(--c); mix-blend-mode: var(--blend); }
+.fx .flash { fill: var(--k-yellow); mix-blend-mode: var(--blend); }
+.fx .bub { fill: none; stroke: var(--ink); stroke-width: .3; }
+.fx .rip { fill: none; stroke: var(--k-yellow); stroke-width: .6; }
+.board.shake { animation: shake .4s; }
+
+/* where the picked item can go: a pulsing dot in each cell, a dashed bar on each rock face */
+.spot .hit { fill: transparent; cursor: pointer; }
+.spot .ring { fill: var(--stock); stroke: var(--ink); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
+.spot .pip { fill: var(--ink); pointer-events: none; }
+@keyframes spot { 50% { stroke-width: .9; } }
+.spot.face line { stroke: var(--k-yellow); stroke-width: 1.4; stroke-dasharray: 1 .8; pointer-events: none; }
+.spot:hover .ring, .spot.kbd .ring { r: 2; fill: var(--k-yellow); }
+.board.failed .tank { filter: grayscale(.55); }
+
+/* ---------- tray ---------- */
+.tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; max-width: 620px; min-height: 52px; }
+.slot {
+  width: 48px; height: 48px; padding: 7px; border: 0; border-radius: 12px; display: grid; place-items: center;
+  background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift);
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), opacity .2s;
+}
+.slot svg { width: 100%; height: 100%; }
+.slot[aria-pressed="true"] { background: var(--speck), var(--sun); box-shadow: 2px 3px 0 var(--reg); transform: translate(-1px, -2px); }
+.slot.used { background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px; box-shadow: inset 0 0 0 1px var(--hair); opacity: .5; }
+.slot:disabled { cursor: default; }
+.tray.busy .slot:not(.used) { opacity: .6; }
+@media (hover: hover) { .slot:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1px var(--ink), var(--lift); } }
+#btn-fast[aria-pressed="true"] { background: var(--speck), var(--sun); color: var(--navy); box-shadow: none; }
+.tip[data-warn] { color: var(--red-text); }
+#btn-hint .left { min-width: 1.4em; padding: 1px 5px; border-radius: 999px; background: var(--slot); font-size: 12px; font-weight: 700; text-align: center; }
+
+/* keep board, tray, tip and tools together in the middle */
+#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+#game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
+#game .tip { margin: 10px 0 0; }
+
+#logo .look { stroke-width: 1.6; }
+#logo svg { width: 200px; height: 120px; margin: 0 auto 4px; display: block; overflow: visible; }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .board { width: min(calc((100 * var(--dvh) - 90px) * var(--ar, 1)), calc(100 * var(--vw) - 380px)); }
+}
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board { width: min(568px, calc(100 * var(--vw) - 64px), calc((100 * var(--dvh) - 380px) * var(--ar, 1))); }
+  .slot { width: 60px; height: 60px; }
+}

@@ -6,12 +6,12 @@
 <script>var I18N = {"Theme: auto":"ערכת צבע: אוטומטית","Theme: light":"ערכת צבע: בהירה","Theme: dark":"ערכת צבע: כהה","Tap Share, then Add to Home Screen":"הקישו על שיתוף ואז על „הוספה למסך הבית״","Open the browser menu and tap ☆ or Add to Home screen":"פתחו את תפריט הדפדפן והקישו על ☆ או על „הוספה למסך הבית״","Press ⌘D to bookmark this page":"הקישו ⌘D כדי להוסיף את הדף למועדפים","Press Ctrl+D to bookmark this page":"הקישו Ctrl+D כדי להוסיף את הדף למועדפים","Settings":"הגדרות","High contrast":"ניגודיות גבוהה","Plain paper: no grain or misprints, darker text":"נייר חלק: בלי גרעיניות ובלי הדפסה מוסטת, טקסט כהה יותר","Reduce motion":"פחות תנועה","No confetti, flips or sliding":"בלי קונפטי, היפוכים והחלקות","Text & tile size":"גודל טקסט ומשבצות","Normal":"רגיל","Large":"גדול","Larger":"גדול יותר","Your progress":"ההתקדמות שלכם","Kept in this browser only. Export it to keep a copy or move it to another device.":"נשמרת רק בדפדפן הזה. ייצאו אותה כדי לשמור עותק או להעביר אותה למכשיר אחר.","Export":"ייצוא","Import":"ייבוא","Reset all progress":"איפוס כל ההתקדמות","Done":"סיום","OK":"אישור","Cancel":"ביטול","That file isn't a Games by Miki export.":"הקובץ הזה אינו ייצוא של מדף המשחקים של מיקי.","Replace the progress in this browser with the one in this file?":"להחליף את ההתקדמות בדפדפן הזה בזו שבקובץ?","Impossible Mode":"מצב בלתי אפשרי","Leave Impossible Mode":"יציאה מהמצב הבלתי אפשרי","Impossible":"בלתי אפשרי","Erase all progress, streaks and saved games, in every game? This can't be undone. (Export first to keep a copy.)":"למחוק את כל ההתקדמות, הרצפים והמשחקים השמורים, בכל המשחקים? אי אפשר לבטל את זה. (כדאי לייצא קודם כדי לשמור עותק.)"};</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>
-<meta name="description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים ועל כפות המאזניים. חידות חדשות בכל יום.">
+<meta name="description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים ורקק. חידות חדשות בכל יום.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="מדף המשחקים של מיקי">
 <meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/he/">
 <meta property="og:title" content="מדף המשחקים של מיקי — משחקי היגיון יומיים">
-<meta property="og:description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים ועל כפות המאזניים. חידות חדשות בכל יום.">
+<meta property="og:description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים ורקק. חידות חדשות בכל יום.">
 <meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/he/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -148,6 +148,20 @@
   :root[data-calm] .game::after { animation: none; opacity: .6; }
   /* the banner: a random game above the games, its lead-in over it and a rule under it (the script below deals it) */
   .cover { container-name: cover; } /* named: inside the banner the nearest container is .b-text */
+  /* a new game, announced in one line above the banner; the whole strip is its link */
+  .new-game { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 10px; margin-bottom: clamp(14px, calc(2 * var(--vw)), 20px); border: 1px solid var(--ink); border-radius: 12px;
+    background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg); color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.35; animation: enter .45s 30ms both var(--ease); }
+  .new-fish { flex: none; width: 44px; height: 26px; overflow: visible; animation: new-swim 2.4s ease-in-out infinite alternate; }
+  @keyframes new-swim { from { translate: 0 -1.5px; rotate: -3deg; } to { translate: 2px 1.5px; rotate: 3deg; } }
+  .new-text { flex: 1; min-width: 0; }
+  .new-tag { font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--brand-text); margin-inline-end: 4px; }
+  .new-game b { font-family: var(--display); font-weight: 700; font-size: 17px; }
+  .new-go { flex: none; font-weight: 700; color: var(--brand-text); transition: translate .2s var(--ease); }
+  .new-game:hover .new-go { translate: 4px 0; }
+  .new-game:hover b { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
+  [dir="rtl"] .new-game:hover .new-go { translate: -4px 0; }
+  [dir="rtl"] .new-fish { scale: -1 1; } /* swims the way the line reads */
+  [data-calm] .new-fish { animation: none; }
   .pick { padding-bottom: clamp(20px, calc(3 * var(--vw)), 30px); margin-bottom: clamp(20px, calc(3 * var(--vw)), 30px); border-bottom: 1px solid var(--ink); animation: enter .45s 60ms both var(--ease); }
   .b-ask { margin: 0 0 8px; font: italic 600 20px/1.1 var(--display); letter-spacing: 0; text-transform: none; color: var(--ink); }
   .banner {
@@ -217,6 +231,11 @@
     <p class="issue"><span><b id="issue-no">גיליון 1</b></span><span id="issue-date"></span><span class="hide-sm">מחיר: הפסקת קפה אחת</span></p>
   </header>
 
+  <a class="new-game" href="smallfry/" style="--brand: var(--teal); --brand-text: var(--teal-text)">
+    <svg class="new-fish" viewBox="0 0 44 26" aria-hidden="true"><g filter="url(#speck)"><path d="M11 13L3 7q2 6 0 12z" fill="var(--sun)"/><path d="M9 13c5-9 20-10 30-1q2 1 0 2c-10 9-25 8-30-1z" fill="var(--orange)"/><path d="M21 6.6q4-4 8 0z" fill="var(--sun)"/></g><circle cx="32" cy="11.6" r="2.2" fill="var(--stock)"/><circle cx="32.7" cy="11.6" r="1.1" fill="var(--navy)"/></svg>
+    <span class="new-text"><span class="new-tag">חדש</span> <span>משחק חדש: <b>רקק</b>. כופפו את מבטי הדגים והוציאו את הקטנטן.</span></span>
+    <span class="new-go" aria-hidden="true">←</span>
+  </a>
   <section class="pick">
     <p class="kicker b-ask"></p>
     <a class="banner" href="mathquilibrium/">
@@ -388,6 +407,26 @@
         <div class="today"></div>
       </div>
     </a>
+    <a class="game" href="smallfry/" data-store="smallfry" style="--brand: var(--teal); --brand-text: var(--teal-text); --plate: #d8ebe6; --d: 560ms">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <path d="M0 74h30v22H0zM62 0h34v24H62z" fill="var(--ink)" opacity=".55"/>
+            <path d="M22 46L14 40q2 6 0 12z" fill="var(--orange)"/><path d="M20 46c5-9 20-10 30-1q2 1 0 2c-10 9-25 8-30-1z" fill="var(--orange)"/>
+            <path d="M84 70l8-6q-2 6 0 12z" fill="var(--ink)"/><path d="M86 70c-6-11-25-12-38-1q-2 1 0 2c13 11 32 10 38-1z" fill="var(--ink)"/>
+          </g>
+          <circle cx="43" cy="44" r="2" fill="var(--navy)"/><circle cx="56" cy="68" r="2.4" fill="var(--stock)"/>
+          <path d="M52 46H74L74 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-dasharray="3 3" stroke-linecap="round"/>
+          <path d="M68 52L80 40" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <span class="kicker">09 <em>היגיון</em></span>
+        <h2>ר<span>קק</span></h2>
+        <p>כופפו את מבטי הדגים במראות, עד שהקטנטן יחמוק החוצה בלי להיראות.</p>
+        <div class="today"></div>
+      </div>
+    </a>
   </nav>
   <p class="colophon">מודפס טרי בכל בוקר.</p>
 </main>
@@ -519,6 +558,18 @@
       <text x="20" y="17" font-size="10" font-weight="700" font-family="Fraunces, serif" text-anchor="middle" style="fill: var(--orange-text)">1</text>
       <text x="52" y="17" font-size="10" font-weight="700" font-family="Fraunces, serif" text-anchor="middle" style="fill: var(--orange-text)">2</text>
     </g>
+  </svg>
+  <svg class="art" data-for="smallfry/" data-narrow="110 0 140 120" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g filter="url(#speck)">
+      <rect class="card" width="360" height="120"/>
+      <path d="M0 96h90v24H0zM260 0h100v30H260zM300 78h60v42h-60z" fill="var(--ink)" opacity=".45"/>
+      <path d="M140 60L128 52q3 8 0 16z" fill="var(--orange)"/><path d="M137 60c7-13 28-14 42-1q3 1 0 2c-14 13-35 12-42-1z" fill="var(--orange)"/>
+      <path d="M286 92l12-9q-3 9 0 18z" fill="var(--ink)"/><path d="M289 92c-9-16-37-18-56-1q-3 1 0 2c19 17 47 15 56-1z" fill="var(--ink)"/>
+      <circle class="ov" cx="60" cy="40" r="10" fill="var(--teal)"/>
+    </g>
+    <circle cx="170" cy="57" r="2.6" fill="var(--navy)"/><circle cx="246" cy="90" r="3" fill="var(--stock)"/>
+    <path d="M184 60H226V22" fill="none" stroke="var(--orange)" stroke-width="2.4" stroke-dasharray="4 4" stroke-linecap="round"/>
+    <path d="M216 70L236 50" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
   </svg>
 </template>
 <script src="wordswipe/special.js"></script>
