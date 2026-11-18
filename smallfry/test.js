@@ -27,6 +27,11 @@ assert.strictEqual(go(T, [['/', 7]]), 'bad'); // nobody looks there
 T = tank(['#####', 'X0..#', '#####'], [R]);
 assert.deepStrictEqual(S.spots(T, S.initial(T), 'F'), [8 * 4 + R]);
 assert.strictEqual(go(T, [['F', 8 * 4 + R]]), 'win');
+// a flat mirror beside a diagonal one: the look turns at the diagonal, comes back off the flat mirror, and turns at the diagonal
+// again, back the way it came (here: down, right, back left, up, past the fry itself and out)
+T = tank(['###X#', '#..0#', '#...#', '#####'], [D], { mir: [[13, '\\']] });
+assert.deepStrictEqual(S.spots(T, S.initial(T), 'F'), [13 * 4 + R]);
+assert.strictEqual(go(T, [['F', 13 * 4 + R]]), 'win');
 // a predator that sees the fry eats it
 T = tank(['######', '#0..2#', '######'], [R, L]);
 assert.strictEqual(S.tick(T, S.initial(T)).moved.length, 1);
@@ -61,6 +66,13 @@ for (const [key, tier, line] of lines) {
   const s = S.solve(lv);
   assert(!s.spare, key + ' a smaller hand wins');
   assert.deepStrictEqual(s.answers, [lv.sol.map(([ty, at]) => ty + '@' + at).sort().join(' ')], key + ' not unique');
+  // no scenery: every predator swims in some play, or (standing still) is all that keeps a predator from seeing the fry
+  lv.fish.forEach((f, i) => {
+    if (!i || s.movers.has(i)) return;
+    const M = { ...lv, fish: lv.fish.filter((_, j) => j !== i) };
+    assert(S.tick(M, S.initial(M)).moved.length, key + ' predator ' + i + ' is scenery');
+  });
+  assert([...s.movers].filter((i) => i > 0).length >= t.active, key + ' too few predators in play');
   assert.strictEqual(S.line(lv), line, key + ' round trip');
 }
 assert.deepStrictEqual(S.generate(hash('E1'), 'E'), S.generate(hash('E1'), 'E')); // same seed, same level

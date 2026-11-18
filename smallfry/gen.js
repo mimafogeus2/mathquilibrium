@@ -13,11 +13,12 @@ const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];
 const TURN = { '/': [1, 0, 3, 2], '\\': [3, 2, 1, 0] };
 // W: the tank with its rock border. items: how many in hand. preds: predators. fixed: bolted-on diagonal mirrors.
 // fast: chances at a fast predator. rock: rock runs grown inside. budget: positions the uniqueness search may visit.
+// active: predators that must swim in some play (the rest, scenery, are taken out).
 const TIER = {
-  E: { W: 8, items: [2, 3], preds: [1, 2], types: '/\\', fixed: [0, 0], fast: 0, rock: [3, 6], budget: 2e4 },
-  M: { W: 10, items: [4, 5], preds: [2, 4], types: '/\\FB', fixed: [0, 2], fast: 0, rock: [6, 12], budget: 2e5 },
-  H: { W: 12, items: [5, 6], preds: [3, 5], types: '/\\FB', fixed: [1, 2], fast: 2, rock: [10, 18], budget: 3e4 },
-  I: { W: 14, items: [5, 6], preds: [4, 6], types: '/\\FB', fixed: [2, 3], fast: 3, rock: [14, 24], budget: 1e5 },
+  E: { W: 8, items: [2, 3], preds: [1, 2], types: '/\\', fixed: [0, 0], fast: 0, rock: [3, 6], budget: 2e4, active: 1 },
+  M: { W: 10, items: [4, 5], preds: [2, 4], types: '/\\FB', fixed: [0, 2], fast: 0, rock: [6, 12], budget: 2e5, active: 1 },
+  H: { W: 12, items: [5, 6], preds: [3, 5], types: '/\\FB', fixed: [1, 2], fast: 2, rock: [10, 18], budget: 3e4, active: 2 },
+  I: { W: 14, items: [5, 6], preds: [4, 6], types: '/\\FB', fixed: [2, 3], fast: 3, rock: [14, 24], budget: 1e5, active: 2 },
 };
 
 // ---------- state ----------
@@ -60,7 +61,13 @@ function look(L, S, i, occ = occupancy(L, S), pts = null) {
     SEEN[k] = stamp;
     const n = c + DR[d] * W + DC[d];
     if (g[n] === '#') {
-      if (S.flat[c] >> d & 1) { at(c, d); bounces.push(k); d ^= 2; if (sd.length) sd[sd.length - 1] = d; continue; }
+      if (S.flat[c] >> d & 1) {
+        // turned right round, the look crosses its own cell again: a diagonal mirror there turns it a second time
+        at(c, d); bounces.push(k); d ^= 2;
+        if (S.mir[c]) { at(c); d = TURN[S.mir[c]][d]; }
+        if (sd.length) sd[sd.length - 1] = d;
+        continue;
+      }
       at(c, d);
       return { sc, sd, t: -1, end: k, bounces, hit: -1 };
     }
@@ -80,7 +87,8 @@ function look(L, S, i, occ = occupancy(L, S), pts = null) {
 // One tick: every fish looks at once; each that sees what it wants swims one cell along its look (a fast one two), facing the
 // way it swims. Then any fish that met a bigger one is eaten: they end in the same cell, a fast fish's path crosses it, or the
 // two swim through each other head on. The fry swimming into the exit gets away; into bait, eats it.
-// Returns { moved: [i], eaten: [i], paths: [[cells, from the start]], won, lost }. S changes in place.
+// Returns { moved: [i], eaten: [i], paths: [[cells, from the start]], turns: [[facing at the start, then on leaving each cell]],
+// won, lost }. S changes in place.
 function tick(L, S) {
   const occ = occupancy(L, S), plan = [];
   for (let i = 0; i < S.fish.length; i++) {
@@ -89,9 +97,9 @@ function tick(L, S) {
     const v = look(L, S, i, occ);
     if (v.t < 0) continue;
     const k = Math.min(f.f ? 2 : 1, v.t + 1);
-    plan.push({ i, old: f.p, cells: v.sc.slice(0, k), d: v.sd[k - 1] });
+    plan.push({ i, old: f.p, from: f.d, cells: v.sc.slice(0, k), dirs: v.sd.slice(0, k), d: v.sd[k - 1] });
   }
-  const out = { moved: plan.map((m) => m.i), eaten: [], paths: plan.map((m) => [m.old, ...m.cells]), won: false, lost: false };
+  const out = { moved: plan.map((m) => m.i), eaten: [], paths: plan.map((m) => [m.old, ...m.cells]), turns: plan.map((m) => [m.from, ...m.dirs]), won: false, lost: false };
   if (!plan.length) return out;
   const old = S.fish.map((f) => f.p), cells = S.fish.map(() => []);
   for (const m of plan) { const f = S.fish[m.i]; f.p = m.cells[m.cells.length - 1]; f.d = m.d; cells[m.i] = m.cells; }
@@ -109,13 +117,14 @@ function tick(L, S) {
 }
 // Ticks until nobody sees anything they want: 'win', 'lose', 'loop' (the same fish in the same places again) or 'stop'.
 // Bait only ever gets eaten, so the count of what's left tells bait states within one run apart.
-function run(L, S, cap = 500) {
+function run(L, S, cap = 500, movers = null) {
   const seen = new Set();
   for (let n = 0; n < cap; n++) {
     const key = fishKey(S) + '/' + S.nb;
     if (seen.has(key)) return 'loop';
     seen.add(key);
     const t = tick(L, S);
+    if (movers) for (const i of t.moved) movers.add(i);
     if (t.lost) return 'lose';
     if (t.won) return 'win';
     if (!t.moved.length) return 'stop';
@@ -145,9 +154,10 @@ function place(S, type, at) {
 // ---------- searching ----------
 // Every way to win from S placing at most `max` items, taking types from `left` ({ type: how many }). Positions already seen
 // (the same placements and the same fish, in any order) are skipped. Returns { wins: Map(sorted item types -> Map(answer key ->
-// a working order)), states, over (gave up past `budget`) }. An answer key lists the placements sorted ('/@23 F@97 …').
+// a working order)), movers: the fish that swam in any of it, states, over (gave up past `budget`) }. An answer key lists the
+// placements sorted ('/@23 F@97 …').
 function search(L, left, max, budget, S0 = initial(L)) {
-  const seen = new Set(), wins = new Map(), placed = [];
+  const seen = new Set(), wins = new Map(), placed = [], movers = new Set();
   let states = 0, over = false;
   (function dfs(S) {
     const key = [...placed].sort().join(' ') + '#' + fishKey(S);
@@ -161,7 +171,7 @@ function search(L, left, max, budget, S0 = initial(L)) {
         place(T, type, at);
         left[type]--;
         placed.push(type + '@' + at);
-        const r = run(L, T);
+        const r = run(L, T, 500, movers);
         if (r === 'win') {
           const ms = placed.map((p) => p[0]).sort().join(''), ans = [...placed].sort().join(' ');
           if (!wins.has(ms)) wins.set(ms, new Map());
@@ -173,7 +183,7 @@ function search(L, left, max, budget, S0 = initial(L)) {
       }
     }
   })(S0);
-  return { wins, states, over };
+  return { wins, movers, states, over };
 }
 const count = (s) => { const c = {}; for (const x of s) c[x] = (c[x] || 0) + 1; return c; };
 // a ⊂ b, as multisets of item types, and smaller
@@ -181,7 +191,7 @@ const within = (a, b) => { if (a.length >= b.length) return false; const c = cou
 // The level's verdict for items in hand: its answers (keys), and whether a smaller set of them already wins (spare).
 function solve(L, items = L.items, budget = Infinity) {
   const s = search(L, count(items), items.length, budget), ms = [...items].sort().join('');
-  return { answers: [...(s.wins.get(ms)?.keys() || [])], spare: [...s.wins.keys()].some((k) => within(k, ms)), over: s.over, states: s.states };
+  return { answers: [...(s.wins.get(ms)?.keys() || [])], spare: [...s.wins.keys()].some((k) => within(k, ms)), movers: s.movers, over: s.over, states: s.states };
 }
 
 // ---------- generating ----------
@@ -275,14 +285,26 @@ function generate(seed, tier, stats = {}) {
     stats.tries = (stats.tries || 0) + 1;
     const c = candidate(r, tier);
     if (!c || c.seq.length < t.items[0] || c.seq.length > t.items[1]) continue;
-    const { L, seq } = c;
-    if (tier !== 'E' && !orderMatters(L, seq, r)) continue;
-    const items = seq.map((m) => m[0]).sort(), s = solve(L, items, t.budget);
+    const { seq } = c;
+    if (tier !== 'E' && !orderMatters(c.L, seq, r)) continue;
+    const items = seq.map((m) => m[0]).sort(), s = solve(c.L, items, t.budget);
     stats.states = (stats.states || 0) + s.states;
-    stats.solves = (stats.solves || 0) + 1;
     if (s.over || s.spare || s.answers.length !== 1) continue;
-    L.items = items;
-    L.sol = seq;
+    let L = { ...c.L, items, sol: seq };
+    // scenery: predators that never swim, whatever you do with the hand. They go (unless one is all that keeps a predator from
+    // seeing the fry at the start); if the level then has another answer, it's dropped.
+    const keep = new Set([0, ...s.movers]);
+    for (let i = L.fish.length - 1; i >= 1; i--) {
+      if (keep.has(i)) continue;
+      const M = { ...L, fish: L.fish.filter((_, j) => j !== i) };
+      if (!tick(M, initial(M)).moved.length) L = M;
+    }
+    if ([...s.movers].filter((i) => i > 0).length < t.active) continue;
+    if (L.fish.length !== c.L.fish.length) {
+      const s2 = solve(L, items, t.budget);
+      if (s2.over || s2.spare || s2.answers.length !== 1 || s2.answers[0] !== s.answers[0]) continue;
+      if (tier !== 'E' && !orderMatters(L, seq, r)) continue;
+    }
     return L;
   }
 }

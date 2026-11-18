@@ -107,7 +107,7 @@
   <div class="help-page">
   <ol class="rules">
     <li>Get the orange <b>fry</b> out through the <b>exit</b>, the glowing gap in the rock.</li>
-    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. A fish swims for the first thing it sees, if it wants it: a <b>bigger fish eats a smaller one</b>, and the fry swims for the exit or for bait.</li>
+    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. A fish swims for the first thing it sees, if it wants it: a <b>bigger fish eats a smaller one</b> (each one's size is on its tag), and the fry swims for the exit or for bait.</li>
   </ol>
   </div>
   <div class="help-page">
@@ -138,6 +138,12 @@
   <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
 </dialog>
 
+<!-- riso speckle: the ink misses the paper in tiny spots (fish, rock) -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="speck" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+  <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
+  <feComposite in="SourceGraphic" operator="out"/>
+</filter></svg>
 <canvas id="fx" aria-hidden="true"></canvas>
 <script src="../shared/common.js"></script>
 <script src="../shared/core.js"></script>

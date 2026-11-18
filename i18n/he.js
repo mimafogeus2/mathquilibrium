@@ -901,7 +901,7 @@ module.exports = {
         '<p id="board-keys" class="sr-only">מקשי המספרים בוחרים פריט מהמגש. החצים עוברים בין המקומות שדג מסתכל עליהם. Enter או רווח מניחים את הפריט, והדגים פועלים. U או Backspace מחזירים אותו.</p>'],
       ['</svg>Faster', '</svg>מהר יותר'],
       [`<li>Get the orange <b>fry</b> out through the <b>exit</b>, the glowing gap in the rock.</li>
-    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. A fish swims for the first thing it sees, if it wants it: a <b>bigger fish eats a smaller one</b>, and the fry swims for the exit or for bait.</li>
+    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. A fish swims for the first thing it sees, if it wants it: a <b>bigger fish eats a smaller one</b> (each one's size is on its tag), and the fry swims for the exit or for bait.</li>
   </ol>
   </div>
   <div class="help-page">
@@ -915,7 +915,7 @@ module.exports = {
     <li>Use <b>every item</b>. There's only <b>one way</b>, and order can matter.</li>
     <li>Undo takes back the last item, even while the fish swim. Getting eaten, going in circles, running out of items, and undoing after the fish moved each count against your stars; hints cost a star too.</li>`,
         `<li>הוציאו את ה<b>רקק</b> הכתום דרך ה<b>יציאה</b>, הפתח הזוהר בסלע.</li>
-    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. דג שוחה אל הדבר הראשון שהוא רואה, אם הוא רוצה אותו: <b>דג גדול אוכל דג קטן ממנו</b>, והרקק שוחה אל היציאה או אל פיתיון.</li>
+    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. דג שוחה אל הדבר הראשון שהוא רואה, אם הוא רוצה אותו: <b>דג גדול אוכל דג קטן ממנו</b> (הגודל של כל דג כתוב על התווית שלו), והרקק שוחה אל היציאה או אל פיתיון.</li>
   </ol>
   </div>
   <div class="help-page">

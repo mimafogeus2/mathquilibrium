@@ -109,7 +109,7 @@
   <div class="help-page">
   <ol class="rules">
     <li>הוציאו את ה<b>רקק</b> הכתום דרך ה<b>יציאה</b>, הפתח הזוהר בסלע.</li>
-    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. דג שוחה אל הדבר הראשון שהוא רואה, אם הוא רוצה אותו: <b>דג גדול אוכל דג קטן ממנו</b>, והרקק שוחה אל היציאה או אל פיתיון.</li>
+    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. דג שוחה אל הדבר הראשון שהוא רואה, אם הוא רוצה אותו: <b>דג גדול אוכל דג קטן ממנו</b> (הגודל של כל דג כתוב על התווית שלו), והרקק שוחה אל היציאה או אל פיתיון.</li>
   </ol>
   </div>
   <div class="help-page">
@@ -140,6 +140,12 @@
   <form method="dialog" class="dlg-x"><button class="icon" aria-label="סגירה"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
 </dialog>
 
+<!-- riso speckle: the ink misses the paper in tiny spots (fish, rock) -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="speck" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+  <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
+  <feComposite in="SourceGraphic" operator="out"/>
+</filter></svg>
 <canvas id="fx" aria-hidden="true"></canvas>
 <script src="../../shared/common.js"></script>
 <script src="../../shared/core.js"></script>
