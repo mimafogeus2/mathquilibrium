@@ -1,0 +1,110 @@
+/* Small Fry: the tank, its fish, and the item tray. Everything else is in shared/core.css.
+   A side view: water darkening toward the bottom, rock with sandy tops, an exit glowing in the rock. */
+:root {
+  --brand: var(--teal); --brand-text: var(--teal-text); --on-brand: var(--on-teal);
+  --w0: #cfe9e6; --w1: #7fbcc0; --rock: #8a8170; --sand: #e7cf96; --fry: var(--orange);
+  --pred: #3d4f86; --mirror: #f4f7fb; --mirror-edge: #6f7fa6;
+}
+:root[data-theme="dark"] { --w0: #1f5a73; --w1: #0d2b46; --rock: #3a3f5c; --sand: #8a7a54; --pred: #9fb0e0; --mirror: #e9f1ff; --mirror-edge: #9fb0e0; }
+
+/* the tank is hit-tested in its own coordinates: it never mirrors */
+.board { direction: ltr; }
+.board {
+  width: min(460px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 330px)); aspect-ratio: 1;
+  border-radius: 14px; box-shadow: var(--lift); touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.tank { display: block; width: 100%; height: 100%; overflow: visible; }
+/* core.css strokes every svg; here only what asks for one */
+.tank, .slot svg, #logo svg { stroke: none; fill: none; }
+.w0 { stop-color: var(--w0); } .w1 { stop-color: var(--w1); }
+.rock { fill: var(--rock); }
+.sand { fill: var(--sand); }
+.exit rect { fill: var(--w0); }
+.exit circle { fill: var(--sun); opacity: .45; filter: blur(2px); }
+.exit path { fill: none; stroke: var(--navy); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* mirrors: silver lines; bolted ones show their bolts, the order tag says when each placed one went in */
+.mirror { stroke: var(--mirror-edge); stroke-width: 1.9; stroke-linecap: round; }
+.mirror + .bolt, .bolt { fill: var(--navy); }
+.items g:not(.tag) .mirror, .items > .mirror { filter: drop-shadow(0 0 .5px var(--navy)); }
+.items .mirror { stroke: var(--mirror); stroke-width: 1.5; }
+.items .flat { stroke-width: 1.6; }
+.items .ghost, .items .ghost .mirror { opacity: .55; }
+.items .placed .mirror, .items .placed.mirror { animation: shine .5s var(--ease); }
+@keyframes shine { from { stroke: var(--sun); stroke-width: 2.4; } }
+.tag circle { fill: var(--navy); }
+.tag text { fill: #fff; font: 700 2.4px Inter, sans-serif; text-anchor: middle; }
+.locked + .tag circle, .items .locked ~ .tag circle { fill: var(--sun-text); }
+.bait path { fill: none; stroke: #e0607e; stroke-width: 1.1; stroke-linecap: round; }
+.bait circle { fill: #e0607e; }
+
+/* looks: dotted, the fry's orange, predators' ink; a look that ends on something wanted turns solid-ish and bright */
+.look { fill: none; stroke: var(--pred); stroke-width: .55; stroke-dasharray: .6 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: .55; }
+.look.fry { stroke: var(--fry); opacity: .85; }
+.look.wants { stroke: var(--red); stroke-width: .9; stroke-dasharray: 2.2 1; opacity: .9; }
+.look.fry.wants { stroke: var(--fry); }
+.board.busy .looks { opacity: 0; }
+
+/* fish */
+.fish { transition: opacity .3s .15s; }
+.fish.gone { opacity: 0; }
+.fish .body { fill: var(--pred); }
+.fish .tail, .fish .fin { fill: color-mix(in srgb, var(--pred) 75%, var(--navy)); stroke: none; }
+.fish .fin { fill: none; stroke: color-mix(in srgb, var(--pred) 60%, var(--navy)); stroke-width: .5; }
+.fish .eye { fill: #fff; } .fish .pupil { fill: var(--navy); }
+.fish .size { fill: #fff; font: 700 3.2px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
+:root[data-theme="dark"] .fish .size { fill: var(--navy); }
+.fish.s3 .body { fill: color-mix(in srgb, var(--pred) 85%, var(--navy)); }
+.fish.s4 .body { fill: color-mix(in srgb, var(--pred) 70%, var(--navy)); }
+.fish.s5 .body, .fish.s6 .body, .fish.s7 .body { fill: color-mix(in srgb, var(--pred) 55%, var(--red)); }
+.fish.fry .body { fill: var(--fry); }
+.fish.fry .tail { fill: color-mix(in srgb, var(--fry) 70%, var(--navy)); }
+.fish .speed { stroke: var(--sun-text); stroke-width: .7; stroke-linecap: round; }
+
+/* where the picked item can go: a dot in each cell, a dashed bar on each rock face */
+.spot .hit { fill: transparent; cursor: pointer; }
+.spot circle { fill: var(--sun); stroke: var(--navy); stroke-width: .4; opacity: .85; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
+@keyframes spot { 50% { opacity: .4; } }
+[data-calm] .spot circle { animation: none; }
+.spot.face line { stroke: var(--sun); stroke-width: 1.4; stroke-dasharray: 1 .8; opacity: .9; pointer-events: none; }
+.spot:hover circle, .spot.kbd circle { opacity: .9; r: 1.9; }
+.spot:hover line, .spot.kbd line { opacity: 1; }
+.board.failed .tank { filter: saturate(.4); }
+.board.failed .fishes { opacity: .8; }
+
+/* solved: the water brightens */
+.board.solved .water { filter: brightness(1.12); transition: filter .6s; }
+
+/* ---------- tray ---------- */
+.tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; max-width: 460px; min-height: 52px; }
+.slot {
+  width: 48px; height: 48px; padding: 7px; border: 0; border-radius: 12px; display: grid; place-items: center;
+  background: var(--grain), var(--stock); box-shadow: inset 0 0 0 1px var(--hair), var(--lift);
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), opacity .2s;
+}
+.slot svg { width: 100%; height: 100%; }
+.slot .mirror { stroke: var(--mirror-edge); stroke-width: 1.4; }
+.slot .rockbit { fill: var(--rock); stroke: none; }
+.slot[aria-pressed="true"] { background: var(--speck), var(--sun); box-shadow: 2px 3px 0 var(--reg); transform: translate(-1px, -2px); }
+.slot[aria-pressed="true"] .mirror { stroke: var(--navy); }
+.slot.used { background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px; box-shadow: inset 0 0 0 1px var(--hair); opacity: .5; }
+.slot:disabled { cursor: default; }
+.tray.busy .slot:not(.used) { opacity: .6; }
+@media (hover: hover) { .slot:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1px var(--ink), var(--lift); } }
+#btn-fast[aria-pressed="true"] { background: var(--speck), var(--sun); color: var(--navy); box-shadow: none; }
+.tip[data-warn] { color: var(--red-text); }
+
+/* keep board, tray, tip and tools together in the middle */
+#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+#game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
+#game .tip { margin: 10px 0 0; }
+
+#logo svg { width: 132px; height: 88px; margin: 0 auto 4px; display: block; overflow: visible; }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .board { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
+}
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board { width: min(640px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 440px)); }
+  .slot { width: 60px; height: 60px; }
+}

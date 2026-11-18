@@ -570,7 +570,7 @@ const LSUF = LANG === 'en' ? '' : '-' + LANG;
 const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'pink-text'], ['biggr', T('Biggr'), 'biggr', 'EMH', 'orange-text'],
   ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
   ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text'],
-  ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text']];
+  ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text'], ['smallfry', T('Small Fry'), 'smallfry', 'EMH', 'teal-text']];
 // The slug at the foot of a game's menu, as a print shop pencils on the job: the house and today's issue
 {
   const home = $('#home');

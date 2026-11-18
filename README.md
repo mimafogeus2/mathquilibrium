@@ -14,6 +14,7 @@ Small daily logic games. The root page is a portal; each game lives at its own U
 | Quadflip | `quadflip/` | A board of two-sided tiles and a tray of tetrominoes: stamp each piece once, flipping the four tiles under it, until every tile is blank. One answer, and no smaller set of pieces works. Easy 3×3 with 3–4 pieces, Hard 4×4 with 4–5. |
 | Alien Chess | `alienchess/` | Chess puzzles on 4×4 to 6×6 boards with pieces dealt fresh each level, their moves drawn on cards. Take the enemy king (or every piece) against a computer that defends its best; each puzzle is a forced win in 2 (Easy) or 3 moves from one first move. Stars for speed. Three dailies plus 1,000 random levels per difficulty. |
 | Balancing Act | `balancingact/` | A hanging contraption of beams (arm lengths written on them) and a store of whole weights from 1 to 10: hang every item on a plate until every beam is level. Each plate's target follows from the arms and the store's total; the store splits into them one way only. Medium adds balloons (−1 to −10) tied to plates, Hard loose balloons and up to 8 plates. Stars for moves: three within one of the fewest. Three dailies plus 1,000 random levels per difficulty. |
+| Small Fry | `smallfry/` | A side-view tank of fish: each looks straight ahead and swims for the first thing it sees and wants; a bigger fish eats a smaller one, and the fry wants the exit (or bait). Place every item in hand (mirrors, flat mirrors on rock faces, bait) where some fish is looking; after each one the fish act. One answer, every item needed. Easy 6×6 with diagonal mirrors, Medium adds flat mirrors and bait, Hard fast fish. Three dailies plus 1,000 levels per difficulty, pregenerated (`smallfry/build-levels.js` → `smallfry/levels.js`). |
 
 Mathquilibrium and Coronet have Easy, Medium and Hard packs of 1,000 seeded levels plus three dailies (Quadflip: Easy and Hard, two dailies), with streaks, sharing, hints, pause, synthesized sound, light/dark themes, touch and keyboard. Coronet deals its levels at random (each with its own link, `#easy-k3f`) instead of unlocking them in order.
 
@@ -30,6 +31,7 @@ Hidden: hover the bottom-right corner of the front page or a game's menu (on tou
 | Balancing Act | 7–9 plates, tied and loose balloons together |
 | Biggr | the two sums 1–2 apart (squares, powers, bigger products); a wrong pick costs 5s |
 | Orderly | a Hard level and only 3 checks: miss with the third and the day is lost |
+| Small Fry | a 12×12 tank, 4–6 predators (fast ones too) and 5–6 items |
 | WordSwipe | a Reversed light that may switch every 2–3 words; while it's on, answer the other way round |
 
 In the code: `theme.js` (the peel, the fire, `data-impossible`), `core.js` (`IMP`, `goImpossible()`, `offDailies()`, `impossibleIntro()`), `core.css` (the scorched stock), and tier `I` in each `gen.js`.
@@ -68,6 +70,8 @@ No build step for the English pages (Hebrew: `node build.js`, see above). Serve 
 python3 -m http.server
 ```
 
-Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js && node quadflip/test.js && node alienchess/test.js && node balancingact/test.js` (Alien Chess checks 150 levels a difficulty by default: `node alienchess/test.js 1000` for all)
+Generator checks (all 3,000 levels of each game): `node mathquilibrium/test.js && node coronet/test.js && node wordswipe/test.js && node orderly/test.js && node biggr/test.js && node quadflip/test.js && node alienchess/test.js && node balancingact/test.js && node smallfry/test.js` (Alien Chess checks 150 levels a difficulty by default: `node alienchess/test.js 1000` for all; Small Fry checks 40 levels and 10 dailies per difficulty: `node smallfry/test.js all` for all)
+
+Small Fry's levels are pregenerated, since proving one has a single answer takes seconds on Hard: `node smallfry/build-levels.js [packs] [days]` (about 3½ hours on 12 cores) rewrites `smallfry/levels.js` from seeded keys, so a rerun with bigger numbers adds levels and keeps the existing ones. A daily past the built range falls back to a pack level picked by the date.
 
 Hebrew: `node build.js --check && node wordswipe/test.js he && node orderly/test.js he`
