@@ -154,7 +154,7 @@ function tankSvg(L, vb = viewOf(L)) {
         if (g[c - W] !== '.') continue;
         if (hh % 4 === 0) {
           const k = x + 3 + (hh >> 6) % 4, sway = calm() ? '' : `<animateTransform attributeName="transform" type="rotate" values="-5 ${k} ${y};6 ${k} ${y};-5 ${k} ${y}" dur="${3 + (hh % 3)}s" repeatCount="indefinite"/>`;
-          kelp += `<g><path d="M${k} ${y}q-1.6-2.4 0-4.4t0-4.2M${k + 1.6} ${y}q1.2-1.8 0-3.4t.2-2.8"/>${sway}</g>`;
+          kelp += `<g data-c="${c}" style="transform-box: fill-box; transform-origin: 50% 100%"><path d="M${k} ${y}q-1.6-2.4 0-4.4t0-4.2M${k + 1.6} ${y}q1.2-1.8 0-3.4t.2-2.8"/>${sway}</g>`;
         } else if (hh % 9 === 1) { const sx = x + 3 + (hh >> 5) % 4; pink += `<path d="${star(sx, y + .1, 1.6)}" transform="rotate(${(hh >> 9) % 60} ${sx} ${y + .1})"/>`; }
         else if (hh % 9 === 5) { const sx = x + 3 + (hh >> 5) % 4; yellow += `<path d="M${sx - 1.6} ${y + .4}A1.6 1.6 0 0 1 ${sx + 1.6} ${y + .4}Z"/>`; }
         if (hh % 11 === 7 && !calm()) for (let k = 0; k < 3; k++) {
@@ -216,11 +216,11 @@ function tankSvg(L, vb = viewOf(L)) {
     `<mask id="glowfade" maskContentUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5" fill="url(#glowg)"/></mask><filter id="wobble" filterUnits="userSpaceOnUse" x="${vb.x - 4}" y="${vb.y - 4}" width="${vb.w + 8}" height="${vb.h + 8}">` +
     `<feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="${seed % 97}"/><feDisplacementMap in="SourceGraphic" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter>` +
     `<clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
-    `<g clip-path="url(#tank)"><rect class="sea" width="${S}" height="${S}"/>` +
+    `<g clip-path="url(#tank)"><rect class="sea" width="${S}" height="${S}"/><g class="deep"></g>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
     `<g class="pl yellow burst">${burst}</g>` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
-    `<path class="pl blue rock" filter="url(#wobble)" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>${exit}` +
+    `<path class="misreg" filter="url(#wobble)" transform="translate(.6 .5)" d="${rocks}${fill}"/><path class="pl blue rock" filter="url(#wobble)" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>${exit}` +
     `<path class="sand" filter="url(#wobble)" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
@@ -293,8 +293,35 @@ function startLevel(G, save) {
   }));
   $('#btn-hint').hidden = IMP || !!G.tut;
   tip(G.fail ? failText() : G.date ? T('Today\'s puzzle. A new one tomorrow.') : !G.tut && G.pack === 'E' && G.n === 1 ? FIRST_TIP : '');
+  // every level a little different: a faint tint of one of the inks in its water and kelp
+  const hk = hash(G.key || 'tut');
+  $('#game').style.setProperty('--vary', ['var(--k-yellow)', 'var(--k-teal)', 'var(--k-pink)', 'var(--k-blue)'][hk % 4]);
+  $('#game').style.setProperty('--vamt', `${3 + (hk >> 3) % 6}%`);
+  // the printer's slug under the print
+  $('#slug').textContent = G.tut ? T('Tutorial') : $('#g-title').textContent;
   draw();
+  if (!G.placed.length) intro();
+  deepLife(vb, hk);
   return ok;
+}
+// A level opening: the fish appear one by one, then the fry looks round, behind and back
+function intro() {
+  if (calm()) return;
+  G.fishEls.forEach((el, i) => el.querySelector('.bob').animate([{ opacity: 0, transform: 'translateY(3px) scale(.85)' }, { opacity: 1, transform: 'none' }],
+    { duration: 420, delay: 120 + i * 110, easing: 'cubic-bezier(.3, .7, .4, 1)', fill: 'backwards' }));
+  const fry = G.fishEls[0], pose = fry.pose ?? poseFor(G.S.fish[0].d), back = { a: pose.a ? -pose.a : 0, fx: -pose.fx };
+  fry.querySelector('.o').animate([{ transform: orient(pose) }, { transform: orient(pose), offset: .3 }, { transform: orient(back), offset: .5 }, { transform: orient(back), offset: .7 }, { transform: orient(pose) }],
+    { duration: 1500, delay: 300 + G.fishEls.length * 110, easing: 'ease-in-out' });
+}
+// Now and then, far behind the cave, a big ray glides past: a faint silhouette in the rock's ink, part of nothing
+function deepLife(vb, hk) {
+  const g = $('#board .deep');
+  if (!g || calm() || hk % 3) return;
+  const y = vb.y + vb.h * (.25 + ((hk >> 5) % 40) / 100), dir = hk & 64 ? 1 : -1;
+  g.innerHTML = `<g class="ray"><path transform="scale(${dir} 1)" d="M10 0C6-1 3-6-2-9C-3-5-4-2-6 0C-4 2-3 5-2 9C3 6 6 1 10 0ZM-6 0L-16 .6"/></g>`;
+  const from = dir > 0 ? vb.x - 20 : vb.x + vb.w + 20, to = dir > 0 ? vb.x + vb.w + 20 : vb.x - 20;
+  g.firstChild.animate([{ transform: `translate(${from}px, ${y}px)` }, { transform: `translate(${(from + to) / 2}px, ${y - 4}px)`, offset: .3 }, { transform: `translate(${to}px, ${y + 2}px)`, offset: .6 }, { transform: `translate(${to}px, ${y + 2}px)` }],
+    { duration: 60000, delay: 6000 + (hk % 9000), iterations: Infinity, easing: 'linear', fill: 'backwards' });
 }
 const FIRST_TIP = T('Rays show where each fish looks. Put a <b>mirror</b> where the fry looks, to show it the <b>exit</b>.');
 const firstLeft = () => { const c = left(); return G.L.items.find((t) => c[t] > 0) ?? null; };
@@ -310,9 +337,11 @@ function draw() {
   const { L } = G, W = L.W, svg = $('#board .tank'), S = G.S;
   let items = '';
   for (const [c, m] of L.mir) items += itemSvg(m, c, W, 'fixed');
-  G.placed.forEach(([t, at], i) => { if (t !== 'B' || S.bait[at]) items += itemSvg(t, at, W, i < G.lock ? 'placed locked' : 'placed') + orderTag(t, at, i + 1, W); }); // eaten bait is gone
+  G.placed.forEach(([t, at], i) => { if (t !== 'B' || S.bait[at]) items += `<g data-k="${i}">${itemSvg(t, at, W, i < G.lock ? 'placed locked' : 'placed')}</g>` + orderTag(t, at, i + 1, W); }); // eaten bait is gone
   if (G.preview !== null && G.sel) items += itemSvg(G.sel, G.preview, W, 'ghost');
-  svg.querySelector('.items').innerHTML = items;
+  const box = svg.querySelector('.items');
+  if (box.dataset.html !== items) { box.innerHTML = items; box.dataset.html = items; } // unchanged: leave it, so a drop-in plays out
+  if (G.dropIn != null) { dropIn(box.querySelector(`[data-k="${G.dropIn}"]`), G.placed[G.dropIn]?.[0]); G.dropIn = null; }
   // looks: from the tank as it is, or as it would be with the preview placed
   const V = G.preview !== null && G.sel ? Fry.clone(S) : S;
   if (V !== S) Fry.place(V, G.sel, G.preview);
@@ -327,12 +356,23 @@ function draw() {
     if (i && fry.a && v.sc.some((c) => [1, -1, W, -W].includes(c - fry.p))) near.add(i);
     if (pts.length < 2) return '';
     if (V.mir[f.p]) { const r = restOf(f); pts[0] = [r.x / CELL, r.y / CELL]; } // from the corner it rests in, not the plate
-    const d = 'M' + pts.map(([x, y]) => `${(x * CELL).toFixed(1)} ${(y * CELL).toFixed(1)}`).join('L');
+    const P = pts.map(([x, y]) => [x * CELL, y * CELL]), d = 'M' + P.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L');
     const cls = `${speciesOf(f.s).name}${wants ? ' wants' : ''}`;
-    return `<path class="gaze ${cls}" d="${d}"/><path class="look ${cls}" d="${d}"/>`; // a soft band, and the line itself
+    // the band is a cone of view: it widens and fades with distance; where the look turns (a mirror) it glints
+    let band = '', dist = 0;
+    const half = (k) => Math.min(2.8, 1 + k * .07), alpha = (k) => Math.max(.035, .2 - k * .005);
+    for (let k = 1; k < P.length; k++) {
+      const [x0, y0] = P[k - 1], [x1, y1] = P[k], len = Math.hypot(x1 - x0, y1 - y0) || 1, nx = -(y1 - y0) / len, ny = (x1 - x0) / len;
+      const h0 = half(dist), h1 = half(dist + len);
+      band += `<path class="gaze ${cls}" fill-opacity="${alpha(dist + len / 2).toFixed(3)}" d="M${(x0 + nx * h0).toFixed(2)} ${(y0 + ny * h0).toFixed(2)}L${(x1 + nx * h1).toFixed(2)} ${(y1 + ny * h1).toFixed(2)}L${(x1 - nx * h1).toFixed(2)} ${(y1 - ny * h1).toFixed(2)}L${(x0 - nx * h0).toFixed(2)} ${(y0 - ny * h0).toFixed(2)}Z"/>`;
+      dist += len;
+    }
+    const glints = P.slice(1, -1).map(([x, y]) => `<path class="glint-turn" d="M${x} ${y - 1.4}L${x + .3} ${y - .3}L${x + 1.4} ${y}L${x + .3} ${y + .3}L${x} ${y + 1.4}L${x - .3} ${y + .3}L${x - 1.4} ${y}L${x - .3} ${y - .3}Z"/>`).join('');
+    return `${band}<path class="look ${cls}" d="${d}"/>${glints}`; // the cone, the line itself, and a glint at each turn
   }).join('');
   if (near.size && !mood[0]) mood[0] = 'scared';
   G.fishEls.forEach((el, i) => { for (const m of ['hunting', 'eager', 'scared']) el.classList.toggle(m, mood[i] === m && !G.busy); });
+  eyes();
   // spots
   let spots = '';
   if (G.sel && !G.busy && !G.fail && !G.done) {
@@ -431,6 +471,25 @@ function swimOut(el, ms) {
   el.querySelector('.o').style.transform = orient(poseFor(d, el.pose?.fx ?? 1));
   setTimeout(() => { el.style.transform = to; }, ms * 3);
 }
+// Eyes follow: the fry watches the nearest bigger fish (else the exit), a predator the nearest smaller fish. The pupil shifts up to a
+// third of the eye toward it, in the fish's own turned and flipped frame. Fish within two cells of the exit glow a little warm.
+function eyes() {
+  const { L, S } = G, W = L.W, ex = L.grid.indexOf('X');
+  S.fish.forEach((f, i) => {
+    const el = G.fishEls[i], pupil = el.querySelector('.pupil');
+    if (!f.a || !pupil) return;
+    const cands = S.fish.map((g, j) => j).filter((j) => j !== i && S.fish[j].a && !S.fish[j].w && (i ? S.fish[j].s < f.s : S.fish[j].s > f.s));
+    const dist = (c) => Math.hypot(c % W - f.p % W, Math.floor(c / W) - Math.floor(f.p / W));
+    const t = cands.sort((a, b) => dist(S.fish[a].p) - dist(S.fish[b].p))[0], tc = t !== undefined && dist(S.fish[t].p) < 6 ? S.fish[t].p : i ? -1 : ex;
+    el.classList.toggle('warm', Math.max(Math.abs(ex % W - f.p % W), Math.abs(Math.floor(ex / W) - Math.floor(f.p / W))) <= 2);
+    if (tc < 0) { pupil.style.translate = ''; return; }
+    const pose = el.pose ?? poseFor(f.d), r = (-pose.a * Math.PI) / 180, wx = tc % W - f.p % W, wy = Math.floor(tc / W) - Math.floor(f.p / W);
+    let lx = (wx * Math.cos(r) - wy * Math.sin(r)) * (pose.fx || 1), ly = wx * Math.sin(r) + wy * Math.cos(r);
+    const n = Math.hypot(lx, ly) || 1, er = speciesOf(f.s).eye[2] * .35;
+    pupil.style.translate = `${(lx / n * er).toFixed(2)}px ${(ly / n * er).toFixed(2)}px`;
+  });
+}
+
 // ---------- sound ----------
 // Underwater sounds, synthesized (no files), quiet, and off with the site's mute: a soft plip as fish swim, a gulp, bubbles
 // when the fry gets out. A context of its own, made on first use (after a tap, as browsers require).
@@ -455,6 +514,33 @@ const water = (() => {
     bubbles: () => [0, 1, 2, 3, 4].forEach((k) => tone(600 + k * 180 + Math.random() * 80, { dur: .06, vol: .035, at: k * .07, slide: 1100 + k * 200 })),
   };
 })();
+
+// The water reacts to a swim: a short wake of bubbles where it set off, kelp bending as it passes, a puff of sand off a ledge
+// it skims
+function stir(path, ms) {
+  const W = G.L.W, g = G.L.grid, [c0] = path;
+  const b = fx(`<circle class="bub" cx="${cx(c0, W)}" cy="${cy(c0, W)}" r=".4"/><circle class="bub" cx="${cx(c0, W) + .8}" cy="${cy(c0, W) + .4}" r=".3"/>`, 1400);
+  [...b.children].forEach((e, k) => e.animate([{ transform: 'translate(0, 0)', opacity: 0 }, { opacity: .8, offset: .2 }, { transform: `translate(${k - .5}px, -5px)`, opacity: 0 }], { duration: 1100, delay: k * 120, fill: 'both' }));
+  path.slice(1).forEach((c, k) => {
+    const when = (ms * (k + .5)) / path.length;
+    const kelp = $(`#board .kelp [data-c="${c + W}"]`);
+    if (kelp) setTimeout(() => kelp.animate([{ rotate: '0deg' }, { rotate: `${(Math.random() < .5 ? -1 : 1) * 14}deg` }, { rotate: '0deg' }], { duration: 900, easing: 'ease-out' }), when);
+    if (g[c + W] === '#') setTimeout(() => {
+      const p = fx([0, 1, 2].map((j) => `<circle class="puff" cx="${cx(c, W) + (j - 1) * 1.2}" cy="${(Math.floor(c / W) + 1) * CELL - .3}" r=".45"/>`).join(''), 1000);
+      [...p.children].forEach((e, j) => e.animate([{ transform: 'translate(0, 0)', opacity: .9 }, { transform: `translate(${(j - 1) * 1.6}px, -2.2px)`, opacity: 0 }], { duration: 800, easing: 'ease-out', fill: 'forwards' }));
+    }, when);
+  });
+}
+// An item arriving: a mirror drops in from above and wobbles to rest, a flat mirror lands with a small squash, bait sinks in
+function dropIn(el, t) {
+  if (!el || calm()) return;
+  el.style.transformBox = 'fill-box';
+  el.style.transformOrigin = '50% 50%';
+  const kf = t === 'B' ? [{ transform: 'translate(0, -6px)', opacity: 0 }, { transform: 'translate(0, 0)', opacity: 1 }]
+    : t === 'F' ? [{ transform: 'translate(0, -5px) scale(1.1, .9)', opacity: 0 }, { transform: 'translate(0, .4px) scale(1.12, .82)', opacity: 1, offset: .55 }, { transform: 'none', opacity: 1 }]
+    : [{ transform: 'translate(0, -8px) rotate(-14deg)', opacity: 0 }, { transform: 'translate(0, .5px) rotate(7deg)', opacity: 1, offset: .5 }, { transform: 'rotate(-3deg)', offset: .75 }, { transform: 'none' }];
+  el.animate(kf, { duration: t === 'B' ? 700 : 520, easing: t === 'B' ? 'cubic-bezier(.3, .6, .4, 1)' : 'ease-out' });
+}
 
 // ---------- moments ----------
 // Small printed bursts on the fx layer, each removed when it's done: bubbles and scales from a gulp, bubbles and light where the fry
@@ -547,6 +633,7 @@ function placeAt(at) {
   if (!coachAllows({ t, at })) { G.preview = null; draw(); return; }
   Fry.place(G.S, t, at);
   G.placed.push([t, at]);
+  G.dropIn = G.placed.length - 1;
   G.preview = null;
   G.kspot = -1;
   G.moved = false;
@@ -579,6 +666,7 @@ async function swim() {
     water.plip();
     const ms = G.ff ? FAST_MS : TICK_MS, calm = document.documentElement.hasAttribute('data-calm');
     G.fishEls.forEach((el, i) => { const m = t.moved.includes(i); el.classList.toggle('swimming', m); el.dataset.was = el.dataset.now || ''; el.dataset.now = m ? '1' : ''; });
+    if (!calm) t.moved.forEach((i, k) => stir(t.paths[k], ms));
     t.moved.forEach((i, k) => {
       const el = G.fishEls[i], f = G.S.fish[i];
       if (!calm) animateSwim(el, swimPath(t.paths[k], t.turns[k], L.W, el.pose ?? poseFor(t.turns[k][0]), f.w), ms, f.f, !el.dataset.was);

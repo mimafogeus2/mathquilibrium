@@ -13,7 +13,7 @@
 .board {
   /* as big as fits: the screen's width (600 at most, padding in) and the height left by the bar, tray and tools; --ar is the cave's
      own shape (game.js: viewOf) */
-  width: min(568px, calc(100 * var(--vw) - 32px), calc((100 * var(--dvh) - 290px) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
+  width: min(540px, calc(100 * var(--vw) - 60px), calc((100 * var(--dvh) - 330px) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
   border-radius: 14px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
 .tank { display: block; width: 100%; height: 100%; }
@@ -24,9 +24,23 @@
 .pl { fill: currentColor; mix-blend-mode: var(--blend); }
 /* grain: one sheet of specks over the whole tank, where the ink missed the paper (cheap: a static image, not a filter per layer) */
 .board { position: relative; overflow: hidden; } /* one rounded edge for everything in it */
+/* The tank is presented as a print: the sheet it's printed on (a deckle edge, the reg shadow under it), crop marks at its corners,
+   and the printer's slug, the level's name, in the margin under it */
+.print { position: relative; padding: 12px 12px 26px; }
+.print::before { content: ''; position: absolute; inset: 0; background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg);
+  clip-path: polygon(0 1%, 3% 0, 9% .6%, 17% 0, 26% .4%, 38% 0, 49% .7%, 61% .1%, 72% .6%, 84% 0, 93% .5%, 100% 0, 99.4% 9%, 100% 21%, 99.5% 34%, 100% 47%, 99.3% 60%, 100% 73%, 99.6% 86%, 100% 100%, 92% 99.3%, 80% 100%, 67% 99.4%, 55% 100%, 43% 99.5%, 31% 100%, 19% 99.4%, 7% 100%, 0 99.2%, .6% 87%, 0 74%, .5% 61%, 0 48%, .7% 35%, 0 22%, .4% 10%); }
+.crop { position: absolute; width: 10px; height: 10px; border: 0 solid var(--ink); opacity: .55; }
+.crop.tl { top: -6px; left: -6px; border-width: 0 1px 1px 0; } .crop.tr { top: -6px; right: -6px; border-width: 0 0 1px 1px; }
+.crop.bl { bottom: -6px; left: -6px; border-width: 1px 1px 0 0; } .crop.br { bottom: -6px; right: -6px; border-width: 1px 0 0 1px; }
+.print-slug { position: absolute; left: 14px; right: 14px; bottom: 6px; margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); text-align: end; }
+.print .board { box-shadow: inset 0 0 0 1px var(--hair); }
+
+/* every level a little different: a faint tint of one ink (--vary, --vamt: game.js) in its water and kelp */
+.sea { fill: color-mix(in srgb, var(--sea, var(--stock)), var(--vary, var(--stock)) var(--vamt, 0%)); }
+
 /* Moods: each difficulty prints on its own water. Easy is shallow and sunny, Medium the open sea, Hard deeper and greener, and
    Impossible the abyss, where the light hardly reaches. --sea is the water's paper, --k-blue the rock, --shine the light shafts. */
-.sea { fill: var(--sea, var(--stock)); }
 #game[data-tier="E"], #game[data-tier="T"] { --sea: color-mix(in srgb, var(--stock) 88%, var(--sun)); --k-blue: #3f72b9; --shine: .75; }
 #game[data-tier="H"] { --sea: color-mix(in srgb, var(--stock) 84%, var(--teal)); --k-blue: #284b8c; --shine: .35; }
 #game[data-tier="I"] { --sea: color-mix(in srgb, var(--stock) 78%, #000); --shine: .12; --k-blue: #3a4f8f; }
@@ -77,14 +91,14 @@
 .fry, .angler { --c: var(--orange); } .minnow, .shark { --c: var(--k-teal); } .perch { --c: var(--sun-text); } .pike, .grouper { --c: var(--k-pink); }
 
 /* looks: a row of dots from the eye; one that ends on something its fish wants turns to a running dash */
-.gaze, .look { fill: none; stroke: var(--c, var(--ink)); stroke-linecap: round; stroke-linejoin: round; mix-blend-mode: var(--blend); }
+.look { fill: none; stroke: var(--c, var(--ink)); stroke-linecap: round; stroke-linejoin: round; mix-blend-mode: var(--blend); }
 /* a gaze: a soft band in its fish's ink, and a fine solid line down the middle. Wanting what it sees, both brighten and the band breathes */
-.gaze { stroke-width: 3.6; opacity: .13; }
 .look { stroke-width: .55; opacity: .8; }
-.gaze.wants { stroke: var(--red); opacity: .26; animation: breathe 1.2s ease-in-out infinite alternate; }
+.gaze { mix-blend-mode: var(--blend); }
+.gaze.wants { animation: breathe 1.2s ease-in-out infinite alternate; }
 .look.wants { stroke: var(--red); stroke-width: .8; opacity: 1; }
-.gaze.fry.wants, .look.fry.wants { stroke: var(--orange); }
-@keyframes breathe { to { opacity: .12; } }
+.look.fry.wants { stroke: var(--orange); }
+@keyframes breathe { from { opacity: 1.6; } to { opacity: .55; } }
 [data-calm] .gaze.wants, [data-calm] .way-out, [data-calm] .spot .ring { animation: none; }
 .board.busy .looks { opacity: 0; }
 
@@ -127,6 +141,18 @@
 #game[data-tier="I"] .angler > .o .pl.yellow, #game[data-tier="I"] .angler .o > g > .pl.yellow { filter: drop-shadow(0 0 1.2px var(--k-yellow)) drop-shadow(0 0 2.5px var(--k-yellow)); animation: lure 2.4s ease-in-out infinite alternate; }
 @keyframes lure { from { opacity: .7; } to { opacity: 1; } }
 [data-calm] #game[data-tier="I"] .angler .pl.yellow { animation: none; }
+
+/* the cone of view (filled, its alpha per segment from game.js) and a glint where a look turns */
+.gaze { stroke: none; fill: var(--c, var(--ink)); }
+.gaze.wants { fill: var(--red); } .gaze.fry.wants { fill: var(--orange); }
+.glint-turn { fill: var(--stock); opacity: .9; }
+/* the rock's second drum, pink, printed a hair off: it peeks out on one side */
+.misreg { fill: var(--k-pink); mix-blend-mode: var(--blend); opacity: .3; }
+/* near the exit, fish warm up in the daylight */
+.fish.warm .o { filter: drop-shadow(0 0 1.2px color-mix(in srgb, var(--k-yellow) 80%, transparent)); }
+/* the water stirring: sand puffs; the far ray */
+.fx .puff { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
+.ray path { fill: var(--k-blue); fill-opacity: .08; stroke: var(--k-blue); stroke-opacity: .08; stroke-width: .6; }
 
 /* moments: bubbles and the prey's scales from a gulp, a flash and bubbles where the fry gets out, a ripple where an item lands */
 .fx { pointer-events: none; }
