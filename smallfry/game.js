@@ -83,8 +83,15 @@ const mix = (p, q, k) => ({ a: p.a + (q.a - p.a) * k, fx: p.fx + (q.fx - p.fx) *
 // mirror is the same plate on brackets against the rock; bait a pink worm.
 const plate = (len) => `<rect class="glass" x="${-len / 2}" y="-.9" width="${len}" height="1.8" rx=".5"/>` +
   `<path class="pl blue glare" d="M${-len / 2 + 1.6}-.1l.9-.5M${-len / 2 + 2.8}.3l1.2-.8M${len / 2 - 2.6}.1l.8-.5"/>`;
-const worm = () => `<g class="pl pink bait"><path d="M-3.2 1.2C-2.2-1.4-.8 1.8.6-.2S2.6-1.6 3.2.2"/><circle cx="3.3" cy=".1" r=".8"/>` +
-  (calm() ? '' : '<animateTransform attributeName="transform" type="rotate" values="-6;6;-6" dur="1.3s" repeatCount="indefinite"/>') + '</g>';
+// The bait wriggles: its body ripples through a few curves (the same path shape each time, so it morphs smoothly), head following
+const WORM = ['M-3.2 1.2C-2.2-1.4-.8 1.8.6-.2S2.6-1.6 3.2.2', 'M-3.3.5C-2 1.7-.7-1.3.8.5S2.5 1 3.3-.4', 'M-3.1-.2C-2.2-1.7-.9 1.4.7.7S2.4-1.3 3.2.7'];
+const HEAD = [[3.3, .1], [3.4, -.5], [3.3, .8]];
+const worm = () => {
+  const spline = 'calcMode="spline" keyTimes="0;.33;.67;1" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1" dur="1.4s" repeatCount="indefinite"';
+  const live = calm() ? ['', '', ''] : [`<animate attributeName="d" values="${[...WORM, WORM[0]].join(';')}" ${spline}/>`,
+    `<animate attributeName="cx" values="${[...HEAD, HEAD[0]].map((h) => h[0]).join(';')}" ${spline}/>`, `<animate attributeName="cy" values="${[...HEAD, HEAD[0]].map((h) => h[1]).join(';')}" ${spline}/>`];
+  return `<g class="pl pink bait"><path d="${WORM[0]}">${live[0]}</path><circle cx="${HEAD[0][0]}" cy="${HEAD[0][1]}" r=".8">${live[1]}${live[2]}</circle></g>`;
+};
 function itemSvg(t, c, W, cls = '') {
   if (t === 'B') return `<g class="item ${cls}" transform="translate(${cx(c, W)} ${cy(c, W)})">${worm()}</g>`;
   if (t === 'F') {
