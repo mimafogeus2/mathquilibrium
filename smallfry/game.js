@@ -65,6 +65,8 @@ function fishArt(s, fast) {
   const tail = `<g><path d="${p.tail}"/>${wag}</g>`;
   return `<g transform="scale(${p.sc})">` +
     (fast ? `<path class="pl yellow speed" d="M${p.joint - 6.4}-2.4h-3.4M${p.joint - 7.4} 0h-4.6M${p.joint - 6.4} 2.4h-3.4"/>` : '') +
+    // a bare-paper margin round the whole fish, so it lifts off the halftone behind it
+    `<g class="halo">${tail}<path d="${p.body}"/><path d="${p.fins}"/>${p.extra ? '<circle cx="10.6" cy="-8.4" r="1.5"/>' : ''}</g>` +
     `<g class="pl ${p.a}">${tail}<path d="${p.body}"/><path d="${p.fins}"/></g>` +
     `<g class="pl ${p.b} over">${p.over(p, tail)}</g>` +
     `<g class="paper">${p.paper}<circle cx="${ex}" cy="${ey}" r="${er}"/></g>` + (p.extra || '') +
@@ -152,9 +154,9 @@ function tankSvg(L) {
       exit = `<rect class="paper" x="${x}" y="${y}" width="10" height="10"/>` +
         `<g transform="translate(${mx - DC[d] * 2.2} ${my - DR[d] * 2.2}) rotate(${rot})" class="pl blue chevs"><path class="chev" d="M-2.2 1.6L0-.6L2.2 1.6"/><path class="chev c2" d="M-2.2-.4L0-2.6L2.2-.4"/></g>`;
       burst = `<g transform="translate(${mx + DC[d] * 5} ${my + DR[d] * 5}) rotate(${rot})"><path d="${[-34, -18, -6, 6, 18, 34].map((a) => {
-        const r1 = (a - 4) * Math.PI / 180, r2 = (a + 4) * Math.PI / 180, l = 30;
+        const r1 = (a - 3) * Math.PI / 180, r2 = (a + 3) * Math.PI / 180, l = 22;
         return `M0 0L${(Math.sin(r1) * l).toFixed(1)} ${(Math.cos(r1) * l).toFixed(1)}L${(Math.sin(r2) * l).toFixed(1)} ${(Math.cos(r2) * l).toFixed(1)}Z`; }).join('')}" fill="url(#ht-sun)"/>` +
-        `<circle r="7" class="pl yellow"/></g>`;
+        `<circle r="6" class="pl yellow"/></g>`;
     }
   }
   let ridge = `M0 ${S}V${S * .7}`;
@@ -171,7 +173,7 @@ function tankSvg(L) {
     `<g clip-path="url(#tank)"><rect class="paper" width="${S}" height="${S}"/>` +
     `<g class="pl teal far"><path d="${ridge}" fill="url(#ht-teal)"/><path class="far-kelp" d="${farKelp}"/></g>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
-    `<g class="pl yellow">${burst}</g>${exit}` +
+    `<g class="pl yellow burst">${burst}</g>${exit}` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
     `<path class="pl blue rock" d="${rocks}${fill}"/><path class="pl pink" d="${shade}" fill="url(#ht-pink)"/>` +
     `<g class="paper cuts"><g>${pebbles}</g><path class="crack" d="${cracks}"/><path d="${sand}"/></g>` +
