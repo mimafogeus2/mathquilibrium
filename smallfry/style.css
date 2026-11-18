@@ -16,14 +16,16 @@
   width: min(568px, calc(100 * var(--vw) - 32px), calc((100 * var(--dvh) - 290px) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
   border-radius: 14px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
-.tank { display: block; width: 100%; height: 100%; overflow: visible; border-radius: 14px; }
+.tank { display: block; width: 100%; height: 100%; }
 /* core.css strokes every svg; here only what asks for one */
 .tank, .slot svg, #logo svg { stroke: none; fill: none; }
 
 /* inks: each layer (.pl) prints in one, overprinting what's under it, a little out of register */
 .pl { fill: currentColor; mix-blend-mode: var(--blend); }
 /* grain: one sheet of specks over the whole tank, where the ink missed the paper (cheap: a static image, not a filter per layer) */
-.board { position: relative; }
+.board { position: relative; overflow: hidden; } /* one rounded edge for everything in it */
+/* the rock is the first ink down and fully covers the paper: the water's screen never shows through it */
+.pl.rock { mix-blend-mode: normal; }
 .board::after { content: ''; position: absolute; inset: 0; border-radius: 14px; background: var(--speck); background-size: 140px; pointer-events: none; opacity: .7; }
 #logo svg .pl { filter: url(#speck); }
 .pl.blue { color: var(--k-blue); } .ink-blue { fill: var(--k-blue); }
@@ -32,13 +34,16 @@
 .pl.teal { color: var(--k-teal); translate: .25px .3px; } .ink-teal { fill: var(--k-teal); }
 .pl.orange { color: var(--k-orange); translate: -.25px -.3px; }
 .paper, .paper * { fill: var(--stock); }
-.water { opacity: .7; }
+.water { opacity: 1; }
+/* the water's screen: a pale tint of the rock's blue, so fish read clearly over it */
+.ink-water { fill: color-mix(in srgb, var(--k-blue) 38%, var(--stock)); }
+:root[data-theme="dark"] .ink-water { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
 .strata { fill: none; stroke: color-mix(in srgb, var(--k-blue) 55%, var(--navy)); stroke-width: .55; stroke-linecap: round; opacity: .45; }
 :root[data-theme="dark"] .strata { stroke: color-mix(in srgb, var(--k-blue) 60%, var(--stock)); }
 /* sand: a pale tint of the rock's blue, with a dotted ripple along each bank */
 .sand { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
 .ripple { fill: none; stroke: var(--k-blue); stroke-width: .4; stroke-dasharray: 0 1.5; stroke-linecap: round; opacity: .55; }
-.burst { opacity: .7; }
+.burst { opacity: .8; }
 .shafts path { fill: var(--stock); opacity: .55; }
 .kelp path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
 .bubbles circle { fill: none; stroke: currentColor; stroke-width: .35; opacity: 0; }

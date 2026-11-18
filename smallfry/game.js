@@ -168,16 +168,12 @@ function tankSvg(L, vb = viewOf(L)) {
           fill += `M${sx} ${sy}H${sx + ix}A1.6 1.6 0 0 ${sw} ${sx} ${sy + iy}Z`;
         }
     } else if (g[c] === 'X') {
-      // daylight: a yellow burst screened onto the water just inside the gap, and arrows pointing out
+      // the gap is open to daylight: bare paper through the rock, a soft yellow glow screened into the water just inside it
+      // (it fades out from the gap), and a small arrow drifting out
       const d = c < W ? 0 : c >= W * (W - 1) ? 2 : c % W === 0 ? 3 : 1, mx = x + 5, my = y + 5, rot = [0, 90, 180, 270][d];
-      // the gap: daylight in the rock, rounded where it opens into the tank, with a small arrow drifting out through it
-      const ox = x + Math.min(0, DC[d]) * 4 + (DC[d] > 0 ? 0 : 0), oy = y + Math.min(0, DR[d]) * 4;
-      exit = `<rect class="pl yellow daylight" x="${d % 2 ? ox : x + .4}" y="${d % 2 ? y + .4 : oy}" width="${d % 2 ? 14 : 9.2}" height="${d % 2 ? 9.2 : 14}" rx="3"/>` +
+      exit = `<rect class="paper" x="${x}" y="${y}" width="10" height="10"/>` +
         `<g transform="translate(${mx - DC[d] * 1.2} ${my - DR[d] * 1.2}) rotate(${rot})"><g class="way-out"><path d="M0 2.6V-1.8M-1.9 .2L0-1.9L1.9 .2"/></g></g>`;
-      burst = `<g transform="translate(${mx + DC[d] * 5} ${my + DR[d] * 5}) rotate(${rot})"><path d="${[-34, -18, -6, 6, 18, 34].map((a) => {
-        const r1 = (a - 3) * Math.PI / 180, r2 = (a + 3) * Math.PI / 180, l = 22;
-        return `M0 0L${(Math.sin(r1) * l).toFixed(1)} ${(Math.cos(r1) * l).toFixed(1)}L${(Math.sin(r2) * l).toFixed(1)} ${(Math.cos(r2) * l).toFixed(1)}Z`; }).join('')}" fill="url(#ht-sun)"/>` +
-        '</g>';
+      burst = `<circle cx="${mx}" cy="${my}" r="16" fill="url(#ht-sun)" mask="url(#glowfade)"/>`;
     }
   }
   // Sand: one strip per ledge (a run of rock tops under water), so a long ledge reads as one bank. Its surface rolls gently;
@@ -212,13 +208,15 @@ function tankSvg(L, vb = viewOf(L)) {
   // halftone screens: the water's dots grow with depth, band by band
   const dots = (id, r, ink, step = 1.6) => `<pattern id="${id}" width="${step}" height="${step}" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="${step / 2}" cy="${step / 2}" r="${r}" class="ink-${ink}"/></pattern>`;
   const BANDS = 7, deep = Array.from({ length: BANDS }, (_, i) => `<rect y="${(S * i) / BANDS}" width="${S}" height="${S / BANDS + .2}" fill="url(#ht${i})"/>`).join('');
-  return `<defs>${Array.from({ length: BANDS }, (_, i) => dots('ht' + i, .08 + i * .045, 'blue', 1.7)).join('')}${dots('ht-teal', .38, 'teal', 1.6)}${dots('ht-pink', .34, 'pink', 1.3)}${dots('ht-sun', .55, 'yellow', 1.4)}` +
-    `<clipPath id="tank"><rect x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}" rx="5"/></clipPath><clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
+  return `<defs>${Array.from({ length: BANDS }, (_, i) => dots('ht' + i, .06 + i * .032, 'water', 1.7)).join('')}${dots('ht-teal', .38, 'teal', 1.6)}${dots('ht-pink', .34, 'pink', 1.3)}${dots('ht-sun', .55, 'yellow', 1.4)}` +
+    `<clipPath id="tank"><rect x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}"/></clipPath>` +
+    `<radialGradient id="glowg"><stop offset=".25" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
+    `<mask id="glowfade" maskContentUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5" fill="url(#glowg)"/></mask><clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
     `<g clip-path="url(#tank)"><rect class="paper" width="${S}" height="${S}"/>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
-    `<g class="pl yellow burst">${burst}</g>${exit}` +
+    `<g class="pl yellow burst">${burst}</g>` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
-    `<path class="pl blue rock" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>` +
+    `<path class="pl blue rock" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>${exit}` +
     `<path class="sand" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
