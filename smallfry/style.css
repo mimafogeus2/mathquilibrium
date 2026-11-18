@@ -122,6 +122,14 @@
 @keyframes tremble { 0%, 100% { translate: -.18px 0; } 50% { translate: .18px 0; } }
 [data-calm] .fish .lid, [data-calm] .fish.scared .bob { animation: none; }
 
+/* moments: ink drops from a gulp (in the eaten fish's ink), a flash and bubbles where the fry gets out, a ripple where an item lands */
+.fx { pointer-events: none; }
+.fx .drop { fill: var(--c); mix-blend-mode: var(--blend); }
+.fx .flash { fill: var(--k-yellow); mix-blend-mode: var(--blend); }
+.fx .bub { fill: none; stroke: var(--ink); stroke-width: .3; }
+.fx .rip { fill: none; stroke: var(--k-yellow); stroke-width: .6; }
+.board.shake { animation: shake .4s; }
+
 /* where the picked item can go: a pulsing dot in each cell, a dashed bar on each rock face */
 .spot .hit { fill: transparent; cursor: pointer; }
 .spot .ring { fill: var(--stock); stroke: var(--ink); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }

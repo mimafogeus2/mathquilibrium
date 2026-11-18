@@ -274,7 +274,7 @@ function startLevel(G, save) {
   const vb = viewOf(L);
   $('#game').dataset.tier = G.tut ? 'T' : G.pack; // each difficulty has its own water (style.css)
   b.style.setProperty('--ar', (vb.w / vb.h).toFixed(4));
-  b.innerHTML = `<svg class="tank" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L, vb)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes" clip-path="url(#tank)"></g></svg>`;
+  b.innerHTML = `<svg class="tank" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L, vb)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes" clip-path="url(#tank)"></g><g class="fx" clip-path="url(#tank)"></g></svg>`;
   G.fishEls = L.fish.map((f) => {
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', `fish ${speciesOf(f.s).name}${f.s === 1 ? ' fry' : ' pred'}${f.f ? ' fast' : ''}`);
@@ -431,6 +431,36 @@ function swimOut(el, ms) {
   el.querySelector('.o').style.transform = orient(poseFor(d, el.pose?.fx ?? 1));
   setTimeout(() => { el.style.transform = to; }, ms * 3);
 }
+// ---------- moments ----------
+// Small printed bursts on the fx layer, each removed when it's done: ink splashing from a gulp, bubbles and light where the fry
+// gets out, a ripple where an item lands.
+function fx(html, ms) {
+  const g = document.createElementNS(SVGNS, 'g');
+  g.innerHTML = html;
+  $('#board .fx')?.append(g);
+  setTimeout(() => g.remove(), ms);
+  return g;
+}
+function splash(x, y, species) {
+  if (calm()) return;
+  const g = fx(Array.from({ length: 9 }, (_, k) => `<circle class="drop ${species}" cx="${x}" cy="${y}" r="${(.5 + (k % 3) * .3).toFixed(1)}"/>`).join(''), 900);
+  [...g.children].forEach((d, k) => {
+    const a = (k / 9) * Math.PI * 2 + Math.random() * .5, r = 4 + Math.random() * 4;
+    d.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * r}px, ${Math.sin(a) * r + 2}px)`, opacity: 0 }], { duration: 650 + Math.random() * 200, easing: 'cubic-bezier(.2, .8, .3, 1)', fill: 'forwards' });
+  });
+}
+function escapeBurst(x, y) {
+  if (calm()) return;
+  const g = fx(`<circle class="flash" cx="${x}" cy="${y}" r="3"/>` + Array.from({ length: 10 }, (_, k) => `<circle class="bub" cx="${x + (k % 5 - 2) * 1.6}" cy="${y}" r="${(.5 + (k % 4) * .25).toFixed(2)}"/>`).join(''), 1600);
+  g.firstChild.animate([{ r: 3, opacity: .9 }, { r: 16, opacity: 0 }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
+  [...g.children].slice(1).forEach((b, k) => b.animate([{ transform: 'translate(0, 0)', opacity: 0 }, { opacity: 1, offset: .15 },
+    { transform: `translate(${(Math.random() - .5) * 6}px, ${-8 - Math.random() * 12}px)`, opacity: 0 }], { duration: 900 + k * 60, delay: k * 40, easing: 'ease-out', fill: 'both' }));
+}
+function ripple(x, y) {
+  if (calm()) return;
+  const g = fx(`<circle class="rip" cx="${x}" cy="${y}" r="2"/>`, 700);
+  g.firstChild.animate([{ r: 2, opacity: .8 }, { r: 7, opacity: 0 }], { duration: 600, easing: 'ease-out', fill: 'forwards' });
+}
 // the eater's lunge: a quick stretch forward and back
 const chomp = (el) => el.querySelector('.bob')?.animate([{ scale: '1' }, { scale: '1.22' }, { scale: '1' }], { duration: 260, easing: 'ease-out' });
 
@@ -481,6 +511,7 @@ function placeAt(at) {
   G.kspot = -1;
   G.moved = false;
   sfx.place();
+  { const W = G.L.W, c = t === 'F' ? at >> 2 : at; ripple(cx(c, W) + (t === 'F' ? DC[at & 3] * 4 : 0), cy(c, W) + (t === 'F' ? DR[at & 3] * 4 : 0)); }
   $('#sr').textContent = T('{item} placed.', { item: ITEM[t] });
   if (!(left()[t] > 0)) G.sel = firstLeft();
   tip('');
@@ -510,13 +541,19 @@ async function swim() {
     t.moved.forEach((i, k) => {
       const el = G.fishEls[i], f = G.S.fish[i];
       if (!calm) animateSwim(el, swimPath(t.paths[k], t.turns[k], L.W, el.pose ?? poseFor(t.turns[k][0]), f.w), ms, f.f, !el.dataset.was);
-      if (i === 0 && t.won) swimOut(el, calm ? 0 : ms);
+      if (i === 0 && t.won) {
+        swimOut(el, calm ? 0 : ms);
+        const c = L.grid.indexOf('X');
+        setTimeout(() => escapeBurst(cx(c, L.W), cy(c, L.W)), ms * 1.1);
+      }
       placeFish(i, f);
     });
     // whoever ate lunges
     for (const j of t.eaten) {
       const eater = t.moved.filter((i) => G.S.fish[i].s > G.S.fish[j].s).sort((a, b) => G.S.fish[b].s - G.S.fish[a].s).find((i) => G.S.fish[i].p === G.S.fish[j].p || t.paths[t.moved.indexOf(i)].includes(G.S.fish[j].p));
       if (eater !== undefined && !calm) setTimeout(() => chomp(G.fishEls[eater]), ms * .8);
+      const prey = G.S.fish[j], p = restOf(prey);
+      setTimeout(() => splash(p.x, p.y, speciesOf(prey.s).name), ms * .8);
     }
     for (const i of t.eaten) { G.fishEls[i].classList.add('gone'); }
     if (t.eaten.length && !t.lost) sfx.erase();
@@ -540,6 +577,7 @@ function settle(res) {
 }
 function fail(kind) {
   G.fail = kind;
+  if (!calm()) flash($('#board'), 'shake');
   if (!G.tut) G.mistakes++;
   sfx.bad();
   tip(failText(), true);
