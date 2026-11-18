@@ -300,18 +300,8 @@ function startLevel(G, save) {
   // the printer's slug under the print
   $('#slug').textContent = G.tut ? T('Tutorial') : $('#g-title').textContent;
   draw();
-  if (!G.placed.length) intro();
   deepLife(vb, hk);
   return ok;
-}
-// A level opening: the fish appear one by one, then the fry looks round, behind and back
-function intro() {
-  if (calm()) return;
-  G.fishEls.forEach((el, i) => el.querySelector('.bob').animate([{ opacity: 0, transform: 'translateY(3px) scale(.85)' }, { opacity: 1, transform: 'none' }],
-    { duration: 420, delay: 120 + i * 110, easing: 'cubic-bezier(.3, .7, .4, 1)', fill: 'backwards' }));
-  const fry = G.fishEls[0], pose = fry.pose ?? poseFor(G.S.fish[0].d), back = { a: pose.a ? -pose.a : 0, fx: -pose.fx };
-  fry.querySelector('.o').animate([{ transform: orient(pose) }, { transform: orient(pose), offset: .3 }, { transform: orient(back), offset: .5 }, { transform: orient(back), offset: .7 }, { transform: orient(pose) }],
-    { duration: 1500, delay: 300 + G.fishEls.length * 110, easing: 'ease-in-out' });
 }
 // Now and then, far behind the cave, a big ray glides past: a faint silhouette in the rock's ink, part of nothing
 function deepLife(vb, hk) {
