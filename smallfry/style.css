@@ -72,7 +72,14 @@
 .rail, .rail-end { fill: none; stroke: var(--c); stroke-width: .7; stroke-linecap: round; mix-blend-mode: var(--blend); opacity: .6; }
 .rail { stroke-dasharray: 1.6 1.2; }
 
-/* fish */
+/* fish: an idle hover and a lazy tail at rest; while swimming the tail beats fast and wide. Each fish on its own beat (--ph). */
+.fish .bob { animation: bob 2.6s var(--ph, 0s) ease-in-out infinite alternate; }
+@keyframes bob { from { translate: 0 -.35px; } to { translate: 0 .35px; } }
+.fish .tailg { transform-box: fill-box; transform-origin: 100% 50%; animation: wag 1.5s var(--ph, 0s) ease-in-out infinite alternate; }
+@keyframes wag { from { rotate: -7deg; } to { rotate: 7deg; } }
+.fish.swimming .tailg { animation: beat .16s ease-in-out infinite alternate; }
+@keyframes beat { from { rotate: -17deg; } to { rotate: 17deg; } }
+[data-calm] .fish .bob, [data-calm] .fish .tailg { animation: none; }
 .fish { transition: opacity .35s .15s, scale .35s .15s; }
 .fish.gone { opacity: 0; scale: .4; }
 .fish .over .tint { opacity: .55; }

@@ -61,8 +61,7 @@ const SPECIES = {
 const speciesOf = (s) => SPECIES[Math.min(s, 7)];
 function fishArt(s, fast) {
   const p = speciesOf(s), [ex, ey, er] = p.eye;
-  const wag = calm() ? '' : `<animateTransform attributeName="transform" type="rotate" values="-9 ${p.joint} 0;9 ${p.joint} 0;-9 ${p.joint} 0" dur="${(.8 + s * .12).toFixed(2)}s" repeatCount="indefinite"/>`;
-  const tail = `<g><path d="${p.tail}"/>${wag}</g>`;
+  const tail = `<g class="tailg"><path d="${p.tail}"/></g>`; // it beats in CSS: slow at rest, fast while swimming
   return `<g transform="scale(${p.sc})">` +
     (fast ? `<path class="pl yellow speed" d="M${p.joint - 6.4}-2.4h-3.4M${p.joint - 7.4} 0h-4.6M${p.joint - 6.4} 2.4h-3.4"/>` : '') +
     // a bare-paper margin round the whole fish, so it lifts off the halftone behind it
@@ -72,10 +71,13 @@ function fishArt(s, fast) {
     `<g class="paper">${p.paper}<circle cx="${ex}" cy="${ey}" r="${er}"/></g>` + (p.extra || '') +
     `<circle class="pl blue pupil" cx="${ex + er * .3}" cy="${ey}" r="${er * .55}"/></g>`;
 }
-// A fish's heading as an angle (0 right, 90 down). Heading left it's turned over, not swum upside down.
-const ANG = [-90, 0, 90, 180];
-const orient = (a) => `rotate(${a}deg)` + (Math.cos((a * Math.PI) / 180) < -.01 ? ' scaleY(-1)' : '');
-const near = (from, to) => from + ((((to - from) % 360) + 540) % 360) - 180; // `to`, wound round to the nearest turn from `from`
+// A fish's pose: { a: rotation in degrees, fx: 1 or -1, which way it faces in the side view }. Heading right is a 0 fx 1, left a 0
+// fx -1 (upright both ways); up and down are a quarter turn from whichever side it faced. So turning round left↔right turns the
+// body toward you (fx passes through 0) instead of rolling it upside down, and a turn between sideways and up or down banks.
+const poseFor = (d, fx = 1) => (d === 1 ? { a: 0, fx: 1 } : d === 3 ? { a: 0, fx: -1 } : { a: (d === 0 ? -90 : 90) * fx, fx });
+const orient = (p) => `rotate(${p.a.toFixed(1)}deg) scale(${p.fx.toFixed(3)}, 1)`;
+const ease = (k) => k * k * (3 - 2 * k);
+const mix = (p, q, k) => ({ a: p.a + (q.a - p.a) * k, fx: p.fx + (q.fx - p.fx) * ease(k) });
 
 // Items. A mirror is a bare paper plate edged in blue with a couple of glare strokes; a bolted one is tinted and riveted. A flat
 // mirror is the same plate on brackets against the rock; bait a pink worm.
@@ -263,7 +265,8 @@ function startLevel(G, save) {
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', `fish ${speciesOf(f.s).name}${f.s === 1 ? ' fry' : ' pred'}${f.f ? ' fast' : ''}`);
     // the size, on a small tag above it: who eats whom
-    g.innerHTML = `<g class="o">${fishArt(f.s, f.f)}</g>` + (f.s > 1 ? `<g class="size"><circle cy="-5.6" r="1.75"/><text y="-4.9">${f.s}</text></g>` : '');
+    g.innerHTML = `<g class="bob"><g class="o">${fishArt(f.s, f.f)}</g></g>` + (f.s > 1 ? `<g class="size"><circle cy="-5.6" r="1.75"/><text y="-4.9">${f.s}</text></g>` : '');
+    g.style.setProperty('--ph', `-${(h32(f.p * 13 + f.s) % 300) / 100}s`); // each on its own beat
     b.querySelector('.fishes').append(g);
     return g;
   });
@@ -326,95 +329,88 @@ function draw() {
   refresh();
 }
 // Where a fish rests: its cell's middle; or, on a cell with a diagonal mirror, in the corner on the mirror's shiny side (the
-// middle is the plate itself), facing straight on the way it left the mirror. Never mid-turn.
-function restOf(f) {
-  const W = G.L.W, m = G.S.mir[f.p], x = cx(f.p, W), y = cy(f.p, W);
-  if (!m || f.w) return { x, y, a: ANG[f.d] }; // a patroller swims straight through mirrors
+// middle is the plate itself), facing straight on the way it left the mirror. Never mid-turn. fx: which side it faced before.
+function restOf(f, fx = 1) {
+  const W = G.L.W, m = G.S.mir[f.p], x = cx(f.p, W), y = cy(f.p, W), pose = poseFor(f.d, fx);
+  if (!m || f.w) return { x, y, ...pose }; // a patroller swims straight through mirrors
   const din = Fry.TURN[m][f.d ^ 2] ^ 2; // the way it came in: back along the mirror
-  return { x: x - DC[din] * 2.5 + DC[f.d] * 2.5, y: y - DR[din] * 2.5 + DR[f.d] * 2.5, a: ANG[f.d] };
+  return { x: x - DC[din] * 2.5 + DC[f.d] * 2.5, y: y - DR[din] * 2.5 + DR[f.d] * 2.5, ...pose };
 }
 // a point th degrees round the quarter turn from din to dout in cell c: an arc about the corner between the two edges
-function arc(c, din, dout, th, W, a0) {
+function arcAt(c, din, dout, th, W) {
   const x = cx(c, W), y = cy(c, W), ix = DC[din], iy = DR[din], ox = DC[dout], oy = DR[dout], r = (th * Math.PI) / 180;
-  const kx = x - ix * 5 + ox * 5, ky = y - iy * 5 + oy * 5, a1 = near(a0, ANG[dout]);
-  return { x: kx + 5 * (ix * Math.sin(r) - ox * Math.cos(r)), y: ky + 5 * (iy * Math.sin(r) - oy * Math.cos(r)), a: a0 + ((a1 - a0) * th) / 90 };
+  const kx = x - ix * 5 + ox * 5, ky = y - iy * 5 + oy * 5;
+  return { x: kx + 5 * (ix * Math.sin(r) - ox * Math.cos(r)), y: ky + 5 * (iy * Math.sin(r) - oy * Math.cos(r)) };
 }
 function placeFish(i, f) {
   const el = G.fishEls[i];
   if (i === 0 && G.S.out) return; // the fry is swimming out of the tank: its own animation finishes it
-  const p = restOf(f);
-  el.angle = near(el.angle ?? p.a, p.a);
+  const p = restOf(f, el.pose?.fx ?? 1);
+  el.pose = { a: p.a, fx: p.fx };
   el.style.transform = `translate(${p.x}px, ${p.y}px)`;
-  el.querySelector('.o').style.transform = orient(el.angle);
+  el.querySelector('.o').style.transform = orient(el.pose);
   el.classList.toggle('gone', !f.a);
 }
 
-// One fish's swim through a tick, as points { x, y, a, t }: a its heading, t how far along in cells (0 at the start, 1 a cell on),
-// so every fish crosses cells on the same clock. It swims edge to edge; at a mirror it curves round the corner on the shiny side
-// (an arc about that corner, never touching the plate), and if it stops on a mirror cell it ends in that corner, facing straight
-// on; at a flat mirror it swings round just short of the rock. cells: where it starts, then each cell it enters; dirs: its
-// facing at the start, then on leaving each cell. a0: its heading now. straight: a patroller, which ignores mirrors.
-function swimPath(cells, dirs, W, a0, straight = false) {
+// One fish's swim through a tick, as points { x, y, a, fx, t }: its pose there, and t how far along in cells (0 at the start, 1 a
+// cell on), so every fish crosses cells on the same clock. It swims edge to edge; at a mirror it curves round the corner on the
+// shiny side (an arc about that corner, never touching the plate), and if it stops on a mirror cell it ends in that corner,
+// facing straight on; at a flat mirror it swims up short of the rock and turns round. cells: where it starts, then each cell it
+// enters; dirs: its facing at the start, then on leaving each cell. pose0: its pose now. straight: a patroller (ignores mirrors).
+function swimPath(cells, dirs, W, pose0, straight = false) {
   const pts = [], C = (c) => [cx(c, W), cy(c, W)];
-  let a = a0;
-  const at = ([x, y], t) => pts.push({ x, y, a, t });
-  // heading d into a flat mirror on (x, y)'s far face: nose up to it, swing round (over the top when going sideways), face back
+  let pose = pose0;
+  const at = ([x, y], t, p = pose) => { pose = p; pts.push({ x, y, ...p, t }); };
+  // heading d into a flat mirror on (x, y)'s far face: nose up to it, turn round (toward you if sideways), swim back to the middle
   const uturn = ([x, y], d, t0) => {
-    const turn = d === 1 ? -180 : 180;
-    a = near(a, ANG[d]);
-    at([x + DC[d] * 2.6, y + DR[d] * 2.6], t0 + .15);
-    const m = ((a + turn / 2) * Math.PI) / 180;
-    pts.push({ x: x + DC[d] * 2 + Math.cos(m) * 1.6, y: y + DR[d] * 2 + Math.sin(m) * 1.6, a: a + turn / 2, t: t0 + .3 });
-    a += turn;
-    at([x, y], t0 + .45);
+    const from = poseFor(d, pose.fx), to = poseFor(d ^ 2, d % 2 ? -from.fx : from.fx);
+    at([x + DC[d] * 2.6, y + DR[d] * 2.6], t0 + .15, from);
+    const mid = d % 2 ? { a: 0, fx: 0 } : { a: 0, fx: from.fx }; // sideways: face you; up or down: swing through level
+    at([x + DC[d] * 2.2 + (d % 2 ? 0 : 1.4 * from.fx), y + DR[d] * 2.2 + (d % 2 ? -.6 : 0)], t0 + .3, mid);
+    at([x, y], t0 + .45, to);
   };
   const travel = (from, to) => { const d = to - from; return d === -W ? 0 : d === 1 ? 1 : d === W ? 2 : 3; };
-  const mir0 = !straight && G.S.mir[cells[0]];
-  if (mir0) { // resting in a mirror's corner: on out over the edge it faces
-    const r0 = restOf({ p: cells[0], d: dirs[0] });
-    a = near(a, r0.a);
-    pts.push({ ...r0, a, t: 0 });
+  if (!straight && G.S.mir[cells[0]]) { // resting in a mirror's corner: on out over the edge it faces
+    const r0 = restOf({ p: cells[0], d: dirs[0] }, pose.fx);
+    at([r0.x, r0.y], 0, { a: r0.a, fx: r0.fx });
   } else {
-    a = near(a, ANG[dirs[0]]);
-    at(C(cells[0]), 0);
+    at(C(cells[0]), 0, poseFor(dirs[0], pose.fx));
     if (travel(cells[0], cells[1]) !== dirs[0]) uturn(C(cells[0]), dirs[0], 0); // a flat mirror on its own cell's rock
   }
   for (let i = 1; i < cells.length; i++) {
     const din = travel(cells[i - 1], cells[i]), dout = dirs[i], [x, y] = C(cells[i]), last = i === cells.length - 1;
-    a = near(a, ANG[din]);
-    at([x - DC[din] * 5, y - DR[din] * 5], i - .5); // the edge it comes in over
+    at([x - DC[din] * 5, y - DR[din] * 5], i - .5, poseFor(din, pose.fx)); // the edge it comes in over
     if (dout === din || straight) { if (last) at([x, y], i); continue; }
     if (dout === (din ^ 2)) { uturn([x, y], din, i - .5); if (last) at([x, y], i); continue; } // a flat mirror on this cell's far face
-    const a0q = a;
-    if (last) { // stopping here: round toward the corner and settle facing straight on the way out
-      pts.push({ ...arc(cells[i], din, dout, 35, W, a0q), t: i - .25 });
-      a = near(a0q, ANG[dout]);
-      const r = restOf({ p: cells[i], d: dout });
-      at([r.x, r.y], i);
-    } else {
-      for (const th of [22.5, 45, 67.5, 90]) pts.push({ ...arc(cells[i], din, dout, th, W, a0q), t: i - .5 + th / 90 });
-      a = pts[pts.length - 1].a;
-    }
+    const p0 = pose, p1 = poseFor(dout, pose.fx);
+    if (last) { // stopping here: bank toward the corner and settle facing straight on the way out
+      at(Object.values(arcAt(cells[i], din, dout, 35, W)), i - .25, mix(p0, p1, .5));
+      const r = restOf({ p: cells[i], d: dout }, p1.fx);
+      at([r.x, r.y], i, p1);
+    } else for (const th of [22.5, 45, 67.5, 90]) at(Object.values(arcAt(cells[i], din, dout, th, W)), i - .5 + th / 90, mix(p0, p1, th / 90));
   }
   return pts;
 }
-// play a swim path on fish element el over ms. Offsets come from cell progress, so all fish keep step: a fish crosses a cell in
-// a tick, a fast one in half a tick (then waits). The body turns along the path; the size tag rides along upright.
-function animateSwim(el, pts, ms, fast) {
+// Play a swim path on fish element el over ms. Offsets come from cell progress, so all fish keep step: a fish crosses a cell in a
+// tick, a fast one in half a tick (then waits). One setting off from rest eases in. The size tag rides along upright.
+function animateSwim(el, pts, ms, fast, start) {
   const k = (p) => Math.min(1, p.t / (fast ? 2 : 1)), last = pts[pts.length - 1];
   const frames = (f) => [...pts.map((p) => ({ ...f(p), offset: k(p) })), ...(k(last) < 1 ? [{ ...f(last), offset: 1 }] : [])];
-  el.animate(frames((p) => ({ transform: `translate(${p.x}px, ${p.y}px)` })), { duration: ms, easing: 'linear' });
-  el.querySelector('.o').animate(frames((p) => ({ transform: orient(p.a) })), { duration: ms, easing: 'linear' });
-  el.angle = last.a;
+  const easing = start ? 'cubic-bezier(.5, 0, .9, 1)' : 'linear';
+  el.animate(frames((p) => ({ transform: `translate(${p.x}px, ${p.y}px)` })), { duration: ms, easing });
+  el.querySelector('.o').animate(frames((p) => ({ transform: orient(p) })), { duration: ms, easing });
+  el.pose = { a: last.a, fx: last.fx };
 }
-// the fry, at the exit: on out through the gap and off the tank
+// the fry, at the exit: on out through the gap and off the tank, speeding up
 function swimOut(el, ms) {
   const W = G.L.W, c = G.L.grid.indexOf('X'), d = c < W ? 0 : c >= W * (W - 1) ? 2 : c % W === 0 ? 3 : 1;
-  const x = cx(c, W), y = cy(c, W), a = near(el.angle, ANG[d]), to = `translate(${x + DC[d] * 18}px, ${y + DR[d] * 18}px)`;
+  const x = cx(c, W), y = cy(c, W), to = `translate(${x + DC[d] * 18}px, ${y + DR[d] * 18}px)`;
   el.animate([{ transform: `translate(${x}px, ${y}px)` }, { transform: to }], { duration: ms * 2, delay: ms, easing: 'ease-in', fill: 'forwards' });
-  el.querySelector('.o').style.transform = orient(a);
+  el.querySelector('.o').style.transform = orient(poseFor(d, el.pose?.fx ?? 1));
   setTimeout(() => { el.style.transform = to; }, ms * 3);
 }
+// the eater's lunge: a quick stretch forward and back
+const chomp = (el) => el.querySelector('.bob')?.animate([{ scale: '1' }, { scale: '1.22' }, { scale: '1' }], { duration: 260, easing: 'ease-out' });
 
 function refresh() {
   const c = left();
@@ -485,12 +481,18 @@ async function swim() {
     if (!t.moved.length) return settle('stop');
     G.moved = true;
     const ms = G.ff ? FAST_MS : TICK_MS, calm = document.documentElement.hasAttribute('data-calm');
+    G.fishEls.forEach((el, i) => { const m = t.moved.includes(i); el.classList.toggle('swimming', m); el.dataset.was = el.dataset.now || ''; el.dataset.now = m ? '1' : ''; });
     t.moved.forEach((i, k) => {
       const el = G.fishEls[i], f = G.S.fish[i];
-      if (!calm) animateSwim(el, swimPath(t.paths[k], t.turns[k], L.W, el.angle, f.w), ms, f.f);
+      if (!calm) animateSwim(el, swimPath(t.paths[k], t.turns[k], L.W, el.pose ?? poseFor(t.turns[k][0]), f.w), ms, f.f, !el.dataset.was);
       if (i === 0 && t.won) swimOut(el, calm ? 0 : ms);
       placeFish(i, f);
     });
+    // whoever ate lunges
+    for (const j of t.eaten) {
+      const eater = t.moved.filter((i) => G.S.fish[i].s > G.S.fish[j].s).sort((a, b) => G.S.fish[b].s - G.S.fish[a].s).find((i) => G.S.fish[i].p === G.S.fish[j].p || t.paths[t.moved.indexOf(i)].includes(G.S.fish[j].p));
+      if (eater !== undefined && !calm) setTimeout(() => chomp(G.fishEls[eater]), ms * .8);
+    }
     for (const i of t.eaten) { G.fishEls[i].classList.add('gone'); }
     if (t.eaten.length && !t.lost) sfx.erase();
     $('#board .looks').innerHTML = '';
@@ -503,6 +505,7 @@ async function swim() {
 }
 function settle(res) {
   G.busy = false;
+  for (const el of G.fishEls) { el.classList.remove('swimming'); el.dataset.now = ''; }
   G.states.push(Fry.clone(G.S));
   if (res === 'win') { draw(); $('#board').classList.add('solved'); win(); return; }
   if (res === 'lose') fail('eaten');
@@ -533,7 +536,7 @@ function rewind(k) {
   G.preview = null;
   G.kspot = -1;
   G.sel = G.sel && left()[G.sel] > 0 ? G.sel : firstLeft();
-  for (const el of G.fishEls) el.getAnimations().forEach((a) => a.cancel());
+  for (const el of G.fishEls) el.getAnimations({ subtree: true }).forEach((a) => !(a instanceof CSSAnimation) && a.cancel()); // the swims, not the idle beat
   tip('');
 }
 function undo() {
