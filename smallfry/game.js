@@ -431,6 +431,31 @@ function swimOut(el, ms) {
   el.querySelector('.o').style.transform = orient(poseFor(d, el.pose?.fx ?? 1));
   setTimeout(() => { el.style.transform = to; }, ms * 3);
 }
+// ---------- sound ----------
+// Underwater sounds, synthesized (no files), quiet, and off with the site's mute: a soft plip as fish swim, a gulp, bubbles
+// when the fry gets out. A context of its own, made on first use (after a tap, as browsers require).
+const water = (() => {
+  let ctx;
+  const tone = (freq, { dur = .12, type = 'sine', vol = .06, at = 0, slide } = {}) => {
+    if (muted()) return;
+    try {
+      ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state !== 'running') ctx.resume();
+      const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+      f.type = 'lowpass'; f.frequency.value = 1800; // muffled, as under water
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(f).connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + .05);
+    } catch {}
+  };
+  return {
+    plip: () => tone(520 + Math.random() * 120, { dur: .07, vol: .018, slide: 760 }),
+    gulp: () => { tone(260, { dur: .16, type: 'triangle', vol: .09, slide: 90 }); tone(1200, { dur: .05, vol: .03, at: .12, slide: 600 }); },
+    bubbles: () => [0, 1, 2, 3, 4].forEach((k) => tone(600 + k * 180 + Math.random() * 80, { dur: .06, vol: .035, at: k * .07, slide: 1100 + k * 200 })),
+  };
+})();
+
 // ---------- moments ----------
 // Small printed bursts on the fx layer, each removed when it's done: ink splashing from a gulp, bubbles and light where the fry
 // gets out, a ripple where an item lands.
@@ -536,6 +561,7 @@ async function swim() {
     const t = Fry.tick(L, G.S);
     if (!t.moved.length) return settle('stop');
     G.moved = true;
+    water.plip();
     const ms = G.ff ? FAST_MS : TICK_MS, calm = document.documentElement.hasAttribute('data-calm');
     G.fishEls.forEach((el, i) => { const m = t.moved.includes(i); el.classList.toggle('swimming', m); el.dataset.was = el.dataset.now || ''; el.dataset.now = m ? '1' : ''; });
     t.moved.forEach((i, k) => {
@@ -544,7 +570,7 @@ async function swim() {
       if (i === 0 && t.won) {
         swimOut(el, calm ? 0 : ms);
         const c = L.grid.indexOf('X');
-        setTimeout(() => escapeBurst(cx(c, L.W), cy(c, L.W)), ms * 1.1);
+        setTimeout(() => { escapeBurst(cx(c, L.W), cy(c, L.W)); water.bubbles(); }, ms * 1.1);
       }
       placeFish(i, f);
     });
@@ -553,7 +579,7 @@ async function swim() {
       const eater = t.moved.filter((i) => G.S.fish[i].s > G.S.fish[j].s).sort((a, b) => G.S.fish[b].s - G.S.fish[a].s).find((i) => G.S.fish[i].p === G.S.fish[j].p || t.paths[t.moved.indexOf(i)].includes(G.S.fish[j].p));
       if (eater !== undefined && !calm) setTimeout(() => chomp(G.fishEls[eater]), ms * .8);
       const prey = G.S.fish[j], p = restOf(prey);
-      setTimeout(() => splash(p.x, p.y, speciesOf(prey.s).name), ms * .8);
+      setTimeout(() => { splash(p.x, p.y, speciesOf(prey.s).name); water.gulp(); }, ms * .8);
     }
     for (const i of t.eaten) { G.fishEls[i].classList.add('gone'); }
     if (t.eaten.length && !t.lost) sfx.erase();
