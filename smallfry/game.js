@@ -457,7 +457,7 @@ const water = (() => {
 })();
 
 // ---------- moments ----------
-// Small printed bursts on the fx layer, each removed when it's done: ink splashing from a gulp, bubbles and light where the fry
+// Small printed bursts on the fx layer, each removed when it's done: bubbles and scales from a gulp, bubbles and light where the fry
 // gets out, a ripple where an item lands.
 function fx(html, ms) {
   const g = document.createElementNS(SVGNS, 'g');
@@ -465,14 +465,6 @@ function fx(html, ms) {
   $('#board .fx')?.append(g);
   setTimeout(() => g.remove(), ms);
   return g;
-}
-function splash(x, y, species) {
-  if (calm()) return;
-  const g = fx(Array.from({ length: 9 }, (_, k) => `<circle class="drop ${species}" cx="${x}" cy="${y}" r="${(.5 + (k % 3) * .3).toFixed(1)}"/>`).join(''), 900);
-  [...g.children].forEach((d, k) => {
-    const a = (k / 9) * Math.PI * 2 + Math.random() * .5, r = 4 + Math.random() * 4;
-    d.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * r}px, ${Math.sin(a) * r + 2}px)`, opacity: 0 }], { duration: 650 + Math.random() * 200, easing: 'cubic-bezier(.2, .8, .3, 1)', fill: 'forwards' });
-  });
 }
 function escapeBurst(x, y) {
   if (calm()) return;
@@ -487,7 +479,30 @@ function ripple(x, y) {
   g.firstChild.animate([{ r: 2, opacity: .8 }, { r: 7, opacity: 0 }], { duration: 600, easing: 'ease-out', fill: 'forwards' });
 }
 // the eater's lunge: a quick stretch forward and back
-const chomp = (el) => el.querySelector('.bob')?.animate([{ scale: '1' }, { scale: '1.22' }, { scale: '1' }], { duration: 260, easing: 'ease-out' });
+// A gulp: the eater lunges, the prey is pulled into its mouth (shrinking, turning), the eater's body bulges as it swallows, a few
+// bubbles rise from its mouth and a couple of the prey's scales drift down in the prey's ink.
+function swallow(ei, pi) {
+  const eater = G.fishEls[ei], prey = G.fishEls[pi], E = restOf(G.S.fish[ei], eater.pose?.fx ?? 1), P = restOf(G.S.fish[pi]);
+  const sp = speciesOf(G.S.fish[ei].s), pose = eater.pose ?? { a: E.a, fx: E.fx }, r = (pose.a * Math.PI) / 180, reach = (sp.eye[0] + 2.5) * sp.sc; // its mouth
+  const mx = E.x + Math.cos(r) * pose.fx * reach, my = E.y + Math.sin(r) * pose.fx * reach;
+  eater.querySelector('.bob').animate([{ scale: '1' }, { scale: '1.16 .94' }, { scale: '1' }], { duration: 200, easing: 'ease-out' }); // the lunge
+  prey.animate([{ transform: `translate(${P.x}px, ${P.y}px) scale(1)`, opacity: 1 }, { transform: `translate(${mx}px, ${my}px) scale(.12) rotate(${pose.fx > 0 ? 160 : -160}deg)`, opacity: .9 }],
+    { duration: 260, delay: 60, easing: 'cubic-bezier(.55, 0, .9, .5)', fill: 'forwards' });
+  setTimeout(() => {
+    prey.classList.add('gone', 'eaten');
+    eater.querySelector('.bob').animate([{ scale: '1' }, { scale: '1.08 1.2' }, { scale: '.98 1.06' }, { scale: '1' }], { duration: 420, easing: 'ease-out' }); // the swallow
+    water.gulp();
+    const name = speciesOf(G.S.fish[pi].s).name;
+    const g = fx(`<circle class="bub" cx="${mx}" cy="${my}" r=".45"/><circle class="bub" cx="${mx}" cy="${my}" r=".65"/><circle class="bub" cx="${mx}" cy="${my}" r=".35"/>` +
+      `<path class="scale ${name}" d="M${mx} ${my}q.7-.6 1.2 0q-.5.7-1.2 0z"/><path class="scale ${name}" d="M${mx} ${my}q.6-.5 1 0q-.4.6-1 0z"/>`, 1800);
+    [...g.children].forEach((el, k) => {
+      const up = el.classList.contains('bub'), dx = (Math.random() - .5) * 3;
+      el.animate([{ transform: 'translate(0, 0)', opacity: 0 }, { opacity: 1, offset: .15 },
+        { transform: up ? `translate(${dx}px, ${-6 - k * 2.5}px)` : `translate(${dx * 1.6}px, ${4 + k}px) rotate(${180 + k * 90}deg)`, opacity: 0 }],
+        { duration: up ? 900 + k * 120 : 1500, delay: k * 70, easing: up ? 'ease-out' : 'cubic-bezier(.3, .1, .4, 1)', fill: 'both' });
+    });
+  }, 330);
+}
 
 function refresh() {
   const c = left();
@@ -576,12 +591,11 @@ async function swim() {
     });
     // whoever ate lunges
     for (const j of t.eaten) {
-      const eater = t.moved.filter((i) => G.S.fish[i].s > G.S.fish[j].s).sort((a, b) => G.S.fish[b].s - G.S.fish[a].s).find((i) => G.S.fish[i].p === G.S.fish[j].p || t.paths[t.moved.indexOf(i)].includes(G.S.fish[j].p));
-      if (eater !== undefined && !calm) setTimeout(() => chomp(G.fishEls[eater]), ms * .8);
-      const prey = G.S.fish[j], p = restOf(prey);
-      setTimeout(() => { splash(p.x, p.y, speciesOf(prey.s).name); water.gulp(); }, ms * .8);
+      const eater = t.moved.filter((i) => G.S.fish[i].s > G.S.fish[j].s).sort((a, b) => G.S.fish[b].s - G.S.fish[a].s).find((i) => G.S.fish[i].p === G.S.fish[j].p || t.paths[t.moved.indexOf(i)].includes(G.S.fish[j].p))
+        ?? G.S.fish.map((f, i) => i).filter((i) => G.S.fish[i].a && G.S.fish[i].s > G.S.fish[j].s && G.S.fish[i].p === G.S.fish[j].p)[0];
+      if (eater === undefined || calm) { G.fishEls[j].classList.add('gone'); if (eater !== undefined) water.gulp(); continue; }
+      setTimeout(() => swallow(eater, j), ms * .7);
     }
-    for (const i of t.eaten) { G.fishEls[i].classList.add('gone'); }
     if (t.eaten.length && !t.lost) sfx.erase();
     $('#board .looks').innerHTML = '';
     await wait(ms);

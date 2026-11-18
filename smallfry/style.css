@@ -102,6 +102,7 @@
 [data-calm] .fish .bob, [data-calm] .fish .tailg { animation: none; }
 .fish { transition: opacity .35s .15s, scale .35s .15s; }
 .fish.gone { opacity: 0; scale: .4; }
+.fish.eaten { transition: none; } /* already swallowed: gone at once */
 .fish .over .tint { opacity: .55; }
 .fish.angler .over .tint { opacity: .22; }
 .fish .halo, .fish .halo * { fill: var(--stock); stroke: var(--stock); stroke-width: 2.2; stroke-linejoin: round; }
@@ -127,9 +128,9 @@
 @keyframes lure { from { opacity: .7; } to { opacity: 1; } }
 [data-calm] #game[data-tier="I"] .angler .pl.yellow { animation: none; }
 
-/* moments: ink drops from a gulp (in the eaten fish's ink), a flash and bubbles where the fry gets out, a ripple where an item lands */
+/* moments: bubbles and the prey's scales from a gulp, a flash and bubbles where the fry gets out, a ripple where an item lands */
 .fx { pointer-events: none; }
-.fx .drop { fill: var(--c); mix-blend-mode: var(--blend); }
+.fx .scale { fill: var(--c); mix-blend-mode: var(--blend); }
 .fx .flash { fill: var(--k-yellow); mix-blend-mode: var(--blend); }
 .fx .bub { fill: none; stroke: var(--ink); stroke-width: .3; }
 .fx .rip { fill: none; stroke: var(--k-yellow); stroke-width: .6; }
