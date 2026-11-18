@@ -11,7 +11,9 @@
 /* the tank is hit-tested in its own coordinates: it never mirrors */
 .board { direction: ltr; }
 .board {
-  width: min(568px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 330px)); aspect-ratio: 1; /* the screen is 600 wide, padding in */
+  /* as big as fits: the screen's width (600 at most, padding in) and the height left by the bar, tray and tools; --ar is the cave's
+     own shape (game.js: viewOf) */
+  width: min(568px, calc(100 * var(--vw) - 32px), calc((100 * var(--dvh) - 290px) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
   border-radius: 14px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
 .tank { display: block; width: 100%; height: 100%; overflow: visible; border-radius: 14px; }
@@ -30,15 +32,14 @@
 .pl.teal { color: var(--k-teal); translate: .25px .3px; } .ink-teal { fill: var(--k-teal); }
 .pl.orange { color: var(--k-orange); translate: -.25px -.3px; }
 .paper, .paper * { fill: var(--stock); }
-.paper .crack { fill: none; stroke: var(--stock); stroke-width: .5; stroke-linecap: round; }
 .water { opacity: .7; }
+.strata { fill: none; stroke: color-mix(in srgb, var(--k-blue) 55%, var(--navy)); stroke-width: .55; stroke-linecap: round; opacity: .45; }
+:root[data-theme="dark"] .strata { stroke: color-mix(in srgb, var(--k-blue) 60%, var(--stock)); }
 /* sand: a pale tint of the rock's blue, with a dotted ripple along each bank */
 .sand { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
 .ripple { fill: none; stroke: var(--k-blue); stroke-width: .4; stroke-dasharray: 0 1.5; stroke-linecap: round; opacity: .55; }
-.far { opacity: .28; }
 .burst { opacity: .7; }
 .shafts path { fill: var(--stock); opacity: .55; }
-.far-kelp { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
 .kelp path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
 .bubbles circle { fill: none; stroke: currentColor; stroke-width: .35; opacity: 0; }
 .way-out { fill: none; stroke: var(--k-blue); stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; animation: way-out 1.8s ease-in-out infinite; }
@@ -61,11 +62,15 @@
 .fry, .angler { --c: var(--orange); } .minnow, .shark { --c: var(--k-teal); } .perch { --c: var(--sun-text); } .pike, .grouper { --c: var(--k-pink); }
 
 /* looks: a row of dots from the eye; one that ends on something its fish wants turns to a running dash */
-.look { fill: none; stroke: var(--c, var(--ink)); stroke-width: 1.05; stroke-dasharray: 0 2.1; stroke-linecap: round; stroke-linejoin: round; opacity: .85; mix-blend-mode: var(--blend); }
-.look.wants { stroke: var(--red); stroke-width: .9; stroke-dasharray: 1.8 1.2; opacity: 1; animation: run .5s linear infinite; }
-.look.fry.wants { stroke: var(--orange); }
-@keyframes run { to { stroke-dashoffset: -3; } }
-[data-calm] .look.wants, [data-calm] .way-out, [data-calm] .spot circle { animation: none; }
+.gaze, .look { fill: none; stroke: var(--c, var(--ink)); stroke-linecap: round; stroke-linejoin: round; mix-blend-mode: var(--blend); }
+/* a gaze: a soft band in its fish's ink, and a fine solid line down the middle. Wanting what it sees, both brighten and the band breathes */
+.gaze { stroke-width: 3.6; opacity: .13; }
+.look { stroke-width: .55; opacity: .8; }
+.gaze.wants { stroke: var(--red); opacity: .26; animation: breathe 1.2s ease-in-out infinite alternate; }
+.look.wants { stroke: var(--red); stroke-width: .8; opacity: 1; }
+.gaze.fry.wants, .look.fry.wants { stroke: var(--orange); }
+@keyframes breathe { to { opacity: .12; } }
+[data-calm] .gaze.wants, [data-calm] .way-out, [data-calm] .spot .ring { animation: none; }
 .board.busy .looks { opacity: 0; }
 
 /* a patroller's rail, in its fish's ink */
@@ -93,10 +98,11 @@
 
 /* where the picked item can go: a pulsing dot in each cell, a dashed bar on each rock face */
 .spot .hit { fill: transparent; cursor: pointer; }
-.spot circle { fill: var(--k-yellow); stroke: var(--k-blue); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
-@keyframes spot { 50% { opacity: .45; } }
+.spot .ring { fill: var(--stock); stroke: var(--k-blue); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
+.spot .pip { fill: var(--k-blue); pointer-events: none; }
+@keyframes spot { 50% { stroke-width: .9; } }
 .spot.face line { stroke: var(--k-yellow); stroke-width: 1.4; stroke-dasharray: 1 .8; pointer-events: none; }
-.spot:hover circle, .spot.kbd circle { r: 2.1; }
+.spot:hover .ring, .spot.kbd .ring { r: 2; fill: var(--k-yellow); }
 .board.failed .tank { filter: grayscale(.55); }
 
 /* ---------- tray ---------- */
@@ -121,13 +127,13 @@
 #game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
 #game .tip { margin: 10px 0 0; }
 
-#logo .look { stroke-width: 2; stroke-dasharray: 3.4 2.4; }
+#logo .look { stroke-width: 1.6; }
 #logo svg { width: 200px; height: 120px; margin: 0 auto 4px; display: block; overflow: visible; }
 
 @media (orientation: landscape) and (max-height: 540px) {
-  .board { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
+  .board { width: min(calc((100 * var(--dvh) - 90px) * var(--ar, 1)), calc(100 * var(--vw) - 380px)); }
 }
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
-  .board { width: min(640px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 440px)); }
+  .board { width: min(568px, calc(100 * var(--vw) - 64px), calc((100 * var(--dvh) - 380px) * var(--ar, 1))); }
   .slot { width: 60px; height: 60px; }
 }

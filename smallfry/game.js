@@ -123,16 +123,22 @@ function orderTag(t, at, n, W) {
   return `<g class="tag"><circle cx="${x}" cy="${y}" r="1.8"/><text x="${x}" y="${y + .7}">${n}</text></g>`;
 }
 
+// The view: just the cave and half a cell of rock round it (the exit, in the border, shows half), so the tank fills the screen
+function viewOf(L) {
+  const W = L.W, cells = [...L.grid].map((ch, i) => (ch === '.' ? i : -1)).filter((i) => i >= 0);
+  const cols = cells.map((c) => c % W), rows = cells.map((c) => Math.floor(c / W));
+  const x = Math.min(...cols) * CELL - CROP, y = Math.min(...rows) * CELL - CROP;
+  return { x, y, w: (Math.max(...cols) + 1) * CELL + CROP - x, h: (Math.max(...rows) + 1) * CELL + CROP - y };
+}
 // The tank, printed risograph style in four spot inks on the page's own paper. The water is the paper, screened with blue
-// halftone dots that grow toward the floor; light falls through as paper-white bands. Behind, a far ridge in a teal screen.
-// Rock is solid blue with grain, knocked-out pebbles and cracks, pink screened into the shade under overhangs (purple where they
-// overprint); ledges are yellow sand. Kelp is teal, starfish pink, shells yellow, and daylight comes in through the exit as a
-// yellow burst. Each ink sits a hair out of register. Nothing decorative is in open water, where it could pass for an item.
+// halftone dots that grow toward the floor; light falls through as paper-white bands. Rock is solid blue with gentle strata;
+// ledges are pale-blue sand banks. Kelp is teal, starfish pink, shells yellow, and daylight comes in through the exit as a yellow
+// burst. Each ink sits a hair out of register. Nothing decorative is in open water, where it could pass for an item.
 const star = (x, y, r) => 'M' + Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + (i * Math.PI) / 5, k = i % 2 ? r * .42 : r; return `${(x + Math.cos(a) * k).toFixed(2)} ${(y + Math.sin(a) * k).toFixed(2)}`; }).join('L') + 'Z';
-function tankSvg(L) {
+function tankSvg(L, vb = viewOf(L)) {
   const W = L.W, g = L.grid, S = CELL * W, R = 3.2, seed = h32([...g].reduce((a, ch, i) => a + (ch === '#' ? i * 31 : 0), W));
   const rock = (c, dr, dc) => { const r = Math.floor(c / W) + dr, q = (c % W) + dc; return r < 0 || q < 0 || r >= W || q >= W || g[r * W + q] === '#'; };
-  let rocks = '', fill = '', sand = '', pebbles = '', cracks = '', shade = '', kelp = '', pink = '', yellow = '', bubbles = '', exit = '', burst = '';
+  let rocks = '', fill = '', sand = '', kelp = '', pink = '', yellow = '', bubbles = '', exit = '', burst = '';
   for (let c = 0; c < W * W; c++) {
     const x = (c % W) * CELL, y = Math.floor(c / W) * CELL, hh = h32(c + seed);
     if (g[c] === '#') {
@@ -142,9 +148,6 @@ function tankSvg(L) {
       const tl = !up && !lf ? R : 0, tr = !up && !rt ? R : 0, br = !dn && !rt ? R : 0, bl = !dn && !lf ? R : 0;
       rocks += `M${x0 + tl} ${y0}H${x1 - tr}${tr ? `A${tr} ${tr} 0 0 1 ${x1} ${y0 + tr}` : ''}V${y1 - br}${br ? `A${br} ${br} 0 0 1 ${x1 - br} ${y1}` : ''}` +
         `H${x0 + bl}${bl ? `A${bl} ${bl} 0 0 1 ${x0} ${y1 - bl}` : ''}V${y0 + tl}${tl ? `A${tl} ${tl} 0 0 1 ${x0 + tl} ${y0}` : ''}Z`;
-      if (hh % 3 === 1) pebbles += `<ellipse cx="${x + 2 + (hh % 6)}" cy="${y + 3 + ((hh >> 4) % 5)}" rx="${.7 + ((hh >> 8) % 3) * .3}" ry="${.5 + ((hh >> 10) % 2) * .25}"/>`;
-      if (hh % 5 === 1) cracks += `M${x + 1.5 + ((hh >> 3) % 4)} ${y + 5 + ((hh >> 7) % 3)}q2-1.2 3.4 0t3 .4`;
-      if (!dn && g[c + W] === '.') shade += `M${x0 + bl} ${y + 5}H${x1 - br}V${y1 - br}${br ? `A${br} ${br} 0 0 1 ${x1 - br} ${y1}` : ''}H${x0 + bl}${bl ? `A${bl} ${bl} 0 0 1 ${x0} ${y1 - bl}` : ''}Z`;
       if (!up) {
         if (g[c - W] !== '.') continue;
         if (hh % 4 === 0) {
@@ -199,24 +202,23 @@ function tankSvg(L) {
     if (b - a > 7) ripple += `M${a + 2.6} ${y + .7}H${b - 2.6}`;
   }
 
-  let ridge = `M0 ${S}V${S * .7}`;
-  for (let i = 0; i <= 8; i++) ridge += `Q${S * (i + .5) / 8} ${S * (.6 + ((h32(seed + i) % 100) / 100) * .14)} ${S * (i + 1) / 8} ${S * (.68 + ((h32(seed + i + 50) % 100) / 100) * .08)}`;
-  ridge += `V${S}Z`;
-  for (let i = 0; i < 3; i++) { const sx = S * (.15 + i * .32 + (h32(seed + 9 * i) % 10) / 100), top = S * (.38 + (h32(seed + 7 * i) % 20) / 100), w = 5 + (h32(seed + i) % 5); ridge += `M${sx - w} ${S}V${top + w}A${w} ${w} 0 0 1 ${sx + w} ${top + w}V${S}Z`; }
-  const farKelp = [.08, .3, .55, .82].map((f, i) => { const kx = S * f, ky = S * (.74 + (i % 2) * .05); return `M${kx} ${S}V${ky}q-2-4 0-8t0-8`; }).join('');
-  const shafts = [.18, .46, .74].map((f, i) => `<path d="M${S * f} 0h${S * (.06 + i * .02)}l${S * .16} ${S}h-${S * (.1 + i * .02)}Z"/>`).join('');
+  // strata: gentle wavy layers through the rock, in a deeper blue, clipped to it
+  let strata = '';
+  for (let y = 4 + (seed % 3); y < S; y += 6.5) {
+    strata += `M0 ${y.toFixed(1)}`;
+    for (let x = 0; x < S; x += 10) strata += `q5 ${(((h32(seed + y * 7 + x) % 3) - 1) * 1.1).toFixed(1)} 10 0`;
+  }
+  const shafts = [.18, .46, .74].map((f, i) => `<path d="M${vb.x + vb.w * f} ${vb.y}h${vb.w * (.06 + i * .02)}l${vb.w * .16} ${vb.h}h-${vb.w * (.1 + i * .02)}Z"/>`).join('');
   // halftone screens: the water's dots grow with depth, band by band
   const dots = (id, r, ink, step = 1.6) => `<pattern id="${id}" width="${step}" height="${step}" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="${step / 2}" cy="${step / 2}" r="${r}" class="ink-${ink}"/></pattern>`;
   const BANDS = 7, deep = Array.from({ length: BANDS }, (_, i) => `<rect y="${(S * i) / BANDS}" width="${S}" height="${S / BANDS + .2}" fill="url(#ht${i})"/>`).join('');
   return `<defs>${Array.from({ length: BANDS }, (_, i) => dots('ht' + i, .08 + i * .045, 'blue', 1.7)).join('')}${dots('ht-teal', .38, 'teal', 1.6)}${dots('ht-pink', .34, 'pink', 1.3)}${dots('ht-sun', .55, 'yellow', 1.4)}` +
-    `<clipPath id="tank"><rect x="${CROP}" y="${CROP}" width="${S - 2 * CROP}" height="${S - 2 * CROP}" rx="5"/></clipPath></defs>` +
+    `<clipPath id="tank"><rect x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}" rx="5"/></clipPath><clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
     `<g clip-path="url(#tank)"><rect class="paper" width="${S}" height="${S}"/>` +
-    `<g class="pl teal far"><path d="${ridge}" fill="url(#ht-teal)"/><path class="far-kelp" d="${farKelp}"/></g>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
     `<g class="pl yellow burst">${burst}</g>${exit}` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
-    `<path class="pl blue rock" d="${rocks}${fill}"/><path class="pl pink" d="${shade}" fill="url(#ht-pink)"/>` +
-    `<g class="paper cuts"><g>${pebbles}</g><path class="crack" d="${cracks}"/></g>` +
+    `<path class="pl blue rock" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>` +
     `<path class="sand" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
@@ -267,7 +269,9 @@ function startLevel(G, save) {
   G.sel = G.tut ? null : firstLeft();
   const b = $('#board');
   b.classList.remove('solved', 'failed');
-  b.innerHTML = `<svg class="tank" viewBox="${CROP} ${CROP} ${L.W * CELL - 2 * CROP} ${L.W * CELL - 2 * CROP}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes" clip-path="url(#tank)"></g></svg>`;
+  const vb = viewOf(L);
+  b.style.setProperty('--ar', (vb.w / vb.h).toFixed(4));
+  b.innerHTML = `<svg class="tank" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L, vb)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes" clip-path="url(#tank)"></g></svg>`;
   G.fishEls = L.fish.map((f) => {
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', `fish ${speciesOf(f.s).name}${f.s === 1 ? ' fry' : ' pred'}${f.f ? ' fast' : ''}`);
@@ -316,7 +320,8 @@ function draw() {
     if (pts.length < 2) return '';
     if (V.mir[f.p]) { const r = restOf(f); pts[0] = [r.x / CELL, r.y / CELL]; } // from the corner it rests in, not the plate
     const d = 'M' + pts.map(([x, y]) => `${(x * CELL).toFixed(1)} ${(y * CELL).toFixed(1)}`).join('L');
-    return `<path class="look${f.s === 1 ? ' fry' : ''}${wants ? ' wants' : ''}" d="${d}"/>`;
+    const cls = `${speciesOf(f.s).name}${wants ? ' wants' : ''}`;
+    return `<path class="gaze ${cls}" d="${d}"/><path class="look ${cls}" d="${d}"/>`; // a soft band, and the line itself
   }).join('');
   // spots
   let spots = '';
@@ -328,7 +333,7 @@ function draw() {
         const c = at >> 2, d = at & 3, x = cx(c, W) + DC[d] * 4.4, y = cy(c, W) + DR[d] * 4.4, h = d % 2 ? 0 : 1;
         spots += `<g class="spot face${k}" data-spot="${at}"><rect class="hit" x="${x - (h ? 5 : 3)}" y="${y - (h ? 3 : 5)}" width="${h ? 10 : 6}" height="${h ? 6 : 10}"/>` +
           `<line x1="${x - h * 3.6}" y1="${y - (1 - h) * 3.6}" x2="${x + h * 3.6}" y2="${y + (1 - h) * 3.6}"/></g>`;
-      } else spots += `<g class="spot${k}" data-spot="${at}"><rect class="hit" x="${(at % W) * CELL}" y="${Math.floor(at / W) * CELL}" width="10" height="10"/><circle cx="${cx(at, W)}" cy="${cy(at, W)}" r="1.6"/></g>`;
+      } else spots += `<g class="spot${k}" data-spot="${at}"><rect class="hit" x="${(at % W) * CELL}" y="${Math.floor(at / W) * CELL}" width="10" height="10"/><circle class="ring" cx="${cx(at, W)}" cy="${cy(at, W)}" r="1.5"/><circle class="pip" cx="${cx(at, W)}" cy="${cy(at, W)}" r=".55"/></g>`;
     }
   } else G.spotList = [];
   svg.querySelector('.spots').innerHTML = spots;
