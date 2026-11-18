@@ -69,7 +69,9 @@ function fishArt(s, fast) {
     `<g class="pl ${p.a}">${tail}<path d="${p.body}"/><path d="${p.fins}"/></g>` +
     `<g class="pl ${p.b} over">${p.over(p, tail)}</g>` +
     `<g class="paper">${p.paper}<circle cx="${ex}" cy="${ey}" r="${er}"/></g>` + (p.extra || '') +
-    `<circle class="pl blue pupil" cx="${ex + er * .3}" cy="${ey}" r="${er * .55}"/></g>`;
+    `<circle class="pl blue pupil" cx="${ex + er * .3}" cy="${ey}" r="${er * .55}"/>` +
+    // the lid, in the body's ink, drops from the top: shut for a blink, half down in a hunter's squint
+    `<rect class="pl ${p.a} lid" x="${ex - er - .1}" y="${ey - er - .1}" width="${2 * er + .2}" height="${2 * er + .2}" rx="${er}"/></g>`;
 }
 // A fish's pose: { a: rotation in degrees, fx: 1 or -1, which way it faces in the side view }. Heading right is a 0 fx 1, left a 0
 // fx -1 (upright both ways); up and down are a quarter turn from whichever side it faced. So turning round left↔right turns the
@@ -211,13 +213,15 @@ function tankSvg(L, vb = viewOf(L)) {
   return `<defs>${Array.from({ length: BANDS }, (_, i) => dots('ht' + i, .06 + i * .032, 'water', 1.7)).join('')}${dots('ht-teal', .38, 'teal', 1.6)}${dots('ht-pink', .34, 'pink', 1.3)}${dots('ht-sun', .55, 'yellow', 1.4)}` +
     `<clipPath id="tank"><rect x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}"/></clipPath>` +
     `<radialGradient id="glowg"><stop offset=".25" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
-    `<mask id="glowfade" maskContentUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5" fill="url(#glowg)"/></mask><clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
+    `<mask id="glowfade" maskContentUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5" fill="url(#glowg)"/></mask><filter id="wobble" filterUnits="userSpaceOnUse" x="${vb.x - 4}" y="${vb.y - 4}" width="${vb.w + 8}" height="${vb.h + 8}">` +
+    `<feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="${seed % 97}"/><feDisplacementMap in="SourceGraphic" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter>` +
+    `<clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
     `<g clip-path="url(#tank)"><rect class="paper" width="${S}" height="${S}"/>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
     `<g class="pl yellow burst">${burst}</g>` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
-    `<path class="pl blue rock" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>${exit}` +
-    `<path class="sand" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
+    `<path class="pl blue rock" filter="url(#wobble)" d="${rocks}${fill}"/><path class="strata" clip-path="url(#rockclip)" d="${strata}"/>${exit}` +
+    `<path class="sand" filter="url(#wobble)" d="${sand}"/><path class="ripple" d="${ripple}"/><g class="pl pink">${pink}</g><g class="pl yellow">${yellow}</g></g>`;
 }
 
 // ---------- state ----------
@@ -312,15 +316,22 @@ function draw() {
   const V = G.preview !== null && G.sel ? Fry.clone(S) : S;
   if (V !== S) Fry.place(V, G.sel, G.preview);
   const occ = Fry.occupancy(L, V);
+  // moods: a fish that sees what it wants is hunting (or, the fry, eager); the fry is scared when a bigger fish's look passes
+  // right beside it
+  const near = new Set(), fry = V.fish[0], mood = V.fish.map(() => '');
   svg.querySelector('.looks').innerHTML = G.done && S.out ? '' : V.fish.map((f, i) => {
     if (!f.a || f.w) return ''; // a patroller looks at nothing
     const pts = [], v = Fry.look(L, V, i, occ, pts), wants = v.t >= 0;
+    if (wants) mood[i] = i ? 'hunting' : 'eager';
+    if (i && fry.a && v.sc.some((c) => [1, -1, W, -W].includes(c - fry.p))) near.add(i);
     if (pts.length < 2) return '';
     if (V.mir[f.p]) { const r = restOf(f); pts[0] = [r.x / CELL, r.y / CELL]; } // from the corner it rests in, not the plate
     const d = 'M' + pts.map(([x, y]) => `${(x * CELL).toFixed(1)} ${(y * CELL).toFixed(1)}`).join('L');
     const cls = `${speciesOf(f.s).name}${wants ? ' wants' : ''}`;
     return `<path class="gaze ${cls}" d="${d}"/><path class="look ${cls}" d="${d}"/>`; // a soft band, and the line itself
   }).join('');
+  if (near.size && !mood[0]) mood[0] = 'scared';
+  G.fishEls.forEach((el, i) => { for (const m of ['hunting', 'eager', 'scared']) el.classList.toggle(m, mood[i] === m && !G.busy); });
   // spots
   let spots = '';
   if (G.sel && !G.busy && !G.fail && !G.done) {

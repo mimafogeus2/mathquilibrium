@@ -101,6 +101,17 @@
 .fish .size circle { fill: var(--stock); stroke: var(--k-blue); stroke-width: .45; }
 .fish .size text { fill: var(--k-blue); font: 700 2.3px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
 
+/* faces: lids blink now and then (each fish on its own beat); a hunter squints, the eager fry's eye widens, a scared fry trembles */
+.fish .lid { transform-box: fill-box; transform-origin: 50% 0; scale: 1 0; animation: blink 5.2s var(--ph, 0s) infinite; mix-blend-mode: normal; }
+@keyframes blink { 0%, 93%, 100% { scale: 1 0; } 96% { scale: 1 1; } }
+.fish.hunting .lid { animation: none; scale: 1 .5; transition: scale .25s; }
+.fish.hunting .pupil { scale: 1.25; transform-box: fill-box; transform-origin: center; }
+.fish.eager .pupil { scale: .8; transform-box: fill-box; transform-origin: center; }
+.fish.scared .bob { animation: tremble .12s linear infinite; }
+.fish.scared .pupil { scale: .6; transform-box: fill-box; transform-origin: center; }
+@keyframes tremble { 0%, 100% { translate: -.18px 0; } 50% { translate: .18px 0; } }
+[data-calm] .fish .lid, [data-calm] .fish.scared .bob { animation: none; }
+
 /* where the picked item can go: a pulsing dot in each cell, a dashed bar on each rock face */
 .spot .hit { fill: transparent; cursor: pointer; }
 .spot .ring { fill: var(--stock); stroke: var(--k-blue); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
