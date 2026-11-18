@@ -216,7 +216,7 @@ function tankSvg(L, vb = viewOf(L)) {
     `<mask id="glowfade" maskContentUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5" fill="url(#glowg)"/></mask><filter id="wobble" filterUnits="userSpaceOnUse" x="${vb.x - 4}" y="${vb.y - 4}" width="${vb.w + 8}" height="${vb.h + 8}">` +
     `<feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="${seed % 97}"/><feDisplacementMap in="SourceGraphic" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter>` +
     `<clipPath id="rockclip"><path d="${rocks}${fill}"/></clipPath></defs>` +
-    `<g clip-path="url(#tank)"><rect class="paper" width="${S}" height="${S}"/>` +
+    `<g clip-path="url(#tank)"><rect class="sea" width="${S}" height="${S}"/>` +
     `<g class="pl blue water">${deep}</g><g class="shafts">${shafts}</g>` +
     `<g class="pl yellow burst">${burst}</g>` +
     `<g class="pl blue bubbles">${bubbles}</g><g class="pl teal kelp">${kelp}</g>` +
@@ -272,6 +272,7 @@ function startLevel(G, save) {
   const b = $('#board');
   b.classList.remove('solved', 'failed');
   const vb = viewOf(L);
+  $('#game').dataset.tier = G.tut ? 'T' : G.pack; // each difficulty has its own water (style.css)
   b.style.setProperty('--ar', (vb.w / vb.h).toFixed(4));
   b.innerHTML = `<svg class="tank" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L, vb)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes" clip-path="url(#tank)"></g></svg>`;
   G.fishEls = L.fish.map((f) => {

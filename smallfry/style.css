@@ -24,6 +24,16 @@
 .pl { fill: currentColor; mix-blend-mode: var(--blend); }
 /* grain: one sheet of specks over the whole tank, where the ink missed the paper (cheap: a static image, not a filter per layer) */
 .board { position: relative; overflow: hidden; } /* one rounded edge for everything in it */
+/* Moods: each difficulty prints on its own water. Easy is shallow and sunny, Medium the open sea, Hard deeper and greener, and
+   Impossible the abyss, where the light hardly reaches. --sea is the water's paper, --k-blue the rock, --shine the light shafts. */
+.sea { fill: var(--sea, var(--stock)); }
+#game[data-tier="E"], #game[data-tier="T"] { --sea: color-mix(in srgb, var(--stock) 88%, var(--sun)); --k-blue: #3f72b9; --shine: .75; }
+#game[data-tier="H"] { --sea: color-mix(in srgb, var(--stock) 84%, var(--teal)); --k-blue: #284b8c; --shine: .35; }
+#game[data-tier="I"] { --sea: color-mix(in srgb, var(--stock) 78%, #000); --shine: .12; --k-blue: #3a4f8f; }
+:root[data-theme="dark"] #game[data-tier="E"] { --sea: color-mix(in srgb, var(--stock) 80%, #3d78a8); --k-blue: #9cc0ff; }
+:root[data-theme="dark"] #game[data-tier="H"] { --sea: color-mix(in srgb, var(--stock) 75%, #0b3a40); --k-blue: #7b9be0; }
+.shafts { opacity: var(--shine, .55); }
+
 /* the rock is the first ink down and fully covers the paper: the water's screen never shows through it */
 .pl.rock { mix-blend-mode: normal; }
 .board::after { content: ''; position: absolute; inset: 0; border-radius: 14px; background: var(--speck); background-size: 140px; pointer-events: none; opacity: .7; }
@@ -44,7 +54,7 @@
 .sand { fill: color-mix(in srgb, var(--k-blue) 32%, var(--stock)); }
 .ripple { fill: none; stroke: var(--k-blue); stroke-width: .4; stroke-dasharray: 0 1.5; stroke-linecap: round; opacity: .55; }
 .burst { opacity: .8; }
-.shafts path { fill: var(--stock); opacity: .55; }
+.shafts path { fill: var(--stock); }
 .kelp path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
 .bubbles circle { fill: none; stroke: currentColor; stroke-width: .35; opacity: 0; }
 .way-out { fill: none; stroke: var(--k-blue); stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; animation: way-out 1.8s ease-in-out infinite; }
@@ -98,8 +108,8 @@
 .fish .stroke { fill: none; stroke: currentColor; stroke-width: .5; stroke-linecap: round; }
 .fish .paper .cut { fill: none; stroke: var(--stock); stroke-width: .55; stroke-linecap: round; }
 .fish .speed { fill: none; stroke: currentColor; stroke-width: .9; stroke-linecap: round; }
-.fish .size circle { fill: var(--stock); stroke: var(--k-blue); stroke-width: .45; }
-.fish .size text { fill: var(--k-blue); font: 700 2.3px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
+.fish .size circle { fill: var(--stock); stroke: var(--ink); stroke-width: .45; }
+.fish .size text { fill: var(--ink); font: 700 2.3px Inter, sans-serif; text-anchor: middle; pointer-events: none; }
 
 /* faces: lids blink now and then (each fish on its own beat); a hunter squints, the eager fry's eye widens, a scared fry trembles */
 .fish .lid { transform-box: fill-box; transform-origin: 50% 0; scale: 1 0; animation: blink 5.2s var(--ph, 0s) infinite; mix-blend-mode: normal; }
@@ -114,8 +124,8 @@
 
 /* where the picked item can go: a pulsing dot in each cell, a dashed bar on each rock face */
 .spot .hit { fill: transparent; cursor: pointer; }
-.spot .ring { fill: var(--stock); stroke: var(--k-blue); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
-.spot .pip { fill: var(--k-blue); pointer-events: none; }
+.spot .ring { fill: var(--stock); stroke: var(--ink); stroke-width: .45; pointer-events: none; animation: spot 1.4s ease-in-out infinite; }
+.spot .pip { fill: var(--ink); pointer-events: none; }
 @keyframes spot { 50% { stroke-width: .9; } }
 .spot.face line { stroke: var(--k-yellow); stroke-width: 1.4; stroke-dasharray: 1 .8; pointer-events: none; }
 .spot:hover .ring, .spot.kbd .ring { r: 2; fill: var(--k-yellow); }
