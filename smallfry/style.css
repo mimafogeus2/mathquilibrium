@@ -115,6 +115,7 @@
 @media (hover: hover) { .slot:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1px var(--ink), var(--lift); } }
 #btn-fast[aria-pressed="true"] { background: var(--speck), var(--sun); color: var(--navy); box-shadow: none; }
 .tip[data-warn] { color: var(--red-text); }
+#btn-hint .left { min-width: 1.4em; padding: 1px 5px; border-radius: 999px; background: var(--slot); font-size: 12px; font-weight: 700; text-align: center; }
 
 /* keep board, tray, tip and tools together in the middle */
 #game .board-wrap { flex: 0 0 auto; margin-top: auto; }

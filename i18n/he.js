@@ -468,6 +468,7 @@ module.exports = {
       '{item} placed.': '{item} במקום.',
       'Restart this level? Every item you placed comes back to the tray.': 'להתחיל את השלב מחדש? כל הפריטים שהנחתם יחזרו למגש.',
       'Row {r}, column {c}': 'שורה {r}, עמודה {c}',
+      'Hint ({n} left)': 'רמז (נשארו {n})',
       '<b>Eaten!</b> Undo and try another way.': '<b>נאכל!</b> בטלו ונסו דרך אחרת.',
       '<b>Going in circles.</b> Undo and try another way.': '<b>מסתובבים במעגלים.</b> בטלו ונסו דרך אחרת.',
       '<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.': '<b>תקועים:</b> כל הפריטים במקום, והרקק עדיין בפנים. בטלו ונסו דרך אחרת.',

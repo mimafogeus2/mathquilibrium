@@ -3,7 +3,7 @@
 // act (each swims for what it sees and wants), then you place the next. Rules and levels: gen.js (the global Fry), levels.js.
 
 const CELL = 10, CROP = 5, SVGNS = 'http://www.w3.org/2000/svg';
-const TICK_MS = 280, FAST_MS = 70;
+const TICK_MS = 280, FAST_MS = 70, HINTS = 3;
 const DR = Fry.DR, DC = Fry.DC;
 const ITEM = { '/': T('mirror'), '\\': T('mirror'), F: T('flat mirror'), B: T('bait') };
 const skey = (t, at) => t + '@' + at;
@@ -432,7 +432,10 @@ function refresh() {
   $('#tray').classList.toggle('busy', G.busy);
   $('#btn-undo').disabled = G.done || G.placed.length <= G.lock;
   $('#btn-reset').disabled = G.done || G.placed.length <= G.lock;
-  $('#btn-hint').disabled = G.done || G.busy;
+  // three hints a level: the chip counts down what's left
+  $('#btn-hint').disabled = G.done || G.busy || G.hinted.size >= HINTS;
+  $('#btn-hint .left').textContent = HINTS - G.hinted.size;
+  $('#btn-hint').setAttribute('aria-label', T('Hint ({n} left)', { n: HINTS - G.hinted.size }));
   $('#btn-fast').hidden = !G.busy;
   $('#btn-fast').setAttribute('aria-pressed', String(!!G.ff));
   $('#board').classList.toggle('busy', G.busy);
@@ -567,6 +570,7 @@ async function reset() {
 // A hint: back to the last point where everything placed is part of the answer (and the rest can still follow), then one more
 // item from the answer, placed and locked. Each costs a star.
 function hint() {
+  if (G.hinted.size >= HINTS) return;
   if (!playing() || G.busy || IMP || !coachAllows({ hint: true })) return;
   const { L } = G, ans = new Set(L.sol.map(([t, at]) => skey(t, at)));
   for (let k = G.placed.length; k >= G.lock; k--) {
