@@ -907,7 +907,7 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="3">
     <li>Place the items in your tray where a fish is <b>looking</b>. A <b>mirror</b> turns a look round a corner. A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what's behind it. <b>Bait</b> lures the fry, which turns the way it swam to it.</li>
-    <li>After each item, the fish act. When they stop, place the next. A fast fish (with streaks) swims two cells at a time.</li>
+    <li>After each item, the fish act. When they stop, place the next. A fish sees a smaller one swimming into its look and goes for it at once. A fast fish (with streaks) swims two cells at a time; a fish on a rail patrols back and forth whenever anything else moves.</li>
   </ol>
   </div>
   <div class="help-page">
@@ -921,7 +921,7 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="3">
     <li>הניחו את הפריטים מהמגש במקומות שדג <b>מסתכל</b> עליהם. <b>מראה</b> מסובבת מבט מעבר לפינה. <b>מראה שטוחה</b> נתלית על הסלע שדג בוהה בו, ומראה לו מה מאחוריו. <b>פיתיון</b> מושך את הרקק, והוא פונה לכיוון שבו שחה אליו.</li>
-    <li>אחרי כל פריט, הדגים פועלים. כשהם עוצרים, הניחו את הבא. דג מהיר (עם פסים) שוחה שתי משבצות בכל פעם.</li>
+    <li>אחרי כל פריט, הדגים פועלים. כשהם עוצרים, הניחו את הבא. דג שרואה דג קטן ממנו נכנס למבט שלו מסתער עליו מיד. דג מהיר (עם פסים) שוחה שתי משבצות בכל פעם; דג על מסילה מפטרל הלוך ושוב בכל פעם שמשהו אחר זז.</li>
   </ol>
   </div>
   <div class="help-page">
