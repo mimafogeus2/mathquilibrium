@@ -383,6 +383,15 @@ function renderHome() {
   }));
   offDailies();
   if (IMP) return;
+  // A random game without packs (no #pack-btns: Lexiconga) practises from the New puzzle row alone: each button resumes that
+  // difficulty's level left mid-way, else deals a new one
+  if (!$('#pack-btns')) {
+    for (const b of document.querySelectorAll('#new-row button')) {
+      b.querySelector('small')?.remove();
+      b.insertAdjacentHTML('beforeend', `<small>${T(store.saves[b.dataset.pack + store.cur[b.dataset.pack]] ? 'Resume' : 'New puzzle')}</small>`);
+    }
+    return;
+  }
   $('#pack-btns').replaceChildren(...Object.keys(TIERS).map((k) => {
     const pp = store.packs[k], done = Object.keys(pp.stars).length;
     const b = document.createElement('button');
@@ -570,7 +579,8 @@ const LSUF = LANG === 'en' ? '' : '-' + LANG;
 const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'pink-text'], ['biggr', T('Biggr'), 'biggr', 'EMH', 'orange-text'],
   ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
   ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text'],
-  ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text'], ['smallfry', T('Small Fry'), 'smallfry', 'EMH', 'teal-text']];
+  ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text'], ['smallfry', T('Small Fry'), 'smallfry', 'EMH', 'teal-text'],
+  ['lexiconga', T('Lexiconga'), 'lexiconga' + LSUF, 'EMH', 'pink-text']];
 // The slug at the foot of a game's menu, as a print shop pencils on the job: the house and today's issue
 {
   const home = $('#home');
@@ -764,7 +774,7 @@ function boot(g) {
     store.cur ??= {};
     // a level left mid-way under the old fixed progression becomes that difficulty's puzzle to resume
     for (const k in TIERS) store.cur[k] ??= +Object.keys(store.saves).find((s) => s[0] === k && /^\d+$/.test(s.slice(1)))?.slice(1) || undefined;
-    for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(b.dataset.pack, true);
+    for (const b of document.querySelectorAll('#new-row button')) b.onclick = () => playRandom(b.dataset.pack, !!$('#pack-btns'));
   } else $('#btn-levels').onclick = () => openLevels();
   $('#btn-help').onclick = () => { track('help', ''); $('#dlg-help').showModal(); };
   if (g.tutorial) tutorialLink(startTutorial);

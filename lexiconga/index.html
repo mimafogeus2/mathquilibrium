@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lexiconga — one long word</title>
+<meta name="description" content="Link ten words into one long word: each word you type starts where the chain ends and ends where a word in the box begins. New daily puzzles every day.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Games by Miki">
+<meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/lexiconga/">
+<meta property="og:title" content="Lexiconga — one long word">
+<meta property="og:description" content="Link ten words into one long word: each word you type starts where the chain ends and ends where a word in the box begins. New daily puzzles every day.">
+<meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/lexiconga/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede1">
+<script src="../shared/theme.js"></script>
+<script data-goatcounter="https://goatcounter-production-28ca10cd.up.railway.app/count" async src="https://goatcounter-production-28ca10cd.up.railway.app/count.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f3ede1'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-weight='700' font-size='34' text-anchor='middle' fill='%2326366b'%3Ea%3Ctspan fill='%23ff48b0'%3Ex%3C/tspan%3Ea%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/core.css">
+<link rel="stylesheet" href="style.css">
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d6f3678d2c48486fb850d1daaa43a9b1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+
+<main id="home" class="screen">
+  <a class="icon corner-start" href="../" aria-label="All games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="corner"><button class="icon js-fav" aria-label="Add to favorites"></button><button class="icon js-theme" aria-label="Theme"></button><button class="icon js-sound" aria-label="Sound"></button></div>
+  <div id="logo" aria-hidden="true"></div>
+  <h1 class="wordmark">Lexi<span>conga</span></h1>
+  <p class="tagline">Ten words, one long word. You write the links.</p>
+  <nav class="menu">
+    <div class="block-head"><h2>Today</h2><span id="daily-meta"></span></div>
+    <div id="daily-btns" class="trio"></div>
+    <div class="block-head"><h2>Practice</h2></div>
+    <div id="new-row" class="row practice">
+      <button class="btn ghost tier-E" data-pack="E"><b>Easy</b></button>
+      <button class="btn ghost tier-M" data-pack="M"><b>Medium</b></button>
+      <button class="btn ghost tier-H" data-pack="H"><b>Hard</b></button>
+    </div>
+    <div class="links"><button id="btn-help" class="foot-link">How to play</button></div>
+  </nav>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="bar">
+    <div class="bar-start">
+      <button id="btn-back" class="icon" aria-label="Back to menu">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button id="btn-pause" class="icon" aria-label="Pause"></button>
+    </div>
+    <div class="title"><b id="g-title"></b><small id="g-sub"></small></div>
+    <div class="bar-end">
+      <span id="timer" aria-label="Time">0:00</span>
+      <button id="btn-print" class="icon" aria-label="Print this puzzle"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg></button>
+      <button class="icon js-sound" aria-label="Sound"></button>
+    </div>
+  </header>
+  <div class="board-wrap">
+    <div id="board" class="board" aria-describedby="board-keys">
+      <div id="mini" class="mini" aria-hidden="true"><div class="mini-line"></div><i class="mini-frame"></i></div>
+      <div id="strip" class="strip" aria-hidden="true"><div class="track"></div></div>
+      <div id="final" class="final" aria-hidden="true" hidden></div>
+      <p id="tip" class="tip"></p>
+      <div id="box" class="box" role="list" aria-label="Words to link"></div>
+    </div>
+    <p id="board-keys" class="sr-only">Type your word and press Enter. Backspace deletes a letter.</p>
+    <p id="sr" class="sr-only" aria-live="polite"></p>
+    <div id="pause-cover" class="pause-cover" hidden>
+      <b>Paused</b>
+      <button id="btn-resume" class="btn primary center"><b>Resume</b></button>
+    </div>
+  </div>
+  <div class="tools">
+    <button id="btn-undo" class="chip" disabled>
+      <svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo
+    </button>
+    <button id="btn-hint" class="chip">
+      <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>Hint
+    </button>
+    <button id="btn-giveup" class="give-up">Give up</button>
+    <button id="btn-result" class="btn primary center" hidden><b>See result</b></button>
+  </div>
+  <div id="keys" class="palette keys" aria-label="Keyboard"></div>
+</main>
+
+<dialog id="dlg-help">
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+  <h2>How to play</h2>
+  <div class="help-pages">
+  <div class="help-page">
+  <p class="help-chain" aria-hidden="true">ca<b>t</b>ou<b>r</b>ai<b>n</b>ic<b>e</b>gg</p>
+  <ol class="rules">
+    <li>Link every word in the <b>box</b> into one long word. The chain starts with a word of its own.</li>
+    <li>Type a word that <b>starts</b> with the chain's last letter and <b>ends</b> with the first letter of a word in the box. The computer then adds that word, and it's your turn again.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
+    <li>Your words can't be words from the box, and each can be used once. Harder levels ask for longer ones.</li>
+    <li>If two words in the box start with the same letter, the computer picks one that still lets you finish. Your choices can still lead you into a <b>dead end</b>: <b>Undo</b> takes back your last word and the one it brought in, as often as you like.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
+    <li>Stars are for speed. One <b>hint</b> a level fills in a word for you (backing out of a dead end first), and costs a star.</li>
+  </ol>
+  <p class="muted small">Word lists: <a href="CREDITS.md">SCOWL and FrequencyWords</a> (CC BY-SA 4.0).</p>
+  <p class="muted small kbd-hint">Keyboard: type, <kbd>Enter</kbd> to add your word, <kbd>Backspace</kbd> to delete, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo, <kbd>Esc</kbd> menu.</p>
+  </div>
+  </div>
+  <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
+</dialog>
+
+<dialog id="dlg-win">
+  <div id="win-stars" class="stars" role="img"></div>
+  <h2 id="win-title"></h2>
+  <p id="win-stats" class="stats"></p>
+  <div class="win-actions">
+    <button id="win-next" class="btn primary center"><b></b></button>
+    <button id="win-home" class="btn ghost center"><b>Menu</b></button>
+  </div>
+  <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
+</dialog>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="../shared/common.js"></script>
+<script src="../shared/core.js"></script>
+<script src="words.js"></script>
+<script src="gen-words.js"></script>
+<script src="gen.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

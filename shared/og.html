@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Social card source (1200×630). Re-render after edits:
-     for g in home mathquilibrium coronet wordswipe orderly biggr quadflip alienchess balancingact smallfry; do
+     for g in home mathquilibrium coronet wordswipe orderly biggr quadflip alienchess balancingact smallfry lexiconga; do
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-color-profile=srgb \
          --window-size=1200,630 --virtual-time-budget=3000 --screenshot=og-$g.png "file://$PWD/shared/og.html?g=$g"
      done   (then move og-home.png → og.png, og-<game>.png → <game>/og.png)
@@ -147,6 +147,16 @@
           <path d="M68 52L80 40" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
         </svg>
 </template>
+<template id="lexiconga">
+  <svg class="art" viewBox="0 0 96 96">
+          <g filter="url(#speck)">
+            <rect class="card" x="6" y="30" width="84" height="36" rx="8"/>
+            <circle class="ov" cx="74" cy="22" r="13" fill="var(--sun)"/>
+          </g>
+          <text class="chain" x="48" y="49" style="font: 700 21px Fraunces, serif">ca<tspan fill="var(--pink-text)">t</tspan>o<tspan fill="var(--pink-text)">e</tspan>gg</text>
+          <path d="M14 78h68" stroke="var(--pink)" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 6"/>
+        </svg>
+</template>
 <svg width="0" height="0" style="position: absolute"><filter id="speck" x="0" y="0" width="100%" height="100%">
   <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
   <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.45"/>
@@ -163,6 +173,7 @@
     alienchess: ['Alien ', 'Chess', 'red', '#f6dcd6', 'Pieces from another planet, new every level. Read their cards, then take the king.'],
     balancingact: ['Balancing ', 'Act', 'orange', '#f8e2d5', 'Hang every weight on the right plate until the whole contraption hangs level.'],
     smallfry: ['Small ', 'Fry', 'teal', '#d8ebe6', 'Bend the fishes\' looks with mirrors until the little one slips out unseen.'],
+    lexiconga: ['Lexi', 'conga', 'pink', '#f7e0e8', 'Link ten words into one long word: you write the links.'],
   };
   // Hebrew (?lang=he): the names, lines and footers of the Hebrew pages (i18n/he.js)
   const HE = { // [wordmark, line]: the accented letters are in <span>, as on the pages
@@ -175,6 +186,7 @@
     alienchess: ['שח<span>מאדים</span>', 'כלים מכוכב אחר, חדשים בכל שלב. קראו את הקלפים שלהם, ואז אכלו את המלך.'],
     balancingact: ['על כפות <span>המאזניים</span>', 'תלו כל משקולת על הכף הנכונה, עד שכל המתקן התלוי מאוזן.'],
     smallfry: ['ר<span>קק</span>', 'כופפו את מבטי הדגים במראות, עד שהקטנטן יחמוק החוצה בלי להיראות.'],
+    lexiconga: ['לקסי<span>קונגה</span>', 'חברו עשר מילים למילה ארוכה אחת: את החוליות כותבים אתם.'],
   };
   const he = new URLSearchParams(location.search).get('lang') === 'he';
   if (he) {
@@ -182,6 +194,7 @@
     for (const k in GAMES) [GAMES[k][0], GAMES[k][1], GAMES[k][4]] = [HE[k][0], '', HE[k][1]]; // the whole wordmark in the first part
     document.getElementById('wordswipe').content.querySelector('.owl').textContent = 'ינשוף?';
     document.getElementById('wordswipe').content.querySelector('.owl').style.direction = 'rtl';
+    document.getElementById('lexiconga').content.querySelector('.chain').outerHTML = '<text x="48" y="49" style="font: 700 21px var(--display); direction: rtl">חתו<tspan fill="var(--pink-text)">ל</tspan>ימון</text>';
   }
   const plate = (id, bg) => `<div class="plate" style="--plate: ${bg}">${document.getElementById(id).innerHTML}</div>`;
   const g = new URLSearchParams(location.search).get('g');
