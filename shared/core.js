@@ -9,6 +9,7 @@
 //   random         -> optional: random levels per difficulty with share codes (playRandom), no unlocks or levels grid
 //   stars(G)       -> optional: the stars for a win (default: by hints); a game with it has no hints, and its results show stars instead
 //   moves(G)       -> optional: the moves a win took; a daily records it (m), and the win screen and share show it
+//   extra(G)       -> optional: a short line about the win (translated); a daily records it (x), and share shows it
 //   ownIntro       -> optional: the game teaches in its own first-level intro, so How to play doesn't auto-open on a first visit
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
@@ -521,7 +522,7 @@ function win() {
   }
   clearInterval(timer);
   delete store.saves[G.key];
-  const h = G.hinted.size, rec = { t: G.elapsed, h, s: IMP ? game.impossible?.stars?.(G) ?? 3 : game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1, m: game.moves?.(G) };
+  const h = G.hinted.size, rec = { t: G.elapsed, h, s: IMP ? game.impossible?.stars?.(G) ?? 3 : game.stars ? game.stars(G) : h === 0 ? 3 : h <= 2 ? 2 : 1, m: game.moves?.(G), x: game.extra?.(G) };
   if (G.date) (store.daily[G.date] ??= {})[G.pack] ??= rec;
   else {
     const pp = store.packs[G.pack];
@@ -638,7 +639,7 @@ async function share() {
   track('share');
   const r = store.daily[G.date][G.pack];
   const st = streak(), s = r.s ?? (r.h ? (r.h <= 2 ? 2 : 1) : 3); // results saved before stars were recorded: rate by hints, as the win screen does
-  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${IMP ? '🔥 ' : ''}${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.m ? `👣 ${T('{n} moves', { n: r.m })}  ` : ''}${(IMP ? '⛧' : '⭐').repeat(s)}` +
+  const text = `${T('{game} daily', { game: game.name })} · ${shortDate(G.date)} · ${IMP ? '🔥 ' : ''}${tierName(G.pack)}\n⏱ ${fmt(r.t)}  ${r.m ? `👣 ${T('{n} moves', { n: r.m })}  ` : ''}${r.x ? r.x + '  ' : ''}${(IMP ? '⛧' : '⭐').repeat(s)}` +
     (st ? `  🔥 ${T('{n}-day streak', { n: st })}` : '') +
     (location.protocol.startsWith('http') ? '\n' + location.origin + location.pathname : '');
   // Android's in-app browsers (Telegram, Gmail…) have no navigator.share, or a share that rejects: copy instead, down to the

@@ -276,5 +276,6 @@ boot({ name: T('Lexiconga'),
   ],
   storeKey: 'lexiconga' + LSUF, random: true, glyphs: HE ? ['א', 'ש', 'ל'] : ['a', 'x', 'e'], start: startLevel,
   save: (G) => ({ conns: G.conns, hints: G.hinted.size }), key: () => false, reveal,
+  extra: () => '🔤 ' + T('One word, {n} letters', { n: letters().length }), // the whole chain's length, for the share
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return Math.max(1, (G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1) - G.hinted.size); } });
 game.impossible = { stars: game.stars };
