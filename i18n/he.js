@@ -474,8 +474,8 @@ module.exports = {
       '<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.': '<b>תקועים:</b> כל הפריטים במקום, והרקק עדיין בפנים. בטלו ונסו דרך אחרת.',
       'Each fish looks only straight ahead: the dotted lines show where. The fry (orange) is looking at rock. Pick the <b>mirror</b> below.':
         'כל דג מסתכל רק ישר קדימה: הקווים המנוקדים מראים לאן. הרקק (הכתום) מסתכל על סלע. בחרו את ה<b>מראה</b> למטה.',
-      'Items go only where a fish is looking. Tap the ringed spot (once to see how the looks bend, again to place it): the fry will see the <b>exit</b> and swim for it.':
-        'פריטים מניחים רק במקום שדג מסתכל עליו. הקישו על הנקודה המסומנת (פעם אחת כדי לראות איך המבטים מתכופפים, ושוב כדי להניח): הרקק יראה את <b>היציאה</b> וישחה אליה.',
+      'Items go only where a fish is looking. Tap the ringed spot to place it there: the fry will see the <b>exit</b> and swim for it.':
+        'פריטים מניחים רק במקום שדג מסתכל עליו. הקישו על הנקודה המסומנת כדי להניח שם את הפריט: הרקק יראה את <b>היציאה</b> וישחה אליה.',
     },
     'balancingact/game.js': {
       'Balancing Act': 'על כפות המאזניים',
