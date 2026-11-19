@@ -3,7 +3,7 @@
 :root { --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink); }
 
 #game { justify-content: flex-start; }
-.board-wrap { width: 100%; }
+.board-wrap { width: 100%; grid-template-columns: 100%; } /* an auto column would grow to the minimap's whole chain, pushing the board off screen */
 .board { width: min(560px, 100%); margin: 0 auto; display: flex; flex-direction: column; align-items: stretch; user-select: none; -webkit-user-select: none; }
 .board .tip { align-self: center; margin: 6px 0 10px; }
 
