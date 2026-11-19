@@ -228,7 +228,7 @@ function tankSvg(L, vb = viewOf(L)) {
 // G.L: the level. G.states[i]: the tank after the first i placements, once the fish stopped (G.S is the live one). G.placed:
 // [type, spot] in order. G.lock: placements a hint made (and everything before them), which undo can't take back.
 // G.sel: the picked item type. G.busy: fish are moving. G.fail: 'eaten' | 'loop' | 'stuck' | null. G.moved: fish moved since the
-// last placement. G.mistakes: for the stars. G.preview: a spot shown as if placed (hover, or a first tap on touch).
+// last placement. G.mistakes: for the stars. G.preview: a spot shown as if placed (mouse hover, or keyboard).
 const TUTORIAL = Fry.parse('7|' + ['###X###', '#.....#', '#.0...#', '#.....#', '#.....#', '#..2..#', '#######'].join('') + '|16.1.1,38.1.2||/|/@17');
 const levelOf = (G) => {
   if (G.tut) return TUTORIAL;
@@ -769,7 +769,7 @@ function finish(pre, rest) {
 
 // ---------- input ----------
 $('#tray').addEventListener('click', (e) => { const s = e.target.closest('.slot'); if (s) { G.kspot = -1; choose(s.dataset.type); } });
-// Mouse: hovering a spot previews the looks with the item there; a click places it. Touch: the first tap previews, the second places.
+// Mouse: hovering a spot previews the looks with the item there. A click or tap places it.
 $('#board').addEventListener('pointerover', (e) => {
   const s = e.target.closest('[data-spot]');
   if (e.pointerType !== 'mouse' || !s || !playing() || G.busy) return;
@@ -779,11 +779,8 @@ $('#board').addEventListener('pointerleave', (e) => { if (e.pointerType === 'mou
 $('#board').addEventListener('click', (e) => {
   const s = e.target.closest('[data-spot]');
   if (!s || !playing() || G.busy) return;
-  const at = +s.dataset.spot;
-  if (G.preview === at || G.lastPointer === 'mouse') placeAt(at);
-  else { G.preview = at; sfx.tap(); draw(); }
+  placeAt(+s.dataset.spot);
 });
-$('#board').addEventListener('pointerdown', (e) => { if (G) G.lastPointer = e.pointerType; });
 
 // Keyboard: 1–9 pick an item from the tray, arrows step through the spots it can go, Enter or Space places it, U / Z / Backspace undo
 function onKey(e) {
