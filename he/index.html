@@ -6,12 +6,12 @@
 <script>var I18N = {"Theme: auto":"ערכת צבע: אוטומטית","Theme: light":"ערכת צבע: בהירה","Theme: dark":"ערכת צבע: כהה","Tap Share, then Add to Home Screen":"הקישו על שיתוף ואז על „הוספה למסך הבית״","Open the browser menu and tap ☆ or Add to Home screen":"פתחו את תפריט הדפדפן והקישו על ☆ או על „הוספה למסך הבית״","Press ⌘D to bookmark this page":"הקישו ⌘D כדי להוסיף את הדף למועדפים","Press Ctrl+D to bookmark this page":"הקישו Ctrl+D כדי להוסיף את הדף למועדפים","Settings":"הגדרות","High contrast":"ניגודיות גבוהה","Plain paper: no grain or misprints, darker text":"נייר חלק: בלי גרעיניות ובלי הדפסה מוסטת, טקסט כהה יותר","Reduce motion":"פחות תנועה","No confetti, flips or sliding":"בלי קונפטי, היפוכים והחלקות","Text & tile size":"גודל טקסט ומשבצות","Normal":"רגיל","Large":"גדול","Larger":"גדול יותר","Your progress":"ההתקדמות שלכם","Kept in this browser only. Export it to keep a copy or move it to another device.":"נשמרת רק בדפדפן הזה. ייצאו אותה כדי לשמור עותק או להעביר אותה למכשיר אחר.","Export":"ייצוא","Import":"ייבוא","Reset all progress":"איפוס כל ההתקדמות","Done":"סיום","OK":"אישור","Cancel":"ביטול","That file isn't a Games by Miki export.":"הקובץ הזה אינו ייצוא של מדף המשחקים של מיקי.","Replace the progress in this browser with the one in this file?":"להחליף את ההתקדמות בדפדפן הזה בזו שבקובץ?","Impossible Mode":"מצב בלתי אפשרי","Leave Impossible Mode":"יציאה מהמצב הבלתי אפשרי","Impossible":"בלתי אפשרי","Erase all progress, streaks and saved games, in every game? This can't be undone. (Export first to keep a copy.)":"למחוק את כל ההתקדמות, הרצפים והמשחקים השמורים, בכל המשחקים? אי אפשר לבטל את זה. (כדאי לייצא קודם כדי לשמור עותק.)"};</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>
-<meta name="description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים ורקק. חידות חדשות בכל יום.">
+<meta name="description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים, רקק ולקסיקונגה. חידות חדשות בכל יום.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="מדף המשחקים של מיקי">
 <meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/he/">
 <meta property="og:title" content="מדף המשחקים של מיקי — משחקי היגיון יומיים">
-<meta property="og:description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים ורקק. חידות חדשות בכל יום.">
+<meta property="og:description" content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים, רקק ולקסיקונגה. חידות חדשות בכל יום.">
 <meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/he/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -148,11 +148,17 @@
   :root[data-calm] .game::after { animation: none; opacity: .6; }
   /* the banner: a random game above the games, its lead-in over it and a rule under it (the script below deals it) */
   .cover { container-name: cover; } /* named: inside the banner the nearest container is .b-text */
-  /* a new game, announced in one line above the banner; the whole strip is its link */
-  .new-game { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 10px; margin-bottom: clamp(14px, calc(2 * var(--vw)), 20px); border: 1px solid var(--ink); border-radius: 12px;
-    background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg); color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.35; animation: enter .45s 30ms both var(--ease); }
+  /* the new games, announced in one line above the banner, taking turns (the script below swaps them); each whole strip is its link */
+  .new-games { display: grid; margin-bottom: clamp(14px, calc(2 * var(--vw)), 20px); animation: enter .45s 30ms both var(--ease); }
+  .new-game { grid-area: 1 / 1; display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 10px; border: 1px solid var(--ink); border-radius: 12px;
+    background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg); color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.35;
+    transition: opacity .5s var(--ease), translate .5s var(--ease), visibility 0s; }
+  .new-game[inert] { opacity: 0; translate: 0 6px; visibility: hidden; transition: opacity .5s var(--ease), translate .5s var(--ease), visibility 0s .5s; }
   .new-fish { flex: none; width: 44px; height: 26px; overflow: visible; animation: new-swim 2.4s ease-in-out infinite alternate; }
   @keyframes new-swim { from { translate: 0 -1.5px; rotate: -3deg; } to { translate: 2px 1.5px; rotate: 3deg; } }
+  .new-chain { flex: none; font: 700 26px/1 var(--display); letter-spacing: .01em; color: var(--ink); }
+  .new-chain b { font: inherit; color: var(--brand-text); display: inline-block; animation: new-bob 1.6s ease-in-out infinite alternate; }
+  @keyframes new-bob { from { translate: 0 -2px; } to { translate: 0 2px; } }
   .new-text { flex: 1; min-width: 0; }
   .new-tag { font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--brand-text); margin-inline-end: 4px; }
   .new-game b { font-family: var(--display); font-weight: 700; font-size: 17px; }
@@ -161,7 +167,7 @@
   .new-game:hover b { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
   [dir="rtl"] .new-game:hover .new-go { translate: -4px 0; }
   [dir="rtl"] .new-fish { scale: -1 1; } /* swims the way the line reads */
-  [data-calm] .new-fish { animation: none; }
+  [data-calm] :is(.new-fish, .new-chain b) { animation: none; }
   .pick { padding-bottom: clamp(20px, calc(3 * var(--vw)), 30px); margin-bottom: clamp(20px, calc(3 * var(--vw)), 30px); border-bottom: 1px solid var(--ink); animation: enter .45s 60ms both var(--ease); }
   .b-ask { margin: 0 0 8px; font: italic 600 20px/1.1 var(--display); letter-spacing: 0; text-transform: none; color: var(--ink); }
   .banner {
@@ -231,11 +237,18 @@
     <p class="issue"><span><b id="issue-no">גיליון 1</b></span><span id="issue-date"></span><span class="hide-sm">מחיר: הפסקת קפה אחת</span></p>
   </header>
 
+  <div class="new-games">
+  <a class="new-game" href="lexiconga/" style="--brand: var(--pink); --brand-text: var(--pink-text)">
+    <span class="new-chain" aria-hidden="true">ע<b>ץ</b></span>
+    <span class="new-text"><span class="new-tag">חדש</span> <span>משחק חדש: <b>לקסיקונגה</b>. חברו עשר מילים למילה ארוכה אחת.</span></span>
+    <span class="new-go" aria-hidden="true">←</span>
+  </a>
   <a class="new-game" href="smallfry/" style="--brand: var(--teal); --brand-text: var(--teal-text)">
     <svg class="new-fish" viewBox="0 0 44 26" aria-hidden="true"><g filter="url(#speck)"><path d="M11 13L3 7q2 6 0 12z" fill="var(--sun)"/><path d="M9 13c5-9 20-10 30-1q2 1 0 2c-10 9-25 8-30-1z" fill="var(--orange)"/><path d="M21 6.6q4-4 8 0z" fill="var(--sun)"/></g><circle cx="32" cy="11.6" r="2.2" fill="var(--stock)"/><circle cx="32.7" cy="11.6" r="1.1" fill="var(--navy)"/></svg>
     <span class="new-text"><span class="new-tag">חדש</span> <span>משחק חדש: <b>רקק</b>. כופפו את מבטי הדגים והוציאו את הקטנטן.</span></span>
     <span class="new-go" aria-hidden="true">←</span>
   </a>
+  </div>
   <section class="pick">
     <p class="kicker b-ask"></p>
     <a class="banner" href="mathquilibrium/">
@@ -427,6 +440,24 @@
         <div class="today"></div>
       </div>
     </a>
+    <a class="game" href="lexiconga/" data-store="lexiconga-he" style="--brand: var(--pink); --brand-text: var(--pink-text); --plate: #f7e0e8; --d: 630ms">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <rect class="card" x="6" y="30" width="84" height="36" rx="8"/>
+            <circle class="ov" cx="74" cy="22" r="13" fill="var(--sun)"/>
+          </g>
+          <text x="48" y="49" style="font: 700 21px var(--display); direction: rtl">חתו<tspan fill="var(--pink-text)">ל</tspan>ימון</text>
+          <path d="M14 78h68" stroke="var(--pink)" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 6"/>
+        </svg>
+      </div>
+      <div>
+        <span class="kicker">10 <em>מילים</em></span>
+        <h2>לקסי<span>קונגה</span></h2>
+        <p>חברו עשר מילים למילה ארוכה אחת: את החוליות כותבים אתם.</p>
+        <div class="today"></div>
+      </div>
+    </a>
   </nav>
   <p class="colophon">מודפס טרי בכל בוקר.</p>
 </main>
@@ -571,9 +602,26 @@
     <path d="M184 60H226V22" fill="none" stroke="var(--orange)" stroke-width="2.4" stroke-dasharray="4 4" stroke-linecap="round"/>
     <path d="M216 70L236 50" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
   </svg>
+  <svg class="art" data-for="lexiconga/" data-narrow="90 0 180 120" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g filter="url(#speck)">
+      <rect class="card" width="360" height="120"/>
+      <circle class="ov" cx="300" cy="30" r="22" fill="var(--sun)"/>
+      <circle class="ov" cx="52" cy="92" r="16" fill="var(--teal)"/>
+    </g>
+    <text x="180" y="62" style="font: 700 40px var(--display); direction: rtl">שמ<tspan fill="var(--pink-text)">ש</tspan>ול<tspan fill="var(--pink-text)">ח</tspan>תול</text>
+  </svg>
 </template>
 <script src="wordswipe/special.js"></script>
 <script>
+  // The new games take turns in the strip: a random one first, then the next every 5 seconds (held while pointed at or focused)
+  {
+    const news = [...document.querySelectorAll('.new-game')], box = document.querySelector('.new-games');
+    let at = Math.floor(Math.random() * news.length), held = false;
+    const turn = () => news.forEach((a, i) => (a.inert = i !== at));
+    turn();
+    for (const [ev, v] of [['pointerenter', true], ['pointerleave', false], ['focusin', true], ['focusout', false]]) box.addEventListener(ev, () => { held = v; });
+    if (news.length > 1) setInterval(() => { if (!held && !document.hidden) { at = (at + 1) % news.length; turn(); } }, 5000);
+  }
   const d = new Date(), today = d.toISOString().slice(0, 10); // UTC, like the games
   // The issue number counts days since the first issue (2026-11-12). Reset this to relaunch.
   const ISSUE0 = Date.UTC(2026, 10, 12);

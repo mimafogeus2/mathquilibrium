@@ -67,8 +67,8 @@ module.exports = {
   dir: 'rtl',
   // Added to each page's Google Fonts request: Fraunces and Inter have no Hebrew, so those glyphs fall through to these (see --display in core.css)
   fonts: '&family=Frank+Ruhl+Libre:wght@300..900&family=Heebo:wght@400..700',
-  // Latin words that stay on Hebrew pages: key names, as printed on the keys
-  keep: ['Backspace', 'Enter'],
+  // Latin words that stay on Hebrew pages: key names, as printed on the keys; Lexiconga's word-list credit
+  keep: ['Backspace', 'Enter', 'FrequencyWords', 'CC', 'BY', 'SA'],
 
   // What the scripts look up with T(), by the script that does. A page gets the groups of the scripts it loads (every game loads core.js).
   js: {
@@ -133,6 +133,7 @@ module.exports = {
       'Alien Chess': 'שחמאדים',
       'Balancing Act': 'על כפות המאזניים',
       'Small Fry': 'רקק',
+      'Lexiconga': 'לקסיקונגה',
       'Easy': 'קל',
       'Medium': 'בינוני',
       'Hard': 'קשה',
@@ -477,6 +478,33 @@ module.exports = {
       'Items go only where a fish is looking. Tap the ringed spot to place it there: the fry will see the <b>exit</b> and swim for it.':
         'פריטים מניחים רק במקום שדג מסתכל עליו. הקישו על הנקודה המסומנת כדי להניח שם את הפריט: הרקק יראה את <b>היציאה</b> וישחה אליה.',
     },
+    'lexiconga/game.js': {
+      'Lexiconga': 'לקסיקונגה',
+      '★★★ in {t}': '★★★ ב־{t}',
+      '<b>Dead end:</b> no word links {x} to anything left. Undo and try another way.': '<b>מבוי סתום:</b> אין מילה שמחברת את {x} לשום דבר שנשאר. בטלו ונסו דרך אחרת.',
+      'A word from <b>{x}</b> to the first letter of a word in the box.': 'מילה מ־<b>{x}</b> אל האות הראשונה של מילה בתיבה.',
+      'Too short: at least {n} letters here.': 'קצרה מדי: כאן צריך לפחות {n} אותיות.',
+      "That's a word from the box: links are your own words.": 'זו מילה מהתיבה: החוליות הן מילים משלכם.',
+      'Already in the chain.': 'כבר בשרשרת.',
+      "<b>{w}</b> isn't in the word list.": '<b>{w}</b> לא ברשימת המילים.',
+      'Nothing left in the box starts with <b>{y}</b>.': 'שום מילה שנשארה בתיבה לא מתחילה ב־<b>{y}</b>.',
+      '{w} added.': '{w} נוספה.',
+      'Press <b>Enter</b> to add it.': 'הקישו <b>Enter</b> כדי להוסיף אותה.',
+      'One word, {n} letters': 'מילה אחת, {n} אותיות',
+      'Enter': 'Enter',
+      'Delete': 'מחיקה',
+      "Link the box into one long word: each word you write starts with the chain's last letter and ends with the first letter of a box word, which comes next.":
+        'חברו את התיבה למילה ארוכה אחת: כל מילה שאתם כותבים מתחילה באות האחרונה של השרשרת ונגמרת באות הראשונה של מילה מהתיבה, שבאה אחריה.',
+      "Your words can't be box words, and each is used once.": 'המילים שלכם לא יכולות להיות מילים מהתיבה, וכל אחת באה פעם אחת.',
+      'Your word starts where <b>{start}</b> ends: the <b>{x}</b> is already there. End it on <b>{y}</b>, the first letter of <b>{w}</b>{note}: type <b>{try}</b>, then Enter.':
+        'המילה שלכם מתחילה איפה ש<b>{start}</b> נגמרת: ה־<b>{x}</b> כבר שם. סיימו אותה ב־<b>{y}</b>, האות הראשונה של <b>{w}</b>{note}: הקלידו <b>{try}</b>, ואז Enter.',
+      'The computer added <b>{w}</b> and crossed it out. Now from <b>{next}</b>: type <b>{try2}</b>, which ends on the first letter of <b>{w2}</b>.':
+        'המחשב הוסיף את <b>{w}</b> וסימן אותה. עכשיו מ־<b>{next}</b>: הקלידו <b>{try2}</b>, שנגמרת באות הראשונה של <b>{w2}</b>.',
+      'This time, head for <b>{w3}</b>: type <b>{try3}</b>.': 'הפעם, לכו על <b>{w3}</b>: הקלידו <b>{try3}</b>.',
+      'Last one, from <b>{next3}</b> to <b>{w2}</b>: type <b>{try4}</b>. In a real level the words are yours to find, and the <b>hint</b> types one for you, for a star.':
+        'ואחרונה, מ־<b>{next3}</b> אל <b>{w2}</b>: הקלידו <b>{try4}</b>. בשלב אמיתי את המילים מוצאים לבד, וה<b>רמז</b> מקליד אחת בשבילכם, תמורת כוכב.',
+      'Changed your mind? <b>Undo</b> takes back your word and the one it brought in.': 'התחרטתם? <b>ביטול</b> מחזיר את המילה שלכם ואת המילה שהיא הביאה.',
+    },
     'balancingact/game.js': {
       'Balancing Act': 'על כפות המאזניים',
       'The numbers on the beam are its <b>arm lengths</b>. A beam hangs level when <b>weight × arm</b> is the same on both sides. Drag the <b>6</b> onto the plate on the short arm, or tap it, then tap the plate.':
@@ -596,8 +624,8 @@ module.exports = {
       ['<span class="print-hint" aria-hidden="true"><span>Printable version here</span><svg', '<span class="print-hint" aria-hidden="true"><span>אפשר גם להדפיס</span><svg'],
       ['<title>Games by Miki — daily logic games</title>', '<title>מדף המשחקים של מיקי — משחקי היגיון יומיים</title>'],
       ['content="Games by Miki — daily logic games"', 'content="מדף המשחקים של מיקי — משחקי היגיון יומיים"'],
-      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act and Small Fry. New puzzles every day."',
-        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים ורקק. חידות חדשות בכל יום."'],
+      ['content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act, Small Fry and Lexiconga. New puzzles every day."',
+        'content="חידות היגיון יומיות קטנות: מאוזן, הכתרה, שמאל ימין שמאל, בסדר, כמה כמה, מהפכים, שחמאדים, על כפות המאזניים, רקק ולקסיקונגה. חידות חדשות בכל יום."'],
       ['<span class="kicker">Daily logic games</span>', '<span class="kicker">משחקי היגיון יומיים</span>'],
       // The Hebrew title is ~7.5em wide: size it to the header's width so it stays on one line (13cqi ≈ 100% / 7.6em, shadow included)
       ['<header>', '<header style="container-type: inline-size">'],
@@ -635,7 +663,17 @@ module.exports = {
       ['<span class="kicker">09 <em>Logic</em></span>', '<span class="kicker">09 <em>היגיון</em></span>'],
       ['<h2>Small <span>Fry</span></h2>', '<h2>ר<span>קק</span></h2>'],
       [`<p>Bend the fishes' looks with mirrors until the little one slips out unseen.</p>`, '<p>כופפו את מבטי הדגים במראות, עד שהקטנטן יחמוק החוצה בלי להיראות.</p>'],
+      ['<span class="new-tag">New</span> <span>A new game: <b>Lexiconga</b>. Link ten words into one long word.</span>', '<span class="new-tag">חדש</span> <span>משחק חדש: <b>לקסיקונגה</b>. חברו עשר מילים למילה ארוכה אחת.</span>'],
       ['<span class="new-tag">New</span> <span>A new game: <b>Small Fry</b>. Bend the fishes\' looks and get the little one out.</span>', '<span class="new-tag">חדש</span> <span>משחק חדש: <b>רקק</b>. כופפו את מבטי הדגים והוציאו את הקטנטן.</span>'],
+      ['<span class="new-chain" aria-hidden="true">a<b>x</b>e</span>', '<span class="new-chain" aria-hidden="true">ע<b>ץ</b></span>'],
+      ['data-store="lexiconga"', 'data-store="lexiconga-he"'],
+      ['<span class="kicker">10 <em>Words</em></span>', '<span class="kicker">10 <em>מילים</em></span>'],
+      ['<h2>Lexi<span>conga</span></h2>', '<h2>לקסי<span>קונגה</span></h2>'],
+      ['<p>Link ten words into one long word: you write the links.</p>', '<p>חברו עשר מילים למילה ארוכה אחת: את החוליות כותבים אתם.</p>'],
+      ['<text x="48" y="49" style="font: 700 21px Fraunces, serif">ca<tspan fill="var(--pink-text)">t</tspan>o<tspan fill="var(--pink-text)">e</tspan>gg</text>',
+        '<text x="48" y="49" style="font: 700 21px var(--display); direction: rtl">חתו<tspan fill="var(--pink-text)">ל</tspan>ימון</text>'],
+      ['<text x="180" y="62" style="font: 700 40px Fraunces, serif">pla<tspan fill="var(--pink-text)">n</tspan>ois<tspan fill="var(--pink-text)">e</tspan>gg</text>',
+        '<text x="180" y="62" style="font: 700 40px var(--display); direction: rtl">שמ<tspan fill="var(--pink-text)">ש</tspan>ול<tspan fill="var(--pink-text)">ח</tspan>תול</text>'],
       ['<span class="new-go" aria-hidden="true">→</span>', '<span class="new-go" aria-hidden="true">←</span>'],
       ['<p class="colophon">Printed fresh every morning.</p>', '<p class="colophon">מודפס טרי בכל בוקר.</p>'],
       ['<span class="b-go">Play <b', '<span class="b-go">שחקו <b'],
@@ -978,6 +1016,46 @@ module.exports = {
       ['<p class="muted small kbd-hint">Keyboard: arrows pick an item, <kbd>1</kbd>–<kbd>8</kbd> hang it on that plate, <kbd>0</kbd> back to the store, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: החצים בוחרים פריט, <kbd>1</kbd>–<kbd>8</kbd> תולים אותו על הכף, <kbd>0</kbd> בחזרה למחסן, <kbd>P</kbd> השהיה.</p>'],
     ],
+    'lexiconga/index.html': [
+      ['Lexiconga — one long word', 'לקסיקונגה — מילה אחת ארוכה'],
+      ['Link ten words into one long word: each word you type starts where the chain ends and ends where a word in the box begins. New daily puzzles every day.',
+        'חברו עשר מילים למילה ארוכה אחת: כל מילה שאתם מקלידים מתחילה איפה שהשרשרת נגמרת ונגמרת איפה שמילה מהתיבה מתחילה. חידות יומיות חדשות בכל יום.'],
+      ['<h1 class="wordmark">Lexi<span>conga</span></h1>', '<h1 class="wordmark">לקסי<span>קונגה</span></h1>'],
+      ['<p class="tagline">Ten words, one long word. You write the links.</p>', '<p class="tagline">עשר מילים, מילה ארוכה אחת. את החוליות כותבים אתם.</p>'],
+      ['aria-label="Words to link"', 'aria-label="מילים לחבר"'],
+      ['aria-label="Keyboard"', 'aria-label="מקלדת"'],
+      ['<p id="board-keys" class="sr-only">Type your word and press Enter. Backspace deletes a letter.</p>', '<p id="board-keys" class="sr-only">הקלידו את המילה והקישו Enter. Backspace מוחק אות.</p>'],
+      ['<p class="help-chain" aria-hidden="true">ca<b>t</b>ou<b>r</b>ai<b>n</b>ic<b>e</b>gg</p>', '<p class="help-chain" aria-hidden="true">חתו<b>ל</b>ימו<b>נ</b>מ<b>ר</b>אש</p>'],
+      [`<li>Link every word in the <b>box</b> into one long word. The chain starts with a word of its own.</li>
+    <li>Type a word that <b>starts</b> with the chain's last letter and <b>ends</b> with the first letter of a word in the box. The computer then adds that word, and it's your turn again.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
+    <li>Your words can't be words from the box, and each can be used once. Harder levels ask for longer ones.</li>
+    <li>If two words in the box start with the same letter, the computer picks one that still lets you finish. Your choices can still lead you into a <b>dead end</b>: <b>Undo</b> takes back your last word and the one it brought in, as often as you like.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
+    <li>Stars are for speed. One <b>hint</b> a level fills in a word for you (backing out of a dead end first), and costs a star.</li>`,
+        `<li>חברו את כל המילים שב<b>תיבה</b> למילה ארוכה אחת. השרשרת מתחילה במילה משלה.</li>
+    <li>הקלידו מילה ש<b>מתחילה</b> באות האחרונה של השרשרת ו<b>נגמרת</b> באות הראשונה של מילה מהתיבה. המחשב מוסיף את המילה הזו, ושוב תורכם.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="3">
+    <li>המילים שלכם לא יכולות להיות מילים מהתיבה, וכל אחת באה פעם אחת. בשלבים הקשים צריך מילים ארוכות יותר. אותיות סופיות נחשבות כמו הרגילות: אחרי ך באה כ.</li>
+    <li>אם שתי מילים בתיבה מתחילות באותה אות, המחשב בוחר אחת שעדיין מאפשרת לסיים. הבחירות שלכם עדיין יכולות להוביל ל<b>מבוי סתום</b>: <b>ביטול</b> מחזיר את המילה האחרונה שלכם ואת המילה שהיא הביאה, כמה פעמים שתרצו.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="5">
+    <li>הכוכבים הם על מהירות. <b>רמז</b> אחד בכל שלב מקליד בשבילכם מילה (ויוצא קודם ממבוי סתום), ועולה כוכב.</li>`],
+      ['<p class="muted small">Word lists: <a href="CREDITS.md">SCOWL and FrequencyWords</a> (CC BY-SA 4.0).</p>', '<p class="muted small">רשימות המילים: <a href="CREDITS.md">FrequencyWords</a> (רישיון CC BY-SA 4.0).</p>'],
+      ['<p class="muted small kbd-hint">Keyboard: type, <kbd>Enter</kbd> to add your word, <kbd>Backspace</kbd> to delete, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo, <kbd>Esc</kbd> menu.</p>',
+        '<p class="muted small kbd-hint">מקלדת: מקלידים, <kbd>Enter</kbd> מוסיף את המילה, <kbd>Backspace</kbd> מוחק, <kbd>Ctrl</kbd>+<kbd>Z</kbd> ביטול, <kbd>Esc</kbd> לתפריט.</p>'],
+    ],
     // the daily zine. The booklet opens right to left: a sheet's right page is its front.
     'print.html': [
       [`<title>Games by Miki — print today's zine</title>`, '<title>מדף המשחקים של מיקי — הגיליון של היום להדפסה</title>'],
@@ -1000,8 +1078,8 @@ module.exports = {
       ['<span><b>Staple</b> twice through the fold, from the outside. Opening the stapler flat onto some cardboard helps.</span>', '<span><b>הדקו</b> פעמיים דרך הקפל, מבחוץ. עוזר לפתוח את המהדק לגמרי ולהדק על קרטון.</span>'],
       ['<h2 class="kicker z-head">Preview</h2>', '<h2 class="kicker z-head">תצוגה מקדימה</h2>'],
       // the inline script
-      ["const GAMES = [['mathquilibrium', 'Mathquilibrium', 'EMH'], ['biggr', 'Biggr', 'EMH'], ['wordswipe', 'WordSwipe', ''], ['orderly', 'Orderly', ''], ['coronet', 'Coronet', 'EMH'], ['balancingact', 'Balancing Act', 'EMH']];",
-        "const GAMES = [['mathquilibrium', 'מאוזן', 'EMH'], ['biggr', 'כמה כמה', 'EMH'], ['wordswipe', 'שמאל ימין שמאל', ''], ['orderly', 'בסדר', ''], ['coronet', 'הכתרה', 'EMH'], ['balancingact', 'על כפות המאזניים', 'EMH']];"],
+      ["const GAMES = [['mathquilibrium', 'Mathquilibrium', 'EMH'], ['biggr', 'Biggr', 'EMH'], ['wordswipe', 'WordSwipe', ''], ['orderly', 'Orderly', ''], ['coronet', 'Coronet', 'EMH'], ['balancingact', 'Balancing Act', 'EMH'], ['lexiconga', 'Lexiconga', 'EMH']];",
+        "const GAMES = [['mathquilibrium', 'מאוזן', 'EMH'], ['biggr', 'כמה כמה', 'EMH'], ['wordswipe', 'שמאל ימין שמאל', ''], ['orderly', 'בסדר', ''], ['coronet', 'הכתרה', 'EMH'], ['balancingact', 'על כפות המאזניים', 'EMH'], ['lexiconga', 'לקסיקונגה', 'EMH']];"],
       ['d.toLocaleDateString(undefined,', "d.toLocaleDateString('he',"],
       [`    daily: 'Daily', answer: 'Answer', answers: 'Answers', foot: 'Games by Miki · No. {no}', top: 'Daily logic games', free: 'Free · one coffee break',
     mast: 'Games<br>by Miki', no: 'No.', note: 'A pen is all you need.', scratch: 'Scratch paper', working: 'For working out',
