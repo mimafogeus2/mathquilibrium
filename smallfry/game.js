@@ -822,7 +822,7 @@ boot({ name: T('Small Fry'), storeKey: 'smallfry', glyphs: ['🐟', '◆'], star
   tutorial: [
     [T('Each fish looks only straight ahead: the dotted lines show where. The fry (orange) is looking at rock. Pick the <b>mirror</b> below.'),
       () => G.sel === '/', () => $('#tray .slot'), (m) => m.pick === '/'],
-    [T('Items go only where a fish is looking. Tap the ringed spot (once to see how the looks bend, again to place it): the fry will see the <b>exit</b> and swim for it.'),
+    [T('Items go only where a fish is looking. Tap the ringed spot to place it there: the fry will see the <b>exit</b> and swim for it.'),
       null, tutSpot, (m) => m.at === 17 || m.pick === '/'],
   ],
   save: (G) => ({ placed: G.placed, mistakes: G.mistakes, hints: G.hinted.size, lock: G.lock }), key: onKey,
