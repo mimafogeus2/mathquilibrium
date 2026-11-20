@@ -244,6 +244,7 @@
     welcome: 'Welcome', first: 'Read me first', hello: 'Puzzles<br>to go.',
     lede: 'This booklet is today’s issue of Games by Miki: Small daily logic games, each one a good excuse for a coffee break.',
     about: 'Every puzzle here and more are also online, free, with no sign-up needed. On screen they come with timers, hints, streaks, thousands of additional levels and a few games that don’t fit on paper at all.',
+    home: 'You can print tomorrow’s booklet at home - the print version is freely available from the website.',
     how: 'Solve in pen, or in pencil if you like to change your mind. The answers start on page {p}: no peeking!',
     scan: 'Play today’s issue on screen', camera: 'Point your phone’s camera at the square.',
   };
@@ -395,7 +396,7 @@
       <ol class="c-toc">${book.toc.map(([name, at, n]) => `<li><b>${at}</b><span>${esc(name)}</span><small>${n ? (n === 1 ? L.puzzle : L.puzzles.replace('{n}', n)) : ''}</small></li>`).join('')}</ol>
       ${coverArt}<p class="c-note">${L.note}</p></div>`);
     pg(`<div class="inside"><header class="z-h"><h3>${L.welcome}</h3><span class="tag">${L.first}</span></header>
-      <h2>${L.hello}</h2><p class="lede">${L.lede}</p><p>${L.about}</p><p>${L.how.replace('{p}', book.toc.at(-1)[1])}</p>
+      <h2>${L.hello}</h2><p class="lede">${L.lede}</p><p>${L.about}</p><p>${L.home}</p><p>${L.how.replace('{p}', book.toc.at(-1)[1])}</p>
       <div class="i-qr"><img src="qr-zine-inside.svg" alt=""><p><b>${L.scan}</b>${L.camera}<span dir="ltr">${esc(site)}</span></p></div></div>`, foot);
     for (const rows of book.pp) pg('<div class="pg-area"></div>', foot).firstChild.append(...rowsToSlots(rows));
     for (const rows of book.ap) pg('<div class="pg-area"></div>', L.answers).firstChild.append(...rowsToSlots(rows));

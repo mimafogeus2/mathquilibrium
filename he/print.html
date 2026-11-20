@@ -246,6 +246,7 @@
     welcome: 'ברוכים הבאים', first: 'קראו קודם', hello: 'חידות<br>לדרך.',
     lede: 'החוברת הזאת היא הגליון היומי של מדף המשחקים של מיקי: משחקי הגיון יומיים קטנים, ותירוץ טוב להפסקות קפה.',
     about: 'כל החידות בחוברת נמצאות גם באתר - בחינם וללא הרשמה. באתר הן מגיעות עם זמנים ורמזים, אלפי שלבים נוספים, וכמה משחקים שלא עובדים על נייר.',
+    home: 'אפשר להדפיס את הגליון של מחר בבית - גרסת ההדפסה זמינה בחינם באתר.',
     how: 'השתמשו בעט, או בעפרון כדי שיהיה קל לתקן. הפתרונות מתחילים בעמוד {p}. אל תציצו!',
     scan: 'לשחק בגיליון של היום על המסך', camera: 'כוונו את מצלמת הטלפון לריבוע.',
   };
@@ -397,7 +398,7 @@
       <ol class="c-toc">${book.toc.map(([name, at, n]) => `<li><b>${at}</b><span>${esc(name)}</span><small>${n ? (n === 1 ? L.puzzle : L.puzzles.replace('{n}', n)) : ''}</small></li>`).join('')}</ol>
       ${coverArt}<p class="c-note">${L.note}</p></div>`);
     pg(`<div class="inside"><header class="z-h"><h3>${L.welcome}</h3><span class="tag">${L.first}</span></header>
-      <h2>${L.hello}</h2><p class="lede">${L.lede}</p><p>${L.about}</p><p>${L.how.replace('{p}', book.toc.at(-1)[1])}</p>
+      <h2>${L.hello}</h2><p class="lede">${L.lede}</p><p>${L.about}</p><p>${L.home}</p><p>${L.how.replace('{p}', book.toc.at(-1)[1])}</p>
       <div class="i-qr"><img src="qr-zine-inside.svg" alt=""><p><b>${L.scan}</b>${L.camera}<span dir="ltr">${esc(site)}</span></p></div></div>`, foot);
     for (const rows of book.pp) pg('<div class="pg-area"></div>', foot).firstChild.append(...rowsToSlots(rows));
     for (const rows of book.ap) pg('<div class="pg-area"></div>', L.answers).firstChild.append(...rowsToSlots(rows));
