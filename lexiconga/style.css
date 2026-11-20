@@ -74,7 +74,7 @@
   #game .tools { margin-top: 6px; }
   #game .tools .give-up { flex-basis: auto; }
   .keys { margin-top: 8px; gap: 5px; }
-  .keys button { height: clamp(38px, 6 * var(--dvh), 50px); }
+  .keys button { height: clamp(34px, 6 * var(--dvh), 50px); }
 }
 
 /* the menu's practice row: no packs, a button per difficulty (core.js labels it Resume or New puzzle) */
