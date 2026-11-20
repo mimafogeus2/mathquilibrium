@@ -596,7 +596,7 @@ dialog .win-actions::before {
 .seal circle { fill: none; stroke: currentColor; stroke-width: 2.4; }
 .seal circle + circle { stroke-width: 1.1; }
 .seal text { text-anchor: middle; }
-.seal .ring { font: 700 8.2px 'Inter', 'Heebo', sans-serif; text-transform: uppercase; text-anchor: start; direction: ltr; } /* laid from the path's start in every language (RTL would anchor it off the far end) */
+.seal .ring { font: 700 8.2px 'Inter', 'Heebo', sans-serif; text-transform: uppercase; text-anchor: start; direction: ltr; unicode-bidi: bidi-override; } /* laid letter by letter from the path's start in every language (RTL would anchor it off the far end; bidi would flip each Hebrew word); core.js reverses RTL */
 .seal .no { font: 600 15px var(--display); letter-spacing: -.02em; }
 .seal .val { font: 700 10.5px 'Inter', 'Heebo', sans-serif; font-variant-numeric: tabular-nums; }
 .tag { --tilt: -7deg; top: 16px; inset-inline-start: 14px; border-radius: 4px; }
