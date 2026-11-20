@@ -566,6 +566,7 @@ function stamp(host, { date, label, value, fresh = true }) {
   if (date) {
     let ring = [game.name, T('Daily'), label].filter(Boolean).join(' · ') + ' · ';
     if (ring.length < 26) ring += ring; // round twice when short, so the letters aren't strung out around the ring
+    if (document.dir === 'rtl') ring = [...ring].reverse().join(''); // laid clockwise, so backwards: it reads right to left over the top
     s.innerHTML = `<div class="ink"><svg viewBox="0 0 100 100"><path id="stamp-ring" d="M14 50a36 36 0 1 1 72 0a36 36 0 1 1-72 0" fill="none"/>
       <circle cx="50" cy="50" r="47"/><circle cx="50" cy="50" r="28.5"/>
       <text class="ring"><textPath href="#stamp-ring" textLength="222" lengthAdjust="spacing">${esc(ring)}</textPath></text>
