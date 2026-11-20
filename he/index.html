@@ -90,7 +90,8 @@
     font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; font-variant-numeric: tabular-nums;
   }
   .issue b { font-weight: 700; }
-  @container (max-width: 515px) { .issue .hide-sm { display: none; } }
+  .issue .show-sm { display: none; }
+  @container (max-width: 515px) { .issue .hide-sm { display: none; } .issue .show-sm { display: inline; } }
 
   /* ---- contents ---- */
   .contents { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(16px, calc(2.6 * var(--vw)), 28px); }
@@ -627,7 +628,8 @@
   const ISSUE0 = Date.UTC(2026, 10, 12);
   const no = Math.max(1, Math.round((Date.parse(today) - ISSUE0) / 864e5) + 1);
   document.getElementById('issue-no').textContent = `כרך ${Math.floor((no - 1) / 365) + 1} · גיליון ${no.toLocaleString()}`; // a volume a year
-  document.getElementById('issue-date').textContent = d.toLocaleDateString('he', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const date = (len) => d.toLocaleDateString('he', { weekday: len, day: 'numeric', month: len, year: 'numeric', timeZone: 'UTC' });
+  document.getElementById('issue-date').innerHTML = `<span class="hide-sm">${date('long')}</span><span class="show-sm">${date('short')}</span>`; // short names on phones, so the line stays one line
 
   // Today's dailies, read from each game's saved progress. Impossible Mode (theme.js): the one Impossible daily, from its own store.
   const IMP = document.documentElement.hasAttribute('data-impossible');
