@@ -58,6 +58,24 @@
 .keys svg { width: 22px; height: 22px; }
 #game.done .keys { display: none; }
 #game.paused .keys { visibility: hidden; }
+/* a mouse means a real keyboard: no on-screen one */
+@media (pointer: fine) { .keys { display: none; } }
+
+/* phones: everything fits one screen, no scrolling. The keys and the box give up height first */
+@media (pointer: coarse) and (max-height: 860px) and (orientation: portrait) {
+  #game { height: calc(100 * var(--dvh)); }
+  #game .board-wrap { flex: 1 1 auto; min-height: 0; padding: 4px 0; }
+  .mini { margin: 0 0 6px; }
+  .strip { height: 60px; }
+  .track { font-size: 40px; }
+  .board .tip { margin: 4px 0 6px; font-size: 14px; }
+  .box { gap: 0 16px; padding: 8px 16px; }
+  .box .w { font-size: 18px; line-height: 1.35; }
+  #game .tools { margin-top: 6px; }
+  #game .tools .give-up { flex-basis: auto; }
+  .keys { margin-top: 8px; gap: 5px; }
+  .keys button { height: clamp(38px, 6 * var(--dvh), 50px); }
+}
 
 /* the menu's practice row: no packs, a button per difficulty (core.js labels it Resume or New puzzle) */
 .practice .btn { flex-direction: column; gap: 2px; padding-block: 12px; }

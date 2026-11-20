@@ -17,6 +17,7 @@ const TUT = HE ? { start: 'חתול', x: 'ל', y: 'נ', w: 'נמר', note: ' (ב
   : { start: 'cat', x: 'T', y: 'R', w: 'rain', note: '', try: 'tour', next: 'N', try2: 'nice', w2: 'egg', w3: 'nest', try3: 'noon', next3: 'T', try4: 'tree' };
 const only = (w) => (m) => m.word === Lex.norm(w); // the tutorial takes the word it names, nothing else
 const written = (w) => (HE ? Lex.finalForm(w) : w); // a word as written on its own
+const KEYS_AT = () => ($('#keys').offsetParent ? '#keys' : '#strip'); // the tutorial rings the on-screen keyboard, or, without one, the strip you type into
 const seed = (G) => hash('lexiconga ' + G.key);
 
 // ---------- state ----------
@@ -268,11 +269,11 @@ $('#logo').innerHTML = `<p class="logo-chain">${HE ? 'שמ<b>ש</b>ול<b>ח</b>
 boot({ name: T('Lexiconga'),
   // the tutorial level's own words: TUTORIAL (above)
   tutorial: [
-    [T('Your word starts where <b>{start}</b> ends: the <b>{x}</b> is already there. End it on <b>{y}</b>, the first letter of <b>{w}</b>{note}: type <b>{try}</b>, then Enter.', TUT), () => G.picks.length >= 1, '#keys', only(TUT.try)],
-    [T('The computer added <b>{w}</b> and crossed it out. Now from <b>{next}</b>: type <b>{try2}</b>, which ends on the first letter of <b>{w2}</b>.', TUT), () => G.picks.length >= 2, '#keys', only(TUT.try2)],
+    [T('Your word starts where <b>{start}</b> ends: the <b>{x}</b> is already there. End it on <b>{y}</b>, the first letter of <b>{w}</b>{note}: type <b>{try}</b>, then Enter.', TUT), () => G.picks.length >= 1, KEYS_AT, only(TUT.try)],
+    [T('The computer added <b>{w}</b> and crossed it out. Now from <b>{next}</b>: type <b>{try2}</b>, which ends on the first letter of <b>{w2}</b>.', TUT), () => G.picks.length >= 2, KEYS_AT, only(TUT.try2)],
     [T('Changed your mind? <b>Undo</b> takes back your word and the one it brought in.'), () => G.undid, '#btn-undo', () => false],
-    [T('This time, head for <b>{w3}</b>: type <b>{try3}</b>.', TUT), () => G.conns.includes(Lex.norm(TUT.try3)), '#keys', only(TUT.try3)],
-    [T('Last one, from <b>{next3}</b> to <b>{w2}</b>: type <b>{try4}</b>. In a real level the words are yours to find, and the <b>hint</b> types one for you, for a star.', TUT), null, '#keys', only(TUT.try4)],
+    [T('This time, head for <b>{w3}</b>: type <b>{try3}</b>.', TUT), () => G.conns.includes(Lex.norm(TUT.try3)), KEYS_AT, only(TUT.try3)],
+    [T('Last one, from <b>{next3}</b> to <b>{w2}</b>: type <b>{try4}</b>. In a real level the words are yours to find, and the <b>hint</b> types one for you, for a star.', TUT), null, KEYS_AT, only(TUT.try4)],
   ],
   storeKey: 'lexiconga' + LSUF, random: true, glyphs: HE ? ['א', 'ש', 'ל'] : ['a', 'x', 'e'], start: startLevel,
   save: (G) => ({ conns: G.conns, hints: G.hinted.size }), key: () => false, reveal,
