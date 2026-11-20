@@ -65,8 +65,9 @@
 @media (pointer: coarse) and (max-height: 860px) and (orientation: portrait) {
   #game { height: calc(100 * var(--dvh)); }
   #game .board-wrap { flex: 1 0 auto; padding: 4px 0; }
-  /* under the keys, room for a native keyboard's bottom row (space, return), so the letters sit where the phone's own do; it goes first when space is short */
-  #game:not(.done)::after { content: ''; flex: 0 1 56px; }
+  /* under the keys, what a native keyboard keeps below its letters, so ours sit where the phone's own do: its bottom row (space, return),
+     and, where the page reaches the screen's edge, the home-indicator strip again (the safe area; 0 above a browser toolbar). It goes first when space is short */
+  #game:not(.done)::after { content: ''; flex: 0 1 calc(48px + env(safe-area-inset-bottom)); }
   .mini { margin: 0 0 6px; }
   .strip { height: 60px; }
   .track { font-size: 40px; }
