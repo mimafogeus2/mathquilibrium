@@ -103,14 +103,27 @@
   /* overprinted shapes, like the front page's art, in halftones: the day's own (coverArt() below) */
   .art { position: absolute; mix-blend-mode: multiply; }
 
+  /* page 2, inside the cover: what this is and the way to the site, set as type (the back cover is the art) */
+  .inside { position: absolute; inset: 11mm 11mm 18mm; display: flex; flex-direction: column; }
+  .inside h2 { margin: 4mm 0 0; font: 800 30pt/.95 var(--display); letter-spacing: -0.045em; font-variation-settings: var(--wonk); }
+  .inside p { margin: 5mm 0 0; font-size: 10.5pt; line-height: 1.5; text-wrap: pretty; }
+  .inside .lede { font: italic 500 13pt/1.4 var(--display); }
+  .i-qr { margin-top: auto; display: flex; align-items: center; gap: 6mm; padding: 5mm; border: .6mm solid #000; border-radius: 2mm; }
+  .i-qr img { flex: none; width: 34mm; height: 34mm; }
+  .i-qr p { margin: 0; font-size: 9.5pt; }
+  .i-qr b { display: block; margin-bottom: 1.5mm; font: 800 15pt/1.1 var(--display); letter-spacing: -0.02em; font-variation-settings: var(--wonk); }
+  .i-qr span { display: block; margin-top: 2.5mm; font-weight: 700; letter-spacing: .08em; }
+
   /* scratch paper and the back cover */
   .scratch { position: absolute; inset: 11mm 11mm 18mm; display: flex; flex-direction: column; }
   .scratch i { flex: 1; background: radial-gradient(circle, #999 .28mm, transparent .34mm) 0 0 / 5mm 5mm; }
-  .back { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-  .back p { position: relative; margin: 0; }
-  .back .b1 { margin-top: 44mm; font: 800 20pt/1 var(--display); letter-spacing: -0.03em; font-variation-settings: var(--wonk); }
-  .back .b2 { margin-top: 3mm; font: italic 500 10.5pt var(--display); }
-  .back .b3 { margin-top: 8mm; padding: 1mm 2.5mm; background: #000; color: #fff; font-size: 7pt; font-weight: 700; letter-spacing: .12em; rotate: -2deg; }
+  /* below the art (it ends above 100mm), then the way back to the site */
+  .back { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding-top: 108mm; text-align: center; }
+  .back p, .back img { position: relative; margin: 0; }
+  .back .b1 { font: 800 20pt/1 var(--display); letter-spacing: -0.03em; font-variation-settings: var(--wonk); }
+  .back .b2 { max-width: 96mm; margin-top: 3mm; font: italic 500 10.5pt/1.35 var(--display); text-wrap: balance; }
+  .back img { width: 30mm; height: 30mm; margin-top: 6mm; }
+  .back .b3 { margin-top: 4mm; padding: 1mm 2.5mm; background: #000; color: #fff; font-size: 7pt; font-weight: 700; letter-spacing: .12em; rotate: -2deg; }
 
   @media print {
     @page { size: A4 landscape; margin: 0; }
@@ -223,11 +236,17 @@
   const L = {
     daily: 'Daily', answer: 'Answer', answers: 'Answers', foot: 'Games by Miki · No. {no}', top: 'Daily logic games', free: 'Free · one coffee break',
     mast: 'Games<br>by Miki', no: 'No.', note: 'A pen is all you need.', scratch: 'Scratch paper', working: 'For working out',
-    back: 'Printed fresh every morning.', tomorrow: 'A new issue tomorrow at', puzzles: '{n} puzzles', puzzle: '1 puzzle',
+    back: 'Printed fresh every morning.', tomorrow: 'A new issue tomorrow, and every game to play on screen, with thousands more levels. Free, no sign-up: scan or visit', puzzles: '{n} puzzles', puzzle: '1 puzzle',
     count: (sheets, pages, both) => `<b>${sheets === 1 ? '1 sheet' : sheets + ' sheets'}</b> of A4${both ? ', both sides' : ''} · ${pages} pages`,
     go: (both) => (both ? 'A4, landscape, both sides: flip on short edge' : 'A4, landscape, one side'),
     cap: (i, side) => `Sheet ${i}` + (side ? (side === 1 ? ' · front' : ' · back') : ''),
     fail: "Couldn't set the type. Reload the page to try again.",
+    welcome: 'Welcome', first: 'Read me first', hello: 'Puzzles<br>to go.',
+    lede: 'This booklet is today’s issue of Games by Miki: Small daily logic games, each one a good excuse for a coffee break.',
+    about: 'Every puzzle here and more are also online, free, with no sign-up needed. On screen they come with timers, hints, streaks, thousands of additional levels and a few games that don’t fit on paper at all.',
+    home: 'You can print tomorrow’s booklet at home - the print version is freely available on the website.',
+    how: 'Solve in pen, or in pencil if you like to change your mind. The answers start on page {p}: no peeking!',
+    scan: 'Play today’s issue on screen', camera: 'Point your phone’s camera at the square.',
   };
   const MM = 96 / 25.4, CW = 126.5, CH = 181, GAP = 6, HEAD = 12; // a page's type area (.pg-area) and a puzzle's header (.z-h), mm
   const QW = (CW - GAP) / 2, HH = (CH - GAP) / 2;
@@ -359,9 +378,10 @@
   const backArt = dayArt('back', (w, h) => [-40, 40 - w, 30, 100 - h], (x, y) => `left: calc(50% + ${x}mm); top: ${y}mm`); // ends above 100mm, clear of the text
 
   let book; // { pp, ap: packed puzzle and answer pages, toc }
-  // The pages, in reading order: cover, puzzles, answers, then any pages left on the last sheet: scratch paper, the last one a back cover.
+  // The pages, in reading order: cover, the inside page, puzzles, answers, then any pages left on the last sheet: scratch paper, and always a back cover
+  // (the way back to the site, for whoever finds the zine).
   function pages(per) {
-    const n = Math.ceil((1 + book.pp.length + book.ap.length) / per) * per, out = [];
+    const n = Math.ceil((3 + book.pp.length + book.ap.length) / per) * per, out = [];
     const pg = (html, label) => {
       const p = document.createElement('div'), i = out.length + 1;
       p.className = 'pg' + (i % 2 ? '' : ' verso');
@@ -375,10 +395,13 @@
       <p class="c-date">${esc(longDate)}</p>
       <ol class="c-toc">${book.toc.map(([name, at, n]) => `<li><b>${at}</b><span>${esc(name)}</span><small>${n ? (n === 1 ? L.puzzle : L.puzzles.replace('{n}', n)) : ''}</small></li>`).join('')}</ol>
       ${coverArt}<p class="c-note">${L.note}</p></div>`);
+    pg(`<div class="inside"><header class="z-h"><h3>${L.welcome}</h3><span class="tag">${L.first}</span></header>
+      <h2>${L.hello}</h2><p class="lede">${L.lede}</p><p>${L.about}</p><p>${L.home}</p><p>${L.how.replace('{p}', book.toc.at(-1)[1])}</p>
+      <div class="i-qr"><img src="qr-zine-inside.svg" alt=""><p><b>${L.scan}</b>${L.camera}<span dir="ltr">${esc(site)}</span></p></div></div>`, foot);
     for (const rows of book.pp) pg('<div class="pg-area"></div>', foot).firstChild.append(...rowsToSlots(rows));
     for (const rows of book.ap) pg('<div class="pg-area"></div>', L.answers).firstChild.append(...rowsToSlots(rows));
     while (out.length < n - 1) pg(`<div class="scratch"><header class="z-h"><h3>${L.scratch}</h3><span class="tag">${L.working}</span></header><i></i></div>`, foot);
-    if (out.length < n) pg(`<div class="back">${backArt}<p class="b1">${L.back}</p><p class="b2">${L.tomorrow}</p><p class="b3" dir="ltr">${esc(site)}</p></div>`);
+    pg(`<div class="back">${backArt}<p class="b1">${L.back}</p><p class="b2">${L.tomorrow}</p><img src="qr-zine-back.svg" alt=""><p class="b3" dir="ltr">${esc(site)}</p></div>`);
     return out;
   }
   // Pages onto A4 sheets. One side: two pages a sheet, in order. Both sides: a booklet folded once, so the outer sheet carries
@@ -418,8 +441,8 @@
     });
     await document.fonts.ready;
     const pp = pack(puzzles.map(fit(MIN_Z))), ap = pack(answers.map(fit(MIN_ANSWER)), true);
-    const at = (b) => 2 + pp.findIndex((rows) => rows.flat().includes(b));
-    book = { pp, ap, toc: [...GAMES.map(([g, name]) => { const bs = puzzles.filter((b) => b.game === g); return [name, at(bs[0]), bs.length]; }), [L.answers, 2 + pp.length, 0]] };
+    const at = (b) => 3 + pp.findIndex((rows) => rows.flat().includes(b));
+    book = { pp, ap, toc: [...GAMES.map(([g, name]) => { const bs = puzzles.filter((b) => b.game === g); return [name, at(bs[0]), bs.length]; }), [L.answers, 3 + pp.length, 0]] };
     $('#z-msg').remove();
     $('#btn-go').disabled = false;
     render(sides);

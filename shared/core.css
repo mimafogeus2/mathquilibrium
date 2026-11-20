@@ -527,6 +527,12 @@ label.set-row { cursor: pointer; }
 #print .rules li::marker { color: #000; }
 /* the answer: its own page after the puzzle */
 .p-answer { width: 100%; break-before: page; display: flex; flex-direction: column; align-items: center; gap: 6mm; }
+/* the way back to the site: a QR and a line, at the foot of the last page */
+.p-site { width: 100%; display: flex; align-items: center; gap: 5mm; border-top: .75pt solid #000; padding-top: 4mm; font-size: 9.5pt; line-height: 1.35; break-inside: avoid; }
+.p-site img { flex: none; width: 22mm; height: 22mm; }
+.p-site p { margin: 0; }
+.p-site b { display: block; font: 600 13pt/1.2 var(--display); }
+.p-site span { display: block; margin-top: 1mm; font-weight: 700; letter-spacing: .08em; }
 /* a box to write in */
 .p-box { flex: none; display: inline-block; width: 6mm; height: 6mm; border: 1pt solid #000; border-radius: 1mm; vertical-align: middle; }
 

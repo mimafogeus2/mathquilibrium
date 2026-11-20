@@ -753,12 +753,15 @@ function printable(build, daily) {
   window.paper = (tier) => { daily(tier, ymd(new Date())); return build(true); };
   const out = document.createElement('section');
   out.id = 'print';
+  new Image().src = '../qr-print.svg'; // loaded ahead: printing doesn't wait for it (../ is the site's root from a game, he/ from a Hebrew one, its own QR)
   document.body.append(out);
   addEventListener('beforeprint', () => {
     const s = !$('#game').hidden && build();
     const head = (name) => `<header class="p-head"><h1>${esc(name)}</h1><p>${esc([$('#g-title').textContent, $('#g-sub').textContent].filter(Boolean).join(' · '))}</p></header>`;
+    // the way back to the site, for whoever finds the sheet: on the answer page (the puzzle page is full), else under the puzzle
+    const site = `<footer class="p-site"><img src="../qr-print.svg" alt=""><p><b>${T('Games by Miki')}</b>${T('Free logic games, a new daily every morning. Scan to play this one on screen, and the rest:')}<span dir="ltr">${T('gamesbymiki.com')}</span></p></footer>`;
     out.innerHTML = s ? `${head(game.name)}${s.top || ''}<ol class="rules">${s.rules.map((r) => `<li>${r}</li>`).join('')}</ol>${s.body}` +
-      (s.answer ? `<div class="p-answer">${head(T('{game}: the answer', { game: game.name }))}${s.top || ''}${s.answer}</div>` : '') : '';
+      (s.answer ? `<div class="p-answer">${head(T('{game}: the answer', { game: game.name }))}${s.top || ''}${s.answer}${site}</div>` : site) : '';
     document.body.classList.toggle('printing', !!s);
   });
   $('#btn-print').onclick = () => print();
