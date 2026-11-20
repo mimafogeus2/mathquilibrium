@@ -17,6 +17,7 @@ const TUT = HE ? { start: 'חתול', x: 'ל', y: 'נ', w: 'נמר', note: ' (ב
   : { start: 'cat', x: 'T', y: 'R', w: 'rain', note: '', try: 'tour', next: 'N', try2: 'nice', w2: 'egg', w3: 'nest', try3: 'noon', next3: 'T', try4: 'tree' };
 const only = (w) => (m) => m.word === Lex.norm(w); // the tutorial takes the word it names, nothing else
 const written = (w) => (HE ? Lex.finalForm(w) : w); // a word as written on its own
+const KEYS_AT = () => ($('#keys').offsetParent ? '#keys' : '#strip'); // the tutorial rings the on-screen keyboard, or, without one, the strip you type into
 const seed = (G) => hash('lexiconga ' + G.key);
 
 // ---------- state ----------
@@ -83,6 +84,7 @@ function render(instant) {
 function follow() {
   const strip = $('#strip'), track = $('#strip .track'), W = strip.clientWidth, rtl = getComputedStyle(strip).direction === 'rtl';
   const room = !G.done && mask() ? W * 0.28 : 0, shift = Math.max(0, track.scrollWidth + room - W);
+  track.style.transition = G.typed ? 'none' : ''; // your own letters land at once, as fast as you type; the computer's words glide in
   track.style.transform = `translateX(${rtl ? shift : -shift}px)`;
   const mini = $('#mini'), line = $('#mini .mini-line'), MW = mini.clientWidth;
   line.style.fontSize = '';
@@ -236,15 +238,23 @@ addEventListener('keydown', (e) => {
   const key = (label, act, cls = '') => `<button type="button" class="${cls}" data-k="${act}"${cls ? ` aria-label="${label}"` : ''}>${cls === 'wide del' ? '<svg viewBox="0 0 24 24"><path d="M9 6h11v12H9l-6-6zM12 9l5 6M17 9l-5 6"/></svg>' : label}</button>`;
   const rows = KEYS.map((r, i) => `<div class="row">${i === 2 ? key(T('Enter'), 'enter', 'wide') : ''}${[...r].map((c) => key(c, c)).join('')}${i === 2 ? key(T('Delete'), 'del', 'wide del') : ''}</div>`);
   $('#keys').innerHTML = rows.join('');
-  // pointerdown, not click: typing fast on a phone shouldn't wait for the click (or lose a double tap to zoom)
-  $('#keys').addEventListener('pointerdown', (e) => {
-    const b = e.target.closest('button');
+  const press = (b) => {
     if (!b || b.disabled) return;
-    e.preventDefault();
     const k = b.dataset.k;
     if (k === 'enter') enter(); else if (k === 'del') erase(); else type(k);
     b.classList.add('down');
     setTimeout(() => b.classList.remove('down'), 120);
+  };
+  // On the press, not the click: typing fast shouldn't wait for it. Touch goes through touchstart, cancelled, so iOS can't take a quick
+  // second tap for a double tap (or a text selection) and swallow it; each finger counts, for two-thumb typing. A mouse or pen: pointerdown.
+  $('#keys').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    for (const t of e.changedTouches) press(t.target.closest?.('button'));
+  }, { passive: false });
+  $('#keys').addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') return;
+    e.preventDefault();
+    press(e.target.closest('button'));
   });
 }
 $('#btn-undo').onclick = undo;
@@ -268,11 +278,11 @@ $('#logo').innerHTML = `<p class="logo-chain">${HE ? 'שמ<b>ש</b>ול<b>ח</b>
 boot({ name: T('Lexiconga'),
   // the tutorial level's own words: TUTORIAL (above)
   tutorial: [
-    [T('Your word starts where <b>{start}</b> ends: the <b>{x}</b> is already there. End it on <b>{y}</b>, the first letter of <b>{w}</b>{note}: type <b>{try}</b>, then Enter.', TUT), () => G.picks.length >= 1, '#keys', only(TUT.try)],
-    [T('The computer added <b>{w}</b> and crossed it out. Now from <b>{next}</b>: type <b>{try2}</b>, which ends on the first letter of <b>{w2}</b>.', TUT), () => G.picks.length >= 2, '#keys', only(TUT.try2)],
+    [T('Your word starts where <b>{start}</b> ends: the <b>{x}</b> is already there. End it on <b>{y}</b>, the first letter of <b>{w}</b>{note}: type <b>{try}</b>, then Enter.', TUT), () => G.picks.length >= 1, KEYS_AT, only(TUT.try)],
+    [T('The computer added <b>{w}</b> and crossed it out. Now from <b>{next}</b>: type <b>{try2}</b>, which ends on the first letter of <b>{w2}</b>.', TUT), () => G.picks.length >= 2, KEYS_AT, only(TUT.try2)],
     [T('Changed your mind? <b>Undo</b> takes back your word and the one it brought in.'), () => G.undid, '#btn-undo', () => false],
-    [T('This time, head for <b>{w3}</b>: type <b>{try3}</b>.', TUT), () => G.conns.includes(Lex.norm(TUT.try3)), '#keys', only(TUT.try3)],
-    [T('Last one, from <b>{next3}</b> to <b>{w2}</b>: type <b>{try4}</b>. In a real level the words are yours to find, and the <b>hint</b> types one for you, for a star.', TUT), null, '#keys', only(TUT.try4)],
+    [T('This time, head for <b>{w3}</b>: type <b>{try3}</b>.', TUT), () => G.conns.includes(Lex.norm(TUT.try3)), KEYS_AT, only(TUT.try3)],
+    [T('Last one, from <b>{next3}</b> to <b>{w2}</b>: type <b>{try4}</b>. In a real level the words are yours to find, and the <b>hint</b> types one for you, for a star.', TUT), null, KEYS_AT, only(TUT.try4)],
   ],
   storeKey: 'lexiconga' + LSUF, random: true, glyphs: HE ? ['א', 'ש', 'ל'] : ['a', 'x', 'e'], start: startLevel,
   save: (G) => ({ conns: G.conns, hints: G.hinted.size }), key: () => false, reveal,
