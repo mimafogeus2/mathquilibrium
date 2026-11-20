@@ -7,6 +7,9 @@
 
 /* The board pinch-zooms (game.js sets --zoom) inside its own scroller; the page keeps one screen tall so the keys stay put. */
 #game { height: calc(100 * var(--dvh)); container-type: inline-size; } /* keys size from cqw, not vw */
+/* done: the controls go for good here, so the board grows into their room (the other games keep it) */
+#game.done :is(.tools > :not(#btn-result), .palette, .give-up, #btn-pause) { display: none; }
+#game.done .tools > #btn-result { position: static; }
 .board-wrap { min-height: 0; grid-template: minmax(0, 1fr) / minmax(0, 1fr); container-type: size; }
 .zoom {
   place-self: stretch; overflow: auto; overscroll-behavior: contain;
