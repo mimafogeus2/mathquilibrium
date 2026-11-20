@@ -84,6 +84,7 @@ function render(instant) {
 function follow() {
   const strip = $('#strip'), track = $('#strip .track'), W = strip.clientWidth, rtl = getComputedStyle(strip).direction === 'rtl';
   const room = !G.done && mask() ? W * 0.28 : 0, shift = Math.max(0, track.scrollWidth + room - W);
+  track.style.transition = G.typed ? 'none' : ''; // your own letters land at once, as fast as you type; the computer's words glide in
   track.style.transform = `translateX(${rtl ? shift : -shift}px)`;
   const mini = $('#mini'), line = $('#mini .mini-line'), MW = mini.clientWidth;
   line.style.fontSize = '';
@@ -237,15 +238,23 @@ addEventListener('keydown', (e) => {
   const key = (label, act, cls = '') => `<button type="button" class="${cls}" data-k="${act}"${cls ? ` aria-label="${label}"` : ''}>${cls === 'wide del' ? '<svg viewBox="0 0 24 24"><path d="M9 6h11v12H9l-6-6zM12 9l5 6M17 9l-5 6"/></svg>' : label}</button>`;
   const rows = KEYS.map((r, i) => `<div class="row">${i === 2 ? key(T('Enter'), 'enter', 'wide') : ''}${[...r].map((c) => key(c, c)).join('')}${i === 2 ? key(T('Delete'), 'del', 'wide del') : ''}</div>`);
   $('#keys').innerHTML = rows.join('');
-  // pointerdown, not click: typing fast on a phone shouldn't wait for the click (or lose a double tap to zoom)
-  $('#keys').addEventListener('pointerdown', (e) => {
-    const b = e.target.closest('button');
+  const press = (b) => {
     if (!b || b.disabled) return;
-    e.preventDefault();
     const k = b.dataset.k;
     if (k === 'enter') enter(); else if (k === 'del') erase(); else type(k);
     b.classList.add('down');
     setTimeout(() => b.classList.remove('down'), 120);
+  };
+  // On the press, not the click: typing fast shouldn't wait for it. Touch goes through touchstart, cancelled, so iOS can't take a quick
+  // second tap for a double tap (or a text selection) and swallow it; each finger counts, for two-thumb typing. A mouse or pen: pointerdown.
+  $('#keys').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    for (const t of e.changedTouches) press(t.target.closest?.('button'));
+  }, { passive: false });
+  $('#keys').addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') return;
+    e.preventDefault();
+    press(e.target.closest('button'));
   });
 }
 $('#btn-undo').onclick = undo;
