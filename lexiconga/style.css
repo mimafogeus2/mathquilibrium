@@ -64,7 +64,9 @@
 /* phones: everything fits one screen, no scrolling. The keys and the box give up height first */
 @media (pointer: coarse) and (max-height: 860px) and (orientation: portrait) {
   #game { height: calc(100 * var(--dvh)); }
-  #game .board-wrap { flex: 1 1 auto; min-height: 0; padding: 4px 0; }
+  #game .board-wrap { flex: 1 0 auto; padding: 4px 0; }
+  /* under the keys, room for a native keyboard's bottom row (space, return), so the letters sit where the phone's own do; it goes first when space is short */
+  #game:not(.done)::after { content: ''; flex: 0 1 56px; }
   .mini { margin: 0 0 6px; }
   .strip { height: 60px; }
   .track { font-size: 40px; }
