@@ -10,7 +10,7 @@ const skey = (t, at) => t + '@' + at;
 
 // ---------- drawing ----------
 // One SVG in cell units ×10, printed like the rest of the site: flat inks with speckle (#speck) and a misregistered shadow.
-// Layers: water and rock (tankSvg), items, looks, spots for the picked item, fish.
+// Layers: water and rock (tankSvg), items, looks, fish, spots for the picked item (over the fish, so a spot under one still shows and takes the tap).
 const cx = (c, W) => (c % W + .5) * CELL, cy = (c, W) => (Math.floor(c / W) + .5) * CELL;
 const calm = () => document.documentElement.hasAttribute('data-calm');
 // a cheap, steady hash for cell decoration (pebbles, kelp): the same tank always looks the same
@@ -274,7 +274,7 @@ function startLevel(G, save) {
   const vb = viewOf(L);
   $('#game').dataset.tier = G.tut ? 'T' : G.pack; // each difficulty has its own water (style.css)
   b.style.setProperty('--ar', (vb.w / vb.h).toFixed(4));
-  b.innerHTML = `<svg class="tank" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L, vb)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="spots"></g><g class="fishes" clip-path="url(#tank)"></g><g class="fx" clip-path="url(#tank)"></g></svg>`;
+  b.innerHTML = `<svg class="tank" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="${SVGNS}" aria-hidden="true">${tankSvg(L, vb)}<g class="rails">${railsSvg(L)}</g><g class="items"></g><g class="looks"></g><g class="fishes" clip-path="url(#tank)"></g><g class="spots"></g><g class="fx" clip-path="url(#tank)"></g></svg>`;
   G.fishEls = L.fish.map((f) => {
     const g = document.createElementNS(SVGNS, 'g');
     g.setAttribute('class', `fish ${speciesOf(f.s).name}${f.s === 1 ? ' fry' : ' pred'}${f.f ? ' fast' : ''}`);
