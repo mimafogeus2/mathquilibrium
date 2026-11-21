@@ -149,10 +149,13 @@ addEventListener('resize', balancePalette);
 function buildPalette() {
   const pal = $('#palette');
   pal.replaceChildren();
+  // small number on each operator: its turn in the order of operations (1 first); none when all share one turn
+  const turns = [...new Set(G.p.ops.map((o) => PREC[o]))].sort((a, b) => b - a);
   for (const op of [...G.p.ops, ...G.p.rels]) {
     const k = document.createElement('button');
     k.className = 'key' + (G.p.rels.includes(op) ? ' eq' : '');
     k.textContent = sym(op);
+    if (turns.length > 1 && op in PREC) k.insertAdjacentHTML('beforeend', `<sup class="turn" aria-hidden="true">${turns.indexOf(PREC[op]) + 1}</sup>`);
     k.dataset.op = op;
     k.setAttribute('aria-label', NAMES[op]);
     k.onclick = () => place(op);
@@ -417,7 +420,7 @@ boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true,
   tutorial: [
     [T('Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours to fill. Tap the ringed one.'),
       () => G.sel?.key === '1,1', tile('1,1'), (m) => m.sel === '1,1'],
-    [T('It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below.'),
+    [T('It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below. The small number on a key is its turn in the math: 1 is worked out before 2.'),
       () => G.fills.get('1,1') === '+', '#palette', (m) => m.key === '1,1' && m.op === '+'],
     [T('3 + 5 = 8. That tile is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Tap the row\'s other blank.'),
       () => G.sel?.key === '1,3', tile('1,3'), (m) => m.sel === '1,3'],
