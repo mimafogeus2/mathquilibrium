@@ -355,7 +355,7 @@ module.exports = {
     'mathquilibrium/game.js': {
       'Mathquilibrium': 'מאוזן',
       'Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours to fill. Tap the ringed one.': 'כל שורה וכל עמודה הן משוואה, וכל אחת חייבת לצאת <b>נכונה</b>. את המשבצות הריקות אתם ממלאים. הקישו על המסומנת.',
-      'It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below.': 'היא נמצאת בשורה <b dir="ltr">3 _ 5 = 8</b>. איזה סימן הופך את 3 ו־5 ל־8? בחרו אותו מהמקשים למטה.',
+      'It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below. The small number on a key is its turn in the math: 1 is worked out before 2.': 'היא נמצאת בשורה <b dir="ltr">3 _ 5 = 8</b>. איזה סימן הופך את 3 ו־5 ל־8? בחרו אותו מהמקשים למטה. המספר הקטן על מקש הוא התור שלו בחישוב: 1 מחושב לפני 2.',
       "3 + 5 = 8. That tile is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Tap the row's other blank.": '<span dir="ltr">3 + 5 = 8</span>. המשבצת הזאת <b>משותפת</b> לעמודה, שבה כתוב עכשיו <span dir="ltr">2 + 4 _ 6</span>: סימן אחד צריך לעבוד בשני הכיוונים. הקישו על המשבצת הריקה השנייה בשורה.',
       'Between 3 + 5 and 8 goes <b>=</b>. Pick it.': 'בין <span dir="ltr">3 + 5</span> ל־8 בא <b>=</b>. בחרו אותו.',
       'The row is true, so it turns green. Now tap the blank in the column.': 'השורה נכונה, אז היא נצבעת בירוק. עכשיו הקישו על המשבצת הריקה בעמודה.',
@@ -705,7 +705,7 @@ module.exports = {
   </div>
   <div class="help-page">
   <ol class="rules" start="3">
-    <li>Usual math order: <b>×  ÷</b> before <b>+  −</b>. Division must come out exact.</li>
+    <li>Usual math order: <b>×  ÷</b> before <b>+  −</b>. The small number on each operator key shows its turn: 1 first, then 2. Division must come out exact.</li>
     <li>Harder levels add <b>^</b> power, <b>.</b> decimal point (3 . 5 is 3.5), <b>%</b> remainder, and <b>&lt;  &gt;</b> for lines that are inequalities.</li>`,
       `<li>מלאו כל משבצת ריקה בפעולה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>. משוואות נקראות רק <b>משמאל לימין</b> או <b>מלמעלה למטה</b>.</li>
     <li>משבצות שבהן קווים נחתכים הן <b>משותפות</b> — סימן אחד צריך לעבוד בשני הכיוונים.</li>
@@ -713,7 +713,7 @@ module.exports = {
   </div>
   <div class="help-page">
   <ol class="rules" start="3">
-    <li>סדר פעולות רגיל: <b>×  ÷</b> לפני <b>+  −</b>. החילוק חייב לצאת שלם.</li>
+    <li>סדר פעולות רגיל: <b>×  ÷</b> לפני <b>+  −</b>. המספר הקטן על כל מקש פעולה מראה את התור שלו: קודם 1, אחר כך 2. החילוק חייב לצאת שלם.</li>
     <li>בשלבים הקשים יותר מצטרפות <b>^</b> חזקה, <b>.</b> נקודה עשרונית (<span dir="ltr">3 . 5</span> הוא 3.5), <b>%</b> שארית, ו־<b dir="ltr">&lt;  &gt;</b> לשורות של אי־שוויון.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, arrows to move, <kbd>⌫</kbd> to clear, <kbd>Z</kbd> undo, <kbd>P</kbd> to pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, חצים לתזוזה, <kbd>⌫</kbd> לניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
