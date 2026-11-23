@@ -10,6 +10,8 @@
 //   stars(G)       -> optional: the stars for a win (default: by hints); a game with it has no hints, and its results show stars instead
 //   moves(G)       -> optional: the moves a win took; a daily records it (m), and the win screen and share show it
 //   extra(G)       -> optional: a short line about the win (translated); a daily records it (x), and share shows it
+//   winDelay()     -> optional: ms from the win to its dialog (default 1200), for a game with a longer solve animation
+//   confetti       -> optional: false for a game with its own win celebration (no confetti)
 //   ownIntro       -> optional: the game teaches in its own first-level intro, so How to play doesn't auto-open on a first visit
 // Games read and extend the shared G: { pack, n, date, key, elapsed, hinted: Set, done, paused }.
 const $ = (s) => document.querySelector(s);
@@ -547,7 +549,7 @@ function win() {
   track('finish');
 
   const g = G;
-  setTimeout(() => G === g && winScreen(g, rec, true), 1200); // one delay for every game: long enough for the solve animations to finish
+  setTimeout(() => G === g && winScreen(g, rec, true), game.winDelay?.() ?? 1200); // long enough for the solve animations to finish (a game with a longer one says so)
 }
 
 // The win dialog for result r ({ t, h, s, m }): opened fresh after a win, or (fresh = false) only filled in for a solved daily seen again
@@ -591,7 +593,7 @@ const ALL_GAMES = [['mathquilibrium', T('Mathquilibrium'), 'crossum2', 'EMH', 'p
   ['wordswipe', T('WordSwipe'), 'wordswipe' + LSUF, '', 'teal-text'], ['orderly', T('Orderly'), 'orderly' + LSUF, '', 'sun-text'], ['coronet', T('Coronet'), 'coronet', 'EMH', 'ink'],
   ['quadflip', T('Quadflip'), 'quadflip', 'EH', 'teal-text'], ['alienchess', T('Alien Chess'), 'alienchess', 'EMH', 'red-text'],
   ['balancingact', T('Balancing Act'), 'balancingact', 'EMH', 'orange-text'], ['smallfry', T('Small Fry'), 'smallfry', 'EMH', 'teal-text'],
-  ['lexiconga', T('Lexiconga'), 'lexiconga' + LSUF, 'EMH', 'pink-text']];
+  ['lexiconga', T('Lexiconga'), 'lexiconga' + LSUF, 'EMH', 'pink-text'], ['reception', T('Reception'), 'reception', 'EMH', 'wave-text']];
 // The slug at the foot of a game's menu, as a print shop pencils on the job: the house and today's issue
 {
   const home = $('#home');
@@ -661,7 +663,7 @@ async function share() {
 // Cut paper in the page's inks, overprinted (multiply on cream, screen on blue stock). A special day passes its own glyphs (its emoji);
 // a streak milestone just reached (bumped) throws twice as much, higher.
 function confetti(glyphs = game.glyphs) {
-  if (document.documentElement.hasAttribute('data-calm')) return; // reduce motion (theme.js)
+  if (document.documentElement.hasAttribute('data-calm') || game.confetti === false) return; // reduce motion (theme.js), or the game celebrates its own way
   // the canvas's own size: under the text & tile size zoom it's smaller than innerWidth in CSS px
   const cv = $('#fx'), ctx = cv.getContext('2d'), dpr = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
   cv.width = W * dpr; cv.height = H * dpr;

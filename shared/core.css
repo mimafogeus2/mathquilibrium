@@ -10,6 +10,7 @@
   --teal: #00787e;    --teal-text: #00747a;   --on-teal: #f8f3e8;
   --sun: #ffb511;     --sun-text: #8a6200;    --on-sun: var(--navy);
   --red: #d2342a;     --red-text: #c4281d;    --on-red: #fff;
+  --wave: #2b7de9;    --wave-text: #1d63c4;   --on-wave: #f8f3e8; /* Reception's radio blue */
   --ember: #ff6a2b;   --ember-text: #ff8f5a; /* Impossible Mode's one ink: fire */
   --brand: var(--pink); --brand-text: var(--pink-text); --on-brand: var(--on-pink);
 
@@ -44,6 +45,7 @@
   --teal: #3fd0c2;   --teal-text: #5fdccf; --on-teal: var(--navy);
   --sun: #ffd23f;    --sun-text: #ffd23f;
   --red: #ff6b5e;    --red-text: #ff8378; --on-red: var(--navy);
+  --wave: #5ea2f0;   --wave-text: #7cb6ff; --on-wave: var(--navy);
   --paper: #1d2a55; --stock: #24336a; --ink: #f4ecdc; --muted: #a9b0cc;
   --hair: rgb(244 236 220 / .14); --line: rgb(244 236 220 / .28); --slot: rgb(244 236 220 / .06);
   --dot: rgb(244 236 220 / .2);
@@ -647,6 +649,7 @@ dialog .win-actions::before {
   --pink: #ff4fb2; --pink-text: #ff7cc6;
   --orange: #ff8a4c; --orange-text: #ff9a63; --teal: #3fd0c2; --teal-text: #5fdccf; --on-teal: var(--navy);
   --sun: #ffd23f; --sun-text: #ffd23f; --red: #ff6b5e; --red-text: #ff8378; --on-red: var(--navy);
+  --wave: #5ea2f0; --wave-text: #7cb6ff; --on-wave: var(--navy);
   --brand: var(--ember); --brand-text: var(--ember-text); --on-brand: var(--navy);
   --paper: #120b08; --stock: #1e130e; --ink: #f4e6d6; --muted: #b8a294;
   --hair: rgb(243 230 220 / .14); --line: rgb(243 230 220 / .3); --slot: rgb(243 230 220 / .06); --dot: rgb(243 230 220 / .2);
@@ -736,6 +739,16 @@ body:has(#game:not([hidden])) :is(.peel, .fire-band) { display: none; }
 .coach-lines > p:not(.now) { visibility: hidden; }
 .tut :is(#timer, #btn-print, #btn-link, #btn-pause, .give-up, #btn-giveup) { visibility: hidden; }
 .coach-at { outline: 3px solid var(--brand) !important; outline-offset: 2px !important; animation: coach-ring 1.2s ease-in-out infinite !important; } /* !important: over a game's own selection ring and entrance */
+/* A board presented as a print (Small Fry, Reception): the sheet it's printed on (a deckle edge, the reg shadow under it), crop marks at its corners,
+   and the printer's slug, the level's name, in the margin under it. Markup: .print > .crop.tl/.tr/.bl/.br, the board, p.print-slug */
+.print { position: relative; padding: 12px 12px 26px; }
+.print::before { content: ''; position: absolute; inset: 0; background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg);
+  clip-path: polygon(0 1%, 3% 0, 9% .6%, 17% 0, 26% .4%, 38% 0, 49% .7%, 61% .1%, 72% .6%, 84% 0, 93% .5%, 100% 0, 99.4% 9%, 100% 21%, 99.5% 34%, 100% 47%, 99.3% 60%, 100% 73%, 99.6% 86%, 100% 100%, 92% 99.3%, 80% 100%, 67% 99.4%, 55% 100%, 43% 99.5%, 31% 100%, 19% 99.4%, 7% 100%, 0 99.2%, .6% 87%, 0 74%, .5% 61%, 0 48%, .7% 35%, 0 22%, .4% 10%); }
+.crop { position: absolute; width: 10px; height: 10px; border: 0 solid var(--ink); opacity: .55; }
+.crop.tl { top: -6px; left: -6px; border-width: 0 1px 1px 0; } .crop.tr { top: -6px; right: -6px; border-width: 0 0 1px 1px; }
+.crop.bl { bottom: -6px; left: -6px; border-width: 1px 1px 0 0; } .crop.br { bottom: -6px; right: -6px; border-width: 1px 0 0 1px; }
+.print-slug { position: absolute; left: 14px; right: 14px; bottom: 6px; margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); text-align: end; }
 @keyframes coach-ring { 50% { outline-offset: 5px; outline-color: color-mix(in srgb, var(--brand) 40%, transparent); } }
 .board .coach-at { outline-offset: -4px !important; animation-name: coach-ring-in !important; } /* inside: a board clips its edges */
 @keyframes coach-ring-in { 50% { outline-offset: -8px; outline-color: color-mix(in srgb, var(--brand) 40%, transparent); } }

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Games by Miki — daily logic games</title>
-<meta name="description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act, Small Fry and Lexiconga. New puzzles every day.">
+<meta name="description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act, Small Fry, Lexiconga and Reception. New puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Games by Miki">
 <meta property="og:url" content="https://mimafogeus2.github.io/mathquilibrium/">
 <meta property="og:title" content="Games by Miki — daily logic games">
-<meta property="og:description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act, Small Fry and Lexiconga. New puzzles every day.">
+<meta property="og:description" content="Small daily logic puzzles: Mathquilibrium, Coronet, WordSwipe, Orderly, Biggr, Quadflip, Alien Chess, Balancing Act, Small Fry, Lexiconga and Reception. New puzzles every day.">
 <meta property="og:image" content="https://mimafogeus2.github.io/mathquilibrium/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -166,7 +166,11 @@
   .new-game:hover b { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
   [dir="rtl"] .new-game:hover .new-go { translate: -4px 0; }
   [dir="rtl"] .new-fish { scale: -1 1; } /* swims the way the line reads */
-  [data-calm] :is(.new-fish, .new-chain b) { animation: none; }
+  .new-bars { flex: none; width: 44px; height: 26px; overflow: visible; }
+  .new-bars .w { animation: new-ping 1.2s ease-in-out infinite alternate; }
+  .new-bars .w + .w { animation-delay: .4s; }
+  @keyframes new-ping { from { opacity: .2; } }
+  [data-calm] :is(.new-fish, .new-chain b, .new-bars .w) { animation: none; }
   .pick { padding-bottom: clamp(20px, calc(3 * var(--vw)), 30px); margin-bottom: clamp(20px, calc(3 * var(--vw)), 30px); border-bottom: 1px solid var(--ink); animation: enter .45s 60ms both var(--ease); }
   .b-ask { margin: 0 0 8px; font: italic 600 20px/1.1 var(--display); letter-spacing: 0; text-transform: none; color: var(--ink); }
   .banner {
@@ -245,6 +249,11 @@
   </header>
 
   <div class="new-games">
+  <a class="new-game" href="reception/" style="--brand: var(--wave); --brand-text: var(--wave-text)">
+    <svg class="new-bars" viewBox="0 0 44 26" aria-hidden="true"><g filter="url(#speck)"><rect x="26" y="16" width="4" height="8" rx="1" fill="var(--wave)"/><rect x="32" y="11" width="4" height="13" rx="1" fill="var(--wave)"/><rect x="38" y="5" width="4" height="19" rx="1" fill="var(--ink)"/></g><path d="M10 24V10" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"/><g fill="none" stroke="var(--wave)" stroke-width="2" stroke-linecap="round"><path class="w" d="M6 5q-3 5 0 10M14 5q3 5 0 10"/><path class="w" d="M2 1q-5 9 0 18M18 1q5 9 0 18"/></g></svg>
+    <span class="new-text"><span class="new-tag">New</span> <span>A new game: <b>Reception</b>. Put every antenna up and get every street on full bars.</span></span>
+    <span class="new-go" aria-hidden="true">→</span>
+  </a>
   <a class="new-game" href="lexiconga/" style="--brand: var(--pink); --brand-text: var(--pink-text)">
     <span class="new-chain" aria-hidden="true">a<b>x</b>e</span>
     <span class="new-text"><span class="new-tag">New</span> <span>A new game: <b>Lexiconga</b>. Link ten words into one long word.</span></span>
@@ -465,6 +474,25 @@
         <div class="today"></div>
       </div>
     </a>
+    <a class="game" href="reception/" data-store="reception" style="--brand: var(--wave); --brand-text: var(--wave-text); --plate: #dce7f6; --d: 700ms">
+      <div class="plate">
+        <svg class="art" viewBox="0 0 96 96" aria-hidden="true">
+          <g filter="url(#speck)">
+            <circle class="ov" cx="44" cy="30" r="30" fill="var(--wave)" opacity=".3"/>
+            <path d="M6 62h22v30H6zM34 40h20v52H34zM60 54h26v38H60z" fill="var(--ink)" opacity=".55"/>
+            <path d="M68 30h4v8h-4zM75 25h4v13h-4zM82 19h4v19h-4z" fill="var(--wave)"/>
+          </g>
+          <path d="M44 40V22" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M37 13q-4 7 0 14M31 8q-8 12 0 24M51 13q4 7 0 14M57 8q8 12 0 24" fill="none" stroke="var(--wave)" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <span class="kicker">11 <em>Logic</em></span>
+        <h2>Recep<span>tion</span></h2>
+        <p>Put every antenna on a rooftop until every street gets the bars it needs.</p>
+        <div class="today"></div>
+      </div>
+    </a>
   </nav>
   <p class="colophon">Printed fresh every morning.</p>
 </main>
@@ -616,6 +644,16 @@
       <circle class="ov" cx="52" cy="92" r="16" fill="var(--teal)"/>
     </g>
     <text x="180" y="62" style="font: 700 40px Fraunces, serif">pla<tspan fill="var(--pink-text)">n</tspan>ois<tspan fill="var(--pink-text)">e</tspan>gg</text>
+  </svg>
+  <svg class="art" data-for="reception/" data-narrow="110 0 140 120" viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g filter="url(#speck)">
+      <rect class="card" width="360" height="120"/>
+      <circle class="ov" cx="180" cy="40" r="56" fill="var(--wave)" opacity=".3"/>
+      <path d="M20 86h40v34H20zM70 66h34v54H70zM162 48h36v72h-36zM214 76h36v44h-36zM266 60h42v60h-42zM318 90h30v30h-30z" fill="var(--ink)" opacity=".45"/>
+      <path d="M284 40h6v12h-6zM294 32h6v20h-6zM304 22h6v30h-6z" fill="var(--wave)"/>
+    </g>
+    <path d="M180 48V26" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M169 16q-6 10 0 20M159 8q-11 18 0 36M191 16q6 10 0 20M201 8q11 18 0 36" fill="none" stroke="var(--wave)" stroke-width="3" stroke-linecap="round"/>
   </svg>
 </template>
 <script src="wordswipe/special.js"></script>

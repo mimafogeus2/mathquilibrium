@@ -1,0 +1,236 @@
+/* Reception: a carrier's coverage map, printed on the site's riso like the other games. Everything else is in shared/core.css.
+   Spot inks on the page's own paper, flat, no outlines: blue (the cut slab, water, glass), fluorescent pink, orange, yellow (the pads,
+   lit windows), teal (parks). The signal is a flat tint of its own ink per difficulty, overprinted; shadows are hatched. The pieces are the key plate: navy linework over the spot colour. Grain over the whole sheet. */
+:root {
+  --brand: var(--wave); --brand-text: var(--wave-text); --on-brand: var(--on-wave);
+  --k-blue: #3255a4; --k-pink: #ff48b0; --k-yellow: #ffd21f; --k-teal: #00838a; --k-orange: #ff6c2f;
+  /* the city by day (see graphics-guide.md) */
+  --slab: var(--stock); --edge: var(--k-blue); --edge-wet: color-mix(in srgb, var(--k-blue) 70%, #000);
+  --road: color-mix(in srgb, var(--k-blue) 12%, var(--stock)); --lane: var(--stock);
+  --park: color-mix(in srgb, var(--k-teal) 34%, var(--stock)); --tuft: color-mix(in srgb, var(--k-teal) 75%, var(--stock)); --path: var(--stock);
+  --water: color-mix(in srgb, var(--k-blue) 40%, var(--stock)); --quay: var(--k-blue); --foam: var(--stock); --ripple: var(--stock);
+  --shadow: color-mix(in srgb, var(--k-blue) 30%, transparent); --sh-ink: var(--k-blue);
+  --face0: var(--k-orange); --face1: var(--k-pink); --face2: color-mix(in srgb, var(--k-teal) 80%, var(--stock));
+  --face3: var(--k-blue); --face4: color-mix(in srgb, var(--k-blue) 65%, var(--k-pink));
+  --deck: var(--stock); --rim: 38%;
+  --wn: var(--stock); --wn-lit: var(--stock); --door: color-mix(in srgb, var(--ink) 85%, var(--k-blue)); --pad: var(--k-yellow); --pad-ln: var(--ink);
+  /* art.svg's inks: the key plate (navy line) over paper, blue screens and the slot's colour */
+  --a-k: var(--k-blue); --a-ln: #26366b; --a-m1: var(--stock); --a-m2: color-mix(in srgb, var(--k-blue) 26%, var(--stock)); --a-m3: color-mix(in srgb, var(--k-blue) 55%, var(--stock));
+  --a-wh: var(--stock); --a-gl: color-mix(in srgb, var(--k-blue) 50%, var(--stock)); --a-hi: var(--stock);
+  --a-leaf: var(--k-teal); --a-leaf2: color-mix(in srgb, var(--k-teal) 70%, var(--k-blue)); --a-leaf-hi: var(--k-yellow); --a-trunk: color-mix(in srgb, var(--k-orange) 50%, var(--ink));
+  --a-wood: var(--k-orange); --a-lamp: var(--k-yellow); --a-led: var(--k-teal); --a-acc2: var(--k-pink); --a-sun: var(--k-yellow); --a-acc: var(--wave);
+}
+/* the city at night: the same plates on blue stock, the inks dimmer, lit windows and lamps in yellow */
+:root[data-theme="dark"] {
+  --k-blue: #8fb2ff; --k-pink: #ff6cc4; --k-yellow: #ffe14d; --k-teal: #3fd0c2; --k-orange: #ff8a4c;
+  --edge: #0f1838; --edge-wet: #0b1430;
+  --road: color-mix(in srgb, #000 22%, var(--stock)); --lane: color-mix(in srgb, var(--k-blue) 30%, var(--stock));
+  --park: color-mix(in srgb, var(--k-teal) 22%, var(--stock)); --tuft: color-mix(in srgb, var(--k-teal) 45%, var(--stock)); --path: color-mix(in srgb, var(--k-blue) 20%, var(--stock));
+  --water: color-mix(in srgb, #000 35%, var(--stock)); --quay: color-mix(in srgb, var(--k-blue) 40%, var(--stock)); --foam: color-mix(in srgb, var(--k-blue) 35%, var(--stock)); --ripple: var(--k-yellow);
+  --shadow: rgb(4 8 28 / .45); --sh-ink: #050a22;
+  --face0: color-mix(in srgb, var(--k-orange) 42%, var(--stock)); --face1: color-mix(in srgb, var(--k-pink) 40%, var(--stock));
+  --face2: color-mix(in srgb, var(--k-teal) 38%, var(--stock)); --face3: color-mix(in srgb, var(--k-blue) 45%, var(--stock));
+  --face4: color-mix(in srgb, #a28bff 42%, var(--stock));
+  --deck: color-mix(in srgb, var(--k-blue) 14%, var(--stock)); --rim: 30%;
+  --wn: color-mix(in srgb, #000 30%, var(--stock)); --wn-lit: var(--k-yellow); --door: #0b1230; --pad: color-mix(in srgb, var(--k-yellow) 75%, var(--stock)); --pad-ln: var(--navy);
+  --a-k: #8fb2ff; --a-ln: #0d1430; --a-m1: #c9d0ea; --a-m2: #8f9bc6; --a-m3: #5d6894; --a-wh: #dfe3f3; --a-gl: #4f6db0; --a-hi: #b9d0ff;
+  --a-leaf2: color-mix(in srgb, var(--k-teal) 55%, #0d1430); --a-trunk: #4b3c3c; --a-wood: color-mix(in srgb, var(--k-orange) 60%, #000);
+}
+#game { --cov: var(--wave); }
+#game[data-tier="M"] { --cov: #0f9c8f; }
+#game[data-tier="H"] { --cov: #7d4fe0; }
+#game[data-tier="I"] { --cov: var(--ember); }
+:root[data-theme="dark"] #game[data-tier="M"] { --cov: #3fd0c2; }
+:root[data-theme="dark"] #game[data-tier="H"] { --cov: #b291f0; }
+
+svg.art { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* The board is hit-tested by pointer position, left to right: it never mirrors */
+.board { direction: ltr; }
+.board {
+  --n: 8;
+  /* as big as fits: the width, and the height left by the bar, the sheet's margins, one row of tray, the tip and the tools */
+  width: min(480px, calc(100 * var(--vw) - 48px), calc((100 * var(--dvh) - 372px) * (var(--n) + .6) / (var(--n) + var(--vt, .8) + .4))); min-width: 240px;
+  aspect-ratio: calc(var(--n) + .6) / calc(var(--n) + var(--vt, .8) + .4);
+  border-radius: 10px; background: var(--stock);
+  touch-action: none; user-select: none; -webkit-user-select: none; position: relative; overflow: visible;
+}
+.board:focus-visible { outline-offset: 4px; }
+/* grain: one sheet of specks over the whole print, where the ink missed the paper (a static image, not a filter per layer) */
+.board::after { content: ''; position: absolute; inset: 0; border-radius: 10px; background: var(--speck); background-size: 140px; pointer-events: none; opacity: .75; }
+.board-wrap .print { margin: 0 auto; }
+.board .city { width: 100%; height: 100%; display: block; overflow: visible; stroke: none; stroke-width: 0; }
+.board.dragging { cursor: grabbing; }
+.city .gcov, .city .rcov, .city .sprites, .city .cables, .city .pieces, .city .over, .city .fx, .city .glow { pointer-events: none; }
+
+/* ground: the city's slab and its cut edge, roads with kerbs, lanes and crossings, parks with paths, the harbour */
+.city .slab { fill: var(--slab); }
+.city .edge { fill: var(--edge); }
+.city .edge.wet { fill: var(--edge-wet); }
+.city .edge-line { stroke: var(--bl); stroke-width: .02; opacity: .5; }
+.city .road { fill: var(--road); }
+.city .lane { stroke: var(--lane); stroke-width: .035; stroke-dasharray: .14 .12; stroke-dashoffset: -.07; }
+.city .manhole { fill: none; stroke: var(--lane); stroke-width: .02; opacity: .8; }
+.city .park { fill: var(--park); }
+.city .tuft { fill: none; stroke: var(--tuft); stroke-width: .022; stroke-linecap: round; stroke-linejoin: round; }
+.city .path { fill: none; stroke: var(--path); stroke-width: .11; stroke-linecap: round; }
+.city .plaza { fill: var(--path); }
+.city .tree-shadow { fill: var(--shadow); }
+.city .water { fill: var(--water); }
+.city .quay { stroke: var(--quay); stroke-width: .07; }
+.city .foam { stroke: var(--foam); stroke-width: .03; stroke-linecap: round; }
+.city .ripple { fill: none; stroke: var(--ripple); stroke-width: .03; stroke-linecap: round; }
+.city .glow { fill: url(#glow); display: none; }
+.city .glow-in { stop-color: #ffcf6e; stop-opacity: .42; } .city .glow-out { stop-color: #ffcf6e; stop-opacity: 0; }
+:root[data-theme="dark"] .city .glow { display: inline; }
+:root[data-theme="dark"] .city .ripple { stroke-dasharray: .05 .06; opacity: .55; }
+
+/* buildings: flat ink walls with paper windows and a hatched foot; a paper roof in a rim of the wall's ink. The window plate and the
+   rim print a hair out of register with the walls. */
+.city .bld .face { fill: var(--face); }
+.city .bld .top { fill: color-mix(in srgb, var(--face) var(--rim), var(--stock)); translate: -.012px .01px; }
+.city .bld .deck { fill: var(--deck); }
+.city .bld .foot { fill: url(#sh); opacity: .55; }
+.city .wn { fill: var(--wn); translate: .014px -.01px; }
+.city .wn.lit { fill: var(--wn-lit); }
+.city .door { fill: var(--door); }
+:root[data-theme="dark"] .city .wn.lit { filter: drop-shadow(0 0 .04px var(--k-yellow)); }
+.city .s0 { --face: var(--face0); } .city .s1 { --face: var(--face1); } .city .s2 { --face: var(--face2); }
+.city .s3 { --face: var(--face3); } .city .s4 { --face: var(--face4); }
+.city .shadow { fill: url(#sh); opacity: .45; }
+.city .sh-line { stroke: var(--sh-ink); stroke-width: .022; }
+/* a free roof: a yellow pad with a paper cross, the brightest thing on the board */
+.city .roof { fill: var(--pad); mix-blend-mode: var(--blend); }
+.city .pad-mark { stroke: var(--stock); stroke-width: .06; stroke-linecap: round; }
+:root[data-theme="dark"] .city .pad-mark { stroke: var(--navy); }
+:root[data-theme="dark"] .city .roof { mix-blend-mode: normal; }
+/* while a piece is aimed or dragged, walls thin out so the street behind them shows */
+.board.dragging .city .wall { opacity: .55; transition: opacity .15s; }
+
+/* signal: a flat tint of the difficulty's ink, overprinted on the map, one step deeper per bar (the corner bars give the count) */
+.city .gcov rect, .city .rcov rect { fill: var(--cov); mix-blend-mode: var(--blend); transition: opacity .2s; }
+.city .l1 { opacity: .16; } .city .l2 { opacity: .3; } .city .l3 { opacity: .44; } .city .l4 { opacity: .58; }
+:root[data-theme="dark"] .city .l1 { opacity: .2; } :root[data-theme="dark"] .city .l2 { opacity: .32; }
+:root[data-theme="dark"] .city .l3 { opacity: .44; } :root[data-theme="dark"] .city .l4 { opacity: .56; }
+/* signal on a square the level doesn't ask about (streets when only buildings count, water): a faint ghost, no count */
+.city rect.spare { opacity: .1; }
+/* the preview: what the piece adds, lighter, and where taller buildings stop it */
+.city rect.gain { opacity: .22; } .city rect.gain.spare { opacity: .07; }
+.city rect.blocked { fill: url(#hatch); opacity: 1; mix-blend-mode: normal; }
+.city .hatch { stroke: var(--a-ln); stroke-width: .035; opacity: .6; }
+.city .hatch-bg { fill: var(--a-ln); opacity: .2; }
+.city rect.blocker { fill: none; stroke: var(--red); stroke-width: .05; stroke-dasharray: .1 .06; opacity: 1; mix-blend-mode: normal; }
+.city .plus { font: 800 .17px Inter, system-ui, sans-serif; fill: var(--cov); text-anchor: middle; paint-order: stroke; stroke: var(--stock); stroke-width: .05; stroke-linejoin: round; }
+
+/* each square's reception, as phone bars in its corner: inked for the bars it has, hollow red for the ones it still needs */
+.city .bars .pill { fill: var(--stock); opacity: .88; }
+.city .bars .on { fill: var(--ink); }
+.city .bars .off { fill: var(--stock); stroke: var(--red); stroke-width: .028; }
+.city .bars.short .pill { stroke: var(--red); stroke-width: .02; opacity: 1; }
+/* hotspots: a pin with the bars they need, filled with signal once met */
+.city .pin path:first-child { fill: var(--stock); stroke: var(--a-ln); stroke-width: .025; }
+.city .pin text { font: 800 .17px Inter, system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+.city .pin.met path:first-child { fill: var(--cov); }
+.city .pin.met text { fill: #fff; }
+.city .pin .tick { fill: none; stroke: var(--a-ln); stroke-width: .035; stroke-linecap: round; stroke-linejoin: round; }
+
+/* pieces: the hardware from art.svg standing on a disc in its slot's colour */
+.city .pc, .piece { --a-acc: var(--c); }
+.city .pc .base { fill: var(--c); stroke: var(--a-ln); stroke-width: .022; }
+.city .pc .aim { fill: none; stroke: var(--a-ln); stroke-width: .035; stroke-linecap: round; stroke-linejoin: round; }
+.city .pc .pip { fill: #fff; stroke: var(--a-ln); stroke-width: .014; }
+.city .pc .avl { fill: #ff3b30; }
+:root[data-theme="dark"] .city .pc .avl { animation: rc-avl 1.6s steps(1) infinite; filter: drop-shadow(0 0 .05px #ff3b30); }
+@keyframes rc-avl { 50% { opacity: .25; } }
+.city .pc .amp rect { fill: var(--sun); stroke: var(--a-ln); stroke-width: .016; }
+.city .pc .amp text { font: 800 .12px Inter, system-ui, sans-serif; fill: var(--navy); text-anchor: middle; }
+.city .pc .fx-badge rect { fill: var(--a-ln); }
+.city .pc .fx-badge text { font: 700 .11px Inter, system-ui, sans-serif; fill: #fff; text-anchor: middle; }
+.city .pc .hw { filter: url(#halo); }
+.city .halo-ink { flood-color: var(--stock); }
+/* the second drum: the piece again in pink, flat, printed a hair off and under it */
+.city .pc .misreg { --a-k: var(--k-pink); --a-acc: var(--k-pink); --a-ln: transparent; --a-hi: var(--k-pink); --a-wh: var(--k-pink); --a-m2: var(--k-pink); --a-m3: var(--k-pink); --a-sun: var(--k-pink); opacity: .28; mix-blend-mode: var(--blend); }
+.city .pc.ghost .misreg, .city .pc.off .misreg { display: none; }
+.city .pc.off .hw { filter: url(#halo) grayscale(1); opacity: .55; }
+.city .pc.off .avl { display: none; }
+.city .pc.idle .hw { opacity: .65; }
+.city .pc.ghost { opacity: .6; }
+.city .pc.locked .base { stroke-width: .05; }
+.city .pc.flag .base { stroke: var(--red); stroke-width: .07; animation: rc-flag .8s ease-in-out infinite alternate; }
+@keyframes rc-flag { to { stroke-opacity: .3; } }
+.city .pc .pulse { fill: none; stroke: var(--sun); stroke-width: .08; animation: rc-pulse .9s var(--ease) forwards; }
+@keyframes rc-pulse { to { r: 1.4px; stroke-opacity: 0; stroke-width: .02; } }
+.city .ripple-out { fill: none; stroke: var(--cov); stroke-width: .07; animation: rc-ripple-out .9s cubic-bezier(.1, .6, .3, 1) forwards; }
+@keyframes rc-ripple-out { to { r: 2.8px; stroke-opacity: 0; stroke-width: .01; } }
+/* modifiers' cables: lit when they change an antenna, grey and slack when they touch nothing */
+.city .cable { fill: none; stroke: var(--a-ln); stroke-width: .05; stroke-linecap: round; }
+.city .cable.live { stroke: var(--sun); stroke-width: .045; filter: drop-shadow(0 0 .015px var(--a-ln)); }
+.city .cable.idle { stroke: var(--muted); stroke-dasharray: .05 .04; opacity: .8; }
+.city .cursor { fill: none; stroke: var(--ink); stroke-width: .06; }
+
+/* the win: fireworks over the tallest roofs */
+.city .burst circle { fill: var(--k); opacity: 0; animation: rc-boom 1.1s var(--d) cubic-bezier(.15, .7, .3, 1) forwards; }
+@keyframes rc-boom { 0% { opacity: 1; transform: translate(0, 0); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(.4); } }
+
+/* ---------- tray ---------- */
+.tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; max-width: 500px; }
+.piece {
+  position: relative; width: 54px; height: 54px; padding: 9px; border: 0; border-radius: 12px; display: grid; place-items: center;
+  background: var(--grain), var(--stock); box-shadow: inset 0 0 0 2px var(--c), var(--lift);
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), opacity .2s;
+}
+.piece.mod { border-radius: 50%; }
+.piece svg { width: 100%; height: 100%; overflow: visible; stroke: none; }
+.piece > b { position: absolute; top: 3px; inset-inline-end: 6px; font: 700 13px Inter, system-ui, sans-serif; }
+.piece .amp { position: absolute; bottom: -5px; inset-inline-start: -4px; font: 700 10.5px/1 Inter, system-ui, sans-serif; font-style: normal; padding: 3px 4px; border-radius: 5px; background: var(--sun); color: var(--navy); box-shadow: 0 0 0 1px var(--ink); }
+.piece[aria-pressed="true"] { background: var(--speck), var(--sun); box-shadow: inset 0 0 0 2px var(--c), 2px 3px 0 var(--reg); transform: translate(-1px, -2px); }
+.piece[aria-pressed="true"] > b { color: var(--navy); }
+/* used: an empty dotted slot with the piece's outline */
+.piece.used { background: radial-gradient(circle, var(--dot) .9px, transparent 1.25px) 0 0 / 5px 5px; box-shadow: inset 0 0 0 1px var(--hair); }
+.piece.used svg { filter: grayscale(1); opacity: .35; }
+.piece.hinted svg { filter: none; opacity: .8; }
+.piece:disabled { cursor: default; }
+@media (hover: hover) { .piece:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 2px var(--ink), var(--lift); } }
+
+/* keep board, tray, tip and tools together in the middle */
+#game .board-wrap { flex: 0 0 auto; margin-top: auto; }
+#game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
+#game .tip { margin: 10px 0 0; min-height: 2.9em; }
+#tip[data-warn] { color: var(--red-text); }
+#g-sub { white-space: nowrap; } /* "2+ bars" never splits at the plus */
+
+/* the menu's logo: three signal bars, the tallest inked */
+#logo svg { width: 74px; height: 54px; margin-bottom: 4px; fill: var(--slot); stroke: var(--ink); stroke-width: 1.6; }
+#logo .on { fill: var(--brand); }
+
+/* How to play: every piece */
+.legend { list-style: none; padding: 0; display: grid; gap: 7px; }
+.legend li { display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; font-size: 14px; line-height: 1.4; }
+.legend li svg { width: 32px; height: 36px; margin-top: -6px; overflow: visible; stroke: none; }
+.legend .note { display: block; color: var(--muted); }
+
+@media (max-width: 440px) {
+  .tray { gap: 5px; margin-top: 10px; flex-wrap: nowrap; }
+  .piece { width: 42px; height: 42px; padding: 6px; border-radius: 10px; }
+  .piece > b { top: 1px; inset-inline-end: 4px; font-size: 11.5px; }
+  .piece .amp { font-size: 9.5px; padding: 2px 3px; }
+}
+@media (orientation: landscape) and (max-height: 540px) {
+  .board { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
+  .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
+}
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+  .board { width: min(640px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 440px)); border-radius: 20px; }
+  .tray { gap: 12px; max-width: 640px; margin-top: 18px; }
+  .piece { width: 68px; height: 68px; padding: 11px; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
+  .board { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 480px)); }
+  #game .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 400px; margin-bottom: 18px; }
+}
+[data-calm] .city .pc .base, [data-calm] .city .pc .avl { animation: none; }
+[data-calm] .city .pc .pulse, [data-calm] .city .ripple-out { display: none; }
+/* the tutorial's ringed rooftop: the roof's own dashed square, inked and pulsing (core's outline ring doesn't suit SVG) */
+.city .roof.coach-at { outline: none !important; stroke: var(--brand); stroke-width: .1; stroke-dasharray: none; opacity: 1; animation: rc-roof-ring 1.2s ease-in-out infinite !important; }
+@keyframes rc-roof-ring { 50% { stroke-opacity: .35; } }
+[data-calm] .city .roof.coach-at { animation: none !important; }
