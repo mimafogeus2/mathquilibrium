@@ -1004,13 +1004,13 @@ module.exports = {
         `<li>תנו לכל העיר <b>קליטה</b>. השורה למעלה אומרת כמה: כל משבצת צריכה לפחות את מספר ה<b>פסים</b> הזה. משבצת עם סיכה (<b>נקודה חמה</b>) צריכה את המספר שעל הסיכה שלה.</li>
     <li>הציבו <b>כל רכיב</b> מהמגש על <b>גג פנוי</b> (המשטחים הצהובים). הקליטה מצטברת איפה שאנטנות חופפות: הנקודות גדלות עם כל פס, והפסים בפינת המשבצת מראים כמה יש בה, ובאדום חלול כמה עוד חסר.</li>`],
       [`<li><b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two. A building <b>taller</b> than the antenna's own blocks the signal behind it.</li>
-    <li>An <b>amplifier</b> (its number on a tab) only broadcasts once its own square already has that many bars, from other antennae.</li>
-    <li><b>Modifiers</b> broadcast nothing: they change every antenna right next to them (not diagonally).</li>
-    <li>Tap a placed antenna to <b>turn</b> it, or its tray slot to take it back. There's more than one way, but never with a piece to spare.</li>`,
+    <li>An <b>amplifier</b> (its number on a tab) only broadcasts once its own square already has that many bars, from other antennae.</li>`,
         `<li><b>מגגות גבוהים מגיעים רחוק יותר</b>: בניין בינוני מוסיף משבצת טווח, וגבוה מוסיף שתיים. בניין <b>גבוה</b> יותר מהבניין של האנטנה חוסם את הקליטה שמאחוריו.</li>
-    <li><b>מגבר</b> (המספר שלו על לשונית) משדר רק כשבמשבצת שלו כבר יש מספר כזה של פסים, מאנטנות אחרות.</li>
-    <li><b>מתאמים</b> לא משדרים כלום: הם משנים כל אנטנה שצמודה אליהם (לא באלכסון).</li>
-    <li>הקישו על אנטנה שהוצבה כדי <b>לסובב</b> אותה, או על המקום שלה במגש כדי להחזיר אותה. יש יותר מדרך אחת, אבל אף פעם לא עם רכיב מיותר.</li>`],
+    <li><b>מגבר</b> (המספר שלו על לשונית) משדר רק כשבמשבצת שלו כבר יש מספר כזה של פסים, מאנטנות אחרות.</li>`],
+      ['<li><b>Modifiers</b> broadcast nothing: they change every antenna right next to them (not diagonally).</li>',
+        '<li><b>מתאמים</b> לא משדרים כלום: הם משנים כל אנטנה שצמודה אליהם (לא באלכסון).</li>'],
+      ['<li>Tap a placed antenna to <b>turn</b> it, or its tray slot to take it back. There\'s more than one way, but never with a piece to spare.</li>',
+        '<li>הקישו על אנטנה שהוצבה כדי <b>לסובב</b> אותה, או על המקום שלה במגש כדי להחזיר אותה. יש יותר מדרך אחת, אבל אף פעם לא עם רכיב מיותר.</li>'],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>9</kbd> pick a piece, arrows to move, <kbd>Enter</kbd> to place or turn, <kbd>R</kbd> turn, <kbd>Backspace</kbd> take off, <kbd>U</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: <kbd>1</kbd>–<kbd>9</kbd> בוחרים רכיב, חצים לתזוזה, <kbd>Enter</kbd> להצבה או לסיבוב, <kbd>R</kbd> סיבוב, <kbd>Backspace</kbd> הורדה, <kbd>U</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
