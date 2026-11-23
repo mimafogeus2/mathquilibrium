@@ -586,9 +586,11 @@ $('#btn-undo').onclick = undo;
 $('#btn-hint').onclick = hint;
 $('#btn-reset').onclick = reset;
 
-// How to play's second page: every piece, its icon and what it does
-$('#help-legend').innerHTML = Object.keys(NAMES).map((k) => `<li>${artSvg(k)}<span><b>${esc(NAMES[k])}</b>: ${DESC[k]}</span></li>`).join('') +
+// How to play's legends: the antennae on one page, the modifiers (under their rule) on another
+const legend = (ks) => ks.map((k) => `<li>${artSvg(k)}<span><b>${esc(NAMES[k])}</b>: ${DESC[k]}</span></li>`).join('');
+$('#help-legend').innerHTML = legend(Object.keys(NAMES).filter(isAnt)) +
   `<li class="note">${T('An antenna\'s strongest signal, in bars, is the number on its tray slot and the dots at its foot on the roof.')}</li>`;
+$('#help-mods').innerHTML = legend(Object.keys(NAMES).filter((k) => !isAnt(k)));
 // The menu's logo: three bars, the last one inked
 $('#logo').innerHTML = '<svg viewBox="0 0 60 44"><rect x="4" y="28" width="12" height="14" rx="2.5"/><rect x="24" y="16" width="12" height="26" rx="2.5"/><rect class="on" x="44" y="2" width="12" height="40" rx="2.5"/></svg>';
 
