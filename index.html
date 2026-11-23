@@ -226,6 +226,14 @@
   .art text { font: 600 15px Inter, Heebo, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
   .art .on-ink { fill: var(--navy); }
   .art .card { fill: var(--stock); stroke: var(--hair); stroke-width: 1; }
+  /* A game on its way (the script below): its card pressed at once; past a quarter second a bar in its ink runs along the top */
+  a.going { opacity: .6; transition: opacity .15s; }
+  body.going::before {
+    content: ''; position: fixed; inset: 0 0 auto; height: 3px; z-index: 20; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--going, var(--ink)) 50%, transparent) 0 0 / 40% 100% no-repeat;
+    animation: busy-in .2s .25s both, going 1.1s ease-in-out infinite;
+  }
+  @keyframes going { from { background-position: -70% 0; } to { background-position: 170% 0; } }
 </style>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d6f3678d2c48486fb850d1daaa43a9b1"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
@@ -650,6 +658,16 @@
 </template>
 <script src="wordswipe/special.js"></script>
 <script>
+  // Opening a game takes a moment: mark the link and the page as on their way (styles above). Not for a new tab or window,
+  // and cleared when Back brings this page back from the cache.
+  addEventListener('click', (e) => {
+    const a = e.target.closest?.('a.game, a.banner, a.new-game');
+    if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    a.classList.add('going');
+    document.body.style.setProperty('--going', getComputedStyle(a).getPropertyValue('--brand'));
+    document.body.classList.add('going');
+  });
+  addEventListener('pageshow', () => { document.body.classList.remove('going'); document.querySelector('a.going')?.classList.remove('going'); });
   // The new games take turns in the strip: a random one first, then the next every 5 seconds (held while pointed at or focused)
   {
     const news = [...document.querySelectorAll('.new-game')], box = document.querySelector('.new-games');

@@ -322,6 +322,15 @@ function toGame(h) {
   if (location.hash) history.replaceState(history.state, '', '#' + h);
   else history.pushState('game', '', '#' + h);
 }
+// The Back button shows its press before the work of leaving runs (saving, the menu's render: a moment on a slow phone),
+// then runs whatever the game set as its onclick; a ring spins on it if that takes long enough to notice (core.css).
+document.addEventListener('click', (e) => {
+  const b = e.target.closest?.('#btn-back');
+  if (!b || b.classList.contains('busy')) return; // busy: the click below, let it through
+  e.stopImmediatePropagation();
+  b.classList.add('busy');
+  requestAnimationFrame(() => setTimeout(() => { b.click(); b.classList.remove('busy'); })); // after the next paint
+}, true);
 // Back to the menu: onto the menu's own entry when this one was pushed from it (so Forward still works), else turn this entry into the menu.
 function toMenu(back = true) {
   if (!location.hash && !(IMP && history.state === 'game')) return;
