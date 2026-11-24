@@ -45,6 +45,7 @@ function intro(ids) {
   $('#intro-title').textContent = T(ids[0] === 'first' ? 'Fill in the math' : ops.length > 1 ? 'New operators' : 'New operator');
   if (ids[0] === 'first') {
     const sec = document.createElement('section'), b = document.createElement('div');
+    sec.className = 'help-page';
     b.className = 'board mini';
     mini(b, ['.2...', '3+5=8', '.4...', '.=...', '.6...']);
     sec.append(b);
@@ -53,32 +54,60 @@ function intro(ids) {
   }
   for (const o of ops) {
     const [line, text] = OP_TIPS[o[0]], sec = document.createElement('section');
+    sec.className = 'help-page';
     const keys = [...o].map((x) => `<span class="key${'=<>'.includes(x) ? ' eq' : ''}">${h(x)}</span>`).join('');
     const cells = line.map((v, c) => `<div class="cell ${typeof v === 'number' ? 'num' : o.includes(v) ? 'op filled' : 'op given'}" style="grid-area:1/${c + 1};--d:${c * 50}ms">${h(v)}</div>`).join('');
     sec.innerHTML = `<div class="intro-keys" aria-hidden="true">${keys}</div><div class="board mini" style="--cols:${line.length};--rows:1" role="img" aria-label="${line.map((v) => NAMES[v] || v).join(' ')}">${cells}</div><p>${text}</p>`;
     body.append(sec);
   }
+  pages($('#dlg-intro')); // one page each, with Back and Next: several at once would scroll
   $('#dlg-intro').showModal();
   store.intros = [...new Set([...(store.intros || []), ...ids])];
   persist();
 }
 
 // ---------- tutorial ----------
-// A 5×5 cross: 3 _ 5 = 8 across, 2 _ 4 _ 6 down, sharing the first blank (+). Built like generate()'s output.
-function tutorialPuzzle() {
-  const rows = [[, 2], [3, '+', 5, '=', 8], [, 4], [, '='], [, 6]], cells = [];
+// The lessons' boards, built like generate()'s output. Lines: the keys of each line's tiles; given: operators already printed.
+// 0: a 5×5 cross, 3 _ 5 _ 8 across and 2 _ 4 _ 6 down, sharing the first blank (+).
+// 1: one line, 2 _ 3 × 4 = 14: only + works, and only once × goes first (the keys' turns).
+const LESSON_BOARDS = [
+  { rows: [[, 2], [3, '+', 5, '=', 8], [, 4], [, '='], [, 6]], lines: [['1,0', '1,1', '1,2', '1,3', '1,4'], ['0,1', '1,1', '2,1', '3,1', '4,1']], given: [] },
+  { rows: [[2, '+', 3, '×', 4, '=', 14]], lines: [['0,0', '0,1', '0,2', '0,3', '0,4', '0,5', '0,6']], given: ['0,3', '0,5'] },
+];
+function tutorialPuzzle(n) {
+  const { rows, lines, given } = LESSON_BOARDS[n], cells = [];
   rows.forEach((row, r) => row.forEach((val, c) => {
     if (val === undefined) return;
-    const op = typeof val === 'string';
-    cells.push({ i: cells.length, r, c, val, key: r + ',' + c, op, given: !op, eqs: [] });
+    const op = typeof val === 'string', key = r + ',' + c;
+    cells.push({ i: cells.length, r, c, val, key, op, given: !op || given.includes(key), eqs: [] });
   }));
-  const at = (k) => cells.find((c) => c.key === k), across = ['1,0', '1,1', '1,2', '1,3', '1,4'], down = ['0,1', '1,1', '2,1', '3,1', '4,1'];
-  [across, down].forEach((line, e) => line.forEach((k) => at(k).eqs.push(e)));
-  return { rows: 5, cols: 5, cells, eqs: [across, down].map((l) => l.map((k) => at(k).i)), ops: ['+', '-', '×', '÷'], rels: ['='] };
+  const at = (k) => cells.find((c) => c.key === k);
+  lines.forEach((line, e) => line.forEach((k) => at(k).eqs.push(e)));
+  return { rows: rows.length, cols: Math.max(...rows.map((r) => r.length)), cells, eqs: lines.map((l) => l.map((k) => at(k).i)), ops: ['+', '-', '×', '÷'], rels: ['='] };
 }
-const tile = (k) => () => G.p.cells.find((c) => c.key === k).el;
-// ring the tile until it's picked, then the key to press
-const opKey = (k, op) => () => (G.sel?.key === k ? $(`#palette [data-op="${op}"]`) : tile(k)());
+// Solved: the first lesson moves on to the next after a moment; the last one wins
+function solved() {
+  if (!G.tut || G.qi === LESSON_BOARDS.length - 1) return win();
+  const g = G;
+  g.done = true;
+  track('tutorial', 'lesson-' + g.qi);
+  setTimeout(() => {
+    if (G !== g || !coached) return;
+    g.qi++;
+    g.done = false;
+    startLevel(g, {});
+    coachCheck();
+  }, 1500);
+}
+// Nothing is forced. A wrong operator says why in the coach line (the line's own reason, else what 3 and 5 make);
+// after two, the coach rings the tile, and once it's picked, the key.
+function missed(cell, op) {
+  G.miss++;
+  coachSay(G.why || (cell.key === '1,1' && op in PREC
+    ? T('Not that one: 3 {op} 5 makes {n}, not 8.', { op: sym(op), n: num(evalExpr([3, 5], [op])) })
+    : T('Not that one: then this line can\'t come out true.')));
+}
+const tutRing = (k, op) => () => G.miss < 2 ? null : G.sel?.key === k ? $(`#palette [data-op="${op}"]`) : G.p.cells.find((c) => c.key === k).el;
 
 // ---------- game ----------
 const editable = (c) => c.op && !c.given && !G.hinted.has(c.key);
@@ -87,12 +116,16 @@ const valOf = (c) => (c.op && !c.given ? G.fills.get(c.key) : c.val);
 // Shell hook: build pack level / daily G.key; returns true if the save was restored.
 function startLevel(G, save) {
   const { pack, n, date, key } = G;
-  const p = G.tut ? tutorialPuzzle() : generate(hash(key), levelConfig(date ? PACKS[pack].daily : packDifficulty(pack, n)));
+  if (G.tut) G.qi ??= 0;
+  const p = G.tut ? tutorialPuzzle(G.qi) : generate(hash(key), levelConfig(date ? PACKS[pack].daily : packDifficulty(pack, n)));
   const s = saveFits(p, save) ? save : {};
   Object.assign(G, { p, fills: new Map(s.fills), hinted: new Set(s.hinted), sel: null, states: [], history: [] });
 
   $('#g-sub').textContent = [...p.ops, ...p.rels].map(sym).join(' ');
   $('#tip').textContent = date ? T(`Today's ${TIERS[pack].toLowerCase()} puzzle. A new one tomorrow.`) : '';
+  G.tip0 = $('#tip').innerHTML;
+  delete $('#tip').dataset.warn;
+  G.miss = 0;
   // intros (how to play, then each operator) show once ever, on the first level that uses them
   const used = new Set(p.cells.filter((c) => c.op).map((c) => c.val)), seen = store.intros || [];
   const todo = ['first', ...Object.keys(OP_TIPS).filter((o) => [...syms(o)].some((x) => used.has(x)))].filter((k) => !seen.includes(k));
@@ -100,7 +133,7 @@ function startLevel(G, save) {
   buildBoard();
   buildPalette();
   balancePalette();
-  G.sel = G.tut ? null : nextEmpty(null);
+  G.sel = nextEmpty(null);
   refresh(false);
   return s === save;
 }
@@ -201,9 +234,28 @@ function refresh(sound) {
     }
     if (sound && cell.eqs.some((e) => states[e] === 'bad' && prev[e] !== 'bad')) flash(el, 'shake');
   }
-  if (!G.done && states.every((s) => s === 'ok')) win();
+  // a false line says why under the board: the selected tile's first, else the first one
+  const bad = [...(G.sel?.eqs || []), ...states.keys()].find((e) => states[e] === 'bad');
+  G.why = bad === undefined ? '' : whyBad(bad);
+  if (G.why || $('#tip').dataset.warn) $('#tip').innerHTML = G.why || G.tip0;
+  if (G.why) $('#tip').dataset.warn = 1; else delete $('#tip').dataset.warn;
+  if (G.tut && G.p.cells.every((c) => !editable(c) || !G.fills.has(c.key) || G.fills.get(c.key) === c.val)) coachSay(null);
+  if (!G.done && states.every((s) => s === 'ok')) solved();
   $('#btn-undo').disabled = !G.history.length || G.done;
   follow();
+}
+
+// Why line e is false: no (or two) =, a part that can't be worked out, or what each side makes.
+const num = (x) => sym(String(+x.toFixed(2))).replace('-', '−');
+function whyBad(e) {
+  const v = G.p.eqs[e].map((i) => valOf(G.p.cells[i])), rels = v.filter((x, i) => i % 2 && x in REL), more = G.p.rels.length > 1;
+  if (rels.length !== 1) return more ? T('A line needs exactly one <b>=</b>, <b>&lt;</b> or <b>&gt;</b>.') : T('A line needs exactly one <b>=</b>.');
+  const at = v.indexOf(rels[0]), side = (x) => evalExpr(x.filter((_, i) => i % 2 === 0), x.filter((_, i) => i % 2));
+  const l = side(v.slice(0, at)), r = side(v.slice(at + 1));
+  if (!Number.isFinite(l) || !Number.isFinite(r)) return T('Part of this line can\'t be worked out.');
+  const n = { l: num(l), r: num(r) };
+  return rels[0] === '<' ? T('Not true: {l} isn\'t less than {r}.', n) : rels[0] === '>' ? T('Not true: {l} isn\'t more than {r}.', n)
+    : T('Not true: one side makes {l}, the other {r}.', n);
 }
 
 // ---------- zoom ----------
@@ -281,7 +333,7 @@ function nextEmpty(from) {
 
 function place(op) {
   if (!playing()) return;
-  if (!G.sel || !editable(G.sel)) { if (G.tut) return coachAllows({}); G.sel = nextEmpty(null); } // the tutorial picks its tiles by hand
+  if (!G.sel || !editable(G.sel)) G.sel = nextEmpty(null);
   const cell = G.sel;
   if (!cell || !coachAllows({ key: cell.key, op })) return;
   if (op) {
@@ -291,7 +343,7 @@ function place(op) {
     flash(cell.el, 'pop');
     const next = nextInEquation(G.p, cell, G.eq, (c) => editable(c) && !G.fills.has(c.key));
     G.eq = next ? next.eq : null;
-    G.sel = G.tut ? cell : next ? next.cell : nextEmpty(cell) || cell; // the tutorial has the next tile tapped, not jumped to
+    G.sel = next ? next.cell : nextEmpty(cell) || cell;
   } else {
     if (!G.fills.has(cell.key)) return;
     remember();
@@ -299,6 +351,7 @@ function place(op) {
     sfx.erase();
   }
   refresh(true);
+  if (G.tut && op) { if (op !== cell.val) missed(cell, op); else G.miss = 0; }
   saveGame();
 }
 
@@ -418,19 +471,23 @@ mini($('#help-grid'), ['.2...', '3+5=8', '.4...', '.=...', '.6...'], ['1,1', '1,
 // ponytail: storage key keeps the old name so existing saves survive the rename.
 boot({ name: T('Mathquilibrium'), storeKey: 'crossum2', ownIntro: true,
   tutorial: [
-    [T('Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours to fill. Tap the ringed one.'),
-      () => G.sel?.key === '1,1', tile('1,1'), (m) => m.sel === '1,1'],
-    [T('It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below. The small number on a key is its turn in the math: 1 is worked out before 2.'),
-      () => G.fills.get('1,1') === '+', '#palette', (m) => m.key === '1,1' && m.op === '+'],
-    [T('3 + 5 = 8. That tile is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Tap the row\'s other blank.'),
-      () => G.sel?.key === '1,3', tile('1,3'), (m) => m.sel === '1,3'],
-    [T('Between 3 + 5 and 8 goes <b>=</b>. Pick it.'),
-      () => G.fills.get('1,3') === '=', opKey('1,3', '='), (m) => m.key === '1,3' && m.op === '='],
-    [T('The row is true, so it turns green. Now tap the blank in the column.'),
-      () => G.sel?.key === '3,1', tile('3,1'), (m) => m.sel === '3,1'],
-    [T('Finish 2 + 4 _ 6 with <b>=</b>. In a real puzzle, <b>Hint</b> fills in a tile when you\'re stuck, but hints cost you stars.'),
-      null, opKey('3,1', '='), (m) => m.key === '3,1' && m.op === '='],
+    [T('Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours: tap one, then pick an operator from the keys below. Look at the row <b>3 _ 5 _ 8</b>: which operator turns 3 and 5 into 8? Put it in its first blank.'),
+      () => G.fills.get('1,1') === '+', tutRing('1,1', '+')],
+    [T('3 + 5 makes 8, so between them and the 8 goes <b>=</b>. Put it in the row\'s other blank.'),
+      () => G.fills.get('1,3') === '=', tutRing('1,3', '=')],
+    [T('The row is true, so it turns green. Your + is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Finish the column.'),
+      () => G.qi > 0, tutRing('3,1', '=')],
+    [T('A new line: <b>2 _ 3 × 4 = 14</b>. The small number on each key is its turn: × and ÷ (1) are worked out before + and − (2), wherever they stand. So 3 × 4 goes first and makes 12. Which operator turns 2 and 12 into 14? Put it in the blank.'),
+      null, tutRing('0,1', '+')],
   ], glyphs: ['+', '−', '×', '÷', '='], start: startLevel, save: (G) => ({ fills: [...G.fills], hinted: [...G.hinted] }), key: onKey,
   reveal: () => { for (const c of G.p.cells) if (c.op && !c.given) G.fills.set(c.key, c.val); refresh(false); },
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 600 ? 3 : G.elapsed <= 1200 ? 2 : 1) } });
+// A first visit (not through a shared link) starts with the tutorial, in place of the how-to-play intro
+if (!store.tutored && !store.seenHelp && !(store.intros || []).includes('first') && !location.hash && !IMP) {
+  store.tutored = true;
+  store.intros = [...(store.intros || []), 'first'];
+  persist();
+  track('tutorial', 'first');
+  startTutorial();
+}

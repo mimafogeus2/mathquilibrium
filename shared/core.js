@@ -177,30 +177,37 @@ syncSound();
 // another tab (another game) flipped it
 addEventListener('storage', (e) => e.key === 'muted' && syncSound());
 
-// How to play in pages: each .help-page in #dlg-help is one, with dots, Back and Next (Got it on the last).
+// A dialog in pages: each .help-page in it is one, with dots, Back and Next (its own button, Got it, on the last).
 // core.css stacks the pages in one grid cell, so the dialog keeps the tallest page's size and doesn't jump.
-const helpPages = [...document.querySelectorAll('#dlg-help .help-page')];
-if (helpPages.length > 1) {
-  const dlg = $('#dlg-help'), form = dlg.querySelector('form:not(.dlg-x)'), done = form.querySelector('button'), last = helpPages.length - 1;
-  form.classList.add('help-nav');
-  form.insertAdjacentHTML('afterbegin', `<button type="button" class="btn ghost center"><b>${T('Back')}</b></button>`);
-  done.insertAdjacentHTML('beforebegin', `<button type="button" class="btn primary center"><b>${T('Next')}</b></button>`);
-  form.insertAdjacentHTML('beforebegin', `<div class="help-dots" aria-hidden="true">${'<i></i>'.repeat(helpPages.length)}</div>`);
-  const [back, next] = form.querySelectorAll('button[type=button]'), dots = [...dlg.querySelectorAll('.help-dots i')];
+// Call again after rebuilding the pages (Mathquilibrium's operator intros): it takes down the old dots and buttons first.
+function pages(dlg) {
+  const ps = [...dlg.querySelectorAll('.help-page')], form = dlg.querySelector('form:not(.dlg-x)');
+  const done = form.querySelector('button:not([data-pg])'), last = ps.length - 1;
+  for (const e of dlg.querySelectorAll('[data-pg]')) e.remove();
+  done.hidden = false;
+  form.classList.toggle('help-nav', ps.length > 1);
+  dlg.pageGo = null;
+  if (ps.length < 2) return;
+  form.insertAdjacentHTML('afterbegin', `<button type="button" data-pg class="btn ghost center"><b>${T('Back')}</b></button>`);
+  done.insertAdjacentHTML('beforebegin', `<button type="button" data-pg class="btn primary center"><b>${T('Next')}</b></button>`);
+  form.insertAdjacentHTML('beforebegin', `<div class="help-dots" data-pg aria-hidden="true">${'<i></i>'.repeat(ps.length)}</div>`);
+  const [back, next] = form.querySelectorAll('button[data-pg]'), dots = [...dlg.querySelectorAll('.help-dots i')];
   let at = 0;
-  const go = (n) => {
+  const go = (dlg.pageGo = (n) => {
     at = n;
-    helpPages.forEach((p, i) => p.toggleAttribute('inert', i !== n));
+    ps.forEach((p, i) => p.toggleAttribute('inert', i !== n));
     dots.forEach((d, i) => d.classList.toggle('on', i === n));
     back.hidden = n === 0;
     next.hidden = n === last;
     done.hidden = n !== last;
-  };
+  });
   back.onclick = () => { go(at - 1); (at ? back : next).focus(); };
   next.onclick = () => { go(at + 1); (at === last ? done : next).focus(); };
-  dlg.addEventListener('close', () => go(0));
+  if (!dlg.paged) dlg.addEventListener('close', () => dlg.pageGo?.(0));
+  dlg.paged = true;
   go(0);
 }
+pages($('#dlg-help'));
 // Opening focuses Next / Got it, not the × that comes first (showModal skips the hidden one)
 for (const b of document.querySelectorAll('#dlg-help form:not(.dlg-x) .btn.primary')) b.autofocus = true;
 

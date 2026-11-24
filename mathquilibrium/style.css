@@ -123,7 +123,6 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 }
 
 /* level intro modal */
-.intro section + section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair); }
 .intro .board.mini { margin: 0 auto; --cell: min(34px, var(--fit)); justify-content: center; }
 .intro p { margin: 12px 0 0; line-height: 1.45; text-wrap: balance; }
 .intro p b { font-weight: 600; }
