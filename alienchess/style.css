@@ -6,7 +6,7 @@
 .board, .cards, #help-card, #help-king { direction: ltr; }
 .board {
   --n: 5; position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr);
-  width: min(400px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 420px)); min-width: 220px; aspect-ratio: 1;
+  width: min(400px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 420px - var(--coach-h, 0px))); min-width: 220px; aspect-ratio: 1;
   border-radius: 10px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line), 4px 5px 0 var(--reg);
   user-select: none; -webkit-user-select: none;
 }
@@ -91,23 +91,22 @@
 #game .tools { margin: 10px 0 auto; padding-bottom: 8px; }
 
 @media (orientation: landscape) and (max-height: 540px) {
-  .board { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 420px)); }
+  .board { width: min(calc(100 * var(--dvh) - 90px - var(--coach-h, 0px)), calc(100 * var(--vw) - 420px)); }
   .cards { grid-column: 2; grid-row: 4; max-width: 400px; }
   .card { width: 112px; }
   .card-head .pc { --h: 36px; } .card-head .pc.foe { --h: 18px; }
 }
 
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
-  .board { width: min(600px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 520px)); border-radius: 14px; }
+  .board { width: min(600px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 520px - var(--coach-h, 0px))); border-radius: 14px; }
   .cards { gap: 14px; max-width: 560px; }
   .card { width: 160px; padding: 10px 10px 12px; }
   .card-head .pc { --h: 52px; } .card-head .pc.foe { --h: 26px; }
 }
 @media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
-  .board { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 500px)); }
+  .board { width: min(calc(100 * var(--dvh) - 120px - var(--coach-h, 0px)), calc(100 * var(--vw) - 500px)); }
   #game .cards { grid-column: 2; grid-row: 4; max-width: 420px; }
   .card { width: 128px; }
   .card-head .pc { --h: 44px; } .card-head .pc.foe { --h: 22px; }
 }
 
-.tut :is(#btn-undo, #btn-reset) { visibility: hidden; } /* tutorial: undoing would strand the steps */

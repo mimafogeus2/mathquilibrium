@@ -735,6 +735,7 @@ body:has(#game:not([hidden])) :is(.peel, .fire-band) { display: none; }
 .coach small { display: block; height: 1.5em; line-height: 1.5; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--brand-text); }
 .coach p { margin: 2px 0 0; line-height: 1.4; }
 .coach-lines { display: grid; }
+.coach-say { margin: 6px 0 0; line-height: 1.4; font-weight: 600; color: var(--brand-text); }
 .coach-lines > p { grid-area: 1 / 1; }
 .coach-lines > p:not(.now) { visibility: hidden; }
 .tut :is(#timer, #btn-print, #btn-link, #btn-pause, .give-up, #btn-giveup) { visibility: hidden; }

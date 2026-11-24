@@ -13,7 +13,7 @@
 .board {
   /* as big as fits: the screen's width (600 at most, padding in) and the height left by the bar, tray and tools; --ar is the cave's
      own shape (game.js: viewOf) */
-  width: min(540px, calc(100 * var(--vw) - 60px), calc((100 * var(--dvh) - 330px) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
+  width: min(540px, calc(100 * var(--vw) - 60px), calc((100 * var(--dvh) - 330px - var(--coach-h, 0px)) * var(--ar, 1))); aspect-ratio: var(--ar, 1);
   border-radius: 14px; box-shadow: inset 0 0 0 1px var(--hair), 4px 5px 0 var(--reg); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
 .tank { display: block; width: 100%; height: 100%; }
@@ -188,10 +188,10 @@
 #logo svg { width: 200px; height: 120px; margin: 0 auto 4px; display: block; overflow: visible; }
 
 @media (orientation: landscape) and (max-height: 540px) {
-  .board { width: min(calc((100 * var(--dvh) - 90px) * var(--ar, 1)), calc(100 * var(--vw) - 380px)); }
+  .board { width: min(calc((100 * var(--dvh) - 90px - var(--coach-h, 0px)) * var(--ar, 1)), calc(100 * var(--vw) - 380px)); }
 }
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
-  .board { width: min(568px, calc(100 * var(--vw) - 64px), calc((100 * var(--dvh) - 380px) * var(--ar, 1))); }
+  .board { width: min(568px, calc(100 * var(--vw) - 64px), calc((100 * var(--dvh) - 380px - var(--coach-h, 0px)) * var(--ar, 1))); }
   .slot { width: 60px; height: 60px; }
 }
 /* How to play: the difficulty a rule starts at */

@@ -8,7 +8,7 @@
 .board {
   --n: 4; --gap: clamp(4px, calc(1.4 * var(--vw)), 8px);
   display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: var(--gap);
-  width: min(440px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 360px)); aspect-ratio: 1; padding: var(--gap);
+  width: min(440px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 360px - var(--coach-h, 0px))); aspect-ratio: 1; padding: var(--gap);
   border-radius: 16px; background: var(--slot); box-shadow: inset 0 0 0 1px var(--hair);
   touch-action: none; user-select: none; -webkit-user-select: none; perspective: 900px;
 }
@@ -77,17 +77,17 @@
 #logo { margin-bottom: 6px; transform: rotate(-4deg); }
 
 @media (orientation: landscape) and (max-height: 540px) {
-  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
+  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 90px - var(--coach-h, 0px)), calc(100 * var(--vw) - 380px)); }
   .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
 }
 
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
-  .board:not(.mini) { width: min(620px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 480px)); border-radius: 22px; }
+  .board:not(.mini) { width: min(620px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 480px - var(--coach-h, 0px))); border-radius: 22px; }
   .tray { gap: 12px; max-width: 620px; margin-top: 20px; }
   .piece { width: 72px; height: 72px; padding: 9px; border-radius: 14px; }
 }
 @media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
-  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 480px)); }
+  .board:not(.mini) { width: min(calc(100 * var(--dvh) - 120px - var(--coach-h, 0px)), calc(100 * var(--vw) - 480px)); }
   #game .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 400px; margin-bottom: 18px; }
 }
 

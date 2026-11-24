@@ -50,7 +50,7 @@ svg.art { position: absolute; width: 0; height: 0; overflow: hidden; }
 .board {
   --n: 8;
   /* as big as fits: the width, and the height left by the bar, the sheet's margins, one row of tray, the tip and the tools */
-  width: min(480px, calc(100 * var(--vw) - 48px), calc((100 * var(--dvh) - 372px) * (var(--n) + .6) / (var(--n) + var(--vt, .8) + .4))); min-width: 240px;
+  width: min(480px, calc(100 * var(--vw) - 48px), calc((100 * var(--dvh) - 372px - var(--coach-h, 0px)) * (var(--n) + .6) / (var(--n) + var(--vt, .8) + .4))); min-width: 240px;
   aspect-ratio: calc(var(--n) + .6) / calc(var(--n) + var(--vt, .8) + .4);
   border-radius: 10px; background: var(--stock);
   touch-action: none; user-select: none; -webkit-user-select: none; position: relative; overflow: visible;
@@ -220,16 +220,16 @@ svg.art { position: absolute; width: 0; height: 0; overflow: hidden; }
   .piece .amp { font-size: 9.5px; padding: 2px 3px; }
 }
 @media (orientation: landscape) and (max-height: 540px) {
-  .board { width: min(calc(100 * var(--dvh) - 90px), calc(100 * var(--vw) - 380px)); }
+  .board { width: min(calc(100 * var(--dvh) - 90px - var(--coach-h, 0px)), calc(100 * var(--vw) - 380px)); }
   .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
 }
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
-  .board { width: min(640px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 440px)); border-radius: 20px; }
+  .board { width: min(640px, calc(100 * var(--vw) - 64px), calc(100 * var(--dvh) - 440px - var(--coach-h, 0px))); border-radius: 20px; }
   .tray { gap: 12px; max-width: 640px; margin-top: 18px; }
   .piece { width: 68px; height: 68px; padding: 11px; }
 }
 @media (pointer: coarse) and (orientation: landscape) and (min-height: 700px) {
-  .board { width: min(calc(100 * var(--dvh) - 120px), calc(100 * var(--vw) - 480px)); }
+  .board { width: min(calc(100 * var(--dvh) - 120px - var(--coach-h, 0px)), calc(100 * var(--vw) - 480px)); }
   #game .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 400px; margin-bottom: 18px; }
 }
 [data-calm] .city .pc .base, [data-calm] .city .pc .avl { animation: none; }
