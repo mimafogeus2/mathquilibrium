@@ -197,6 +197,10 @@ svg.art { position: absolute; width: 0; height: 0; overflow: hidden; }
 #game .tools { margin: 6px 0 auto; padding-bottom: 8px; }
 #game .tip { margin: 10px 0 0; min-height: 2.9em; }
 #tip[data-warn] { color: var(--red-text); }
+/* a level's first-contact line (Impossible Mode): the new piece's tray slot pulses until it's picked */
+.piece.new:not(.used) { animation: rc-new 1.4s ease-in-out 3; }
+@keyframes rc-new { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 45%, transparent); } }
+[data-calm] .piece.new { animation: none; outline: 2px solid var(--brand); outline-offset: 2px; }
 #g-sub { white-space: nowrap; } /* "2+ bars" never splits at the plus */
 
 /* the menu's logo: three signal bars, the tallest inked */
@@ -234,3 +238,5 @@ svg.art { position: absolute; width: 0; height: 0; overflow: hidden; }
 .city .roof.coach-at { outline: none !important; stroke: var(--brand); stroke-width: .1; stroke-dasharray: none; opacity: 1; animation: rc-roof-ring 1.2s ease-in-out infinite !important; }
 @keyframes rc-roof-ring { 50% { stroke-opacity: .35; } }
 [data-calm] .city .roof.coach-at { animation: none !important; }
+/* How to play: the difficulty a rule starts at */
+#dlg-help .tier { display: inline-block; margin-inline-end: 2px; padding: 1px 6px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; vertical-align: 1px; background: var(--sun); color: var(--navy); }
