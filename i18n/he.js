@@ -564,10 +564,33 @@ module.exports = {
       '<b>Eaten!</b> Undo and try another way.': '<b>נאכל!</b> בטלו ונסו דרך אחרת.',
       '<b>Going in circles.</b> Undo and try another way.': '<b>מסתובבים במעגלים.</b> בטלו ונסו דרך אחרת.',
       '<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.': '<b>תקועים:</b> כל הפריטים במקום, והרקק עדיין בפנים. בטלו ונסו דרך אחרת.',
-      'Each fish looks only straight ahead: the dotted lines show where. The fry (orange) is looking at rock. Pick the <b>mirror</b> below.':
-        'כל דג מסתכל רק ישר קדימה: הקווים המנוקדים מראים לאן. הרקק (הכתום) מסתכל על סלע. בחרו את ה<b>מראה</b> למטה.',
-      'Items go only where a fish is looking. Tap the ringed spot to place it there: the fry will see the <b>exit</b> and swim for it.':
-        'פריטים מניחים רק במקום שדג מסתכל עליו. הקישו על הנקודה המסומנת כדי להניח שם את הפריט: הרקק יראה את <b>היציאה</b> וישחה אליה.',
+      'The fry (orange) looks only <b>straight ahead</b>: the dotted line. Items go only where a fish is looking. Put the <b>mirror</b> where it shows the fry the <b>exit</b>.':
+        'הרקק (הכתום) מסתכל רק <b>ישר קדימה</b>: הקו המנוקד. פריטים מניחים רק במקום שדג מסתכל עליו. שימו את ה<b>מראה</b> במקום שמראה לרקק את ה<b>יציאה</b>.',
+      "A bigger fish eats a smaller one it sees, and <b>lunges</b> at one that swims into its look. After each item the fish act. Get the fry out without crossing the 2's look.":
+        'דג גדול אוכל דג קטן ממנו שהוא רואה, ו<b>מסתער</b> על דג שנכנס למבט שלו. אחרי כל פריט הדגים פועלים. הוציאו את הרקק בלי לחצות את המבט של ה־2.',
+      "A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what's behind it.":
+        '<b>מראה שטוחה</b> נתלית על הסלע שדג בוהה בו, ומראה לו את מה שמאחוריו.',
+      "Every fish has a job. The 2 guards the way out; the 3 is hungry. Turn the 3's look onto the 2 first.":
+        'לכל דג יש תפקיד. ה־2 שומר על הדרך החוצה; ה־3 רעב. קודם הפנו את המבט של ה־3 אל ה־2.',
+      "<b>Bait</b> draws the fry to it, and moving the fry sets the fish that watch it moving too. Lure the 3 into the 4's look, and the way up clears.":
+        '<b>פיתיון</b> מושך אליו את הרקק, וכשהרקק זז, גם הדגים שמסתכלים עליו זזים. פתו את ה־3 אל המבט של ה־4, והדרך למעלה תתפנה.',
+      'The 3 on the <b>rail</b> patrols back and forth, a cell each time anything else moves, and eats what it runs into. Get the fry across its rail before it comes back.':
+        'ה־3 שעל ה<b>מסילה</b> מסייר הלוך ושוב, משבצת בכל פעם שמשהו אחר זז, ואוכל את מה שהוא נתקל בו. העבירו את הרקק את המסילה לפני שהוא חוזר.',
+      'A <b>bolted mirror</b> (riveted) is part of the tank: it bends looks like yours, but it never moves. Use it.':
+        '<b>מראה מוברגת</b> (עם מסמרות) היא חלק מהאקווריום: היא מסובבת מבטים כמו המראות שלכם, אבל אף פעם לא זזה. השתמשו בה.',
+      'A <b>fast fish</b> (streaks) swims two cells at a time, so its lunge reaches two cells. Cross its look further out than that.':
+        '<b>דג מהיר</b> (עם פסים) שוחה שתי משבצות בכל פעם, אז ההסתערות שלו מגיעה שתי משבצות. חצו את המבט שלו רחוק יותר מזה.',
+      'mirrors': 'מראות',
+      'flat mirrors': 'מראות שטוחות',
+      'bigger fish': 'דגים גדולים',
+      'bolted mirrors': 'מראות מוברגות',
+      'patrollers': 'דגים מסיירים',
+      'fast fish': 'דגים מהירים',
+      '<b>New here</b>: {list}. See How to play.': '<b>חדש כאן</b>: {list}. ראו „איך משחקים״.',
+      // failText(): looked up at runtime, so build.js can't see these
+      '<b>Eaten!</b> The {n} saw the fry. Undo and keep the fry out of its look.': '<b>נאכל!</b> ה־{n} ראה את הרקק. בטלו והרחיקו את הרקק מהמבט שלו.',
+      "<b>Eaten!</b> The fry swam into the {n}'s look, and it lunged. Undo and try another way.": '<b>נאכל!</b> הרקק שחה אל המבט של ה־{n}, והוא הסתער. בטלו ונסו דרך אחרת.',
+      "<b>Eaten!</b> The fry swam into the patrolling {n}'s way. Undo and try another way.": '<b>נאכל!</b> הרקק שחה אל הדרך של ה־{n} המסייר. בטלו ונסו דרך אחרת.',
     },
     'lexiconga/game.js': {
       'Lexiconga': 'לקסיקונגה',
@@ -1068,32 +1091,22 @@ module.exports = {
         '<p id="board-keys" class="sr-only">מקשי המספרים בוחרים פריט מהמגש. החצים עוברים בין המקומות שדג מסתכל עליהם. Enter או רווח מניחים את הפריט, והדגים פועלים. U או Backspace מחזירים אותו.</p>'],
       ['</svg>Faster', '</svg>מהר יותר'],
       [`<li>Get the orange <b>fry</b> out through the <b>exit</b>, the glowing gap in the rock.</li>
-    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. A fish swims for the first thing it sees, if it wants it: a <b>bigger fish eats a smaller one</b> (each one's size is on its tag), and the fry swims for the exit or for bait.</li>
-  </ol>
-  </div>
-  <div class="help-page">
-  <ol class="rules" start="3">
-    <li>Place the items in your tray where a fish is <b>looking</b>. A <b>mirror</b> turns a look round a corner. A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what's behind it. <b>Bait</b> lures the fry, which turns the way it swam to it.</li>
-    <li>After each item, the fish act. When they stop, place the next. A fish sees a smaller one swimming into its look and goes for it at once. A fast fish (with streaks) swims two cells at a time; a fish on a rail patrols back and forth whenever anything else moves.</li>
-  </ol>
-  </div>
-  <div class="help-page">
-  <ol class="rules" start="5">
-    <li>Use <b>every item</b>. There's only <b>one way</b>, and order can matter.</li>
-    <li>Undo takes back the last item, even while the fish swim. Getting eaten, going in circles, running out of items, and undoing after the fish moved each count against your stars; hints cost a star too.</li>`,
+    <li>Every fish looks <b>straight ahead</b>, never behind: the dotted lines show where. The fry swims for the exit when it sees it.</li>
+    <li>A <b>bigger fish eats a smaller one</b> it sees (sizes are on the tags), and <b>lunges</b> at one that swims into its look.</li>`,
         `<li>הוציאו את ה<b>רקק</b> הכתום דרך ה<b>יציאה</b>, הפתח הזוהר בסלע.</li>
-    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. דג שוחה אל הדבר הראשון שהוא רואה, אם הוא רוצה אותו: <b>דג גדול אוכל דג קטן ממנו</b> (הגודל של כל דג כתוב על התווית שלו), והרקק שוחה אל היציאה או אל פיתיון.</li>
-  </ol>
-  </div>
-  <div class="help-page">
-  <ol class="rules" start="3">
-    <li>הניחו את הפריטים מהמגש במקומות שדג <b>מסתכל</b> עליהם. <b>מראה</b> מסובבת מבט מעבר לפינה. <b>מראה שטוחה</b> נתלית על הסלע שדג בוהה בו, ומראה לו מה מאחוריו. <b>פיתיון</b> מושך את הרקק, והוא פונה לכיוון שבו שחה אליו.</li>
-    <li>אחרי כל פריט, הדגים פועלים. כשהם עוצרים, הניחו את הבא. דג שרואה דג קטן ממנו נכנס למבט שלו מסתער עליו מיד. דג מהיר (עם פסים) שוחה שתי משבצות בכל פעם; דג על מסילה מפטרל הלוך ושוב בכל פעם שמשהו אחר זז.</li>
-  </ol>
-  </div>
-  <div class="help-page">
-  <ol class="rules" start="5">
-    <li>השתמשו ב<b>כל הפריטים</b>. יש רק <b>דרך אחת</b>, והסדר יכול לשנות.</li>
+    <li>כל דג מסתכל <b>ישר קדימה</b>, אף פעם לא אחורה: הקווים המנוקדים מראים לאן. הרקק שוחה אל היציאה כשהוא רואה אותה.</li>
+    <li><b>דג גדול אוכל דג קטן ממנו</b> שהוא רואה (הגדלים על התגיות), ו<b>מסתער</b> על דג שנכנס למבט שלו.</li>`],
+      [`<li>Put each item from your tray where a fish is <b>looking</b>. A <b>mirror</b> turns a look round a corner. A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what's behind it.</li>
+    <li>After each item, the <b>fish act</b>. When they stop, place the next: order can matter.</li>`,
+        `<li>הניחו כל פריט מהמגש במקום שדג <b>מסתכל</b> עליו. <b>מראה</b> מסובבת מבט מעבר לפינה. <b>מראה שטוחה</b> נתלית על הסלע שדג בוהה בו, ומראה לו את מה שמאחוריו.</li>
+    <li>אחרי כל פריט, <b>הדגים פועלים</b>. כשהם עוצרים, הניחו את הבא: הסדר יכול לשנות.</li>`],
+      [`<li><span class="tier">Medium+</span> <b>Bait</b> draws the fry to it. A <b>bolted mirror</b> bends looks but never moves. A fish on a <b>rail</b> patrols back and forth, a cell each time anything else moves.</li>
+    <li><span class="tier">Hard+</span> A <b>fast fish</b> (streaks) swims two cells at a time.</li>`,
+        `<li><span class="tier">בינוני+</span> <b>פיתיון</b> מושך אליו את הרקק. <b>מראה מוברגת</b> מסובבת מבטים אבל אף פעם לא זזה. דג על <b>מסילה</b> מסייר הלוך ושוב, משבצת בכל פעם שמשהו אחר זז.</li>
+    <li><span class="tier">קשה+</span> <b>דג מהיר</b> (עם פסים) שוחה שתי משבצות בכל פעם.</li>`],
+      [`<li>Use <b>every item</b>. There's only <b>one way</b>.</li>
+    <li>Undo takes back the last item, even while the fish swim. Getting eaten, going in circles, running out of items, and undoing after the fish moved each count against your stars; hints cost a star too.</li>`,
+        `<li>השתמשו ב<b>כל הפריטים</b>. יש רק <b>דרך אחת</b>.</li>
     <li>„ביטול״ מחזיר את הפריט האחרון, גם בזמן שהדגים שוחים. להיאכל, להסתובב במעגלים, להיגמר מפריטים ולבטל אחרי שהדגים זזו — כל אחד מאלה עולה בכוכבים; גם רמזים עולים כוכב.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>9</kbd> pick an item, arrows to choose a spot, <kbd>Enter</kbd> to place, <kbd>U</kbd> undo, <kbd>F</kbd> faster, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: <kbd>1</kbd>–<kbd>9</kbd> בוחרים פריט, החצים בוחרים מקום, <kbd>Enter</kbd> מניח, <kbd>U</kbd> ביטול, <kbd>F</kbd> מהר יותר, <kbd>P</kbd> השהיה.</p>'],

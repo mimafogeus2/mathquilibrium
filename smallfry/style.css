@@ -194,3 +194,5 @@
   .board { width: min(568px, calc(100 * var(--vw) - 64px), calc((100 * var(--dvh) - 380px) * var(--ar, 1))); }
   .slot { width: 60px; height: 60px; }
 }
+/* How to play: the difficulty a rule starts at */
+#dlg-help .tier { display: inline-block; margin-inline-end: 2px; padding: 1px 6px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; vertical-align: 1px; background: var(--sun); color: var(--navy); }

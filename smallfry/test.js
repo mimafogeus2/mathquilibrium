@@ -71,6 +71,25 @@ T = tank(['######', '#....X', '#0...#', '######'], [R], {});
   assert.strictEqual(S.parse(S.line({ ...Q, items: ['/'], sol: [['/', 7]] })).fish[1].w, true); // stored with a p
 }
 
+// the tutorial's lessons (game.js LESSONS): nobody moves before the first item, the answer wins, it's the only one, no smaller
+// hand wins, and a wrong first try the lesson is built around loses (the 2's look; the 2 before the 3; the fast fish's lunge)
+{
+  const ls = [...require('fs').readFileSync(__dirname + '/game.js', 'utf8').matchAll(/line: '([^']+)'/g)].map((m) => S.parse(m[1].replace(/\\\\/g, '\\'))); // the source's \\ is one \
+  assert.strictEqual(ls.length, 8, 'every lesson in game.js');
+  for (const lv of ls) {
+    const key = 'lesson ' + S.line(lv);
+    assert(!S.tick(lv, S.initial(lv)).moved.length, key + ': someone moves before any item');
+    assert.strictEqual(S.replay(lv, lv.sol), 'win', key + ' answer');
+    const v = S.solve(lv);
+    assert.strictEqual(v.answers.length, 1, key + ' has one answer');
+    assert(!v.spare, key + ' a smaller hand wins');
+  }
+  assert.strictEqual(S.replay(ls[1], [['/', 29], ['/', 33]]), 'lose'); // past the 2: it lunges
+  assert.strictEqual(S.replay(ls[3], [['/', 29], ['/', 33]]), 'lose'); // the fry first: the 2 is still there
+  assert.strictEqual(S.replay(ls[5], [['/', 40], ['\\', 39]]), 'lose'); // the long way round: the patroller is back
+  assert.strictEqual(S.replay(ls[7], [['/', 23], ['/', 37]]), 'lose'); // down the middle: the fast 3 lunges two cells
+}
+
 // levels
 if (process.argv[2] === 'rules') { console.log('rules ok'); process.exit(); }
 const { LEVELS, DAILY } = require('./levels.js');
