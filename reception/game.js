@@ -26,11 +26,47 @@ const artSvg = (k) => { const s = Math.max(TALL[k] + 8, 66); return `<svg viewBo
 const pieceName = (pc) => (isAnt(pc.k) ? `${NAMES[pc.k]} ${pc.g}` : NAMES[pc.k]);
 const pieceTip = (pc) => `<b>${esc(pieceName(pc))}</b>: ${DESC[pc.k]}` + (pc.amp === 1 ? ' ' + T('A <b>repeater</b>: it only broadcasts once its own square already has some signal.') : pc.amp ? ' ' + T('An <b>amplifier</b>: it only broadcasts once its own square already has {n} bars.', { n: pc.amp }) : '');
 
-// The tutorial: 4×4 on the waterfront, a mast that covers most of it, and an amplifier woken next to it for the corners.
-const TUTORIAL = parse('4|' + ['1..2', '.aa.', '..1.', '~~~~'].join('') + '|' + '111111111111' + '0000|M3,C2^2|5.0,6.0');
+// Lessons: tiny cities, one idea each. Each has one answer and nothing is forced: the player finds the roof, wrong tries play
+// out (the tip under the board says why they fall short), and after two the coach rings the right roof. The menu's Tutorial runs
+// the first five (BASICS); the rest wait for a level that deals their mechanic for the first time (firstContact starts them).
+// `teaches`: the mechanics a lesson covers (a piece's letter, amp, rep, height, hot, lm). test.js checks each has one answer.
+const LESSONS = [
+  { teaches: ['M'], line: '5|~~.~~~a..~..a..~..a~~~.~~|0010001110111110111000100|M3|12.0',
+    text: T('Every square needs <b>1 bar</b> of signal. A <b>mast</b> sends a diamond around its roof. Pick a <b>rooftop</b> where it reaches them all.') },
+  { teaches: ['C', 'hot'], line: '4|a..~.a....a.~..a|1110111111210111|C1,C1|5.0,10.0',
+    text: T('Signal <b>adds up</b> where antennae overlap. The pin needs <b>2 bars</b>: put the two small cells where they meet on it, and still reach every corner.') },
+  { teaches: ['height'], line: '5|~~.~~~.c.~.ba..~...~~~.~~|0010001110111110111000100|M2|7.0',
+    text: T('<b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two. Which roof reaches everywhere?') },
+  { teaches: ['D'], line: '5|~~~~~~~~~~a.2.b~~~~~~~~~~|0000000000111110000000000|D1|14.3',
+    text: T('A <b>dish</b> fires a beam one way, to the edge of the city. Put it on a rooftop.'),
+    // a second line once it's up: how to turn it
+    turn: T('Now <b>tap the dish</b> to turn it, a quarter turn a tap (<kbd>R</kbd> on a keyboard): the arrow at its foot shows where it points. A building <b>taller</b> than its roof stops the beam.') },
+  { teaches: ['amp'], line: '4|1...aaa..1..~.~~|1111111111110100|M3,C1^2|5.0,6.0',
+    text: T('An <b>amplifier</b> (≥2 on its tab) stays off until its own square already has <b>2 bars</b> from the others. Put the mast where it wakes it, and both cover the city.') },
+  // ---- met later, one lesson per mechanic ----
+  { teaches: ['P'], line: '5|~~a~~~~.~~~.a.~.....~~~~~|0010000100011101111100000|P2|2.2',
+    text: T('A <b>panel</b> fires a widening wedge one way, weaker toward its tip. Put it up and tap it to <b>turn</b> it toward the city.') },
+  { teaches: ['X'], line: '5|~~.~~~~.~~..a..~~a~~~~.~~|0010000100111110010000100|X1|12.0',
+    text: T('A <b>plus</b> sends out four arms, two squares long. Which roof do they reach every street from?') },
+  { teaches: ['O'], line: '5|......~~~.1.a....a.a..1..|1111110001111111111111111|O1,C1|12.0,17.0',
+    text: T('A <b>ring</b> covers the squares two steps away, all round, and nothing nearer, not even its own roof. Let the small cell fill its hole.') },
+  { teaches: ['rep'], line: '5|......a.a......~.~~~~~~~~|1111111111111110100000000|M3,C1^1|6.0,8.0',
+    text: T('A <b>repeater</b> (≥1 on its tab) stays off until signal reaches its roof, but even <b>1 bar</b> wakes it. Put the mast where it wakes it, and both cover the city.') },
+  { teaches: ['lm'], line: '4|~~~~aSS.aSS.~~~~|0000122112210000|D2,D2|4.1,8.1',
+    text: T('A <b>stadium</b> needs its pin\'s number on <b>every one</b> of its four squares (a station on both of its two). Aim the dishes across it.') },
+  { teaches: ['b'], line: '5|~~~~~~...~~.aa~~..a~~~~~~|0000002220022200222000000|C1,b|12.0,13.0',
+    text: T('Every square needs <b>2 bars</b> here. A <b>booster</b> broadcasts nothing: it adds <b>1 bar</b> wherever the antennae right next to it reach (not diagonally).') },
+  { teaches: ['e'], line: '5|~~.~~~...~..aa.~..a~~~.~~|0010001110111110111000100|M2,e|12.0,13.0',
+    text: T('An <b>extender</b> gives the antennae right next to it (not diagonally) <b>one more square</b> of range.') },
+  { teaches: ['l'], line: '5|~~~~~~~~~~a.2..aa~~~~~~~~|0000000000010110000000000|D1,l|10.1,15.0',
+    text: T('A <b>lifter</b> makes the antennae right next to it count as a storey taller: they reach further and <b>see over</b> one more storey. Get the beam past the building.') },
+  { teaches: ['s'], line: '5|~~~~~~~~~~..a..~aa~~~~~~~|0000000000110110000000000|D1,s|12.1,17.0',
+    text: T('A <b>splitter</b> makes a dish or panel right next to it fire <b>both ways</b> at once.') },
+];
+const BASICS = [0, 1, 2, 3, 4];
 
 const levelOf = (G) => {
-  if (G.tut) return TUTORIAL;
+  if (G.tut) return parse(LESSONS[G.q[G.qi]].line);
   if (LIVE.includes(G.pack)) return generate(hash(G.key), G.pack);
   // Impossible: today's daily from levels.js; past the ones built, an earlier one picked by the date (build-levels.js makes more)
   const days = DAILY.I, i = Math.round((Date.parse(G.date) - Date.parse(DAILY.from)) / 864e5);
@@ -59,6 +95,8 @@ const SAVE_OK = (L, P, s) => Array.isArray(s.place) && s.place.length === L.hand
   new Set(s.place.filter(Boolean).map((p) => p[0])).size === s.place.filter(Boolean).length;
 
 function startLevel(G, save) {
+  // a tutorial: G.q the lessons it runs, G.qi the one on the board
+  if (G.tut) { G.q ??= lessonQueue || BASICS; G.qi ??= 0; G.miss = 0; lessonQueue = null; }
   const L = levelOf(G), P = prep(L), K = L.hand.length;
   const fits = SAVE_OK(L, P, save);
   Object.assign(G, {
@@ -94,9 +132,30 @@ function startLevel(G, save) {
   $('#slug').textContent = G.tut ? T('Tutorial') : $('#g-title').textContent;
   $('#g-sub').textContent = goalText(G.goal); // one short line: the board shows its own size
   $('#btn-hint').hidden = IMP || !!G.tut;
-  tip(G.date ? T('Today\'s puzzle. A new one tomorrow.') : startTip());
+  tip(firstContact(L, P) || (G.date ? T('Today\'s puzzle. A new one tomorrow.') : startTip()));
   refresh();
   return fits || !Object.keys(save).length;
+}
+// The first level with a mechanic the player hasn't met (a piece, an amplifier or repeater, a hotspot, a landmark) says so under
+// the board and lights the new pieces' tray slots, then plays a lesson for each new mechanic in turn and comes back to the level
+// (not in Impossible Mode, which teaches nothing: there the line stays). What's been met is kept in store.met; a finished lesson counts.
+const MET = () => (store.met ??= []);
+const meet = (fs) => { for (const f of fs) if (!MET().includes(f)) MET().push(f); persist(); };
+const featuresOf = (pc) => [pc.k, ...(pc.amp > 1 ? ['amp'] : pc.amp === 1 ? ['rep'] : [])];
+const levelFeatures = (P) => [...P.hand.flatMap(featuresOf), ...(G.goal.lms.length ? ['lm'] : []), ...(G.goal.pins.length > G.goal.lms.length ? ['hot'] : [])];
+function firstContact(L, P) {
+  if (G.tut || G.done) return '';
+  const fresh = [...new Set(levelFeatures(P).filter((f) => !MET().includes(f)))];
+  if (!fresh.length) return '';
+  meet(fresh);
+  const seen = new Set(), news = P.hand.map((pc, i) => [pc, i]).filter(([pc]) => featuresOf(pc).some((f) => fresh.includes(f)) && !seen.has(pc.code) && seen.add(pc.code));
+  news.forEach(([, i]) => $('#tray').children[i].classList.add('new')); // the tray is built by now
+  const ls = [...new Set(fresh.map((f) => LESSONS.findIndex((l) => l.teaches.includes(f))).filter((n) => n >= 0))];
+  // after core's start() has finished opening the level (its hash, its clock), so the lessons can come back to it
+  const g = G;
+  if (!IMP && ls.length) setTimeout(() => G === g && !$('#game').hidden && showLessons(ls));
+  const what = news.length === 1 ? `<b>${T('New:')}</b> ${pieceTip(news[0][0])}` : news.length ? T('<b>New pieces</b>: {names}. Tap one to see what it does.', { names: news.map(([pc]) => esc(pieceName(pc))).join(', ') }) : startTip();
+  return what;
 }
 const startTip = () => (G.goal.lms.length ? T('Places with a pin are <b>hotspots</b>: they need the number on the pin, a stadium or station on every one of its squares.') : G.goal.hot.length ? T('Squares with a pin are <b>hotspots</b>: they need the number on the pin.') : !G.tut && G.pack === 'E' && G.n === 1 ? T('Pick a piece below, then a <b>yellow rooftop pad</b>. Every square needs signal, and every piece goes up.') : '');
 const tip = (html, warn) => { $('#tip').innerHTML = html; $('#tip').toggleAttribute('data-warn', !!warn); };
@@ -375,7 +434,33 @@ function refresh() {
   if (G.kbd && !G.done && G.at !== null) $('#sr').textContent = describe(G.at, real.cov);
   $('#btn-undo').disabled = !G.hist.length || G.done;
   $('#btn-reset').disabled = G.done || G.place.every((p, i) => !p || G.locked.has(i));
-  if (!G.done && !todo && met(P, real.cov)) { win(); celebrate(); }
+  if (!G.done && !todo && met(P, real.cov)) { if (G.tut) meet([...LESSONS[G.q[G.qi]].teaches, ...P.hand.flatMap(featuresOf)]); if (G.tut && G.qi < G.q.length - 1) nextLesson(); else win(); celebrate(); }
+}
+// A tutorial lesson won with more to come: a moment to see it, then the next city (the coach line follows: its step is done)
+function nextLesson() {
+  const g = G;
+  g.done = true;
+  $('#board').classList.add('solved');
+  sfx.win();
+  track('tutorial', 'lesson-' + g.q[g.qi]);
+  setTimeout(() => {
+    if (G !== g || !coached) return;
+    g.qi++;
+    g.done = false;
+    startLevel(g, {});
+    coachCheck();
+  }, 1500);
+}
+// Every piece is up but the city isn't covered: say why, the first reason that applies
+function whyShort(P, c) {
+  const off = G.place.findIndex((p, i) => p && P.hand[i].amp && !c.on[i]);
+  if (off >= 0) {
+    const pc = P.hand[off], v = c.cov[G.place[off][0]];
+    return pc.amp === 1 ? T('The <b>{name}</b> is off: no signal reaches its roof yet.', { name: esc(pieceName(pc)) })
+      : T('The <b>{name}</b> is off: its roof has {v} of the {n} bars it needs.', { name: esc(pieceName(pc)), v, n: pc.amp });
+  }
+  const short = P.need.filter((q) => c.cov[q] < P.req[q]).length;
+  return T('{n} squares are still short: look for the <b>hollow red bars</b>. Move or <b>turn</b> a piece, or tap its slot to take it back.', { n: short });
 }
 
 // The win: fireworks over the three tallest roofs.
@@ -406,6 +491,7 @@ function pickPiece(i) {
   if (!playing() || G.locked.has(i) || !coachAllows(G.place[i] ? { lift: i } : { pick: i })) return;
   if (G.place[i]) { lift(i); return; } // a used piece comes back off its roof, ready to place again
   G.sel = i;
+  $('#tray').children[i].classList.remove('new');
   sfx.tap();
   tip(pieceTip(G.P.hand[i]));
   refresh();
@@ -420,7 +506,6 @@ function put(c) {
   sfx.place();
   const nf = nextFree(i + 1);
   if (nf >= 0) { G.sel = nf; tip(pieceTip(G.P.hand[nf])); }
-  else if (!met(G.P, coverage(G.P, G.place).cov)) tip(T('Every piece is up, but some squares are short. <b>Turn</b> a piece, or tap its slot to take it back.'), true);
   if (!G.kbd) G.at = null;
   after();
 }
@@ -462,7 +547,13 @@ function undo() {
   G.flag = -1;
   after();
 }
-function after() { refresh(); saveGame(); }
+// after every move: a full tray that falls short says why (and in the tutorial counts a miss: two, and the coach rings the answer)
+function after() {
+  const c = coverage(G.P, G.place);
+  if (G.place.every(Boolean) && !met(G.P, c.cov)) { tip(whyShort(G.P, c), true); if (G.tut) G.miss++; }
+  refresh();
+  saveGame();
+}
 
 async function reset() {
   if (!playing() || !coachAllows({ reset: true })) return;
@@ -610,16 +701,40 @@ $('#logo').innerHTML = '<svg viewBox="0 0 60 44"><rect x="4" y="28" width="12" h
 const STAR_TIME = { E: [40, 100], M: [60, 150], H: [180, 420], I: [360, 900] };
 const stars = (G) => { const [a, b] = STAR_TIME[G.pack] || STAR_TIME.E; return Math.max(1, (G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1) - G.hinted.size); };
 
-const tutRoof = (c) => () => {
-  return $('#board svg').querySelectorAll('.bld .roof')[[...G.L.ground].filter((ch, k) => k < c && isRoof(ch)).length]; };
-boot({ name: T('Reception'), storeKey: 'reception', glyphs: ['▂▄▆', '📶'], start: startLevel,
-  tutorial: [
-    [T('Every square needs <b>1 bar</b> of signal. The <b>mast</b> is picked: put it on the ringed rooftop.'),
-      () => !!G.place[0], tutRoof(5), (m) => m.pick === 0 || (m.put === 0 && m.at === 5)],
-    [T('The bars in each square\'s corner show its signal. Next to the mast there are <b>2</b>: enough to wake an <b>amplifier</b> (its tab says it needs 2). Put it on the other rooftop.'),
-      null, tutRoof(6), (m) => m.pick === 1 || (m.put === 1 && m.at === 6)],
-  ],
+// The coach's ring: nothing at first; after two misses, the roof the first misplaced piece belongs on (its tray slot if it's picked
+// elsewhere, so the player takes it back first)
+const roofEl = (c) => $('#board svg').querySelectorAll('.bld .roof')[[...G.L.ground].filter((ch, k) => k < c && isRoof(ch)).length];
+const tutRing = () => {
+  if (!G?.tut || G.miss < 2) return null;
+  const i = G.L.sol.findIndex((s, j) => !G.place[j] || G.place[j][0] !== s[0] || (ROT.includes(G.P.hand[j].k) && G.place[j][1] !== s[1]));
+  if (i < 0) return null;
+  return G.place[i] && G.place[i][0] !== G.L.sol[i][0] ? $('#tray').children[i] : roofEl(G.L.sol[i][0]);
+};
+// a lesson's coach lines, k its place in the tutorial's run: one line, or (the dish) a second once it's up, ringing it to be tapped
+const lessonSteps = (n, k, last) => {
+  const done = last ? null : () => G?.qi > k;
+  if (!LESSONS[n].turn) return [[LESSONS[n].text, done, tutRing]];
+  return [[LESSONS[n].text, () => G?.qi > k || !!G?.place[0], tutRing],
+    [LESSONS[n].turn, done, () => tutRing() || (G?.place[0] && roofEl(G.place[0][0]))]];
+};
+const stepsFor = (q) => q.flatMap((n, k) => lessonSteps(n, k, k === q.length - 1));
+// Lessons for a level's new mechanics, one after another, then back to that level
+let lessonQueue = null;
+function showLessons(q) {
+  const back = location.hash.slice(1);
+  saveGame();
+  track('tutorial', 'show-' + q.join('-'));
+  lessonQueue = q;
+  startTutorial();
+  coach(stepsFor(q), { onEnd: () => { if (back && back !== 'tutorial') location.hash = back; else show('home'); } });
+}
+boot({ name: T('Reception'), storeKey: 'reception', glyphs: ['▂▄▆', '📶'], start: startLevel, ownIntro: true,
+  tutorial: stepsFor(BASICS),
   save: (G) => ({ place: G.place, hist: G.hist, locked: [...G.locked], hinted: [...G.hinted] }), key: onKey,
   winDelay: () => (document.documentElement.hasAttribute('data-calm') ? 1200 : 2000), confetti: false,
   stars, reveal: () => { G.place = G.L.sol.map((p) => [...p]); G.hist = []; G.locked = new Set(); G.at = null; refresh(); } });
 game.impossible = { stars };
+// Players from before first-contact lines already know the pieces: don't greet them all as new
+if (!store.met && store.seenHelp) store.met = [...ANT, ...MOD, 'amp', 'rep', 'hot', 'lm'];
+// A first visit (not through a shared link) starts with the tutorial, where How to play used to open (ownIntro)
+if (!store.tutored && !store.seenHelp && !location.hash && !IMP) { store.tutored = true; persist(); track('tutorial', 'first'); startTutorial(); }

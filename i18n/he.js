@@ -501,16 +501,46 @@ module.exports = {
       'free roof': 'גג פנוי',
       'street': 'רחוב',
       'Row {r}, column {c}: {what}. Signal {v} of {need}.': 'שורה {r}, עמודה {c}: {what}. קליטה {v} מתוך {need}.',
-      'Every piece is up, but some squares are short. <b>Turn</b> a piece, or tap its slot to take it back.':
-        'כל הרכיבים על הגגות, אבל בחלק מהמשבצות אין מספיק קליטה. <b>סובבו</b> רכיב, או הקישו על המקום שלו במגש כדי להחזיר אותו.',
+      'The <b>{name}</b> is off: no signal reaches its roof yet.': '<b>{name}</b> כבוי: עוד לא מגיעה קליטה לגג שלו.',
+      'The <b>{name}</b> is off: its roof has {v} of the {n} bars it needs.': '<b>{name}</b> כבוי: בגג שלו יש {v} מתוך {n} הפסים שהוא צריך.',
+      '{n} squares are still short: look for the <b>hollow red bars</b>. Move or <b>turn</b> a piece, or tap its slot to take it back.':
+        'ב־{n} משבצות עדיין חסרה קליטה: חפשו את <b>הפסים האדומים החלולים</b>. הזיזו או <b>סובבו</b> רכיב, או הקישו על המקום שלו במגש כדי להחזיר אותו.',
+      'A <b>panel</b> fires a widening wedge one way, weaker toward its tip. Put it up and tap it to <b>turn</b> it toward the city.':
+        '<b>פאנל</b> משדר טריז שמתרחב לכיוון אחד, וחלש יותר לקראת הקצה. הציבו אותו והקישו עליו כדי <b>לסובב</b> אותו אל העיר.',
+      'A <b>plus</b> sends out four arms, two squares long. Which roof do they reach every street from?':
+        '<b>פלוס</b> שולח ארבע זרועות, כל אחת באורך שתי משבצות. מאיזה גג הן מגיעות לכל רחוב?',
+      'A <b>ring</b> covers the squares two steps away, all round, and nothing nearer, not even its own roof. Let the small cell fill its hole.':
+        '<b>טבעת</b> מכסה את המשבצות שבמרחק שני צעדים, מכל הצדדים, ושום דבר קרוב יותר, אפילו לא את הגג שלה. תנו לתא הקטן למלא את החור.',
+      'A <b>repeater</b> (≥1 on its tab) stays off until signal reaches its roof, but even <b>1 bar</b> wakes it. Put the mast where it wakes it, and both cover the city.':
+        '<b>ממסר</b> (≥1 על הלשונית) נשאר כבוי עד שמגיעה קליטה לגג שלו, אבל אפילו <b>פס אחד</b> מעיר אותו. הציבו את התורן במקום שמעיר אותו, כך ששניהם יכסו את העיר.',
+      "A <b>stadium</b> needs its pin's number on <b>every one</b> of its four squares (a station on both of its two). Aim the dishes across it.":
+        '<b>אצטדיון</b> צריך את המספר שעל הסיכה שלו ב<b>כל אחת</b> מארבע המשבצות שלו (תחנה בשתי המשבצות שלה). כוונו את הצלחות לרוחבו.',
+      'Every square needs <b>2 bars</b> here. A <b>booster</b> broadcasts nothing: it adds <b>1 bar</b> wherever the antennae right next to it reach (not diagonally).':
+        'כאן כל משבצת צריכה <b>2 פסים</b>. <b>מגביר</b> לא משדר כלום: הוא מוסיף <b>פס אחד</b> בכל מקום שהאנטנות הצמודות אליו מגיעות (לא באלכסון).',
+      'An <b>extender</b> gives the antennae right next to it (not diagonally) <b>one more square</b> of range.':
+        '<b>מאריך</b> נותן לאנטנות הצמודות אליו (לא באלכסון) <b>משבצת טווח נוספת</b>.',
+      'A <b>lifter</b> makes the antennae right next to it count as a storey taller: they reach further and <b>see over</b> one more storey. Get the beam past the building.':
+        '<b>מגביה</b> גורם לאנטנות הצמודות אליו להיחשב גבוהות בקומה אחת: הן מגיעות רחוק יותר ו<b>רואות מעל</b> קומה נוספת. העבירו את הקרן מעבר לבניין.',
+      'A <b>splitter</b> makes a dish or panel right next to it fire <b>both ways</b> at once.':
+        '<b>מפצל</b> גורם לצלחת או לפאנל הצמודים אליו לשדר <b>לשני הכיוונים</b> בבת אחת.',
+      'New:': 'חדש:',
+      '<b>New pieces</b>: {names}. Tap one to see what it does.': '<b>רכיבים חדשים</b>: {names}. הקישו על אחד כדי לראות מה הוא עושה.',
       'Restart this level? Your pieces come back off the roofs; the clock keeps running.': 'להתחיל את השלב מחדש? הרכיבים יורדים מהגגות; השעון ממשיך לרוץ.',
       "This <b>{name}</b> can't stay where it is.": '<b>{name}</b> לא במקום הנכון.',
       'The hint put up the <b>{name}</b>. It stays there.': 'הרמז הציב <b>{name}</b>. זה נשאר במקום.',
       'An antenna\'s strongest signal, in bars, is the number on its tray slot and the dots at its foot on the roof.': 'הקליטה החזקה ביותר של אנטנה, בפסים, היא המספר על המשבצת שלה במגש והנקודות שלמרגלותיה על הגג.',
-      'Every square needs <b>1 bar</b> of signal. The <b>mast</b> is picked: put it on the ringed rooftop.':
-        'כל משבצת צריכה <b>פס אחד</b> של קליטה. ה<b>תורן</b> כבר נבחר: הציבו אותו על הגג המסומן בטבעת.',
-      "The bars in each square's corner show its signal. Next to the mast there are <b>2</b>: enough to wake an <b>amplifier</b> (its tab says it needs 2). Put it on the other rooftop.":
-        'הפסים בפינת כל משבצת מראים את הקליטה שלה. ליד התורן יש <b>2</b>: מספיק כדי להעיר <b>מגבר</b> (הלשונית שלו אומרת שהוא צריך 2). הציבו אותו על הגג השני.',
+      'Every square needs <b>1 bar</b> of signal. A <b>mast</b> sends a diamond around its roof. Pick a <b>rooftop</b> where it reaches them all.':
+        'כל משבצת צריכה <b>פס אחד</b> של קליטה. <b>תורן</b> משדר בצורת יהלום סביב הגג שלו. בחרו <b>גג</b> שממנו הוא מגיע לכולן.',
+      'Signal <b>adds up</b> where antennae overlap. The pin needs <b>2 bars</b>: put the two small cells where they meet on it, and still reach every corner.':
+        'הקליטה <b>מצטברת</b> איפה שאנטנות חופפות. הסיכה צריכה <b>2 פסים</b>: הציבו את שני התאים הקטנים כך שייפגשו עליה, ועדיין יגיעו לכל פינה.',
+      '<b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two. Which roof reaches everywhere?':
+        '<b>מגגות גבוהים מגיעים רחוק יותר</b>: בניין בינוני מוסיף משבצת טווח, וגבוה מוסיף שתיים. מאיזה גג מגיעים לכל מקום?',
+      'A <b>dish</b> fires a beam one way, to the edge of the city. Put it on a rooftop.':
+        '<b>צלחת</b> משדרת קרן לכיוון אחד, עד קצה העיר. הציבו אותה על גג.',
+      'Now <b>tap the dish</b> to turn it, a quarter turn a tap (<kbd>R</kbd> on a keyboard): the arrow at its foot shows where it points. A building <b>taller</b> than its roof stops the beam.':
+        'עכשיו <b>הקישו על הצלחת</b> כדי לסובב אותה, רבע סיבוב בכל הקשה (<kbd>R</kbd> במקלדת): החץ שלמרגלותיה מראה לאן היא מכוונת. בניין <b>גבוה</b> יותר מהגג שלה עוצר את הקרן.',
+      'An <b>amplifier</b> (≥2 on its tab) stays off until its own square already has <b>2 bars</b> from the others. Put the mast where it wakes it, and both cover the city.':
+        '<b>מגבר</b> (≥2 על הלשונית) נשאר כבוי עד שבמשבצת שלו כבר יש <b>2 פסים</b> מהאחרים. הציבו את התורן במקום שמעיר אותו, כך ששניהם יכסו את העיר.',
       // goalText(): looked up at runtime, so build.js can't see these
       '{n}+ bars everywhere': 'קליטה {n}+‎ בכל מקום',
       '{n}+ bars on streets': 'קליטה {n}+‎ ברחובות',
@@ -1005,18 +1035,24 @@ module.exports = {
       ['aria-label="Pieces"', 'aria-label="רכיבים"'],
       ['<p id="board-keys" class="sr-only">Number keys pick a piece from the tray. Arrow keys move over the city. Enter or Space puts the piece on the rooftop there, or turns the piece already on it. R turns it. Backspace takes the piece there off the roof. U undoes.</p>',
         '<p id="board-keys" class="sr-only">מקשי המספרים בוחרים רכיב מהמגש. החצים זזים על פני העיר. Enter או רווח מציבים את הרכיב על הגג שם, או מסובבים את הרכיב שכבר עליו. R מסובב אותו. Backspace מוריד מהגג את הרכיב שם. U מבטל.</p>'],
-      [`<li>Give the whole city <b>signal</b>. The bar at the top says how much: every square needs at least that many <b>bars</b>. A square with a pin (a <b>hotspot</b>) needs the number on its pin; a stadium or station with one needs it on every square.</li>
-    <li>Put <b>every piece</b> from your tray on a <b>free rooftop</b> (the yellow pads). Signal adds up where antennae overlap: the dots grow with each bar, and the bars in a square's corner show what it has, hollow red for what it still needs.</li>`,
-        `<li>תנו לכל העיר <b>קליטה</b>. השורה למעלה אומרת כמה: כל משבצת צריכה לפחות את מספר ה<b>פסים</b> הזה. משבצת עם סיכה (<b>נקודה חמה</b>) צריכה את המספר שעל הסיכה שלה; אצטדיון או תחנה עם סיכה צריכים אותו בכל משבצת שלהם.</li>
-    <li>הציבו <b>כל רכיב</b> מהמגש על <b>גג פנוי</b> (המשטחים הצהובים). הקליטה מצטברת איפה שאנטנות חופפות: הנקודות גדלות עם כל פס, והפסים בפינת המשבצת מראים כמה יש בה, ובאדום חלול כמה עוד חסר.</li>`],
-      [`<li><b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two. A building <b>taller</b> than the antenna's own blocks the signal behind it.</li>
-    <li>An <b>amplifier</b> (its number on a tab) only broadcasts once its own square already has that many bars, from other antennae. A <b>repeater</b> (≥1 on its tab) wakes on any signal at all.</li>`,
-        `<li><b>מגגות גבוהים מגיעים רחוק יותר</b>: בניין בינוני מוסיף משבצת טווח, וגבוה מוסיף שתיים. בניין <b>גבוה</b> יותר מהבניין של האנטנה חוסם את הקליטה שמאחוריו.</li>
-    <li><b>מגבר</b> (המספר שלו על לשונית) משדר רק כשבמשבצת שלו כבר יש מספר כזה של פסים, מאנטנות אחרות. <b>ממסר</b> (≥1 על הלשונית) מתעורר מכל קליטה שהיא.</li>`],
-      ['<li><b>Modifiers</b> broadcast nothing: they change every antenna right next to them (not diagonally).</li>',
-        '<li><b>מתאמים</b> לא משדרים כלום: הם משנים כל אנטנה שצמודה אליהם (לא באלכסון).</li>'],
-      ['<li>Tap a placed antenna to <b>turn</b> it, or its tray slot to take it back. There\'s more than one way, but never with a piece to spare.</li>',
-        '<li>הקישו על אנטנה שהוצבה כדי <b>לסובב</b> אותה, או על המקום שלה במגש כדי להחזיר אותה. יש יותר מדרך אחת, אבל אף פעם לא עם רכיב מיותר.</li>'],
+      ['<li>Put <b>every piece</b> from your tray on a <b>free rooftop</b> (the yellow pads), until every square has the <b>signal</b> it needs. The line under the title says how many bars.</li>',
+        '<li>הציבו <b>כל רכיב</b> מהמגש על <b>גג פנוי</b> (המשטחים הצהובים), עד שבכל משבצת יש את ה<b>קליטה</b> שהיא צריכה. השורה מתחת לכותרת אומרת כמה פסים.</li>'],
+      [`<li>The <b>bars</b> in a square's corner show its signal; <b>hollow red</b> ones are still missing. Signal <b>adds up</b> where antennae overlap.</li>`,
+        '<li>ה<b>פסים</b> בפינת המשבצת מראים את הקליטה שלה; <b>אדומים חלולים</b> עוד חסרים. הקליטה <b>מצטברת</b> איפה שאנטנות חופפות.</li>'],
+      ['<li><span class="tier">Medium+</span> A <b>pin</b> needs the number on it, on every square of a stadium or station.</li>',
+        '<li><span class="tier">בינוני+</span> <b>סיכה</b> צריכה את המספר שעליה, ובאצטדיון או בתחנה בכל משבצת שלהם.</li>'],
+      ['<li><b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two.</li>',
+        '<li><b>מגגות גבוהים מגיעים רחוק יותר</b>: בניין בינוני מוסיף משבצת טווח, וגבוה מוסיף שתיים.</li>'],
+      [`<li>A building <b>taller</b> than an antenna's roof <b>blocks</b> the signal behind it. The building itself still gets it.</li>`,
+        '<li>בניין <b>גבוה</b> יותר מהגג של אנטנה <b>חוסם</b> את הקליטה שמאחוריו. הבניין עצמו עדיין קולט.</li>'],
+      ['<li><span class="tier">Medium+</span> A <b>repeater</b> (≥1 on its tab) only broadcasts once some signal reaches its roof. <span class="tier">Hard+</span> An <b>amplifier</b> (≥2, ≥3) waits for that many bars.</li>',
+        '<li><span class="tier">בינוני+</span> <b>ממסר</b> (≥1 על הלשונית) משדר רק כשמגיעה לגג שלו קליטה כלשהי. <span class="tier">קשה+</span> <b>מגבר</b> (≥2, ≥3) מחכה למספר כזה של פסים.</li>'],
+      ['<li><span class="tier">Hard+</span> <b>Modifiers</b> broadcast nothing: they change every antenna right next to them (not diagonally).</li>',
+        '<li><span class="tier">קשה+</span> <b>מתאמים</b> לא משדרים כלום: הם משנים כל אנטנה שצמודה אליהם (לא באלכסון).</li>'],
+      ['<li>Tap a piece in the tray to see what it does. Tap a placed antenna to <b>turn</b> it, or its tray slot to take it back.</li>',
+        '<li>הקישו על רכיב במגש כדי לראות מה הוא עושה. הקישו על אנטנה שהוצבה כדי <b>לסובב</b> אותה, או על המקום שלה במגש כדי להחזיר אותה.</li>'],
+      [`<li>Every piece is needed: there's never one to spare.</li>`,
+        '<li>כל רכיב נחוץ: אף פעם אין רכיב מיותר.</li>'],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>9</kbd> pick a piece, arrows to move, <kbd>Enter</kbd> to place or turn, <kbd>R</kbd> turn, <kbd>Backspace</kbd> take off, <kbd>U</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: <kbd>1</kbd>–<kbd>9</kbd> בוחרים רכיב, חצים לתזוזה, <kbd>Enter</kbd> להצבה או לסיבוב, <kbd>R</kbd> סיבוב, <kbd>Backspace</kbd> הורדה, <kbd>U</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],

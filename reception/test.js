@@ -110,6 +110,19 @@ function brute(L) {
   assert(kinds.partial && kinds.many && kinds.one, 'brute force saw ' + JSON.stringify(kinds));
 }
 
+// ---------- the tutorial's lessons (game.js LESSONS): each answer works, it's the only one, and no smaller set of the hand works ----------
+let lessons = 0;
+for (const [, l] of require('fs').readFileSync(__dirname + '/game.js', 'utf8').matchAll(/line: '([^']+)'/g)) {
+  const L = parse(l), P = prep(L);
+  assert(met(P, coverage(P, L.sol).cov), 'lesson answer fails: ' + l);
+  const r = solve(P, { cap: 5, stopPartial: false });
+  // a split dish fires both ways, so facing either way is the same answer: two placements, one answer
+  assert.strictEqual(r.full, L.hand.includes('s') ? 2 : 1, 'lesson has more than one answer: ' + l);
+  lessons++;
+  assert(!r.partial, 'lesson works with a piece to spare: ' + l);
+}
+assert.strictEqual(lessons, 14, 'every lesson in game.js was checked');
+
 // ---------- levels ----------
 function check(key, tier, L) {
   const P = prep(L), T = TIER[tier];
