@@ -33,20 +33,38 @@ const isAnt = (k) => ANT.includes(k);
 // Each difficulty is the one above it before the playtest made everything a step easier: Medium was Easy, Hard was Medium, and
 // Impossible (Impossible Mode's daily, the only one made ahead: build-levels.js) was Hard. Easy is new: 5×5, a mast or two.
 // Medium also deals the odd panel or dish (a letter twice is twice as likely) and now and then a repeater (gate 1): a bridge to
-// Hard's amplifiers.
+// Hard's amplifiers. One Medium level in 7 (lm) has a landmark, its only hotspot.
 const TIER = {
   E: { N: [5, 5], K: [2, 3], T: 1, ants: 'MC', mods: '', nMod: [0, 0], amp: 0, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 1e5 },
-  M: { N: [6, 6], K: [3, 4], T: 1, ants: 'MMCCXXPD', mods: '', nMod: [0, 0], amp: 0.15, gate: 1, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 2e5 },
+  M: { N: [6, 6], K: [3, 4], T: 1, ants: 'MMCCXXPD', mods: '', nMod: [0, 0], amp: 0.15, gate: 1, hi: 2, roofs: [2.2, 1.5], hot: 0, lm: 1 / 7, cap: 20, limit: 2e5 },
   H: { N: [8, 8], K: [5, 6], T: 2, ants: 'MCXPDO', mods: 'be', nMod: [0, 1], amp: 0.3, hi: 3, roofs: [2.2, 1.6], hot: 1, cap: 20, limit: 3e5 },
   I: { N: [9, 10], K: [6, 8], T: 2, ants: 'MCXPDO', mods: 'bels', nMod: [1, 2], amp: 0.7, hi: 3, roofs: [2.5, 1.7], hot: 3, cap: 6, limit: 2e6, los: true },
 };
 const GRADES = { M: [2, 3], P: [2, 3], D: [1, 2], C: [1, 3], X: [1, 2], O: [1, 2] };
 
 // ---------- the level ----------
-// ground: one char a square. '.' street, ',' park, '~' water, '1'–'3' a building, 'a'–'c' a building of height 1–3 with a free roof.
+// ground: one char a square. '.' street, ',' park, '~' water, '1'–'3' a building, 'a'–'c' a building of height 1–3 with a free roof,
+// 'S' / 'T' a landmark's squares (open ground: see LANDMARK).
 // req: one digit a square. hand: piece codes ('M3', 'P2^3', 'b'). sol: the planted answer, [cell, dir] per piece.
 const height = (ch) => ('123'.includes(ch) ? +ch : 'abc'.includes(ch) ? ch.charCodeAt(0) - 96 : 0);
 const isRoof = (ch) => 'abc'.includes(ch);
+// Landmarks, on Hard and up: a stadium (S, 2×2) or a station (T, 2×1), open ground. The tightening loop makes one in place of a
+// hotspot, and every square of it is a hotspot: one target, drawn and pinned as one.
+const LANDMARK = { S: [2, 2], T: [2, 1] };
+// The landmarks on a board, each its squares (top left first). Read row by row, the first landmark square not yet taken is always
+// a landmark's top left corner, so ones that touch still read right.
+function landmarks(N, ground) {
+  const out = [], taken = new Set();
+  for (let c = 0; c < N * N; c++) {
+    const sz = LANDMARK[ground[c]];
+    if (!sz || taken.has(c)) continue;
+    const cells = [];
+    for (let y = 0; y < sz[1]; y++) for (let x = 0; x < sz[0]; x++) cells.push(c + y * N + x);
+    cells.forEach((q) => taken.add(q));
+    out.push(cells);
+  }
+  return out;
+}
 const parsePiece = (s) => ({ k: s[0], g: +s[1] || 0, amp: s.includes('^') ? +s.split('^')[1] : 0, code: s });
 
 // The squares strictly between a and b on a straight line (Bresenham), both ends left out
@@ -327,7 +345,7 @@ function plant(r, N, ground, req, hand) {
 // 3. search: while a smaller set of the hand works, or too many answers do, tighten against the answer found: a square it
 //    covers less than the planted one does becomes a hotspot (needs one more), or a decoy roof it uses goes; else next city.
 function generate(seed, tier, stats = {}) {
-  const r = rng(seed), T = TIER[tier];
+  const r = rng(seed), T = TIER[tier], wantLm = !!T.lm && r() < T.lm; // Medium: this level gets a landmark
   for (let attempt = 1; ; attempt++) {
     stats.attempts = attempt;
     const N = int(r, T.N[0], T.N[1]), K = int(r, T.K[0], T.K[1]);
@@ -356,7 +374,26 @@ function generate(seed, tier, stats = {}) {
     const target = Math.round(K * T.roofs[0]), least = Math.ceil(K * T.roofs[1]);
     for (const c of bld) { if (roofs.size >= target) break; roofs.add(c); }
     const make = () => makeLevel(N, ground.map((ch, c) => (roofs.has(c) ? 'abc'[height(ch) - 1] : ch)).join(''), req.join(''), hand, sol);
+    // Landmark sites: stadiums (else stations) over any of `at`, on squares that need the base, that the answer covers one more,
+    // and that aren't roofs, water or landmarks. Turning buildings into open ground only clears lines of sight, so the answer still works.
+    const sitesOver = (at, pc) => {
+      const out = [];
+      for (const [k, [w, h]] of Object.entries(LANDMARK)) for (let y0 = 0; y0 + h <= N; y0++) for (let x0 = 0; x0 + w <= N; x0++) {
+        const cells = [];
+        for (let dy = 0; dy < h; dy++) for (let dx = 0; dx < w; dx++) cells.push((y0 + dy) * N + x0 + dx);
+        if (cells.some((q) => at.includes(q)) && cells.every((q) => req[q] === T.T && pc[q] > T.T && !roofs.has(q) && ground[q] !== '~' && !LANDMARK[ground[q]])) out.push([k, cells]);
+      }
+      const big = out.filter((s) => s[0] === 'S');
+      return big.length ? big : out;
+    };
+    const build = ([k, cells]) => { for (const q of cells) { req[q] = T.T + 1; if (k) ground[q] = k; } };
     let hot = 0, L = make(), good = false;
+    if (wantLm) {
+      const sites = sitesOver([...ground.keys()], coverage(prep(L), sol).cov);
+      if (!sites.length) { why('landmark'); continue; }
+      build(pick(r, sites));
+      L = make();
+    }
     for (let tighten = 0; tighten < 12; tighten++) {
       const P = prep(L), res = solve(P, { cap: T.cap, except: sol, limit: T.limit });
       stats.nodes = (stats.nodes || 0) + res.nodes;
@@ -370,7 +407,12 @@ function generate(seed, tier, stats = {}) {
       // tighten against the witness
       const w = res.witness, wc = coverage(P, w).cov, pc = coverage(P, sol).cov;
       const spots = P.need.filter((c) => wc[c] < pc[c] && req[c] < pc[c] && req[c] + 1 <= T.T + 1 && req[c] === T.T);
-      if (hot < T.hot && spots.length) { const c = pick(r, spots); req[c] = T.T + 1; hot++; L = make(); continue; }
+      if (hot < T.hot && spots.length) {
+        // a landmark round the square instead, where one fits
+        const c = pick(r, spots), sites = sitesOver([c], pc);
+        build(sites.length ? pick(r, sites) : ['', [c]]);
+        hot++; L = make(); continue;
+      }
       const decoy = w.find((p) => p && !sol.some((s) => s[0] === p[0]));
       if (decoy && roofs.size > least) { roofs.delete(decoy[0]); L = make(); continue; }
       why(res.partial ? 'partial' : 'many');
@@ -387,4 +429,4 @@ function parse(s) {
   return { N: +N, ground, req, hand: hand.split(','), sol: sol.split(',').map((p) => p.split('.').map(Number)) };
 }
 
-if (typeof module === 'object') module.exports = { TIER, DIRS, walk, ANT, MOD, ROT, isAnt, height, isRoof, parsePiece, prep, pattern, patternNoLos, neighbours, coverage, met, solve, city, dealHand, generate, line, parse };
+if (typeof module === 'object') module.exports = { TIER, DIRS, walk, ANT, MOD, ROT, isAnt, height, isRoof, LANDMARK, landmarks, parsePiece, prep, pattern, patternNoLos, neighbours, coverage, met, solve, city, dealHand, generate, line, parse };

@@ -63,6 +63,12 @@ const cov = (L, place, noLos) => [...coverage(prep(L), place, noLos).cov];
   assert.deepStrictEqual(coverage(prep(L2), [[0, 0], [1, 0], [2, 0]]).on, [true, false, false]); // 1 isn't 2
 }
 
+// landmarks: read row by row, touching ones still come apart; open ground, so they neither block nor hold a piece
+{
+  assert.deepStrictEqual(R.landmarks(4, 'SSTT' + 'SSSS' + 'TTSS' + '....'), [[0, 1, 4, 5], [2, 3], [6, 7, 10, 11], [8, 9]]);
+  assert.strictEqual(R.height('S') + R.height('T'), 0);
+}
+
 // ---------- the search, against every placement tried one by one ----------
 function brute(L) {
   const P = prep(L), K = P.hand.length, opts = P.hand.map((pc) => [null, ...P.roofs.flatMap((c) => (ROT.includes(pc.k) ? [0, 1, 2, 3] : [0]).map((d) => [c, d]))]);
@@ -116,6 +122,9 @@ function check(key, tier, L) {
   assert(!res.partial, key + ' a smaller hand wins');
   assert(res.full >= 1 && res.full <= T.cap, key + ' answers: ' + res.full);
   if (T.los) { const free = solve(P, { cap: res.full, noLos: true }); assert(free.partial || free.full > res.full, key + ' blocking never matters'); }
+  // a landmark is one hotspot: every square of it needs more than the base
+  const base = Math.min(...P.req.filter(Boolean));
+  for (const cells of R.landmarks(L.N, L.ground)) assert(cells.every((c) => P.req[c] > base), key + ' landmark not hot');
   assert.strictEqual(line(parse(line(L))), line(L));
 }
 const t0 = Date.now();
