@@ -138,6 +138,7 @@ function stamp(pos) {
   G.order.push(k);
   sfx.place();
   ripple(k, pos);
+  if (G.tut) { if (pos !== G.p.sol[k]) missed(); else G.miss = 0; } // misses count per piece
   const nf = nextFree(k + 1);
   if (nf >= 0) G.sel = nf;
   else if (current()) { sfx.bad(); flash($('#board'), 'shake'); $('#tip').innerHTML = T('Not clear yet. <b>Tap a used piece</b> to lift it, or undo.'); $('#tip').dataset.warn = 1; }
@@ -165,6 +166,7 @@ function lift(k) {
   G.order = G.order.filter((j) => j !== k);
   G.sel = k;
   if ($('#tip').dataset.warn) { $('#tip').innerHTML = ''; delete $('#tip').dataset.warn; }
+  if (G.tut && G.placed.every((v, j) => v < 0 || v === G.p.sol[j])) coachSay(null);
   sfx.erase();
   refresh();
   saveGame();
@@ -310,15 +312,22 @@ const spot = (k, pos) => () => {
   el.innerHTML = `<path d="${outline(G.p.pieces[k], pos, N, .04)}"/>`;
   return el;
 };
-const only = (k, pos) => (m) => m.pick === k || (m.k === k && m.pos === pos);
-boot({ name: T('Quadflip'), storeKey: 'quadflip', glyphs: ['■', '▚'], start: startLevel,
+// The tutorial: nothing is forced. Each step gives the reasoning, then the move; a piece stamped off the answer says so in
+// the coach line, and after two the coach rings the answer's spot.
+function missed() {
+  G.miss = (G.miss || 0) + 1;
+  coachSay(T('Not there: then the board can\'t come out all light. Tap the piece below the board to lift it, and try again.'));
+}
+boot({ name: T('Quadflip'), storeKey: 'quadflip', glyphs: ['■', '▚'], start: startLevel, ownIntro: true,
   tutorial: [
-    [T('Every tile has to end up <b>light</b>. The picked piece, the square, flips the four tiles under it. Tap the ringed spot to stamp it there.'),
-      () => G.placed[0] === 0, spot(0, 0), only(0, 0)],
-    [T('Two of those tiles were light, so they turned dark. The T fixes that: <b>every piece</b> is used once, and a tile flipped twice is light again. Stamp it on the ringed spot. (Stuck in a real puzzle? <b>Hint</b> places a piece, but hints cost stars.)'),
-      null, spot(1, 3), only(1, 3)],
+    [T('Every tile has to end up <b>light</b>. A piece flips the four tiles under it: dark turns light, and light turns dark. Your first piece is the <b>square</b>. Stamp it on the ringed spot.'),
+      () => G.placed[0] === 0 || G.placed[1] === 3, spot(0, 0)],
+    [T('Two light tiles under the square turned dark. That\'s fine: <b>every piece</b> is used once, and a tile flipped twice is light again. Stamp the <b>T</b> over the four dark tiles.'),
+      null, () => (G.miss >= 2 && G.placed[1] < 0 ? spot(1, 3)() : null)],
   ],
   save: (G) => ({ placed: G.placed, order: G.order, hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 240 ? 3 : G.elapsed <= 600 ? 2 : 1) },
   reveal: () => { G.placed = [...G.p.sol]; G.order = []; G.hinted = new Set(); refresh(); } });
+// A first visit (not through a shared link) starts with the tutorial, where How to play used to open (ownIntro)
+if (!store.tutored && !store.seenHelp && !location.hash && !IMP) { store.tutored = true; persist(); track('tutorial', 'first'); startTutorial(); }

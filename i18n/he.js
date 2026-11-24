@@ -456,10 +456,12 @@ module.exports = {
     },
     'quadflip/game.js': {
       'Quadflip': 'מהפכים',
-      'Every tile has to end up <b>light</b>. The picked piece, the square, flips the four tiles under it. Tap the ringed spot to stamp it there.':
-        'כל המשבצות צריכות להיות <b>בהירות</b> בסוף. הצורה שבחרתם, הריבוע, הופכת את ארבע המשבצות שמתחתיה. הקישו על המקום המסומן כדי להטביע אותה שם.',
-      'Two of those tiles were light, so they turned dark. The T fixes that: <b>every piece</b> is used once, and a tile flipped twice is light again. Stamp it on the ringed spot. (Stuck in a real puzzle? <b>Hint</b> places a piece, but hints cost stars.)':
-        'שתיים מהמשבצות האלה היו בהירות, אז הן התכהו. ה־T מתקן את זה: משתמשים ב<b>כל צורה</b> פעם אחת, ומשבצת שהתהפכה פעמיים חוזרת להיות בהירה. הטביעו אותה במקום המסומן. (נתקעתם בחידה אמיתית? <b>רמז</b> מניח צורה, אבל רמזים עולים בכוכבים.)',
+      'Every tile has to end up <b>light</b>. A piece flips the four tiles under it: dark turns light, and light turns dark. Your first piece is the <b>square</b>. Stamp it on the ringed spot.':
+        'כל המשבצות צריכות להיות <b>בהירות</b> בסוף. צורה הופכת את ארבע המשבצות שמתחתיה: כהה נהיית בהירה, ובהירה נהיית כהה. הצורה הראשונה שלכם היא ה<b>ריבוע</b>. החתימו אותו במקום המסומן.',
+      'Two light tiles under the square turned dark. That\'s fine: <b>every piece</b> is used once, and a tile flipped twice is light again. Stamp the <b>T</b> over the four dark tiles.':
+        'שתי משבצות בהירות מתחת לריבוע התכהו. זה בסדר: משתמשים ב<b>כל צורה</b> פעם אחת, ומשבצת שהתהפכה פעמיים חוזרת להיות בהירה. החתימו את ה־<b>T</b> על ארבע המשבצות הכהות.',
+      'Not there: then the board can\'t come out all light. Tap the piece below the board to lift it, and try again.':
+        'לא שם: ככה הלוח לא יכול לצאת בהיר כולו. הקישו על הצורה מתחת ללוח כדי להרים אותה, ונסו שוב.',
       'Pick a <b>piece</b>, tap the board to <b>flip</b> the tiles under it. Use <b>every piece</b> once to clear the board.':
         'בחרו <b>צורה</b> והקישו על הלוח כדי <b>להפוך</b> את המשבצות שמתחתיה. השתמשו ב<b>כל צורה</b> פעם אחת כדי לנקות את הלוח.',
       '{n} pieces': '{n} צורות',
@@ -1038,7 +1040,9 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="3">
     <li>Use <b>every piece exactly once</b>. There's only one way to do it.</li>
-    <li>Tap a used piece to lift it off again.</li>`,
+    <li>A tile flipped <b>twice</b> is blank again, so pieces may overlap.</li>
+    <li>Tap a used piece to lift it off again.</li>
+    <li>Stuck? <b>Hint</b> places a piece, but costs stars.</li>`,
       `<li>החזירו כל משבצת ל<b>נייר לבן</b>.</li>
     <li class="no-touch">בחרו <b>צורה</b> ולחצו על הלוח: ארבע המשבצות שמתחתיה <b>מתהפכות</b>.</li>
     <li class="touch">הקישו על <b>צורה</b> מתחת ללוח כדי לבחור אותה. אחר כך <b>לחצו וגררו</b> על הלוח כדי לכוון, ו<b>שחררו</b> כדי להחתים: ארבע המשבצות שמתחתיה <b>מתהפכות</b>. שחררו מחוץ ללוח כדי לבטל.</li>
@@ -1047,7 +1051,9 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="3">
     <li>השתמשו ב<b>כל צורה בדיוק פעם אחת</b>. יש רק דרך אחת לעשות את זה.</li>
-    <li>הקישו על צורה משומשת כדי להרים אותה שוב.</li>`],
+    <li>משבצת שהתהפכה <b>פעמיים</b> חוזרת להיות לבנה, אז צורות יכולות לחפוף.</li>
+    <li>הקישו על צורה משומשת כדי להרים אותה שוב.</li>
+    <li>נתקעתם? <b>רמז</b> מניח צורה, אבל עולה בכוכבים.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> pick a piece, arrows to move it, <kbd>Space</kbd> to stamp, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: <kbd>1</kbd>–<kbd>5</kbd> בחירת צורה, חצים להזזה, <kbd>רווח</kbd> להחתמה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
