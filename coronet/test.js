@@ -34,4 +34,11 @@ for (const key of keys) {
   }
 }
 assert.deepStrictEqual(generate(hash('E1'), 6), generate(hash('E1'), 6)); // same seed, same puzzle
+// the lessons: one answer each, and it's the queens the coach rings; the second has no one-arc color gives a queen away
+const { LESSON_BOARDS } = require('./gen.js');
+for (const [n, l] of LESSON_BOARDS.entries()) {
+  assert.deepStrictEqual(solve(l.N, l.region, 2), [l.queens], 'lesson ' + n + ' not one answer');
+  const sizes = Array.from({ length: l.N }, (_, g) => l.region.filter((x) => x === g).length);
+  assert(n === 0 ? sizes.includes(1) : !sizes.includes(1), 'lesson ' + n + ' one-arc colors');
+}
 console.log('ok', keys.length, 'puzzles', Date.now() - t0, 'ms, slowest', slowest, 'ms');

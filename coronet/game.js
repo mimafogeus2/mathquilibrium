@@ -83,15 +83,19 @@ const auto = (i) => [...G.queens].some((q) => sees(N_(), G.p.region, q, i));
 const shown = (i) => (G.queens.has(i) ? 'q' : G.marks.has(i) ? 'm' : auto(i) ? 'a' : '');
 
 function startLevel(G, save) {
+  // a tutorial: G.q the lessons it runs, G.qi the one on the board
+  if (G.tut) { G.q ??= BASICS; G.qi ??= 0; G.miss = 0; }
   const N = SIZES[G.pack];
-  const p = G.tut ? generate(hash('tutorial'), 4) : generate(hash(G.key), N); // the tutorial's 4 rings: color 3 is one arc (14), a queen for sure
+  const p = G.tut ? LESSON_BOARDS[G.q[G.qi]] : generate(hash(G.key), N);
   const ok = (a) => Array.isArray(a) && a.every((i) => Number.isInteger(i) && i >= 0 && i < N * N);
   const fits = ok(save.queens) && ok(save.marks) && ok(save.hinted) && save.hinted.every((i) => p.queens.includes(i));
   const s = fits ? save : {};
-  Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [] });
+  Object.assign(G, { p, queens: new Set(s.queens), marks: new Set(s.marks), hinted: new Set(s.hinted), sel: 0, kbd: false, conflicts: new Set(), history: [], why: '' });
 
   $('#g-sub').textContent = T('{n} queens', { n: p.N });
   $('#tip').innerHTML = G.tut ? '' : G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : !Object.values(store.packs).some((pp) => Object.keys(pp.stars).length) ? FIRST_TIP : '';
+  G.tip0 = $('#tip').innerHTML;
+  delete $('#tip').dataset.warn;
   const b = $('#board');
   b.classList.remove('solved');
   G.view = drawBoard(b, p);
@@ -121,8 +125,31 @@ function refresh(sound, placed = null) {
   $('#board').setAttribute('aria-label', T('Coronet board, {n} rings. {left} of {n} queens left', { n: N, left }));
   // screen readers hear the arc under the keyboard cursor, and what just changed there
   if (G.kbd && !G.done) $('#sr').textContent = describe(G.sel, left, conflicts);
-  if (!G.done && G.queens.size === N && !conflicts.size) win();
+  // what's wrong, said under the board: two queens that clash, or a ring, slice or color left with nowhere for its queen
+  const why = whyWrong(conflicts);
+  if (why !== G.why) {
+    if (why) { $('#tip').innerHTML = why; $('#tip').dataset.warn = 1; }
+    else if (G.why) { $('#tip').innerHTML = G.tip0; delete $('#tip').dataset.warn; } // back to what it said before
+    G.why = why;
+  }
+  if (!G.done && G.queens.size === N && !conflicts.size) solved();
   $('#btn-undo').disabled = !G.history.length || G.done;
+}
+
+// Two queens that clash (and in what), else the first ring, slice or color with no queen and no arc its queens leave open
+function whyWrong(conflicts) {
+  const { p } = G, N = p.N, qs = [...G.queens];
+  const q = qs.find((x) => conflicts.has(x)), o = q !== undefined && qs.find((y) => y !== q && sees(N, p.region, q, y));
+  if (o !== undefined && o !== false) return Math.floor(q / N) === Math.floor(o / N) ? T('Two queens in one <b>ring</b>.')
+    : q % N === o % N ? T('Two queens in one <b>slice</b>.') : T('Two <b>{color}</b> queens.', { color: T(REGION[p.region[q]]) });
+  const units = [(i) => Math.floor(i / N), (i) => i % N, (i) => p.region[i]], cells = [...Array(N * N).keys()];
+  for (const [kind, of] of units.entries()) for (let k = 0; k < N; k++) {
+    const u = cells.filter((i) => of(i) === k);
+    if (qs.some((x) => of(x) === k) || u.some((i) => !auto(i))) continue;
+    return kind === 0 ? T('Ring {r} from the centre has no arc left for its queen.', { r: k + 1 })
+      : kind === 1 ? T('A slice has no arc left for its queen.') : T('No arc is left for the <b>{color}</b> queen.', { color: T(REGION[k]) });
+  }
+  return '';
 }
 
 // A ring that just got its queen: one slow glint runs round it, under the pieces. Removes itself when done.
@@ -169,7 +196,7 @@ function cycle(i, toQueen = false) {
   if (!coachAllows({ i, to: k === 'q' ? '' : k || toQueen ? 'q' : 'm' })) return;
   G.history.push(snap());
   if (k === 'q') { G.queens.delete(i); sfx.erase(); refresh(true); }
-  else if (k || toQueen) { G.marks.delete(i); G.queens.add(i); sfx.place(); refresh(true, i); }
+  else if (k || toQueen) { G.marks.delete(i); G.queens.add(i); sfx.place(); refresh(true, i); if (G.tut && !G.p.queens.includes(i)) missed(); }
   else { G.marks.add(i); sfx.tap(); refresh(false); }
   saveGame();
 }
@@ -230,7 +257,7 @@ $('#board').addEventListener('pointerdown', (e) => {
   drag = { from: i, last: i, mode: null, before: snap() };
 });
 $('#board').addEventListener('pointermove', (e) => {
-  if (!drag || !playing() || G.tut) return; // no drag-marking in the tutorial: one arc at a time
+  if (!drag || !playing()) return;
   const i = hit(e);
   if (i < 0 || i === drag.last) return;
   if (drag.mode === null) {
@@ -310,30 +337,76 @@ printable(() => {
 drawBoard($('#logo'), generate(hash('logo'), 5), { mini: true });
 drawBoard($('#help-board'), generate(hash('help'), 4), { mini: true });
 // SVG arcs draw no outline: the ring is a path of its own on top, shaped like arc i (core.css's .coach-at only names it; style.css draws it)
-const arc = (i) => () => {
+const arc = (i) => {
   const v = G.view;
   v.ring ??= $('#board').appendChild(svg('path', { class: 'tut-ring' }));
   v.ring.setAttribute('d', v.els[i].getAttribute('d'));
   return v.ring;
 };
-// The tutorial's chain, each move forced (answer: queens 14, 1, 8, 7; colors 0 pink, 1 yellow, 2 blue, 3 lime):
-// lime is one arc (14) -> its slice takes blue's other two, so blue is arc 1 -> yellow is down to arc 8, so ring 3's
-// other open arc (11) is out -> the queen on 8 -> the last ring, slice and color meet at 7.
-const only = (i, to) => (m) => m.i === i && m.to === to;
-const crown = (i) => (m) => m.i === i && (m.to === 'm' || m.to === 'q'); // as in play: × first, then the queen
+
+// ---------- lessons ----------
+// Tiny boards (LESSON_BOARDS in gen.js, same order), one way of reasoning each, each with one answer (test.js checks). Nothing is
+// forced: a queen that isn't the answer's says why in the coach line; after two, the coach rings the next queen (or the wrong one).
+// Each lesson is a run of coach steps, the reasoning first and the move last: q, a queen to place; x, arcs to mark.
+const ONE_LEFT = T('One queen left. Find where it goes, and place it.');
+const LESSONS = [
+  [{ q: 14, text: T('Every <b>ring</b>, every <b>slice</b> (a wedge from the middle out) and every <b>color</b> gets exactly one queen. Tap an arc once to mark it <b>×</b>, twice for a queen. <b>Lime</b> has only one arc, so its queen must go there. Tap it twice.') },
+    { q: 1, text: T('A queen rules out the rest of its ring, its slice and its color: they grey out. Now <b>blue</b> has one open arc left. Put its queen there.') },
+    { q: 8, text: T('<b>Yellow</b> is down to one open arc too. Put its queen there.') },
+    { q: 7, text: ONE_LEFT }],
+  [{ x: [0, 3], text: T('A new board. Both <b>lime</b> arcs are in the inner ring, so lime\'s queen is the inner ring\'s queen too, and the ring\'s two <b>blue</b> arcs can\'t hold one. Mark them <b>×</b>.') },
+    { q: 7, text: T('Now <b>blue</b> has one open arc left. Put its queen there.') },
+    { q: 14, text: T('<b>Pink</b> is down to one open arc. Put its queen there.') },
+    { q: 1, text: T('Now <b>lime</b> is down to one arc. Put its queen there.') },
+    { q: 8, text: ONE_LEFT }],
+];
+const BASICS = [0, 1];
+// A queen that isn't the answer's: why, where the lesson is read
+function missed() {
+  G.miss++;
+  coachSay(G.why || T('Not there: with that queen, the rest can\'t all fit. Tap it to take it off, and look again.'));
+}
+// Solved: a lesson with more to come moves on after a moment; else the win
+function solved() {
+  if (!G.tut) return win();
+  if (G.qi === G.q.length - 1) return win();
+  const g = G;
+  g.done = true;
+  sfx.win();
+  $('#board').classList.add('solved');
+  track('tutorial', 'lesson-' + g.q[g.qi]);
+  setTimeout(() => {
+    if (G !== g || !coached) return;
+    g.qi++;
+    g.done = false;
+    startLevel(g, {});
+    coachCheck();
+  }, 1500);
+}
+// The coach's ring: nothing at first; after two queens that missed, a wrong queen still there, else the next queen in the
+// lesson's order. A wrong queen gone, the line under the lesson goes too.
+const tutRing = () => {
+  if (!G?.tut || G.done) return null;
+  const wrong = [...G.queens].find((q) => !G.p.queens.includes(q));
+  if (wrong === undefined) coachSay(null);
+  if (G.miss < 2) return null;
+  const next = wrong ?? G.p.order.find((q) => !G.queens.has(q));
+  return next === undefined ? null : arc(next);
+};
+// A step is done once its move is made, or a later step's is (moves can come in any order); a lesson's last step, once the
+// next lesson is up. The tutorial's very last step has no done: the win ends it.
+const made = (s) => (s.q !== undefined ? G.queens.has(s.q) : s.x.every((i) => G.marks.has(i) || auto(i)));
+const stepsFor = (q) => q.flatMap((n, k) => LESSONS[n].map((st, j, all) => {
+  const last = j === all.length - 1, here = () => G?.tut && G.qi === k;
+  const done = (i) => i === all.length - 1 ? G?.qi > k : G?.qi > k || (here() && (made(all[i]) || done(i + 1)));
+  return [st.text, last && k === q.length - 1 ? null : () => done(j), tutRing];
+}));
+
 boot({ name: T('Coronet'), storeKey: 'coronet', random: true,
-  tutorial: [
-    [T('Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there. One tap marks an arc <b>×</b>, a second crowns it: tap the ringed arc twice.'),
-      () => G.queens.has(14), arc(14), crown(14)],
-    [T('The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen\'s slice. Crown the last blue one.'),
-      () => G.queens.has(1), arc(1), crown(1)],
-    [T('Now yellow has just one arc left, so the queen of its ring (the third from the centre) goes there. That rules out the ringed arc in the same ring: tap it <b>once</b> to mark it ×.'),
-      () => G.marks.has(11), arc(11), only(11, 'm')],
-    [T('Mark × wherever you\'ve worked out a queen can\'t go. Now crown the yellow arc.'),
-      () => G.queens.has(8), arc(8), crown(8)],
-    [T('One ring, one slice and one color are left, and they meet on one arc: the last queen. In a real puzzle <b>Hint</b> places a queen when you\'re stuck, but hints cost stars.'),
-      null, arc(7), crown(7)],
-  ], glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
+  ownIntro: true, tutorial: stepsFor(BASICS),
+  glyphs: ['♛'], start: startLevel, save: (G) => ({ queens: [...G.queens], marks: [...G.marks], hinted: [...G.hinted] }), key: onKey,
   // Impossible: no hints, so pentagrams by time. ponytail: first guesses, to tune in the playtest
   impossible: { stars: (G) => (G.elapsed <= 300 ? 3 : G.elapsed <= 720 ? 2 : 1) },
   reveal: () => { G.queens = new Set(G.p.queens); G.marks.clear(); refresh(false); } });
+// A first visit (not through a shared link) starts with the tutorial, where How to play used to open (ownIntro)
+if (!store.tutored && !store.seenHelp && !location.hash && !IMP) { store.tutored = true; persist(); track('tutorial', 'first'); startTutorial(); }

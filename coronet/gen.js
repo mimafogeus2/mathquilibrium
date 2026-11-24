@@ -115,4 +115,13 @@ function tryGenerate(seed, N) {
 const sees = (N, region, i, j) => i !== j &&
   (Math.floor(i / N) === Math.floor(j / N) || i % N === j % N || region[i] === region[j]);
 
-if (typeof module === 'object') module.exports = { SIZES, neighbors, solve, generate, sees };
+// The lessons' boards (game.js LESSONS, same order), each with one answer (test.js checks). order: the answer's queens in the
+// order the lesson's reasoning finds them (the coach rings them in it). Regions as generate() gives them: 0 pink, 1 yellow, 2 blue, 3 lime.
+const LESSON_BOARDS = [
+  // lime is one arc: its queen is sure, and every step after is a ring, slice or color down to one open arc
+  { N: 4, region: '0220012011101130', order: [14, 1, 8, 7] },
+  // both lime arcs are in the inner ring: that ring's queen is lime, so its other arcs are out
+  { N: 4, region: '2332111211101100', order: [7, 14, 1, 8] },
+].map((l) => ({ ...l, region: [...l.region].map(Number), queens: [...l.order].sort((a, b) => a - b) }));
+
+if (typeof module === 'object') module.exports = { SIZES, neighbors, solve, generate, sees, LESSON_BOARDS };
