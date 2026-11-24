@@ -481,11 +481,13 @@ module.exports = {
       'the antennae next to it count as a storey taller: more range, and they see over one more storey.': 'האנטנות שלידו נחשבות גבוהות בקומה: יותר טווח, והן משדרות מעל קומה נוספת.',
       'a panel or dish next to it fires both ways.': 'פאנל או צלחת שלידו משדרים לשני הכיוונים.',
       'An <b>amplifier</b>: it only broadcasts once its own square already has {n} bars.': 'זה <b>מגבר</b>: הוא משדר רק כשבמשבצת שלו כבר יש {n} פסים.',
+      'A <b>repeater</b>: it only broadcasts once its own square already has some signal.': 'זה <b>ממסר</b>: הוא משדר רק כשבמשבצת שלו כבר יש קליטה כלשהי.',
       "Today's puzzle. A new one tomorrow.": 'החידה של היום. מחר תגיע חדשה.',
       'Squares with a pin are <b>hotspots</b>: they need the number on the pin.': 'משבצות עם סיכה הן <b>נקודות חמות</b>: הן צריכות את המספר שעל הסיכה.',
       'Pick a piece below, then a <b>yellow rooftop pad</b>. Every square needs signal, and every piece goes up.':
         'בחרו רכיב למטה, ואז <b>משטח צהוב על גג</b>. כל משבצת צריכה קליטה, וכל הרכיבים עולים לגגות.',
       'amplifier, needs {n}': 'מגבר, צריך {n}',
+      'repeater, needs signal': 'ממסר, צריך קליטה',
       'placed by a hint': 'במקום שקבע רמז',
       'on a roof: tap to take it back': 'על גג: הקישו כדי להחזיר',
       'City, {n} by {n}. {short} squares short of signal, {left} pieces left': 'עיר, {n} על {n}. ב־{short} משבצות אין מספיק קליטה, נשארו {left} רכיבים',
@@ -1004,9 +1006,9 @@ module.exports = {
         `<li>תנו לכל העיר <b>קליטה</b>. השורה למעלה אומרת כמה: כל משבצת צריכה לפחות את מספר ה<b>פסים</b> הזה. משבצת עם סיכה (<b>נקודה חמה</b>) צריכה את המספר שעל הסיכה שלה.</li>
     <li>הציבו <b>כל רכיב</b> מהמגש על <b>גג פנוי</b> (המשטחים הצהובים). הקליטה מצטברת איפה שאנטנות חופפות: הנקודות גדלות עם כל פס, והפסים בפינת המשבצת מראים כמה יש בה, ובאדום חלול כמה עוד חסר.</li>`],
       [`<li><b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two. A building <b>taller</b> than the antenna's own blocks the signal behind it.</li>
-    <li>An <b>amplifier</b> (its number on a tab) only broadcasts once its own square already has that many bars, from other antennae.</li>`,
+    <li>An <b>amplifier</b> (its number on a tab) only broadcasts once its own square already has that many bars, from other antennae. A <b>repeater</b> (≥1 on its tab) wakes on any signal at all.</li>`,
         `<li><b>מגגות גבוהים מגיעים רחוק יותר</b>: בניין בינוני מוסיף משבצת טווח, וגבוה מוסיף שתיים. בניין <b>גבוה</b> יותר מהבניין של האנטנה חוסם את הקליטה שמאחוריו.</li>
-    <li><b>מגבר</b> (המספר שלו על לשונית) משדר רק כשבמשבצת שלו כבר יש מספר כזה של פסים, מאנטנות אחרות.</li>`],
+    <li><b>מגבר</b> (המספר שלו על לשונית) משדר רק כשבמשבצת שלו כבר יש מספר כזה של פסים, מאנטנות אחרות. <b>ממסר</b> (≥1 על הלשונית) מתעורר מכל קליטה שהיא.</li>`],
       ['<li><b>Modifiers</b> broadcast nothing: they change every antenna right next to them (not diagonally).</li>',
         '<li><b>מתאמים</b> לא משדרים כלום: הם משנים כל אנטנה שצמודה אליהם (לא באלכסון).</li>'],
       ['<li>Tap a placed antenna to <b>turn</b> it, or its tray slot to take it back. There\'s more than one way, but never with a piece to spare.</li>',
