@@ -355,12 +355,18 @@ module.exports = {
     },
     'mathquilibrium/game.js': {
       'Mathquilibrium': 'מאוזן',
-      'Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours to fill. Tap the ringed one.': 'כל שורה וכל עמודה הן משוואה, וכל אחת חייבת לצאת <b>נכונה</b>. את המשבצות הריקות אתם ממלאים. הקישו על המסומנת.',
-      'It sits in the row <b>3 _ 5 = 8</b>. Which operator turns 3 and 5 into 8? Pick it from the keys below. The small number on a key is its turn in the math: 1 is worked out before 2.': 'היא נמצאת בשורה <b dir="ltr">3 _ 5 = 8</b>. איזה סימן הופך את 3 ו־5 ל־8? בחרו אותו מהמקשים למטה. המספר הקטן על מקש הוא התור שלו בחישוב: 1 מחושב לפני 2.',
-      "3 + 5 = 8. That tile is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Tap the row's other blank.": '<span dir="ltr">3 + 5 = 8</span>. המשבצת הזאת <b>משותפת</b> לעמודה, שבה כתוב עכשיו <span dir="ltr">2 + 4 _ 6</span>: סימן אחד צריך לעבוד בשני הכיוונים. הקישו על המשבצת הריקה השנייה בשורה.',
-      'Between 3 + 5 and 8 goes <b>=</b>. Pick it.': 'בין <span dir="ltr">3 + 5</span> ל־8 בא <b>=</b>. בחרו אותו.',
-      'The row is true, so it turns green. Now tap the blank in the column.': 'השורה נכונה, אז היא נצבעת בירוק. עכשיו הקישו על המשבצת הריקה בעמודה.',
-      "Finish 2 + 4 _ 6 with <b>=</b>. In a real puzzle, <b>Hint</b> fills in a tile when you're stuck, but hints cost you stars.": 'השלימו את <span dir="ltr">2 + 4 _ 6</span> עם <b>=</b>. בחידה אמיתית, <b>רמז</b> ממלא משבצת כשנתקעים, אבל רמזים עולים בכוכבים.',
+      'Every row and column is an equation, and each has to come out <b>true</b>. The blank tiles are yours: tap one, then pick an operator from the keys below. Look at the row <b>3 _ 5 _ 8</b>: which operator turns 3 and 5 into 8? Put it in its first blank.': 'כל שורה וכל עמודה הן משוואה, וכל אחת חייבת לצאת <b>נכונה</b>. המשבצות הריקות שלכם: הקישו על אחת, ובחרו פעולה מהמקשים למטה. הסתכלו על השורה <b dir="ltr">3 _ 5 _ 8</b>: איזה סימן הופך את 3 ו־5 ל־8? שימו אותו במשבצת הריקה הראשונה שלה.',
+      '3 + 5 makes 8, so between them and the 8 goes <b>=</b>. Put it in the row\'s other blank.': '<span dir="ltr">3 + 5</span> יוצא 8, אז ביניהם לבין ה־8 בא <b>=</b>. שימו אותו במשבצת הריקה השנייה בשורה.',
+      'The row is true, so it turns green. Your + is <b>shared</b> with the column, which now reads 2 + 4 _ 6: one symbol has to work both ways. Finish the column.': 'השורה נכונה, אז היא נצבעת בירוק. ה־+ שלכם <b>משותף</b> לעמודה, שבה כתוב עכשיו <span dir="ltr">2 + 4 _ 6</span>: סימן אחד צריך לעבוד בשני הכיוונים. השלימו את העמודה.',
+      'A new line: <b>2 _ 3 × 4 = 14</b>. The small number on each key is its turn: × and ÷ (1) are worked out before + and − (2), wherever they stand. So 3 × 4 goes first and makes 12. Which operator turns 2 and 12 into 14? Put it in the blank.': 'שורה חדשה: <b dir="ltr">2 _ 3 × 4 = 14</b>. המספר הקטן על כל מקש הוא התור שלו: × ו־÷ (1) מחושבים לפני + ו־− (2), לא משנה איפה הם עומדים. אז <span dir="ltr">3 × 4</span> בא קודם ויוצא 12. איזה סימן הופך את 2 ו־12 ל־14? שימו אותו במשבצת הריקה.',
+      'Not that one: 3 {op} 5 makes {n}, not 8.': 'לא זה: <span dir="ltr">3 {op} 5</span> יוצא <span dir="ltr">{n}</span>, לא 8.',
+      'Not that one: then this line can\'t come out true.': 'לא זה: ככה השורה הזאת לא יכולה לצאת נכונה.',
+      'A line needs exactly one <b>=</b>, <b>&lt;</b> or <b>&gt;</b>.': 'בכל שורה צריך להיות בדיוק <b>=</b>, <b>&lt;</b> או <b>&gt;</b> אחד.',
+      'A line needs exactly one <b>=</b>.': 'בכל שורה צריך להיות בדיוק <b>=</b> אחד.',
+      'Part of this line can\'t be worked out.': 'אי אפשר לחשב חלק מהשורה הזאת.',
+      'Not true: {l} isn\'t less than {r}.': 'לא נכון: <span dir="ltr">{l}</span> לא קטן מ־<span dir="ltr">{r}</span>.',
+      'Not true: {l} isn\'t more than {r}.': 'לא נכון: <span dir="ltr">{l}</span> לא גדול מ־<span dir="ltr">{r}</span>.',
+      'Not true: one side makes {l}, the other {r}.': 'לא נכון: צד אחד יוצא <span dir="ltr">{l}</span>, והשני <span dir="ltr">{r}</span>.',
       'plus': 'פלוס',
       'minus': 'מינוס',
       'times': 'כפול',
@@ -860,7 +866,8 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="3">
     <li>Usual math order: <b>×  ÷</b> before <b>+  −</b>. The small number on each operator key shows its turn: 1 first, then 2. Division must come out exact.</li>
-    <li>Harder levels add <b>^</b> power, <b>.</b> decimal point (3 . 5 is 3.5), <b>%</b> remainder, and <b>&lt;  &gt;</b> for lines that are inequalities.</li>`,
+    <li>Harder levels add <b>^</b> power, <b>.</b> decimal point (3 . 5 is 3.5), <b>%</b> remainder, and <b>&lt;  &gt;</b> for lines that are inequalities.</li>
+    <li>Stuck? <b>Hint</b> fills in a tile, but costs stars.</li>`,
       `<li>מלאו כל משבצת ריקה בפעולה כך ש<b>כל שורה וכל עמודה יהיו משוואה נכונה</b>. משוואות נקראות רק <b>משמאל לימין</b> או <b>מלמעלה למטה</b>.</li>
     <li>משבצות שבהן קווים נחתכים הן <b>משותפות</b> — סימן אחד צריך לעבוד בשני הכיוונים.</li>
   </ol>
@@ -868,7 +875,8 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="3">
     <li>סדר פעולות רגיל: <b>×  ÷</b> לפני <b>+  −</b>. המספר הקטן על כל מקש פעולה מראה את התור שלו: קודם 1, אחר כך 2. החילוק חייב לצאת שלם.</li>
-    <li>בשלבים הקשים יותר מצטרפות <b>^</b> חזקה, <b>.</b> נקודה עשרונית (<span dir="ltr">3 . 5</span> הוא 3.5), <b>%</b> שארית, ו־<b dir="ltr">&lt;  &gt;</b> לשורות של אי־שוויון.</li>`],
+    <li>בשלבים הקשים יותר מצטרפות <b>^</b> חזקה, <b>.</b> נקודה עשרונית (<span dir="ltr">3 . 5</span> הוא 3.5), <b>%</b> שארית, ו־<b dir="ltr">&lt;  &gt;</b> לשורות של אי־שוויון.</li>
+    <li>נתקעתם? <b>רמז</b> ממלא משבצת, אבל עולה בכוכבים.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, arrows to move, <kbd>⌫</kbd> to clear, <kbd>Z</kbd> undo, <kbd>P</kbd> to pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>=</kbd> <kbd>^</kbd> <kbd>.</kbd> <kbd>%</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd>, חצים לתזוזה, <kbd>⌫</kbd> לניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],
