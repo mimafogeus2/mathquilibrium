@@ -89,7 +89,7 @@
 
 @media (orientation: landscape) and (max-height: 540px) {
   #game { height: auto; } /* ponytail: the controls column can outgrow the screen here (Hard: ~70px), so it scrolls rather than overlap the bar */
-  .rig { max-height: calc(100 * var(--dvh) - 110px); }
+  .rig { max-height: calc(100 * var(--dvh) - 110px - var(--coach-h, 0px)); }
   .tray { grid-column: 2; grid-row: 2; align-self: end; max-width: 300px; }
 }
 
@@ -123,5 +123,4 @@
 .plate.coach-at .hit { stroke: var(--brand); stroke-width: 3; stroke-dasharray: none; animation: plate-ring 1.2s ease-in-out infinite; }
 @keyframes plate-ring { 50% { stroke-opacity: .35; } }
 [data-calm] .plate.coach-at .hit { animation: none; }
-.tut #btn-reset { visibility: hidden; } /* a restart would strand the steps */
 #dlg-help .tier { display: inline-block; margin-inline-end: 2px; padding: 1px 6px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; vertical-align: 1px; background: var(--sun); color: var(--navy); }

@@ -64,7 +64,9 @@ const sqName = (i) => 'abcdefgh'[i % G.p.N] + (G.p.N - Math.floor(i / G.p.N));
 const replay = (log) => log.reduce((b, m) => play(b, m), G.p.board);
 
 function startLevel(G, save) {
-  const p = G.tut ? TUTORIAL : (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
+  // a tutorial: G.q the lessons it runs, G.qi the one on the board
+  if (G.tut) { G.q ??= lessonQueue || BASICS; G.qi ??= 0; G.miss = 0; lessonQueue = null; }
+  const p = G.tut ? LESSON_BOARDS[G.q[G.qi]] : (G.pack === 'I' && prebuilt(G.key)) || generate(hash(G.key), G.pack);
   // a save is the move list: it must replay legally, you and the computer in turn (null: a pass, only with no move), with the game still on
   let ok = Array.isArray(save.log), b = p.board;
   if (ok) for (const [k, m] of save.log.entries()) {
@@ -76,6 +78,7 @@ function startLevel(G, save) {
   const log = ok ? save.log.slice(0, save.log.length & ~1) : []; // it replies again to a move saved mid-thought
   Object.assign(G, { p, log, b: null, sel: null, cur: p.N * (p.N - 1), kbd: false, busy: false, out: null, tok: null, note: null });
   G.b = replay(log);
+  G.note = firstContact(p) || null;
 
   $('#g-sub').textContent = `${p.N}×${p.N} · ` + T(p.K === 1 ? 'Win in 1 move' : 'Win in {k} moves', { k: p.K });
   $('#cards').innerHTML = p.types.map(card).join('');
@@ -159,7 +162,10 @@ const say = (side, [f, t], took) => T(side > 0 ? 'You: {piece} {from} to {to}.' 
 // Over without a win: your king or last piece gone, or neither side can move
 function checkOut() {
   const { p, b } = G;
-  G.out = lost(p, b, 1) ? T(p.king[0] && b.some((x) => x > 0) ? 'Your <b>king</b> fell.' : 'You lost <b>every piece</b>.') + ' ' + T('Undo, or restart.')
+  const last = G.log.length % 2 === 0 && G.log.at(-1), by = last && NAME[p.types[Math.abs(b[last[1]]) - 1].look]; // the computer's last move
+  const fell = p.king[0] && b.some((x) => x > 0);
+  G.out = lost(p, b, 1) ? (by ? T(fell ? 'Its {piece} took your <b>king</b>.' : 'Its {piece} took your <b>last piece</b>.', { piece: esc(by) })
+    : T(fell ? 'Your <b>king</b> fell.' : 'You lost <b>every piece</b>.')) + ' ' + T('Undo, or restart.')
     : !moves(p, b, 1).length && !moves(p, b, -1).length ? T('Nobody can move.') + ' ' + T('Undo, or restart.') : null;
   $('#board').classList.toggle('lost', !!G.out);
   return !!G.out;
@@ -177,13 +183,14 @@ function onSquare(i) {
 }
 
 function yourMove(m) {
-  const took = !!G.b[m[1]];
+  const took = !!G.b[m[1]], onLine = !G.tut || winning(G.p, G.b, movesLeft()).some((w) => w[0] === m[0] && w[1] === m[1]);
   apply(m);
   G.sel = null;
   took ? sfx.good(2) : sfx.place();
   $('#sr').textContent = say(1, m, took);
   G.note = null;
-  if (lost(G.p, G.b, -1)) { refresh(); win(); return; }
+  if (lost(G.p, G.b, -1)) { refresh(); solved(); return; }
+  G.missed = !onLine; // a lesson's try that lets it get away: said once it has replied
   theirTurn();
 }
 
@@ -199,13 +206,17 @@ function theirTurn() {
     setTimeout(() => {
       if (!live()) return;
       G.busy = false;
-      const took = !!(r && G.b[r[1]]);
+      const took = !!(r && G.b[r[1]]), missBefore = G.miss;
       apply(r);
       if (r) took ? sfx.erase() : sfx.tap();
       $('#sr').textContent += ' ' + (r ? say(-1, r, took) : T("The computer can't move, and passes."));
       G.note = r ? null : T("It can't move, so it passes: <b>your turn</b> again.");
-      if (checkOut()) { sfx.bad(); flash($('#board'), 'shake'); $('#sr').textContent += ' ' + G.out.replace(/<[^>]+>/g, ''); }
-      else if (youPass()) return;
+      if (!movesLeft() && !lost(G.p, G.b, -1)) G.note = T('That was move {k} of {k}, and no win: it found a way out. Undo, or restart to try another first move.', { k: G.p.K });
+      if (G.missed) { G.missed = false; G.miss++; G.note = T(G.p.K === 1 ? 'That doesn\'t win. Undo, and look for a move that takes what you need.' : 'That lets it get away: it will answer that way every time. Undo, and look for a move it can\'t answer.'); }
+      const over = checkOut();
+      if (over) { sfx.bad(); flash($('#board'), 'shake'); $('#sr').textContent += ' ' + G.out.replace(/<[^>]+>/g, ''); }
+      if (G.tut && (over || G.miss > missBefore)) { coachSay(G.out || G.note); coachCheck(); } // said where the lesson is being read
+      if (!over && youPass()) return;
       refresh();
       saveGame();
     }, Math.max(0, 590 - (performance.now() - t0)));
@@ -220,6 +231,9 @@ function youPass() {
   theirTurn();
   return true;
 }
+
+// Your moves left to win in (a pass counts as one): K less the turns you've had
+const movesLeft = () => G.p.K - Math.ceil(G.log.length / 2);
 
 // Back to before your last move (and its reply)
 function undo() {
@@ -242,6 +256,8 @@ function back() {
   G.b = replay(G.log);
   G.sel = null;
   G.note = null;
+  G.missed = false;
+  if (G.tut) coachSay(null);
   drawUnits();
   checkOut();
   sfx.erase();
@@ -315,27 +331,86 @@ $('#help-card').innerHTML = card({ look: 1, king: false, rules: [{ k: 'slide', v
 // help, page 2: a king's card (its head shows the piece as you'd see yours and the enemy's)
 $('#help-king').innerHTML = card({ look: 0, king: true, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 1, m: 'any' }] });
 
-// Tutorial: 4×4, no kings. Your Zib (slides straight, any distance) on b1 takes the Gromf on b4; the other Gromf (one step
-// diagonally forward) comes to b2, and the Zib takes it down the file. The computer's reply is its own, and on this board it's that one.
-const TUTORIAL = { N: 4, K: 2, king: [false, false], first: [13, 1], board: [0, -2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-  types: [{ look: 1, king: false, rules: [{ k: 'slide', v: [[-1, 0], [1, 0], [0, -1], [0, 1]], n: 9, m: 'any' }] },
-    { look: 2, king: false, rules: [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1, m: 'any' }] }] };
-const enemies = () => G.b.filter((x) => x < 0).length;
+const sqEl = (i) => $(`#board .sq[data-i="${i}"]`);
 
-const sqEl = (i) => $(`#board .sq[data-i="${i}"]`), cardEl = (t) => $(`#cards .card[data-t="${t}"]`);
-// ring the piece to pick up, then (once it's picked) the square it goes to
-const goTo = (f, t) => () => (G.sel === f ? sqEl(t) : G.units[f]);
+// ---------- lessons ----------
+// Tiny boards (LESSON_BOARDS in gen.js, same order), one idea each, each a win from one first move only (test.js checks). Nothing is
+// forced: a try that lets the computer get away says so once it has replied; after two, the coach rings the next move. The menu's
+// Tutorial runs the basics; the rest wait for the first level with their kind of piece (firstContact starts them).
+const LESSONS = [
+  { teaches: ['card'], text: T('Your pieces are the <b>white</b> ones: tap one to see where it can go. Each kind\'s <b>card</b> below shows the same: a dot is a square it can reach, and a <b>line</b> means it slides there, so a piece in the way blocks it. Land on a red piece to <b>take</b> it off the board. Take the red Gromf off the board.') },
+  { teaches: ['reply'], text: T('The computer reads its cards <b>upside down</b>: its Gromfs step diagonally down, toward you. It answers every move, as well as it can. Take both Gromfs in 2 moves.') },
+  { teaches: ['king'], text: T('A crowned piece is a <b>king</b>. Take it and you win, whatever else is left.') },
+  // ---- met later ----
+  { teaches: ['leap'], text: T('Dots without a line are a <b>leap</b>: the Yeep lands there in one jump, over anything in between.') },
+  { teaches: ['split'], text: T('On this card, ○ is a square it can only <b>move</b> to and × one it can only <b>take</b> on. The Snee steps straight but takes diagonally.') },
+];
+const BASICS = [0, 1, 2];
+
+// First contact: the first level with a new kind of piece plays its lesson first, then comes back (not in Impossible Mode,
+// which teaches nothing: there a line under the board names them). What's been met is kept in store.met; a finished lesson counts.
+const MET = () => (store.met ??= []);
+const meet = (fs) => { for (const f of fs) if (!MET().includes(f)) MET().push(f); persist(); };
+const FEATURES = ['card', 'reply', 'king', 'leap', 'split'];
+const rulesOf = (p) => p.types.flatMap((t) => t.rules);
+const levelFeatures = (p) => [...(p.king[1] ? ['king'] : []), ...(rulesOf(p).some((r) => r.k === 'leap') ? ['leap'] : []),
+  ...(rulesOf(p).some((r) => r.m !== 'any') ? ['split'] : [])];
+const FEATURE_NAME = { king: T('kings'), leap: T('leaps'), split: T('pieces that move one way and take another') };
+function firstContact(p) {
+  if (G.tut || G.done) return '';
+  const fresh = levelFeatures(p).filter((f) => !MET().includes(f));
+  if (!fresh.length) return '';
+  meet(fresh);
+  const ls = fresh.map((f) => LESSONS.findIndex((l) => l.teaches.includes(f))), g = G;
+  // after core's start() has finished opening the level (its hash, its clock), so the lessons can come back to it
+  if (!IMP) setTimeout(() => G === g && !$('#game').hidden && showLessons(ls));
+  return T('<b>New here</b>: {list}. See How to play.', { list: fresh.map((f) => FEATURE_NAME[f]).join(', ') });
+}
+// Won: a lesson with more to come moves on after a moment; else the win
+function solved() {
+  if (!G.tut) return win();
+  meet([...LESSONS[G.q[G.qi]].teaches, ...levelFeatures(G.p)]);
+  if (G.qi === G.q.length - 1) return win();
+  const g = G;
+  g.done = true;
+  sfx.win();
+  $('#board').classList.add('solved');
+  track('tutorial', 'lesson-' + g.q[g.qi]);
+  setTimeout(() => {
+    if (G !== g || !coached) return;
+    g.qi++;
+    g.done = false;
+    startLevel(g, {});
+    coachCheck();
+  }, 1500);
+}
+// The coach's ring: nothing at first; after two tries that missed, the next move of the answer: Undo if the board is off it,
+// else the piece to pick up, then where it goes
+const tutRing = () => {
+  if (!G?.tut || G.busy || G.done) return null;
+  if (G.out) return $('#btn-undo'); // over: the only way on
+  if (G.miss < 2) return null;
+  const m = !G.out && movesLeft() > 0 && winning(G.p, G.b, movesLeft())[0];
+  if (!m) return $('#btn-undo');
+  return G.sel === m[0] ? sqEl(m[1]) : G.units[m[0]];
+};
+// a lesson's coach line, k its place in the tutorial's run
+const lessonStep = (n, k, last) => [LESSONS[n].text, last ? null : () => G?.qi > k, tutRing];
+const stepsFor = (q) => q.map((n, k) => lessonStep(n, k, k === q.length - 1));
+// Lessons for a level's new pieces, one after another, then back to that level
+let lessonQueue = null;
+function showLessons(q) {
+  const back = location.hash.slice(1);
+  saveGame();
+  track('tutorial', 'show-' + q.join('-'));
+  lessonQueue = q;
+  startTutorial();
+  coach(stepsFor(q), { onEnd: () => { if (back && back !== 'tutorial') location.hash = back; else show('home'); } });
+}
 
 boot({ name: T('Alien Chess'),
-  tutorial: [
-    [T('Every kind of piece has a <b>card</b> showing how it moves. The colored square in the middle is the piece; a <b>dot</b> is a square it can land on. A <b>line</b> means it slides there square by square, and can be blocked; an <b>arrow</b> runs on to the edge of the board. Tap your Zib\'s card.'),
-      () => G.card === 0, () => cardEl(0), () => false],
-    [T('Cards point up the board. The enemy\'s pieces read theirs <b>upside down</b>: its Gromfs step one square diagonally <b>down</b>, toward you. Tap the Gromf\'s card.'),
-      () => G.card === 1, () => cardEl(1), () => false],
-    [T('Your Zib slides straight, as far as it likes. Tap it: the board marks where it can go.'), () => G.sel === 13, goTo(13, 1), (m) => m.sel === 13],
-    [T('Take the Gromf at the top of its column.'), () => enemies() < 2, goTo(13, 1), (m) => m.sel === 13 || m.to === 1],
-    [T('The computer answers every move: its other Gromf stepped down, diagonally. Take it to win. Win fast: stars are for speed.'), null, goTo(1, 9), (m) => m.sel === 1 || m.to === 9],
-  ], storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
+  ownIntro: true, tutorial: stepsFor(BASICS),
+  storeKey: 'alienchess', random: true, glyphs: ['♞', '♛', '★'], start: startLevel,
   save: (G) => ({ log: G.log }), key: onKey, reveal,
   stars: (G) => { const [a, b] = STAR_TIME[G.pack]; return G.elapsed <= a ? 3 : G.elapsed <= b ? 2 : 1; } });
 game.impossible = { stars: game.stars }; // the same rule in Impossible Mode, on its own times
@@ -350,3 +425,7 @@ if (IMP) $('#daily-btns').addEventListener('click', async (e) => {
   window.pregen = null; // in, or failed: either way the button now just plays
   b.click();
 }, true);
+// Players from before first-contact lessons already know the pieces: don't teach them all of it again
+if (!store.met && store.seenHelp) store.met = [...FEATURES];
+// A first visit (not through a shared link) starts with the tutorial, where How to play used to open (ownIntro)
+if (!store.tutored && !store.seenHelp && !location.hash && !IMP) { store.tutored = true; persist(); track('tutorial', 'first'); startTutorial(); }

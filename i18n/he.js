@@ -654,13 +654,26 @@ module.exports = {
     },
     'alienchess/game.js': {
       'Summoning…': 'מזמנים…',
-      "Every kind of piece has a <b>card</b> showing how it moves. The colored square in the middle is the piece; a <b>dot</b> is a square it can land on. A <b>line</b> means it slides there square by square, and can be blocked; an <b>arrow</b> runs on to the edge of the board. Tap your Zib's card.":
-        'לכל סוג כלי יש <b>קלף</b> שמראה איך הוא זז. הריבוע הצבעוני באמצע הוא הכלי; <b>נקודה</b> היא משבצת שהוא יכול לנחות בה. <b>קו</b> אומר שהוא מחליק לשם משבצת אחרי משבצת, ואפשר לחסום אותו; <b>חץ</b> ממשיך עד קצה הלוח. הקישו על הקלף של הזיב שלכם.',
-      "Cards point up the board. The enemy's pieces read theirs <b>upside down</b>: its Gromfs step one square diagonally <b>down</b>, toward you. Tap the Gromf's card.":
-        'הקלפים מכוונים למעלה בלוח. הכלים של המחשב קוראים את שלהם <b>הפוך</b>: הגרומפים שלו צועדים משבצת אחת באלכסון <b>למטה</b>, לכיוונכם. הקישו על הקלף של הגרומף.',
-      'Your Zib slides straight, as far as it likes. Tap it: the board marks where it can go.': 'הזיב שלכם מחליק בקו ישר, כמה שירצה. הקישו עליו: הלוח יסמן לאן הוא יכול ללכת.',
-      'Take the Gromf at the top of its column.': 'אכלו את הגרומף בראש הטור שלו.',
-      'The computer answers every move: its other Gromf stepped down, diagonally. Take it to win. Win fast: stars are for speed.': 'המחשב עונה על כל מהלך: הגרומף השני שלו ירד באלכסון. אכלו אותו וניצחתם. ומהר: הכוכבים הם על מהירות.',
+      'Your pieces are the <b>white</b> ones: tap one to see where it can go. Each kind\'s <b>card</b> below shows the same: a dot is a square it can reach, and a <b>line</b> means it slides there, so a piece in the way blocks it. Land on a red piece to <b>take</b> it off the board. Take the red Gromf off the board.':
+        'הכלים שלכם הם ה<b>לבנים</b>: הקישו על אחד כדי לראות לאן הוא יכול ללכת. ה<b>קלף</b> של כל סוג, למטה, מראה את אותו הדבר: נקודה היא משבצת שהוא יכול להגיע אליה, ו<b>קו</b> אומר שהוא מחליק לשם, אז כלי שבדרך חוסם אותו. נחתו על כלי אדום כדי <b>לאכול</b> אותו ולהוריד אותו מהלוח. אכלו את הגרומף האדום.',
+      'The computer reads its cards <b>upside down</b>: its Gromfs step diagonally down, toward you. It answers every move, as well as it can. Take both Gromfs in 2 moves.':
+        'המחשב קורא את הקלפים שלו <b>הפוך</b>: הגרומפים שלו צועדים באלכסון למטה, לכיוונכם. הוא עונה על כל מסע, הכי טוב שהוא יכול. אכלו את שני הגרומפים ב־2 מסעים.',
+      'A crowned piece is a <b>king</b>. Take it and you win, whatever else is left.': 'כלי עם כתר הוא <b>מלך</b>. אכלו אותו וניצחתם, לא משנה מה עוד נשאר.',
+      'Dots without a line are a <b>leap</b>: the Yeep lands there in one jump, over anything in between.': 'נקודות בלי קו הן <b>קפיצה</b>: הייפ נוחת שם בקפיצה אחת, מעל כל מה שבדרך.',
+      'On this card, ○ is a square it can only <b>move</b> to and × one it can only <b>take</b> on. The Snee steps straight but takes diagonally.':
+        'בקלף הזה, ○ היא משבצת שהוא יכול רק <b>לזוז</b> אליה, ו־× משבצת שהוא יכול רק <b>לאכול</b> בה. הסני צועד ישר אבל אוכל באלכסון.',
+      'kings': 'מלכים',
+      'leaps': 'קפיצות',
+      'pieces that move one way and take another': 'כלים שזזים בדרך אחת ואוכלים בדרך אחרת',
+      '<b>New here</b>: {list}. See How to play.': '<b>חדש כאן</b>: {list}. ראו איך משחקים.',
+      'That was move {k} of {k}, and no win: it found a way out. Undo, or restart to try another first move.':
+        'זה היה מסע {k} מתוך {k}, ואין ניצחון: הוא מצא דרך לצאת. בטלו מסע, או התחילו מחדש כדי לנסות מסע ראשון אחר.',
+      // picked at runtime (T(cond ? a : b)): build.js doesn't see them, so they're listed by hand
+      "That doesn't win. Undo, and look for a move that takes what you need.": 'זה לא מנצח. בטלו את המסע, וחפשו מסע שאוכל את מה שצריך.',
+      "That lets it get away: it will answer that way every time. Undo, and look for a move it can't answer.":
+        'ככה הוא מתחמק: הוא יענה ככה בכל פעם. בטלו את המסע, וחפשו מסע שאין לו תשובה עליו.',
+      'Its {piece} took your <b>king</b>.': 'ה{piece} שלו אכל את <b>המלך</b> שלכם.',
+      'Its {piece} took your <b>last piece</b>.': 'ה{piece} שלו אכל את <b>הכלי האחרון</b> שלכם.',
       'Alien Chess': 'שחמאדים',
       // the aliens: the same nonsense, in Hebrew letters
       'Bloorp': 'בלורפ',
@@ -1024,36 +1037,52 @@ module.exports = {
       ['<p class="tagline">Chess, as they play it out there.</p>', '<p class="tagline">שחמט, כמו שמשחקים אותו שם בחוץ.</p>'],
       ['<p id="board-keys" class="sr-only">Your pieces start at the bottom. Arrow keys move around the board. Space or Enter picks up one of your pieces, then puts it down on a square it can reach. Z takes back your last move.</p>',
         '<p id="board-keys" class="sr-only">הכלים שלכם מתחילים למטה. החצים זזים על הלוח. רווח או Enter מרימים כלי שלכם, ואז מניחים אותו במשבצת שהוא יכול להגיע אליה. Z מבטל את המסע האחרון.</p>'],
-      [`<li>Every level brings <b>new pieces</b>. Each one's <b>card</b> shows how it moves.</li>
-    <li>On a card, a <b>line</b> slides until something blocks it; an arrow runs to the edge. A <b>lone dot</b> jumps straight there. <b>●</b> moves or takes, <b>○</b> only moves, <b>×</b> only takes.</li>
+      [`<li>Your pieces are <b>white</b>, the computer's <b>red</b>. Tap one of yours to see where it can go, and land on a red one to <b>take</b> it off the board.</li>
+    <li>Every level brings <b>new pieces</b>. Each kind's <b>card</b> shows how it moves.</li>
+    <li>A <b>line</b> slides square by square until something blocks it; an arrow runs on to the edge.</li>
+    <li>A <b>dot without a line</b> is a leap: the piece lands there in one jump, over anything in between.</li>
   </ol>
   </div>
   <div class="help-page">
-  <div id="help-king" aria-hidden="true"></div>
-  <ol class="rules" start="3">
+  <ol class="rules" start="5">
+    <li><b>●</b> moves or takes, <b>○</b> only moves, <b>×</b> only takes.</li>
     <li>Cards point up the board. The enemy's pieces move the same way, <b>upside down</b>.</li>
-    <li>Take the enemy's <b>king</b> (the crowned piece), or <b>all</b> of its pieces. Lose yours and you lose. A side with no move skips its turn.</li>
-  </ol>
-  </div>
-  <div class="help-page">
-  <ol class="rules" start="5">
-    <li>You move first. There's always a <b>win</b> in the moves shown on top: undo, restart and try again.</li>
-    <li>Win fast for <b>three stars</b>.</li>`,
-      `<li>בכל שלב יש <b>כלים חדשים</b>. ה<b>קלף</b> של כל אחד מראה איך הוא זז.</li>
-    <li>בקלף, <b>קו</b> הוא החלקה עד שמשהו חוסם אותה; חץ ממשיך עד הקצה. <b>נקודה בודדת</b> היא קפיצה ישר לשם. <b>●</b> זז או אוכל, <b>○</b> רק זז, <b>×</b> רק אוכל.</li>
   </ol>
   </div>
   <div class="help-page">
   <div id="help-king" aria-hidden="true"></div>
-  <ol class="rules" start="3">
-    <li>הקלפים פונים אל ראש הלוח. הכלים של האויב זזים אותו דבר, <b>הפוך</b>.</li>
-    <li>אכלו את <b>המלך</b> של האויב (הכלי עם הכתר), או את <b>כל</b> הכלים שלו. אם תאבדו את שלכם, הפסדתם. צד שאין לו מסע מדלג על התור.</li>
+  <ol class="rules" start="7">
+    <li>Take the enemy's <b>king</b> (the crowned piece), or <b>all</b> of its pieces. Lose yours and you lose.</li>
+    <li>The computer <b>answers every move</b> as well as it can. There's always a win in the moves shown on top, from one first move only.</li>
+    <li>A side with no move skips its turn.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="10">
+    <li>Undo and restart are free. Win fast for <b>three stars</b>.</li>`,
+      `<li>הכלים שלכם <b>לבנים</b>, של המחשב <b>אדומים</b>. הקישו על אחד משלכם כדי לראות לאן הוא יכול ללכת, ונחתו על כלי אדום כדי <b>לאכול</b> אותו ולהוריד אותו מהלוח.</li>
+    <li>בכל שלב יש <b>כלים חדשים</b>. ה<b>קלף</b> של כל סוג מראה איך הוא זז.</li>
+    <li><b>קו</b> הוא החלקה משבצת אחרי משבצת עד שמשהו חוסם אותה; חץ ממשיך עד הקצה.</li>
+    <li><b>נקודה בלי קו</b> היא קפיצה: הכלי נוחת שם בקפיצה אחת, מעל כל מה שבדרך.</li>
   </ol>
   </div>
   <div class="help-page">
   <ol class="rules" start="5">
-    <li>אתם מתחילים. תמיד יש <b>ניצחון</b> במספר המסעים שכתוב למעלה: בטלו, התחילו מחדש ונסו שוב.</li>
-    <li>נצחו מהר ותקבלו <b>שלושה כוכבים</b>.</li>`],
+    <li><b>●</b> זז או אוכל, <b>○</b> רק זז, <b>×</b> רק אוכל.</li>
+    <li>הקלפים פונים אל ראש הלוח. הכלים של האויב זזים אותו דבר, <b>הפוך</b>.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <div id="help-king" aria-hidden="true"></div>
+  <ol class="rules" start="7">
+    <li>אכלו את <b>המלך</b> של האויב (הכלי עם הכתר), או את <b>כל</b> הכלים שלו. אם תאבדו את שלכם, הפסדתם.</li>
+    <li>המחשב <b>עונה על כל מסע</b> הכי טוב שהוא יכול. תמיד יש ניצחון במספר המסעים שכתוב למעלה, ממסע ראשון אחד בלבד.</li>
+    <li>צד שאין לו מסע מדלג על התור.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="10">
+    <li>ביטול מסע והתחלה מחדש לא עולים כלום. נצחו מהר בשביל <b>שלושה כוכבים</b>.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to pick up and put down, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להרמה ולהנחה, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
     ],

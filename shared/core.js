@@ -214,17 +214,22 @@ for (const b of document.querySelectorAll('#dlg-help form:not(.dlg-x) .btn.prima
 let coached = null;
 function coach(steps, { screen = $('#game'), onEnd } = {}) {
   coached?.el.remove();
+  coached?.fit.disconnect();
   for (const e of document.querySelectorAll('.coach-at')) e.classList.remove('coach-at');
   coached = null;
   screen?.classList.toggle('tut', !!steps);
+  screen?.style.removeProperty('--coach-h');
   if (!steps) return;
   const el = Object.assign(document.createElement('div'), { id: 'coach', className: 'coach' });
   el.setAttribute('role', 'status');
   screen.querySelector('.bar').after(el);
   // every line is laid in the same grid cell, unseen, so the box is as tall as the longest one and the board below never shifts
   const lines = [...steps.map((s) => s[0]), T("That's it — you know how to play. Have fun!")].map((h) => `<p aria-hidden="true">${h}</p>`).join('');
-  el.innerHTML = `<small></small><div class="coach-lines"><p class="now"></p>${lines}</div>`;
-  coached = { steps, at: -1, el, onEnd };
+  el.innerHTML = `<small></small><div class="coach-lines"><p class="now"></p>${lines}</div><p class="coach-say" hidden></p>`;
+  // its height (and margin), as --coach-h on the screen: a board sized to the viewport leaves room for it, so nothing below scrolls away
+  const fit = new ResizeObserver(() => screen.style.setProperty('--coach-h', el.getBoundingClientRect().height / pageScale() + 4 + 'px'));
+  fit.observe(el);
+  coached = { steps, at: -1, el, onEnd, fit };
   coachGo(0);
 }
 function coachGo(n) {
@@ -232,12 +237,21 @@ function coachGo(n) {
   if (n > c.at) { c.at = n; if (n) sfx.tap(); }
   const [html, , target] = c.steps[c.at];
   coachText(T('Tutorial · {n} of {k}', { n: c.at + 1, k: c.steps.length }), html);
+  coachSay(null);
   flash(c.el, 'pop');
   coachRing(target);
 }
 function coachText(head, html) {
   coached.el.querySelector('small').textContent = head;
   coached.el.querySelector('.now').innerHTML = html;
+}
+// A line under the step's own, for what just happened (a try that failed, and why); null clears it. A new step clears it too.
+function coachSay(html) {
+  const e = coached?.el.querySelector('.coach-say');
+  if (!e) return;
+  e.hidden = !html;
+  e.innerHTML = html || '';
+  if (html) flash(coached.el, 'pop');
 }
 function coachRing(target) {
   for (const e of document.querySelectorAll('.coach-at')) e.classList.remove('coach-at');

@@ -53,4 +53,17 @@ for (const key of keys) {
   }
 }
 assert.deepStrictEqual(generate(hash('H1'), 'H'), generate(hash('H1'), 'H'));
+// the lessons: each a win in K (not fewer) from one first move only, and the answer's line holds against the computer
+const { LESSON_BOARDS } = require('./gen.js');
+for (const [n, q] of LESSON_BOARDS.entries()) {
+  assert(!(q.K > 1 && wins(q, q.board, q.K - 1)), 'lesson ' + n + ' wins sooner');
+  assert.strictEqual(winning(q, q.board, q.K).length, 1, 'lesson ' + n + ' not one first move');
+  let bd = q.board, k = q.K;
+  for (;;) {
+    bd = play(bd, winning(q, bd, k)[0]);
+    if (lost(q, bd, -1)) break;
+    bd = play(bd, reply(q, bd));
+    assert(!lost(q, bd, 1) && --k > 0, 'lesson ' + n + ' the line fails');
+  }
+}
 console.log('ok', keys.length, 'puzzles', Date.now() - t0, 'ms, slowest per tier', slowest);

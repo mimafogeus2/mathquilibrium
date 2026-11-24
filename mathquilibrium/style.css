@@ -107,7 +107,7 @@ button.cell.sel.filled { transform: translate(1.5px, 2px); box-shadow: 0 0 0 var
 @media (orientation: landscape) and (max-height: 540px) {
   .key { width: 44px; height: 44px; font-size: 22px; } /* 6 per row in the 300px side column */
   /* the controls column can run past the screen; keep the board in view (90px ≈ top bar + padding) */
-  .board-wrap { max-height: calc(100 * var(--dvh) - 90px); align-self: start; }
+  .board-wrap { max-height: calc(100 * var(--dvh) - 90px - var(--coach-h, 0px)); align-self: start; }
 }
 
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {

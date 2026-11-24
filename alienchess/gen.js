@@ -141,4 +141,23 @@ function generate(seed, tier) {
   }
 }
 
-if (typeof module === 'object') module.exports = { LOOKS, RULES, TIER, moves, play, lost, wins, winning, reply, generate };
+// The lessons' boards (game.js LESSONS, same order): 4×4, each a win in K from one first move only (test.js checks).
+// Types are [look, rules, king]; boards as generate() makes them.
+// A rule is an index in RULES or a rule of its own; m defaults to 'any'.
+const lessonBoard = (K, types, board) => ({ N: 4, K, king: [!!types[0][2], !!types[0][2]], board,
+  types: types.map(([look, rs, king = false]) => ({ look, king, rules: rs.map((r) => ({ m: 'any', ...(typeof r === 'number' ? RULES[r] : r) })) })) });
+const LESSON_BOARDS = [
+  // a Zib (slides straight) blocked by your own Gromf (one step diagonally forward), which takes
+  [1, [[1, [3]], [2, [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1 }]]], [0, 0, 0, 0, -2, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0]],
+  // the old tutorial: take the Gromf at b4, its other Gromf comes down to b2 and is taken
+  [2, [[1, [3]], [2, [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1 }]]], [0, -2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]],
+  // kings: take the Bloorp on a4, not the Zib on c2
+  [1, [[0, [0], true], [1, [3]]], [-1, 0, 0, 0, 0, 0, 0, 0, 2, 0, -2, 0, 0, 0, 0, 1]],
+  // a leap: the Yeep (knight) jumps the Zib to c4
+  [1, [[5, [8]], [1, [3]]], [0, 0, -2, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
+  // split: the Snee moves straight but only takes diagonally: c2 takes b3, b2 can't
+  [1, [[8, [{ k: 'slide', v: [[-1, 0]], n: 1, m: 'move' }, { k: 'slide', v: [[-1, -1], [-1, 1]], n: 1, m: 'cap' }]], [2, [{ k: 'slide', v: [[-1, -1], [-1, 1]], n: 1 }]]],
+    [0, 0, 0, 0, 0, -2, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]],
+].map(([K, types, board]) => { const p = lessonBoard(K, types, board); p.first = winning(p, board, K)[0]; return p; });
+
+if (typeof module === 'object') module.exports = { LOOKS, RULES, TIER, moves, play, lost, wins, winning, reply, generate, LESSON_BOARDS };
