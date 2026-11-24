@@ -229,9 +229,31 @@ function tankSvg(L, vb = viewOf(L)) {
 // [type, spot] in order. G.lock: placements a hint made (and everything before them), which undo can't take back.
 // G.sel: the picked item type. G.busy: fish are moving. G.fail: 'eaten' | 'loop' | 'stuck' | null. G.moved: fish moved since the
 // last placement. G.mistakes: for the stars. G.preview: a spot shown as if placed (mouse hover, or keyboard).
-const TUTORIAL = Fry.parse('7|' + ['###X###', '#.....#', '#.0...#', '#.....#', '#.....#', '#..2..#', '#######'].join('') + '|16.1.1,38.1.2||/|/@17');
+// Lessons: tiny tanks, one idea each, each with one answer (test.js checks). Nothing is forced: wrong tries play out and fail
+// says why; after two, the coach rings the next move. The menu's Tutorial runs the basics (BASICS); the rest wait for the first
+// level with their mechanic (firstContact starts them). teaches: mechanics, as levelFeatures() names them.
+const LESSONS = [
+  { teaches: ['mirror'], line: '7|###X####.....##.....##.....##.....##.....########|16.1.1||/|/@17',
+    text: T('The fry (orange) looks only <b>straight ahead</b>: the dotted line. Items go only where a fish is looking. Put the <b>mirror</b> where it shows the fry the <b>exit</b>.') },
+  { teaches: ['pred'], line: '7|#####X##.....##..#..##.....##.....##.....########|36.0.1,25.1.2||//|/@8,/@12',
+    text: T('A bigger fish eats a smaller one it sees, and <b>lunges</b> at one that swims into its look. After each item the fish act. Get the fry out without crossing the 2\'s look.') },
+  { teaches: ['F'], line: '7|########.....##.....#X.....##.....##.....########|25.1.1||F|F@105',
+    text: T('A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what\'s behind it.') },
+  { teaches: ['hunt'], line: '7|#####X######.######.#####..##.....##.....########|36.0.1,25.1.2,38.1.3||///|/@29,/@39,/@33',
+    text: T('Every fish has a job. The 2 guards the way out; the 3 is hungry. Turn the 3\'s look onto the 2 first.') },
+  // ---- met later, one lesson per mechanic ----
+  { teaches: ['B'], line: '7|########.....X#.....##....###.....###....########|24.0.1,19.3.3,11.2.4||B/|B@17,/@10',
+    text: T('<b>Bait</b> draws the fry to it, and moving the fry sets the fish that watch it moving too. Lure the 3 into the 4\'s look, and the way up clears.') },
+  { teaches: ['patrol'], line: '7|####X###....###.....##.....##.....##.....########|26.2.1,24.3.3p||/\\|/@33,\\@32',
+    text: T('The 3 on the <b>rail</b> patrols back and forth, a cell each time anything else moves, and eats what it runs into. Get the fry across its rail before it comes back.') },
+  { teaches: ['fixed'], line: '7|########.....X#...####.....##...#.###....########|22.1.1,26.3.3|23/|/|/@9',
+    text: T('A <b>bolted mirror</b> (riveted) is part of the tank: it bends looks like yours, but it never moves. Use it.') },
+  { teaches: ['fast'], line: '7|########.....###....##.....##.....#X.....########|25.3.1,32.3.3f||//|/@22,/@36',
+    text: T('A <b>fast fish</b> (streaks) swims two cells at a time, so its lunge reaches two cells. Cross its look further out than that.') },
+];
+const BASICS = [0, 1, 2, 3];
 const levelOf = (G) => {
-  if (G.tut) return TUTORIAL;
+  if (G.tut) return Fry.parse(LESSONS[G.q[G.qi]].line);
   if (G.date) {
     const i = Math.round((Date.parse(G.date) - Date.parse(DAILY.from)) / 864e5), l = DAILY[G.pack]?.[i];
     if (l) return Fry.parse(l);
@@ -245,9 +267,11 @@ const left = () => { const c = {}; for (const t of G.L.items) c[t] = (c[t] || 0)
 const itemsLeft = () => G.L.items.length - G.placed.length;
 
 function startLevel(G, save) {
+  // a tutorial: G.q the lessons it runs, G.qi the one in the tank
+  if (G.tut) { G.q ??= lessonQueue || BASICS; G.qi ??= 0; G.miss = 0; lessonQueue = null; }
   const L = levelOf(G), S0 = Fry.initial(L);
   runId++; // a swim still going on the last level stops
-  Object.assign(G, { L, S: Fry.clone(S0), states: [S0], placed: [], lock: 0, sel: null, busy: false, fail: null, moved: false, mistakes: 0, preview: null, kspot: -1 });
+  Object.assign(G, { L, S: Fry.clone(S0), states: [S0], placed: [], lock: 0, sel: null, busy: false, fail: null, why: null, moved: false, mistakes: 0, preview: null, kspot: -1 });
   let ok = true;
   if (Array.isArray(save.placed)) {
     // replay the saved placements: the fish do what they did
@@ -268,7 +292,7 @@ function startLevel(G, save) {
       G.moved = !!G.fail;
     }
   }
-  G.sel = G.tut ? null : firstLeft();
+  G.sel = firstLeft();
   const b = $('#board');
   b.classList.remove('solved', 'failed');
   const vb = viewOf(L);
@@ -292,7 +316,7 @@ function startLevel(G, save) {
     return s;
   }));
   $('#btn-hint').hidden = IMP || !!G.tut;
-  tip(G.fail ? failText() : G.date ? T('Today\'s puzzle. A new one tomorrow.') : !G.tut && G.pack === 'E' && G.n === 1 ? FIRST_TIP : '');
+  tip(G.fail ? failText() : firstContact(L) || (G.date ? T('Today\'s puzzle. A new one tomorrow.') : !G.tut && G.pack === 'E' && G.n === 1 ? FIRST_TIP : ''));
   // every level a little different: a faint tint of one of the inks in its water and kelp
   const hk = hash(G.key || 'tut');
   $('#game').style.setProperty('--vary', ['var(--k-yellow)', 'var(--k-teal)', 'var(--k-pink)', 'var(--k-blue)'][hk % 4]);
@@ -319,8 +343,33 @@ function tip(html, warn = false) {
   $('#tip').innerHTML = html;
   $('#tip').toggleAttribute('data-warn', warn);
 }
-const failText = () => ({ eaten: T('<b>Eaten!</b> Undo and try another way.'), loop: T('<b>Going in circles.</b> Undo and try another way.'),
-  stuck: T('<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.') })[G.fail];
+// What went wrong, and why: who ate the fry and how (G.why, from the swim), or that it can't get anywhere
+const failText = () => {
+  if (G.fail === 'eaten' && G.why) return T({ saw: '<b>Eaten!</b> The {n} saw the fry. Undo and keep the fry out of its look.',
+    lunge: '<b>Eaten!</b> The fry swam into the {n}\'s look, and it lunged. Undo and try another way.',
+    patrol: '<b>Eaten!</b> The fry swam into the patrolling {n}\'s way. Undo and try another way.' }[G.why.how], { n: G.why.n });
+  return ({ eaten: T('<b>Eaten!</b> Undo and try another way.'), loop: T('<b>Going in circles.</b> Undo and try another way.'),
+    stuck: T('<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.') })[G.fail];
+};
+// The first level with a mechanic the player hasn't met (an item kind, a bigger fish, a bolted mirror, a patroller, a fast fish)
+// plays a lesson for each new one in turn, then comes back (not in Impossible Mode, which teaches nothing: there a line under the
+// tank names them). What's been met is kept in store.met; a finished lesson counts.
+const MET = () => (store.met ??= []);
+const meet = (fs) => { for (const f of fs) if (!MET().includes(f)) MET().push(f); persist(); };
+const FEATURES = ['mirror', 'F', 'B', 'pred', 'fixed', 'patrol', 'fast'];
+const levelFeatures = (L) => [...L.items.map((t) => (t === 'F' || t === 'B' ? t : 'mirror')), ...(L.fish.length > 1 ? ['pred'] : []),
+  ...(L.mir.length ? ['fixed'] : []), ...(L.fish.some((f) => f.w) ? ['patrol'] : []), ...(L.fish.some((f) => f.f) ? ['fast'] : [])];
+const FEATURE_NAME = { mirror: T('mirrors'), F: T('flat mirrors'), B: T('bait'), pred: T('bigger fish'), fixed: T('bolted mirrors'), patrol: T('patrollers'), fast: T('fast fish') };
+function firstContact(L) {
+  if (G.tut || G.done) return '';
+  const fresh = [...new Set(levelFeatures(L).filter((f) => !MET().includes(f)))];
+  if (!fresh.length) return '';
+  meet(fresh);
+  const ls = [...new Set(fresh.map((f) => LESSONS.findIndex((l) => l.teaches.includes(f))).filter((n) => n >= 0))], g = G;
+  // after core's start() has finished opening the level (its hash, its clock), so the lessons can come back to it
+  if (!IMP && ls.length) setTimeout(() => G === g && !$('#game').hidden && showLessons(ls));
+  return T('<b>New here</b>: {list}. See How to play.', { list: fresh.map((f) => FEATURE_NAME[f]).join(', ') });
+}
 
 // The board as it stands: items, looks (or the preview's), spots for the picked item, fish where they are
 function draw() {
@@ -650,6 +699,8 @@ async function swim() {
     const key = Fry.fishKey(G.S) + '/' + G.S.nb;
     if (seen.has(key)) return settle('loop');
     seen.add(key);
+    // who already sees the fry before anyone moves: one that eats it without having seen it lunged as it swam into its look
+    const saw = G.S.fish.map((f, i) => { if (!i || !f.a || f.w) return false; const v = Fry.look(L, G.S, i); return v.t >= 0 && v.hit === 0; });
     const t = Fry.tick(L, G.S);
     if (!t.moved.length) return settle('stop');
     G.moved = true;
@@ -671,6 +722,7 @@ async function swim() {
     for (const j of t.eaten) {
       const eater = t.moved.filter((i) => G.S.fish[i].s > G.S.fish[j].s).sort((a, b) => G.S.fish[b].s - G.S.fish[a].s).find((i) => G.S.fish[i].p === G.S.fish[j].p || t.paths[t.moved.indexOf(i)].includes(G.S.fish[j].p))
         ?? G.S.fish.map((f, i) => i).filter((i) => G.S.fish[i].a && G.S.fish[i].s > G.S.fish[j].s && G.S.fish[i].p === G.S.fish[j].p)[0];
+      if (j === 0 && eater !== undefined) { const e = G.S.fish[eater]; G.why = { n: e.s, how: e.w ? 'patrol' : saw[eater] ? 'saw' : 'lunge' }; }
       if (eater === undefined || calm) { G.fishEls[j].classList.add('gone'); if (eater !== undefined) water.gulp(); continue; }
       setTimeout(() => swallow(eater, j), ms * .7);
     }
@@ -687,16 +739,37 @@ function settle(res) {
   G.busy = false;
   for (const el of G.fishEls) { el.classList.remove('swimming'); el.dataset.now = ''; }
   G.states.push(Fry.clone(G.S));
-  if (res === 'win') { draw(); $('#board').classList.add('solved'); win(); return; }
+  if (res === 'win') {
+    draw();
+    $('#board').classList.add('solved');
+    if (G.tut) meet([...LESSONS[G.q[G.qi]].teaches, ...levelFeatures(G.L)]);
+    if (G.tut && G.qi < G.q.length - 1) return nextLesson();
+    win();
+    return;
+  }
   if (res === 'lose') fail('eaten');
   else if (res === 'loop') fail('loop');
   else if (!itemsLeft()) fail('stuck');
   else { draw(); saveGame(); }
 }
+// A tutorial lesson won with more to come: a moment to see it, then the next tank (the coach line follows: its step is done)
+function nextLesson() {
+  const g = G;
+  g.done = true;
+  sfx.win();
+  track('tutorial', 'lesson-' + g.q[g.qi]);
+  setTimeout(() => {
+    if (G !== g || !coached) return;
+    g.qi++;
+    g.done = false;
+    startLevel(g, {});
+    coachCheck();
+  }, 1500);
+}
 function fail(kind) {
   G.fail = kind;
   if (!calm()) flash($('#board'), 'shake');
-  if (!G.tut) G.mistakes++;
+  if (!G.tut) G.mistakes++; else G.miss++;
   sfx.bad();
   tip(failText(), true);
   draw();
@@ -713,6 +786,7 @@ function rewind(k) {
   G.states.length = k + 1;
   G.placed.length = k;
   G.fail = null;
+  G.why = null;
   G.moved = false;
   G.preview = null;
   G.kspot = -1;
@@ -816,15 +890,31 @@ $('#btn-fast').onclick = () => { if (G) { G.ff = !G.ff; refresh(); } };
     `${fish('grouper pred', 5, 98, 58, 3.4, ' scale(-1 1)')}${fish('fry', 1, 22, 42, 4)}</svg>`;
 }
 
-// Tutorial: the fry looks right, at rock; a / on the ringed cell turns its look up to the exit overhead.
-const tutSpot = () => $('#board .spot[data-spot="17"]') || $('#board .tank');
-boot({ name: T('Small Fry'), storeKey: 'smallfry', glyphs: ['🐟', '◆'], start: startLevel, ownIntro: false,
-  tutorial: [
-    [T('Each fish looks only straight ahead: the dotted lines show where. The fry (orange) is looking at rock. Pick the <b>mirror</b> below.'),
-      () => G.sel === '/', () => $('#tray .slot'), (m) => m.pick === '/'],
-    [T('Items go only where a fish is looking. Tap the ringed spot to place it there: the fry will see the <b>exit</b> and swim for it.'),
-      null, tutSpot, (m) => m.at === 17 || m.pick === '/'],
-  ],
+// The coach's ring: nothing at first; after two failed tries, the next move of the answer: Undo if what's placed isn't part of it,
+// else that item's tray slot, then its spot
+const tutRing = () => {
+  if (!G?.tut || G.miss < 2 || G.busy) return null;
+  const ans = new Set(G.L.sol.map(([t, at]) => skey(t, at)));
+  if (G.fail || !G.placed.every(([t, at]) => ans.has(skey(t, at)))) return $('#btn-undo');
+  const rest = G.L.sol.filter(([t, at]) => !G.placed.some((p) => skey(...p) === skey(t, at))), next = rest.length && finish(G.placed, rest)?.[0];
+  if (!next) return null;
+  return G.sel !== next[0] ? [...$('#tray').querySelectorAll('.slot:not(.used)')].find((s) => s.dataset.type === next[0]) : $(`#board .spot[data-spot="${next[1]}"]`);
+};
+// a lesson's coach line, k its place in the tutorial's run
+const lessonStep = (n, k, last) => [LESSONS[n].text, last ? null : () => G?.qi > k, tutRing];
+const stepsFor = (q) => q.map((n, k) => lessonStep(n, k, k === q.length - 1));
+// Lessons for a level's new mechanics, one after another, then back to that level
+let lessonQueue = null;
+function showLessons(q) {
+  const back = location.hash.slice(1);
+  saveGame();
+  track('tutorial', 'show-' + q.join('-'));
+  lessonQueue = q;
+  startTutorial();
+  coach(stepsFor(q), { onEnd: () => { if (back && back !== 'tutorial') location.hash = back; else show('home'); } });
+}
+boot({ name: T('Small Fry'), storeKey: 'smallfry', glyphs: ['🐟', '◆'], start: startLevel, ownIntro: true,
+  tutorial: stepsFor(BASICS),
   save: (G) => ({ placed: G.placed, mistakes: G.mistakes, hints: G.hinted.size, lock: G.lock }), key: onKey,
   stars: (G) => Math.max(1, (G.mistakes === 0 ? 3 : G.mistakes <= 2 ? 2 : 1) - G.hinted.size),
   reveal: () => {
@@ -840,3 +930,7 @@ boot({ name: T('Small Fry'), storeKey: 'smallfry', glyphs: ['🐟', '◆'], star
     draw();
   } });
 game.impossible = { stars: game.stars };
+// Players from before first-contact lessons already know the tank: don't teach them all of it again
+if (!store.met && store.seenHelp) store.met = [...FEATURES];
+// A first visit (not through a shared link) starts with the tutorial, where How to play used to open (ownIntro)
+if (!store.tutored && !store.seenHelp && !location.hash && !IMP) { store.tutored = true; persist(); track('tutorial', 'first'); startTutorial(); }
