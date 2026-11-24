@@ -4,7 +4,7 @@
 // Every level: the planted answer works, no smaller set of the hand works (so every piece in every answer earns its place),
 // and the answers are few (TIER.cap). Uses rng/int/pick from shared/common.js (a global).
 //
-// Antennae (a letter and a grade, the peak value g; '^2' / '^3' after it makes an amplifier with that threshold):
+// Antennae (a letter and a grade, the peak value g; '^2' / '^3' after it makes an amplifier with that threshold, '^1' a repeater):
 //   M mast    a diamond around the roof: g at the centre, falling 1 a step to 1, radius g-1 (+range)
 //   P panel   a 90° wedge one way: 1 wide, then 3, 5…; g, g, then falling to 1, g+1 long (+range)   rotates
 //   D dish    a straight line one way to the edge, g all along                                      rotates
@@ -15,7 +15,8 @@
 // pattern's far value (1 for a mast or panel).
 // Line of sight: a building taller than the antenna's own (its roof height, plus lifters) blocks the squares behind it;
 // the blocking building's own square still gets signal. Lines run through square centres (Bresenham).
-// Amplifiers broadcast only when their own square already has signal >= the threshold, not counting themselves.
+// Amplifiers broadcast only when their own square already has signal >= the threshold, not counting themselves. A repeater is
+// an amplifier with threshold 1: it wakes on any signal.
 // Worked out to a fixed point: plain antennae first, then each amplifier that's met switches on, until none changes.
 // Modifiers (b booster, e extender, l lifter, s splitter) sit on a roof and act on every antenna orthogonally next to them:
 //   b: +1 to every square it covers. e: +1 range. l: one height higher (range and line of sight). s: panel or dish fires both ways.
@@ -31,10 +32,11 @@ const isAnt = (k) => ANT.includes(k);
 // sight must matter (los).
 // Each difficulty is the one above it before the playtest made everything a step easier: Medium was Easy, Hard was Medium, and
 // Impossible (Impossible Mode's daily, the only one made ahead: build-levels.js) was Hard. Easy is new: 5×5, a mast or two.
-// Medium also deals the odd panel or dish (a letter twice is twice as likely) and now and then an amplifier: a bridge to Hard.
+// Medium also deals the odd panel or dish (a letter twice is twice as likely) and now and then a repeater (gate 1): a bridge to
+// Hard's amplifiers.
 const TIER = {
   E: { N: [5, 5], K: [2, 3], T: 1, ants: 'MC', mods: '', nMod: [0, 0], amp: 0, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 1e5 },
-  M: { N: [6, 6], K: [3, 4], T: 1, ants: 'MMCCXXPD', mods: '', nMod: [0, 0], amp: 0.15, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 2e5 },
+  M: { N: [6, 6], K: [3, 4], T: 1, ants: 'MMCCXXPD', mods: '', nMod: [0, 0], amp: 0.15, gate: 1, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 2e5 },
   H: { N: [8, 8], K: [5, 6], T: 2, ants: 'MCXPDO', mods: 'be', nMod: [0, 1], amp: 0.3, hi: 3, roofs: [2.2, 1.6], hot: 1, cap: 20, limit: 3e5 },
   I: { N: [9, 10], K: [6, 8], T: 2, ants: 'MCXPDO', mods: 'bels', nMod: [1, 2], amp: 0.7, hi: 3, roofs: [2.5, 1.7], hot: 3, cap: 6, limit: 2e6, los: true },
 };
@@ -278,13 +280,13 @@ function city(r, N, T) {
   return { ground: g.join(''), H };
 }
 
-// A hand for the tier: antennae (an amplifier or a chain of them in harder tiers), then modifiers.
+// A hand for the tier: antennae (an amplifier or a chain of them in harder tiers; a repeater when the tier sets gate), then modifiers.
 function dealHand(r, T, K) {
   const nMod = int(r, T.nMod[0], T.nMod[1]), nAnt = K - nMod, hand = [];
   let amps = T.chain ? T.chain : r() < T.amp ? (T.amp >= 1 ? int(r, 1, 2) : 1) : 0;
   for (let i = 0; i < nAnt; i++) {
     const k = pick(r, T.ants), [lo, hi] = GRADES[k];
-    hand.push(`${k}${int(r, lo, hi)}` + (i >= 1 && amps-- > 0 ? '^' + int(r, 2, 3) : ''));
+    hand.push(`${k}${int(r, lo, hi)}` + (i >= 1 && amps-- > 0 ? '^' + (T.gate || int(r, 2, 3)) : ''));
   }
   for (let i = 0; i < nMod; i++) hand.push(pick(r, T.mods));
   return hand.sort();

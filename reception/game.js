@@ -24,7 +24,7 @@ const MARKS = ['--pink', '--sun', '--teal', '--orange', '--red', '--ink', '--mut
 const TALL = { M: 116, P: 102, D: 100, C: 94, X: 86, O: 96, b: 52, e: 100, l: 76, s: 48 };
 const artSvg = (k) => { const s = Math.max(TALL[k] + 8, 66); return `<svg viewBox="${-s / 2} ${-TALL[k] - 4 - (s - TALL[k] - 8) / 2} ${s} ${s}" aria-hidden="true"><use href="#${ROT.includes(k) ? SYM[k] + '-e' : SYM[k]}" x="-50" y="-110" width="100" height="125"/></svg>`; };
 const pieceName = (pc) => (isAnt(pc.k) ? `${NAMES[pc.k]} ${pc.g}` : NAMES[pc.k]);
-const pieceTip = (pc) => `<b>${esc(pieceName(pc))}</b>: ${DESC[pc.k]}` + (pc.amp ? ' ' + T('An <b>amplifier</b>: it only broadcasts once its own square already has {n} bars.', { n: pc.amp }) : '');
+const pieceTip = (pc) => `<b>${esc(pieceName(pc))}</b>: ${DESC[pc.k]}` + (pc.amp === 1 ? ' ' + T('A <b>repeater</b>: it only broadcasts once its own square already has some signal.') : pc.amp ? ' ' + T('An <b>amplifier</b>: it only broadcasts once its own square already has {n} bars.', { n: pc.amp }) : '');
 
 // The tutorial: 4×4 on the waterfront, a mast that covers most of it, and an amplifier woken next to it for the corners.
 const TUTORIAL = parse('4|' + ['1..2', '.aa.', '..1.', '~~~~'].join('') + '|' + '111111111111' + '0000|M3,C2^2|5.0,6.0');
@@ -356,7 +356,7 @@ function refresh() {
     t.classList.toggle('off', placed && isAnt(pc.k) && !real.on[i]);
     t.setAttribute('aria-pressed', String(i === G.sel && !placed && !G.done));
     t.disabled = G.done || G.locked.has(i);
-    t.setAttribute('aria-label', pieceName(pc) + (pc.amp ? ', ' + T('amplifier, needs {n}', { n: pc.amp }) : '') + (G.locked.has(i) ? ', ' + T('placed by a hint') : placed ? ', ' + T('on a roof: tap to take it back') : ''));
+    t.setAttribute('aria-label', pieceName(pc) + (pc.amp === 1 ? ', ' + T('repeater, needs signal') : pc.amp ? ', ' + T('amplifier, needs {n}', { n: pc.amp }) : '') + (G.locked.has(i) ? ', ' + T('placed by a hint') : placed ? ', ' + T('on a roof: tap to take it back') : ''));
   });
   const left = P.need.filter((c) => real.cov[c] < P.req[c]).length, todo = G.place.filter((p) => !p).length;
   $('#board').setAttribute('aria-label', T('City, {n} by {n}. {short} squares short of signal, {left} pieces left', { n: N, short: left, left: todo }));
