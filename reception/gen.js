@@ -31,9 +31,10 @@ const isAnt = (k) => ANT.includes(k);
 // sight must matter (los).
 // Each difficulty is the one above it before the playtest made everything a step easier: Medium was Easy, Hard was Medium, and
 // Impossible (Impossible Mode's daily, the only one made ahead: build-levels.js) was Hard. Easy is new: 5×5, a mast or two.
+// Medium also deals the odd panel or dish (a letter twice is twice as likely) and now and then an amplifier: a bridge to Hard.
 const TIER = {
   E: { N: [5, 5], K: [2, 3], T: 1, ants: 'MC', mods: '', nMod: [0, 0], amp: 0, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 1e5 },
-  M: { N: [6, 6], K: [3, 4], T: 1, ants: 'MCX', mods: '', nMod: [0, 0], amp: 0, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 2e5 },
+  M: { N: [6, 6], K: [3, 4], T: 1, ants: 'MMCCXXPD', mods: '', nMod: [0, 0], amp: 0.15, hi: 2, roofs: [2.2, 1.5], hot: 0, cap: 20, limit: 2e5 },
   H: { N: [8, 8], K: [5, 6], T: 2, ants: 'MCXPDO', mods: 'be', nMod: [0, 1], amp: 0.3, hi: 3, roofs: [2.2, 1.6], hot: 1, cap: 20, limit: 3e5 },
   I: { N: [9, 10], K: [6, 8], T: 2, ants: 'MCXPDO', mods: 'bels', nMod: [1, 2], amp: 0.7, hi: 3, roofs: [2.5, 1.7], hot: 3, cap: 6, limit: 2e6, los: true },
 };
