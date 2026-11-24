@@ -621,11 +621,21 @@ module.exports = {
     },
     'balancingact/game.js': {
       'Balancing Act': 'על כפות המאזניים',
-      'The numbers on the beam are its <b>arm lengths</b>. A beam hangs level when <b>weight × arm</b> is the same on both sides. Drag the <b>6</b> onto the plate on the short arm, or tap it, then tap the plate.':
-        'המספרים על המוט הם <b>אורכי הזרועות</b> שלו. מוט מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. גררו את ה־<b>6</b> אל הכף שעל הזרוע הקצרה, או הקישו עליו ואז על הכף.',
-      '6 × 1 is 6, so the long arm needs 3, as 3 × 2 is 6 too. Hang the <b>2</b> on the left plate.':
-        '<span dir="ltr">6 × 1</span> זה 6, אז הזרוע הארוכה צריכה 3, כי גם <span dir="ltr">3 × 2</span> זה 6. תלו את ה־<b>2</b> על הכף השמאלית.',
-      'And the <b>1</b> with it. Every move counts: stars are for solving in as few moves as you can.': 'ועכשיו את ה־<b>1</b> לידו. כל מהלך נספר: הכוכבים הם על פתרון בכמה שפחות מהלכים.',
+      'The numbers on the beam are its <b>arm lengths</b>. It hangs level when <b>weight × arm</b> is the same on both sides. Drag each item onto a plate, or tap it, then tap a plate.':
+        'המספרים על המוט הם <b>אורכי הזרועות</b> שלו. הוא מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. גררו כל פריט אל כף, או הקישו עליו ואז על כף.',
+      "A side weighs <b>everything hanging under it</b>. The top beam's arms are equal, so the left plate must weigh as much as everything on the right.":
+        'צד שוקל את <b>כל מה שתלוי מתחתיו</b>. הזרועות של המוט העליון שוות, אז הכף השמאלית צריכה לשקול כמו כל מה שבצד ימין.',
+      "Start from the store's <b>Total</b>, 18. The top beam's arms are 1 and 2, so the left side takes twice the right: 12 and 6. Then split the 12 the same way.":
+        'התחילו מה<b>סך הכול</b> של המחסן, 18. הזרועות של המוט העליון הן 1 ו־2, אז הצד השמאלי מקבל פי שניים מהימני: 12 ו־6. אחר כך חלקו את ה־12 באותה דרך.',
+      'A <b>tied balloon</b> (with a bow) lifts its plate: this −2 means the left plate needs 2 more weight to make up for it.':
+        '<b>בלון קשור</b> (עם פפיון) מושך את הכף שלו למעלה: בגלל ה־‎−2 הזה, הכף השמאלית צריכה עוד 2 משקל כדי לפצות עליו.',
+      'A <b>balloon</b> in the store hangs like a weight, but takes its number off: −2 makes a plate 2 lighter. No weight is 6 on its own.':
+        '<b>בלון</b> במחסן נתלה כמו משקולת, אבל מוריד את המספר שלו: ‎−2 עושה כף קלה ב־2. אין משקולת אחת שהיא 6.',
+      'Not level yet: the beam with arms {a} and {b} has {l} × {a} = {x} on the left, {r} × {b} = {y} on the right.':
+        'עוד לא מאוזן: במוט עם הזרועות {a} ו־{b} יש <span dir="ltr">{l} × {a} = {x}</span> משמאל, ו־<span dir="ltr">{r} × {b} = {y}</span> מימין.',
+      'tied balloons': 'בלונים קשורים',
+      'balloons in the store': 'בלונים במחסן',
+      '<b>New here</b>: {list}. See How to play.': '<b>חדש כאן</b>: {list}. ראו איך משחקים.',
       'weight {n}': 'משקולת {n}',
       'Total: {t}': 'סך הכול: {t}',
       'balloon {n}': 'בלון {n}',
@@ -636,7 +646,6 @@ module.exports = {
       '{p} plates · {k} items': '{p} כפות · {k} פריטים',
       'Balancing Act: {p} plates, {left} of {k} items still in the store': 'על כפות המאזניים: {p} כפות, {left} מתוך {k} פריטים עדיין במחסן',
       'Drag every <b>item</b> onto a <b>plate</b> until every beam hangs <b>level</b>.': 'גררו כל <b>פריט</b> אל <b>כף</b>, עד שכל המוטות יהיו <b>מאוזנים</b>.',
-      'Everything is hung, but not every beam is <b>level</b> yet.': 'הכול תלוי, אבל עוד לא כל המוטות <b>מאוזנים</b>.',
       'Restart this level? Everything goes back to the store; your moves still count.': 'להתחיל את השלב מחדש? הכול חוזר למחסן; המהלכים שכבר עשיתם עדיין נספרים.',
       "Hang every item from the <b>store</b> on a plate, so that every beam is <b>level</b>. Write each plate's items in its box.": 'תלו כל פריט מה<b>מחסן</b> על כף, כך שכל המוטות יהיו <b>מאוזנים</b>. כתבו בתיבה של כל כף מה מונח עליה.',
       "A beam is level when <b>weight × arm</b> is the same on both sides. A side's weight is everything hanging under it.": 'מוט מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. המשקל של צד הוא כל מה שתלוי מתחתיו.',
@@ -1121,36 +1130,50 @@ module.exports = {
       ['<p id="board-keys" class="sr-only">Plates are numbered from the left. Arrow keys pick an item, from the store first. A number key hangs it on that plate; 0 sends it back to the store.</p>',
         '<p id="board-keys" class="sr-only">הכפות ממוספרות משמאל. החצים בוחרים פריט, קודם מהמחסן. מקש מספר תולה אותו על הכף הזו; 0 מחזיר אותו למחסן.</p>'],
       [`<li>Hang every item from the <b>store</b> on a plate, until every beam hangs <b>level</b>.</li>
-    <li>A beam is level when <b>weight × arm</b> is the same on both sides. The numbers on a beam are its arms' lengths, and a side weighs everything hanging under it.</li>
+    <li>The numbers on a beam are its <b>arm lengths</b>. It's level when <b>weight × arm</b> is the same on both sides.</li>
+    <li>A side weighs <b>everything hanging under it</b>, beams and all.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="4">
+    <li class="no-touch">Drag an item onto a plate, or click it and then click a plate. Drag it back to the store to take it off.</li>
+    <li class="touch">Drag an item onto a plate, or tap it and then tap a plate. Drag it back to the store to take it off.</li>
+    <li>Start from the store's <b>Total</b>: the top beam's arms split it between its two sides, and each beam below splits its side the same way.</li>
   </ol>
   </div>
   <div class="help-page">
   <div id="help-balloon" aria-hidden="true"></div>
-  <ol class="rules" start="3">
-    <li class="no-touch">Drag an item onto a plate, or click it and then click a plate. Drag it back to the store to take it off.</li>
-    <li class="touch">Drag an item onto a plate, or tap it and then tap a plate. Drag it back to the store to take it off.</li>
-    <li>A <b>balloon</b> lifts: a −2 balloon cancels out a 2 weight. Some come tied to their plate with a bow.</li>
+  <ol class="rules" start="6">
+    <li><span class="tier">Medium+</span> A <b>tied balloon</b> (with a bow) lifts its plate: under a −2, the plate needs 2 more weight.</li>
+    <li><span class="tier">Hard+</span> <b>Balloons</b> in the store hang like weights, but take their number off the plate.</li>
   </ol>
   </div>
   <div class="help-page">
-  <ol class="rules" start="5">
+  <ol class="rules" start="8">
     <li>Use every item. There's only <b>one way</b>.</li>
     <li>Every drop counts as a move, and Restart doesn't undo them: within <b>one move</b> of the fewest for three stars.</li>`,
       `<li>תלו כל פריט מה<b>מחסן</b> על כף, עד שכל המוטות יהיו <b>מאוזנים</b>.</li>
-    <li>מוט מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים. המספרים על מוט הם אורכי הזרועות שלו, וצד שוקל את כל מה שתלוי מתחתיו.</li>
+    <li>המספרים על מוט הם <b>אורכי הזרועות</b> שלו. הוא מאוזן כש<b>משקל × זרוע</b> שווה בשני הצדדים.</li>
+    <li>צד שוקל את <b>כל מה שתלוי מתחתיו</b>, כולל המוטות.</li>
+  </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="4">
+    <li class="no-touch">גררו פריט אל כף, או לחצו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
+    <li class="touch">גררו פריט אל כף, או הקישו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
+    <li>התחילו מה<b>סך הכול</b> של המחסן: הזרועות של המוט העליון מחלקות אותו בין שני הצדדים, וכל מוט מתחת מחלק את הצד שלו באותה דרך.</li>
   </ol>
   </div>
   <div class="help-page">
   <div id="help-balloon" aria-hidden="true"></div>
-  <ol class="rules" start="3">
-    <li class="no-touch">גררו פריט אל כף, או לחצו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
-    <li class="touch">גררו פריט אל כף, או הקישו עליו ואז על כף. גררו אותו בחזרה למחסן כדי להוריד אותו.</li>
-    <li><b>בלון</b> מושך למעלה: בלון ‎−2 מבטל משקולת 2. יש בלונים שמגיעים קשורים לכף שלהם בפפיון.</li>
+  <ol class="rules" start="6">
+    <li><span class="tier">בינוני+</span> <b>בלון קשור</b> (עם פפיון) מושך את הכף שלו למעלה: מתחת ל־‎−2 הכף צריכה עוד 2 משקל.</li>
+    <li><span class="tier">קשה+</span> <b>בלונים</b> במחסן נתלים כמו משקולות, אבל מורידים את המספר שלהם מהכף.</li>
   </ol>
   </div>
   <div class="help-page">
-  <ol class="rules" start="5">
-    <li>השתמשו בכל הפריטים. יש רק <b>דרך אחת</b>.</li>
+  <ol class="rules" start="8">
+    <li>השתמשו בכל פריט. יש רק <b>דרך אחת</b>.</li>
     <li>כל הנחה נספרת כמהלך, וגם „מההתחלה״ לא מוחק אותם: עד <b>מהלך אחד</b> מעל המינימום, ושלושה כוכבים שלכם.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: arrows pick an item, <kbd>1</kbd>–<kbd>8</kbd> hang it on that plate, <kbd>0</kbd> back to the store, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: החצים בוחרים פריט, <kbd>1</kbd>–<kbd>8</kbd> תולים אותו על הכף, <kbd>0</kbd> בחזרה למחסן, <kbd>P</kbd> השהיה.</p>'],

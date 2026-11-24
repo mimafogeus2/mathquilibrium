@@ -195,11 +195,13 @@ const best = () => G.p.items.length;
 const subText = () => G.tut ? '' : T('{m} moves · ★★★ in {n}', { m: G.moves, n: best() + 1 });
 
 function startLevel(G, save) {
-  const p = G.tut ? TUTORIAL : generate(hash(G.key), G.pack), K = p.items.length;
+  // a tutorial: G.q the lessons it runs, G.qi the one on the board
+  if (G.tut) { G.q ??= lessonQueue || BASICS; G.qi ??= 0; G.miss = 0; lessonQueue = null; }
+  const p = G.tut ? LESSON_RIGS[G.q[G.qi]] : generate(hash(G.key), G.pack), K = p.items.length;
   const fits = Array.isArray(save.at) && save.at.length === K && save.at.every((x) => Number.isInteger(x) && x >= -1 && x < p.plates) && Number.isInteger(save.moves) && save.moves >= 0;
-  Object.assign(G, { p, at: fits ? [...save.at] : Array(K).fill(-1), moves: fits ? save.moves : 0, sel: null, kbd: false });
+  Object.assign(G, { p, at: fits ? [...save.at] : Array(K).fill(-1), moves: fits ? save.moves : 0, sel: null, kbd: false, tipping: null });
   delete $('#tip').dataset.warn;
-  $('#tip').innerHTML = G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : G.pack === 'E' && G.n && !Object.keys(store.packs.E.stars).length ? FIRST_TIP : '';
+  $('#tip').innerHTML = firstContact(p) || (G.date ? T(`Today's ${TIERS[G.pack].toLowerCase()} puzzle. A new one tomorrow.`) : G.pack === 'E' && G.n && !Object.keys(store.packs.E.stars).length ? FIRST_TIP : '');
   const b = $('#board');
   b.classList.remove('solved');
   b.innerHTML = `<svg class="rig" xmlns="${SVGNS}" aria-hidden="true"></svg>`;
@@ -223,6 +225,7 @@ function refresh() {
   rig.classList.toggle('aiming', G.sel !== null && !G.done);
   rig.classList.toggle('kbd', G.kbd && !G.done);
   for (const g of rig.querySelectorAll('[data-item]')) g.classList.toggle('sel', +g.dataset.item === G.sel);
+  for (const g of rig.querySelectorAll('.tilt')) g.classList.toggle('tips', +g.dataset.beam === G.tipping);
   $('#tray').querySelectorAll('.slot').forEach((t, i) => {
     t.classList.toggle('used', G.at[i] >= 0);
     t.setAttribute('aria-pressed', String(i === G.sel && !G.done));
@@ -236,6 +239,13 @@ function refresh() {
   $('#board').setAttribute('aria-label', T('Balancing Act: {p} plates, {left} of {k} items still in the store', { p: p.plates, left, k: p.items.length }));
 }
 
+// Everything hung, not level: the topmost beam that tips, and why (its sides' weights times its arms). It's marked on the board.
+function whyTips() {
+  const t = torques(G.p.tree, masses(G.p, G.at)).reverse().find((x) => x.torque !== 0);
+  G.tipping = beams(G.p.tree).indexOf(t.beam);
+  return T('Not level yet: the beam with arms {a} and {b} has {l} × {a} = {x} on the left, {r} × {b} = {y} on the right.',
+    { a: t.beam.a, b: t.beam.b, l: num(t.left), r: num(t.right), x: num(t.left * t.beam.a), y: num(t.right * t.beam.b) });
+}
 // beams hanging level with something on both sides
 const levelCount = () => torques(G.p.tree, masses(G.p, G.at)).filter((t) => t.torque === 0 && t.left && t.right).length;
 
@@ -253,11 +263,13 @@ function moveItem(i, k) {
   $('#sr').textContent = k < 0 ? T('{item} back in the store.', { item: itemName(G.p.items[i].v) })
     : T('{item} on plate {n}: it now holds {t}.', { item: itemName(G.p.items[i].v), n: k + 1, t: num(masses(G.p, G.at)[k]) });
   delete $('#tip').dataset.warn;
-  if ($('#tip').innerHTML === FIRST_TIP) $('#tip').innerHTML = '';
+  if ($('#tip').innerHTML === FIRST_TIP || G.tipping) $('#tip').innerHTML = '';
+  G.tipping = null;
   if (G.at.every((x) => x >= 0)) {
-    if (balanced(G.p, G.at)) { refresh(); $('#board').classList.add('solved'); win(); return; }
-    $('#tip').innerHTML = T('Everything is hung, but not every beam is <b>level</b> yet.');
+    if (balanced(G.p, G.at)) { refresh(); $('#board').classList.add('solved'); solved(); return; }
+    $('#tip').innerHTML = whyTips();
     $('#tip').dataset.warn = 1;
+    if (G.tut) G.miss++;
   }
   if (G.kbd && k >= 0) G.sel = G.at.findIndex((x) => x < 0) >= 0 ? G.at.findIndex((x) => x < 0) : null;
   refresh();
@@ -276,6 +288,7 @@ async function reset() {
   if (!(await ask(T('Restart this level? Everything goes back to the store; your moves still count.')))) return;
   G.at.fill(-1);
   G.sel = null;
+  G.tipping = null;
   delete $('#tip').dataset.warn;
   $('#tip').innerHTML = '';
   sfx.erase();
@@ -420,21 +433,88 @@ for (const [id, key] of [['#logo', 'logo'], ['#help-rig', 'help']]) {
   $('#help-balloon').append(el);
 }
 
-// Tutorial: one beam, arms 2 and 1, and a store of 2, 1 and 6: (2 + 1) × 2 on the left balances 6 × 1 on the right
-const TUTORIAL = { tree: { a: 2, b: 1, l: 0, r: 1 }, plates: 2, fixed: [], items: [{ v: 2, plate: 0 }, { v: 1, plate: 0 }, { v: 6, plate: 1 }], target: [3, 6] };
+// ---------- lessons ----------
+// Tiny rigs (LESSON_RIGS in gen.js, same order), one idea each, each with one answer (test.js checks). Nothing is forced: a full
+// store that tips says which beam and why; after two, the coach rings the next move. The menu's Tutorial runs the basics; the
+// balloon lessons wait for the first level with their kind of balloon (firstContact starts them). teaches: as levelFeatures() names them.
+const LESSONS = [
+  { teaches: ['beam'], text: T('The numbers on the beam are its <b>arm lengths</b>. It hangs level when <b>weight × arm</b> is the same on both sides. Drag each item onto a plate, or tap it, then tap a plate.') },
+  { teaches: ['nest'], text: T('A side weighs <b>everything hanging under it</b>. The top beam\'s arms are equal, so the left plate must weigh as much as everything on the right.') },
+  { teaches: ['total'], text: T('Start from the store\'s <b>Total</b>, 18. The top beam\'s arms are 1 and 2, so the left side takes twice the right: 12 and 6. Then split the 12 the same way.') },
+  // ---- met later ----
+  { teaches: ['tied'], text: T('A <b>tied balloon</b> (with a bow) lifts its plate: this −2 means the left plate needs 2 more weight to make up for it.') },
+  { teaches: ['loose'], text: T('A <b>balloon</b> in the store hangs like a weight, but takes its number off: −2 makes a plate 2 lighter. No weight is 6 on its own.') },
+];
+const BASICS = [0, 1, 2];
 
-// ring the weight to pick up, then (once it's picked) the plate it goes on
-const hangOn = (i, k) => () => (G.sel === i ? $(`#board .plate[data-plate="${k}"]`) : $(`#tray [data-item="${i}"]`));
-const hang = (i, k) => (m) => m.sel === i || (m.i === i && m.k === k);
+// First contact: the first level with a new kind of balloon plays its lesson first, then comes back (not in Impossible Mode,
+// which teaches nothing: there a line under the board names them). What's been met is kept in store.met; a finished lesson counts.
+const MET = () => (store.met ??= []);
+const meet = (fs) => { for (const f of fs) if (!MET().includes(f)) MET().push(f); persist(); };
+const FEATURES = ['beam', 'nest', 'total', 'tied', 'loose'];
+const levelFeatures = (p) => [...(p.fixed.length ? ['tied'] : []), ...(p.items.some((x) => x.v < 0) ? ['loose'] : [])];
+const FEATURE_NAME = { tied: T('tied balloons'), loose: T('balloons in the store') };
+function firstContact(p) {
+  if (G.tut || G.done) return '';
+  const fresh = levelFeatures(p).filter((f) => !MET().includes(f));
+  if (!fresh.length) return '';
+  meet(fresh);
+  const ls = fresh.map((f) => LESSONS.findIndex((l) => l.teaches.includes(f))), g = G;
+  // after core's start() has finished opening the level (its hash, its clock), so the lessons can come back to it
+  if (!IMP) setTimeout(() => G === g && !$('#game').hidden && showLessons(ls));
+  return T('<b>New here</b>: {list}. See How to play.', { list: fresh.map((f) => FEATURE_NAME[f]).join(', ') });
+}
+// Balanced: a lesson with more to come moves on after a moment; else the win
+function solved() {
+  if (!G.tut) return win();
+  meet([...LESSONS[G.q[G.qi]].teaches, ...levelFeatures(G.p)]);
+  if (G.qi === G.q.length - 1) return win();
+  const g = G;
+  g.done = true;
+  sfx.win();
+  track('tutorial', 'lesson-' + g.q[g.qi]);
+  setTimeout(() => {
+    if (G !== g || !coached) return;
+    g.qi++;
+    g.done = false;
+    startLevel(g, {});
+    coachCheck();
+  }, 1500);
+}
+// The coach's ring: nothing at first; after two full tries that tip, the next move of the answer: an item on the wrong plate (its
+// tray slot, a tap sends it back), else the next item in the store, then its plate. Twin items are interchangeable.
+const tutRing = () => {
+  if (!G?.tut || G.miss < 2 || G.done) return null;
+  const want = Array.from({ length: G.p.plates }, (_, k) => G.p.items.filter((x) => x.plate === k).map((x) => x.v));
+  const take = (k, v) => { const j = want[k].indexOf(v); if (j >= 0) want[k].splice(j, 1); return j >= 0; };
+  const slot = (i) => $(`#tray .slot[data-item="${i}"]`);
+  const wrong = G.at.findIndex((k, i) => k >= 0 && !take(k, G.p.items[i].v));
+  if (wrong >= 0) return slot(wrong);
+  const i = G.at.findIndex((k) => k < 0);
+  if (i < 0) return null;
+  return G.sel === i ? $(`#board .plate[data-plate="${want.findIndex((w) => w.includes(G.p.items[i].v))}"]`) : slot(i);
+};
+// a lesson's coach line, k its place in the tutorial's run
+const lessonStep = (n, k, last) => [LESSONS[n].text, last ? null : () => G?.qi > k, tutRing];
+const stepsFor = (q) => q.map((n, k) => lessonStep(n, k, k === q.length - 1));
+// Lessons for a level's new balloons, one after another, then back to that level
+let lessonQueue = null;
+function showLessons(q) {
+  const back = location.hash.slice(1);
+  saveGame();
+  track('tutorial', 'show-' + q.join('-'));
+  lessonQueue = q;
+  startTutorial();
+  coach(stepsFor(q), { onEnd: () => { if (back && back !== 'tutorial') location.hash = back; else show('home'); } });
+}
 
-boot({ name: T('Balancing Act'),
-  tutorial: [
-    [T('The numbers on the beam are its <b>arm lengths</b>. A beam hangs level when <b>weight × arm</b> is the same on both sides. Drag the <b>6</b> onto the plate on the short arm, or tap it, then tap the plate.'),
-      () => G.at[2] === 1, hangOn(2, 1), hang(2, 1)],
-    [T('6 × 1 is 6, so the long arm needs 3, as 3 × 2 is 6 too. Hang the <b>2</b> on the left plate.'), () => G.at[0] === 0, hangOn(0, 0), hang(0, 0)],
-    [T('And the <b>1</b> with it. Every move counts: stars are for solving in as few moves as you can.'), null, hangOn(1, 0), hang(1, 0)],
-  ], storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
+boot({ name: T('Balancing Act'), ownIntro: true, tutorial: stepsFor(BASICS),
+  storeKey: 'balancingact', random: true, glyphs: ['⚖', '½'], start: startLevel,
   save: (G) => ({ at: G.at, moves: G.moves }), key: onKey, moves: (G) => G.moves,
   reveal: () => { G.at = G.p.items.map((x) => x.plate); G.sel = null; refresh(); $('#board').classList.add('solved'); },
   stars: (G) => { const extra = G.moves - best(); return extra <= 1 ? 3 : extra <= Math.ceil(best() / 2) ? 2 : 1; } });
 game.impossible = { stars: game.stars }; // the same rule in Impossible Mode
+// Players from before first-contact lessons already know the rig: don't teach them all of it again
+if (!store.met && store.seenHelp) store.met = [...FEATURES];
+// A first visit (not through a shared link) starts with the tutorial, where How to play used to open (ownIntro)
+if (!store.tutored && !store.seenHelp && !location.hash && !IMP) { store.tutored = true; persist(); track('tutorial', 'first'); startTutorial(); }

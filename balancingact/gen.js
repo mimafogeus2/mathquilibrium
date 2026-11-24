@@ -171,4 +171,14 @@ function torques(tree, m) {
 }
 const balanced = (p, at) => at.every((x) => x >= 0) && torques(p.tree, masses(p, at)).every((x) => x.torque === 0);
 
-if (typeof module === 'object') module.exports = { TIER, LO, HI, shape, depth, beams, count, generate, masses, torques, balanced };
+// The lessons' rigs (game.js LESSONS, same order): tiny, each with one answer (test.js checks). Items sorted as generate() sorts them.
+const rig = (tree, plates, items, fixed = []) => ({ tree, plates, fixed, items: items.map(([v, plate]) => ({ v, plate })) });
+const LESSON_RIGS = [
+  rig({ a: 2, b: 1, l: 0, r: 1 }, 2, [[1, 0], [2, 0], [6, 1]]), // 3 × 2 = 6 × 1
+  rig({ a: 1, b: 1, l: 0, r: { a: 1, b: 2, l: 1, r: 2 } }, 3, [[1, 0], [2, 2], [4, 1], [5, 0]]), // 6 | (4 | 2): a side weighs all under it
+  rig({ a: 1, b: 2, l: { a: 2, b: 1, l: 0, r: 1 }, r: 2 }, 3, [[1, 0], [3, 0], [6, 2], [8, 1]]), // total 18 splits 12 | 6, then 4 | 8
+  rig({ a: 2, b: 1, l: 0, r: 1 }, 2, [[1, 0], [4, 0], [6, 1]], [{ plate: 0, v: 2 }]), // a tied −2: plate 1 needs 5 of weights
+  rig({ a: 1, b: 3, l: 0, r: 1 }, 2, [[2, 1], [8, 0], [-2, 0]]), // 8 − 2 = 6 | 2: no weight is 6 on its own
+];
+
+if (typeof module === 'object') module.exports = { TIER, LO, HI, shape, depth, beams, count, generate, masses, torques, balanced, LESSON_RIGS };

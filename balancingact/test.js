@@ -38,4 +38,13 @@ for (const key of keys) {
   assert.strictEqual(count(need, p.items.map((x) => x.v)), 1, key + ' not unique');
 }
 assert.deepStrictEqual(generate(hash('H1'), 'H'), generate(hash('H1'), 'H')); // same seed, same puzzle
+
+// the lessons: each answer balances, and it's the only one (so every other full try tips a beam)
+const { LESSON_RIGS, masses } = require('./gen.js');
+for (const [n, p] of LESSON_RIGS.entries()) {
+  const at = p.items.map((x) => x.plate);
+  assert(balanced(p, at), 'lesson ' + n + ' answer unbalanced');
+  const need = masses(p, at).map((x, i) => x + p.fixed.filter((f) => f.plate === i).reduce((s, f) => s + f.v, 0));
+  assert.strictEqual(count(need, p.items.map((x) => x.v), 5), 1, 'lesson ' + n + ' not unique');
+}
 console.log('ok', keys.length, 'puzzles', Date.now() - t0, 'ms, slowest per tier', slowest);
