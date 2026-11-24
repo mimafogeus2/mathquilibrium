@@ -406,15 +406,29 @@ module.exports = {
     },
     'coronet/game.js': {
       'Coronet': 'הכתרה',
-      'Every <b>ring</b>, <b>slice</b> and <b>color</b> gets exactly one queen. The ringed green arc is the only one of its color, so its queen must go there. One tap marks an arc <b>×</b>, a second crowns it: tap the ringed arc twice.':
-        'בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b> יש בדיוק מלכה אחת. הקשת הירוקה המסומנת היא היחידה בצבע שלה, אז המלכה הירוקה חייבת להיות שם. הקשה אחת מסמנת בקשת <b>×</b>, והקשה שנייה מכתירה: הקישו פעמיים על הקשת המסומנת.',
-      "The grey × marks are what that queen rules out: the rest of its ring, its slice and its color. Blue had three arcs, but two are in the queen's slice. Crown the last blue one.":
-        'סימני ה־× האפורים הם מה שהמלכה הזאת פוסלת: שאר הטבעת, הפלח והצבע שלה. לכחול היו שלוש קשתות, אבל שתיים מהן בפלח של המלכה. הכתירו את הכחולה האחרונה.',
-      'Now yellow has just one arc left, so the queen of its ring (the third from the centre) goes there. That rules out the ringed arc in the same ring: tap it <b>once</b> to mark it ×.':
-        'עכשיו לצהוב נשארה רק קשת אחת, אז המלכה של הטבעת שלה (השלישית מהמרכז) נמצאת שם. זה פוסל את הקשת המסומנת באותה טבעת: הקישו עליה <b>פעם אחת</b> כדי לסמן בה ×.',
-      "Mark × wherever you've worked out a queen can't go. Now crown the yellow arc.": 'סמנו × בכל מקום שהבנתם שאין בו מלכה. עכשיו הכתירו את הקשת הצהובה.',
-      "One ring, one slice and one color are left, and they meet on one arc: the last queen. In a real puzzle <b>Hint</b> places a queen when you're stuck, but hints cost stars.":
-        'נשארו טבעת אחת, פלח אחד וצבע אחד, והם נפגשים בקשת אחת: המלכה האחרונה. בחידה אמיתית <b>רמז</b> מציב מלכה כשנתקעים, אבל רמזים עולים בכוכבים.',
+      "One queen left. Find where it goes, and place it.":
+        "נשארה מלכה אחת. מצאו לאן היא שייכת, והניחו אותה.",
+      "Every <b>ring</b>, every <b>slice</b> (a wedge from the middle out) and every <b>color</b> gets exactly one queen. Tap an arc once to mark it <b>×</b>, twice for a queen. <b>Lime</b> has only one arc, so its queen must go there. Tap it twice.":
+        "בכל <b>טבעת</b>, בכל <b>פלח</b> (טריז מהמרכז החוצה) ובכל <b>צבע</b> יש בדיוק מלכה אחת. הקישו על קשת פעם אחת כדי לסמן בה <b>×</b>, ופעמיים בשביל מלכה. ל<b>ירוק ליים</b> יש רק קשת אחת, אז המלכה שלו חייבת להיות שם. הקישו עליה פעמיים.",
+      "A queen rules out the rest of its ring, its slice and its color: they grey out. Now <b>blue</b> has one open arc left. Put its queen there.":
+        "מלכה פוסלת את שאר הטבעת, הפלח והצבע שלה: הם מאפירים. עכשיו ל<b>כחול</b> נשארה קשת פתוחה אחת. הניחו שם את המלכה שלו.",
+      "<b>Yellow</b> is down to one open arc too. Put its queen there.":
+        "גם ל<b>צהוב</b> נשארה קשת פתוחה אחת. הניחו שם את המלכה שלו.",
+      "A new board. Both <b>lime</b> arcs are in the inner ring, so lime's queen is the inner ring's queen too, and the ring's two <b>blue</b> arcs can't hold one. Mark them <b>×</b>.":
+        "לוח חדש. שתי הקשתות ב<b>ירוק ליים</b> נמצאות בטבעת הפנימית, אז המלכה של הירוק היא גם המלכה של הטבעת הפנימית, ובשתי הקשתות ה<b>כחולות</b> שבטבעת אין מלכה. סמנו בהן <b>×</b>.",
+      "Now <b>blue</b> has one open arc left. Put its queen there.":
+        "עכשיו ל<b>כחול</b> נשארה קשת פתוחה אחת. הניחו שם את המלכה שלו.",
+      "<b>Pink</b> is down to one open arc. Put its queen there.":
+        "ל<b>ורוד</b> נשארה קשת פתוחה אחת. הניחו שם את המלכה שלו.",
+      "Now <b>lime</b> is down to one arc. Put its queen there.":
+        "עכשיו ל<b>ירוק ליים</b> נשארה קשת אחת. הניחו שם את המלכה שלו.",
+      "Not there: with that queen, the rest can't all fit. Tap it to take it off, and look again.": 'לא שם: עם המלכה הזאת, השאר לא יכולות להיכנס. הקישו עליה כדי להוריד אותה, ונסו שוב.',
+      'Two queens in one <b>ring</b>.': 'שתי מלכות באותה <b>טבעת</b>.',
+      'Two queens in one <b>slice</b>.': 'שתי מלכות באותו <b>פלח</b>.',
+      'Two <b>{color}</b> queens.': 'שתי מלכות בצבע <b>{color}</b>.',
+      'Ring {r} from the centre has no arc left for its queen.': 'בטבעת {r} מהמרכז לא נשארה קשת למלכה שלה.',
+      'A slice has no arc left for its queen.': 'באחד הפלחים לא נשארה קשת למלכה שלו.',
+      'No arc is left for the <b>{color}</b> queen.': 'לא נשארה קשת למלכה בצבע <b>{color}</b>.',
       'Tap an arc to mark it <b>×</b>, again for a <b>queen</b>. One queen per <b>ring</b>, <b>slice</b> and <b>color</b>.':
         'הקישו על קשת כדי לסמן בה <b>×</b>, ושוב כדי להציב <b>מלכה</b>. מלכה אחת בכל <b>טבעת</b>, בכל <b>פלח</b> ובכל <b>צבע</b>.',
       '{n} queens': '{n} מלכות',
@@ -998,6 +1012,14 @@ module.exports = {
     <li>מלכה מסמנת בשבילכם את כל הטבעת, הפלח והצבע שלה. הורידו אותה והסימונים האלה נעלמים — הסימונים שלכם נשארים.</li>`],
       ['<p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to cycle, <kbd>Q</kbd> queen, <kbd>X</kbd> mark, <kbd>⌫</kbd> clear, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>',
         '<p class="muted small kbd-hint">מקלדת: חצים לתזוזה, <kbd>רווח</kbd> להחלפה, <kbd>Q</kbd> מלכה, <kbd>X</kbd> סימון, <kbd>⌫</kbd> ניקוי, <kbd>Z</kbd> ביטול, <kbd>P</kbd> השהיה.</p>'],
+      [`<li>A ring, slice or color down to <b>one open arc</b>: that's its queen.</li>
+    <li>A color that lies all in <b>one ring</b> (or one slice) owns that ring's queen: the ring's other arcs are out.</li>
+    <li>Two colors that fit inside <b>two rings</b> own both rings' queens. Three in three works the same way.</li>
+    <li>Stuck? <b>Hint</b> places a queen, but costs stars.</li>`,
+      `<li>לטבעת, לפלח או לצבע נשארה <b>קשת פתוחה אחת</b>: זו המלכה שלהם.</li>
+    <li>צבע שכולו ב<b>טבעת אחת</b> (או בפלח אחד) לוקח את המלכה של הטבעת הזאת: שאר הקשתות בה נפסלות.</li>
+    <li>שני צבעים שנכנסים כולם ב<b>שתי טבעות</b> לוקחים את המלכות של שתיהן. שלושה בשלוש עובד אותו דבר.</li>
+    <li>נתקעתם? <b>רמז</b> מציב מלכה, אבל עולה בכוכבים.</li>`],
     ],
 
     'quadflip/index.html': [

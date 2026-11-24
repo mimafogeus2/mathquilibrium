@@ -91,13 +91,25 @@
 <dialog id="dlg-help">
   <form method="dialog" class="dlg-x"><button class="icon" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></form>
   <h2>How to play</h2>
+  <div class="help-pages">
+  <div class="help-page">
   <svg id="help-board" class="board mini" aria-hidden="true"></svg>
   <ol class="rules">
     <li>Place one <b>queen</b> in every <b>ring</b>, every <b>slice</b> and every <b>color</b>.</li>
     <li>Tap an arc to mark it <b>×</b>, tap again for a queen, once more to clear. Drag across arcs to mark many.</li>
     <li>A queen marks its whole ring, slice and color for you. Take it away and those marks go too — yours stay.</li>
   </ol>
+  </div>
+  <div class="help-page">
+  <ol class="rules" start="4">
+    <li>A ring, slice or color down to <b>one open arc</b>: that's its queen.</li>
+    <li>A color that lies all in <b>one ring</b> (or one slice) owns that ring's queen: the ring's other arcs are out.</li>
+    <li>Two colors that fit inside <b>two rings</b> own both rings' queens. Three in three works the same way.</li>
+    <li>Stuck? <b>Hint</b> places a queen, but costs stars.</li>
+  </ol>
   <p class="muted small kbd-hint">Keyboard: arrows to move, <kbd>Space</kbd> to cycle, <kbd>Q</kbd> queen, <kbd>X</kbd> mark, <kbd>⌫</kbd> clear, <kbd>Z</kbd> undo, <kbd>P</kbd> pause.</p>
+  </div>
+  </div>
   <form method="dialog"><button class="btn primary center"><b>Got it</b></button></form>
 </dialog>
 
