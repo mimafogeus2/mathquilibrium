@@ -26,6 +26,7 @@
 /* tilting: the beam swings about its pivot, its hangers swing back to hang straight; a little overshoot, like a real beam */
 .tilt, .untilt { transition: transform .7s cubic-bezier(.3, 1.35, .5, 1); }
 .tilt.level > .beam { fill: var(--teal-text); }
+.tilt.tips > .beam { fill: var(--red); } /* the beam the tip says tips */
 
 /* weights and balloons */
 .it text { font-size: 10.5px; }
@@ -123,3 +124,4 @@
 @keyframes plate-ring { 50% { stroke-opacity: .35; } }
 [data-calm] .plate.coach-at .hit { animation: none; }
 .tut #btn-reset { visibility: hidden; } /* a restart would strand the steps */
+#dlg-help .tier { display: inline-block; margin-inline-end: 2px; padding: 1px 6px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; vertical-align: 1px; background: var(--sun); color: var(--navy); }
