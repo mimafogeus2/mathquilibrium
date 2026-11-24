@@ -484,6 +484,8 @@ module.exports = {
       'A <b>repeater</b>: it only broadcasts once its own square already has some signal.': 'זה <b>ממסר</b>: הוא משדר רק כשבמשבצת שלו כבר יש קליטה כלשהי.',
       "Today's puzzle. A new one tomorrow.": 'החידה של היום. מחר תגיע חדשה.',
       'Squares with a pin are <b>hotspots</b>: they need the number on the pin.': 'משבצות עם סיכה הן <b>נקודות חמות</b>: הן צריכות את המספר שעל הסיכה.',
+      'Places with a pin are <b>hotspots</b>: they need the number on the pin, a stadium or station on every one of its squares.':
+        'מקומות עם סיכה הם <b>נקודות חמות</b>: הם צריכים את המספר שעל הסיכה, ואצטדיון או תחנה – בכל אחת מהמשבצות שלהם.',
       'Pick a piece below, then a <b>yellow rooftop pad</b>. Every square needs signal, and every piece goes up.':
         'בחרו רכיב למטה, ואז <b>משטח צהוב על גג</b>. כל משבצת צריכה קליטה, וכל הרכיבים עולים לגגות.',
       'amplifier, needs {n}': 'מגבר, צריך {n}',
@@ -492,6 +494,8 @@ module.exports = {
       'on a roof: tap to take it back': 'על גג: הקישו כדי להחזיר',
       'City, {n} by {n}. {short} squares short of signal, {left} pieces left': 'עיר, {n} על {n}. ב־{short} משבצות אין מספיק קליטה, נשארו {left} רכיבים',
       'water': 'מים',
+      'a stadium': 'אצטדיון',
+      'a station': 'תחנת רכבת',
       'park': 'פארק',
       'a building, {h} storeys': 'בניין, גובה {h}',
       'free roof': 'גג פנוי',
@@ -1001,9 +1005,9 @@ module.exports = {
       ['aria-label="Pieces"', 'aria-label="רכיבים"'],
       ['<p id="board-keys" class="sr-only">Number keys pick a piece from the tray. Arrow keys move over the city. Enter or Space puts the piece on the rooftop there, or turns the piece already on it. R turns it. Backspace takes the piece there off the roof. U undoes.</p>',
         '<p id="board-keys" class="sr-only">מקשי המספרים בוחרים רכיב מהמגש. החצים זזים על פני העיר. Enter או רווח מציבים את הרכיב על הגג שם, או מסובבים את הרכיב שכבר עליו. R מסובב אותו. Backspace מוריד מהגג את הרכיב שם. U מבטל.</p>'],
-      [`<li>Give the whole city <b>signal</b>. The bar at the top says how much: every square needs at least that many <b>bars</b>. A square with a pin (a <b>hotspot</b>) needs the number on its pin.</li>
+      [`<li>Give the whole city <b>signal</b>. The bar at the top says how much: every square needs at least that many <b>bars</b>. A square with a pin (a <b>hotspot</b>) needs the number on its pin; a stadium or station with one needs it on every square.</li>
     <li>Put <b>every piece</b> from your tray on a <b>free rooftop</b> (the yellow pads). Signal adds up where antennae overlap: the dots grow with each bar, and the bars in a square's corner show what it has, hollow red for what it still needs.</li>`,
-        `<li>תנו לכל העיר <b>קליטה</b>. השורה למעלה אומרת כמה: כל משבצת צריכה לפחות את מספר ה<b>פסים</b> הזה. משבצת עם סיכה (<b>נקודה חמה</b>) צריכה את המספר שעל הסיכה שלה.</li>
+        `<li>תנו לכל העיר <b>קליטה</b>. השורה למעלה אומרת כמה: כל משבצת צריכה לפחות את מספר ה<b>פסים</b> הזה. משבצת עם סיכה (<b>נקודה חמה</b>) צריכה את המספר שעל הסיכה שלה; אצטדיון או תחנה עם סיכה צריכים אותו בכל משבצת שלהם.</li>
     <li>הציבו <b>כל רכיב</b> מהמגש על <b>גג פנוי</b> (המשטחים הצהובים). הקליטה מצטברת איפה שאנטנות חופפות: הנקודות גדלות עם כל פס, והפסים בפינת המשבצת מראים כמה יש בה, ובאדום חלול כמה עוד חסר.</li>`],
       [`<li><b>Taller roofs reach further</b>: a medium building adds a square of range, a high one two. A building <b>taller</b> than the antenna's own blocks the signal behind it.</li>
     <li>An <b>amplifier</b> (its number on a tab) only broadcasts once its own square already has that many bars, from other antennae. A <b>repeater</b> (≥1 on its tab) wakes on any signal at all.</li>`,

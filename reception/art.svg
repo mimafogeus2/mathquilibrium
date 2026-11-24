@@ -242,4 +242,41 @@
   <rect x="-12" y="-30" width="24" height="19" rx="3" style="fill:var(--a-wh)" class="a-t"/>
   <path d="M-2.5-27h5v5.5h5.5v5h-5.5v5.5h-5v-5.5H-8v-5h5.5z" transform="translate(0 2) scale(.8) translate(0 -4)" style="fill:var(--a-acc2)"/>
 </symbol>
+
+<!-- ========== landmarks ==========
+     Drawn flat on the ground, in plan, so the signal tint prints over them: 100 units a square, origin the top left corner.
+     l-stadium 2×2, l-station 2×1. What stands up on them (floodlights, the clock) are small things. No outlines, like the city. -->
+<symbol id="l-stadium" viewBox="0 0 200 200">
+  <rect x="7" y="7" width="186" height="186" rx="62" style="fill:var(--face1)"/>
+  <rect x="22" y="22" width="156" height="156" rx="50" style="fill:none;stroke:var(--a-hi);stroke-width:2.5;opacity:.6"/>
+  <rect x="36" y="36" width="128" height="128" rx="40" style="fill:none;stroke:var(--a-hi);stroke-width:2.5;opacity:.6"/>
+  <rect x="48" y="52" width="104" height="96" rx="8" style="fill:var(--park)"/>
+  <g style="fill:none;stroke:var(--a-hi);stroke-width:2.6">
+    <rect x="56" y="60" width="88" height="80" rx="2"/>
+    <path d="M100 60v80M56 86h14v28H56M144 86h-14v28h14"/>
+    <circle cx="100" cy="100" r="12"/>
+  </g>
+  <path d="M86 7h28v14H86z" style="fill:var(--face3)"/>
+</symbol>
+<symbol id="l-station" viewBox="0 0 200 100">
+  <rect x="4" y="12" width="192" height="76" rx="8" style="fill:var(--road)"/>
+  <g style="fill:none;stroke:var(--a-m3);stroke-width:2.4">
+    <path d="M4 16h192M4 28h192M4 72h192M4 84h192"/>
+    <path d="M12 14v16M28 14v16M44 14v16M60 14v16M76 14v16M92 14v16M108 14v16M124 14v16M140 14v16M156 14v16M172 14v16M188 14v16M12 70v16M28 70v16M44 70v16M60 70v16M76 70v16M92 70v16M108 70v16M124 70v16M140 70v16M156 70v16M172 70v16M188 70v16" style="opacity:.55"/>
+  </g>
+  <rect x="10" y="36" width="180" height="28" rx="4" style="fill:var(--slab)"/>
+  <rect x="18" y="33" width="164" height="34" rx="17" style="fill:var(--face3)"/>
+  <path d="M30 50h140" style="fill:none;stroke:var(--a-hi);stroke-width:3;stroke-linecap:round"/>
+  <path d="M48 36v28M76 36v28M104 36v28M132 36v28M160 36v28" style="fill:none;stroke:var(--a-hi);stroke-width:1.6;opacity:.6"/>
+</symbol>
+<symbol id="l-flood" viewBox="-20 -40 40 44" overflow="visible">
+  <path class="a-l" stroke-width="1.8" d="M0 0v-30M-4 0h8"/>
+  <rect x="-8" y="-38" width="16" height="9" rx="2" style="fill:var(--a-wh)" class="a-t"/>
+  <path d="M-5-35.5h2M-1-35.5h2M3-35.5h2M-5-32h2M-1-32h2M3-32h2" class="a-l" stroke-width="2" style="stroke:var(--a-lamp)"/>
+</symbol>
+<symbol id="l-clock" viewBox="-20 -40 40 44" overflow="visible">
+  <path class="a-l" stroke-width="1.8" d="M0 0v-18M-4 0h8"/>
+  <circle cx="0" cy="-26" r="9" style="fill:var(--a-wh)" class="a-t"/>
+  <path class="a-l" stroke-width="1.6" d="M0-26v-6M0-26h4"/>
+</symbol>
 </svg>

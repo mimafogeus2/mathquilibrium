@@ -44,7 +44,9 @@ function goal(L) {
   const open = [...L.ground].map((ch, c) => ch !== '~' && !height(ch) && c).filter((c) => c !== false);
   const bld = [...L.ground].map((ch, c) => !!height(ch) && c).filter((c) => c !== false);
   const scope = open.every((c) => req[c]) && bld.every((c) => req[c]) ? 'all' : open.every((c) => req[c]) ? 'open' : 'bld';
-  return { base, hot, scope, N };
+  // one pin a target: a landmark's squares share one
+  const lms = landmarks(N, L.ground), pins = [...lms, ...hot.filter((c) => !lms.some((m) => m.includes(c))).map((c) => [c])];
+  return { base, hot, pins, lms, scope, N };
 }
 const goalText = (g) => T({ all: '{n}+ bars everywhere', open: '{n}+ bars on streets', bld: '{n}+ bars in buildings' }[g.scope], { n: g.base });
 
@@ -96,7 +98,7 @@ function startLevel(G, save) {
   refresh();
   return fits || !Object.keys(save).length;
 }
-const startTip = () => (G.goal.hot.length ? T('Squares with a pin are <b>hotspots</b>: they need the number on the pin.') : !G.tut && G.pack === 'E' && G.n === 1 ? T('Pick a piece below, then a <b>yellow rooftop pad</b>. Every square needs signal, and every piece goes up.') : '');
+const startTip = () => (G.goal.lms.length ? T('Places with a pin are <b>hotspots</b>: they need the number on the pin, a stadium or station on every one of its squares.') : G.goal.hot.length ? T('Squares with a pin are <b>hotspots</b>: they need the number on the pin.') : !G.tut && G.pack === 'E' && G.n === 1 ? T('Pick a piece below, then a <b>yellow rooftop pad</b>. Every square needs signal, and every piece goes up.') : '');
 const tip = (html, warn) => { $('#tip').innerHTML = html; $('#tip').toggleAttribute('data-warn', !!warn); };
 const nextFree = (from = 0) => {
   const K = G.place.length;
@@ -213,8 +215,16 @@ else if (s[1] && s[3] && !s[0] && !s[2]) ground.push(`<path class="lane" d="M${x
       for (let t = 0; t < n; t++) sprite(y, y + spots[t][1], use(kinds[(rnd(c, 90 + t) * kinds.length) | 0], x + spots[t][0], y + spots[t][1] - W, SK * (h === 3 && !t ? 0.95 : 0.8), '', rnd(c, 95 + t) < 0.5));
     }
   }
+  // landmarks: a stadium or a station drawn flat over its squares (so the signal tint shows on it), floodlights or a clock standing up
+  for (const cells of landmarks(N, g)) {
+    const [x, y] = xy(cells[0], N), st = g[cells[0]] === 'S', w = 2, h = st ? 2 : 1;
+    ground.push(`<use href="${ART}l-${st ? 'stadium' : 'station'}" x="${x}" y="${y}" width="${w}" height="${h}"/>`);
+    if (st) for (const [fx, fy] of [[0.12, 0.2], [1.88, 0.2], [0.12, 1.9], [1.88, 1.9]]) sprite(y + fy, y + fy, use('l-flood', x + fx, y + fy, SK, '', fx > 1));
+    else sprite(y, y + 0.55, use('l-clock', x + 0.3, y + 0.55, SK));
+  }
   // a hotspot's venue, in its square's corner: a bus stop or café on a street, a fountain in a park, a buoy on water, a clinic sign on a roof
   for (const c of hot) {
+    if (LANDMARK[g[c]]) continue;
     const [x, y] = xy(c, N), ch = g[c];
     const id = ch === '~' ? 'v-buoy' : ch === ',' ? 'v-fountain' : H(c) ? 'v-clinic' : rnd(c, 7) < 0.5 ? 'v-bus' : 'v-cafe';
     sprite(y, y + 0.9, use(id, x + 0.26, y + 0.9 - WALL[H(c)], SK * 0.85, 'venue'));
@@ -310,9 +320,11 @@ function refresh() {
     for (let i = 0; i < n; i++) g += `<rect class="${i < cov[c] ? 'on' : 'off'}" x="${f(i * 0.14)}" y="${f(-0.17 - i * 0.1)}" width=".1" height="${f(0.17 + i * 0.1)}" rx=".025"/>`;
     top += g + '</g>';
   }
-  for (const c of G.goal.hot) {
-    const [x] = xy(c, N), y = row(c) - up(c), ok = cov[c] >= P.req[c];
-    top += `<g class="pin${ok ? ' met' : ''}" transform="translate(${x + 0.27} ${f(y + 0.5)})"><path d="M0 0C-.06-.08-.17-.15-.17-.27a.17 .17 0 1 1 .34 0C.17-.15.06-.08 0 0z"/>` +
+  for (const cells of G.goal.pins) {
+    // a lone square's pin sits in its corner, a landmark's in its middle
+    const c = cells[0], [x] = xy(c, N), y = row(c) - up(c), ok = cells.every((q) => cov[q] >= P.req[q]);
+    const px = cells.length > 1 ? x + 1 : x + 0.27, py = cells.length > 2 ? y + 1.1 : cells.length > 1 ? y + 0.6 : y + 0.5;
+    top += `<g class="pin${ok ? ' met' : ''}" transform="translate(${f(px)} ${f(py)})"><path d="M0 0C-.06-.08-.17-.15-.17-.27a.17 .17 0 1 1 .34 0C.17-.15.06-.08 0 0z"/>` +
       `<text y="-.21">${P.req[c]}</text>${ok ? '<path class="tick" d="M.1-.42l.04.04.08-.08"/>' : ''}</g>`;
   }
   // a piece just put down sends a ring out over the city
@@ -384,7 +396,7 @@ function celebrate() {
 // What the keyboard cursor is on, for a screen reader
 function describe(c, cov) {
   const { L, P } = G, N = L.N, ch = L.ground[c], j = pieceAt(c), h = height(ch);
-  const what = ch === '~' ? T('water') : ch === ',' ? T('park') : h ? T('a building, {h} storeys', { h }) + (isRoof(ch) ? ', ' + T('free roof') : '') : T('street');
+  const what = ch === '~' ? T('water') : ch === ',' ? T('park') : ch === 'S' ? T('a stadium') : ch === 'T' ? T('a station') : h ? T('a building, {h} storeys', { h }) + (isRoof(ch) ? ', ' + T('free roof') : '') : T('street');
   return T('Row {r}, column {c}: {what}. Signal {v} of {need}.', { r: ((c / N) | 0) + 1, c: (c % N) + 1, what, v: cov[c], need: P.req[c] }) + (j >= 0 ? ' ' + pieceName(P.hand[j]) + '.' : '');
 }
 
