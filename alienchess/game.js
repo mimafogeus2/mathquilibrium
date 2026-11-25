@@ -292,12 +292,48 @@ function reveal() {
 }
 
 // ---------- input ----------
+const sqAt = (e) => document.elementFromPoint(e.clientX, e.clientY)?.closest('#board .sq');
 $('#board').addEventListener('click', (e) => {
-  const s = e.target.closest('.sq');
-  if (!s) return;
+  const s = e.target.closest('.sq') || sqAt(e); // a press on your piece captures the pointer, so its click lands on the board
+  if (!s || held?.moved) return; // the end of a drag is not a tap
   G.kbd = false;
   onSquare(+s.dataset.i);
 });
+// Drag: press one of your pieces and pull it to a square. It's picked as you start, so its moves show; letting go on one of
+// them plays it, anywhere else drops it back (still picked).
+let held = null;
+$('#board').addEventListener('pointerdown', (e) => {
+  const s = e.target.closest('.sq'), i = s ? +s.dataset.i : -1;
+  if (!s || e.button > 0 || !playing() || G.busy || G.out || !(G.b[i] > 0)) return;
+  held = { i, x: e.clientX, y: e.clientY, moved: false };
+  $('#board').setPointerCapture(e.pointerId);
+});
+$('#board').addEventListener('pointermove', (e) => {
+  if (!held) return;
+  const u = G.units[held.i];
+  if (!held.moved) {
+    if (Math.hypot(e.clientX - held.x, e.clientY - held.y) < 8) return;
+    held.moved = true;
+    G.kbd = false;
+    if (G.sel !== held.i) onSquare(held.i);
+    if (G.sel !== held.i || !u) return; // the tutorial said no
+    u.classList.add('held');
+  }
+  if (!u?.classList.contains('held')) return;
+  const k = pageScale();
+  u.style.translate = `${(e.clientX - held.x) / k}px ${(e.clientY - held.y) / k}px`;
+});
+const drop = (e) => {
+  const h = held;
+  if (!h?.moved) { held = null; return; }
+  const u = G.units[h.i], to = e.type === 'pointerup' && sqAt(e);
+  if (u) u.style.translate = ''; // still .held, so a legal drop lands where it was let go instead of sliding back first
+  if (u?.classList.contains('held') && to && G.sel === h.i && moves(G.p, G.b, 1).some((m) => m[0] === h.i && m[1] === +to.dataset.i)) onSquare(+to.dataset.i);
+  requestAnimationFrame(() => requestAnimationFrame(() => u?.classList.remove('held')));
+  setTimeout(() => { held = null; }); // after the click it fires, if any
+};
+$('#board').addEventListener('pointerup', drop);
+$('#board').addEventListener('pointercancel', drop);
 $('#board').addEventListener('focus', () => { if (playing() && $('#board').matches(':focus-visible')) { G.kbd = true; refresh(); } });
 $('#cards').addEventListener('click', (e) => { // a card shows where its pieces stand
   const c = e.target.closest('.card');
