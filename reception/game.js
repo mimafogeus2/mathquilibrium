@@ -126,7 +126,7 @@ function startLevel(G, save) {
     t.className = 'piece' + (isAnt(pc.k) ? '' : ' mod');
     t.style.setProperty('--c', `var(${MARKS[i % MARKS.length]})`);
     t.innerHTML = artSvg(pc.k) + (pc.g ? `<b>${pc.g}</b>` : '') + (pc.amp ? `<i class="amp">≥${pc.amp}</i>` : '');
-    t.onclick = () => pickPiece(i);
+    t.onclick = () => { if (!drag?.moved) pickPiece(i); }; // the end of a drag is not a tap
     return t;
   }));
   $('#slug').textContent = G.tut ? T('Tutorial') : $('#g-title').textContent;
@@ -657,6 +657,44 @@ $('#board').addEventListener('pointerup', (e) => {
 $('#board').addEventListener('pointercancel', () => { if (press) clearTimeout(press.timer); press = null; G.at = null; refresh(); });
 $('#board').addEventListener('pointerleave', (e) => { if (!press && e.pointerType === 'mouse' && G?.L) { G.at = null; refresh(); } });
 $('#board').addEventListener('focus', () => { if (playing() && $('#board').matches(':focus-visible')) { G.kbd = true; G.at ??= 0; refresh(); } });
+// Drag: press a free tray piece and pull it onto the city, as in Small Fry. Over the board the roof under it previews;
+// letting go there puts it up, anywhere else cancels.
+let drag = null;
+$('#tray').addEventListener('pointerdown', (e) => {
+  const t = e.target.closest('.piece'), i = [...$('#tray').children].indexOf(t);
+  if (!t || t.disabled || e.button > 0 || !playing() || G.place[i] || G.locked.has(i)) return;
+  drag = { i, x: e.clientX, y: e.clientY, moved: false };
+  t.setPointerCapture(e.pointerId);
+});
+$('#tray').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+    drag.moved = true;
+    pickPiece(drag.i);
+    if (G.sel !== drag.i) return; // the tutorial said no
+    drag.el = document.createElement('div');
+    drag.el.className = 'drag-ghost';
+    drag.el.innerHTML = artSvg(G.P.hand[drag.i].k);
+    document.body.append(drag.el);
+  }
+  if (!drag.el) return;
+  const c = playing() ? cellOf(e) : null, s = pageScale();
+  drag.el.hidden = c !== null; // over the city the board's own ghost takes over
+  drag.el.style.translate = `${e.clientX / s}px ${e.clientY / s}px`;
+  $('#board').classList.toggle('dragging', c !== null);
+  if (c !== G.at) { G.at = c; G.kbd = false; refresh(); }
+});
+const endDrag = (e) => {
+  if (!drag?.moved) { drag = null; return; }
+  drag.el?.remove();
+  $('#board').classList.remove('dragging');
+  if (drag.el && e.type === 'pointerup' && G.at !== null && playing()) put(G.at);
+  if (G?.at !== null && !G.kbd) { G.at = null; refresh(); } // a roof that won't take it leaves no ghost behind
+  setTimeout(() => { drag = null; }); // after the click it fires, if any
+};
+$('#tray').addEventListener('pointerup', endDrag);
+$('#tray').addEventListener('pointercancel', endDrag);
 
 function onKey(e) {
   const N = G.L.N, K = G.place.length, moves = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
