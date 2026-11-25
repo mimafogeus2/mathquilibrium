@@ -1073,7 +1073,7 @@ module.exports = {
       ['<p class="tagline">Chess, as they play it out there.</p>', '<p class="tagline">שחמט, כמו שמשחקים אותו שם בחוץ.</p>'],
       ['<p id="board-keys" class="sr-only">Your pieces start at the bottom. Arrow keys move around the board. Space or Enter picks up one of your pieces, then puts it down on a square it can reach. Z takes back your last move.</p>',
         '<p id="board-keys" class="sr-only">הכלים שלכם מתחילים למטה. החצים זזים על הלוח. רווח או Enter מרימים כלי שלכם, ואז מניחים אותו במשבצת שהוא יכול להגיע אליה. Z מבטל את המסע האחרון.</p>'],
-      [`<li>Your pieces are <b>white</b>, the computer's <b>red</b>. Tap one of yours to see where it can go, and land on a red one to <b>take</b> it off the board.</li>
+      [`<li>Your pieces are <b>white</b>, the computer's <b>red</b>. Tap one of yours to see where it can go, then tap where it goes (or drag it there). Land on a red one to <b>take</b> it off the board.</li>
     <li>Every level brings <b>new pieces</b>. Each kind's <b>card</b> shows how it moves.</li>
     <li>A <b>line</b> slides square by square until something blocks it; an arrow runs on to the edge.</li>
     <li>A <b>dot without a line</b> is a leap: the piece lands there in one jump, over anything in between.</li>
@@ -1096,7 +1096,7 @@ module.exports = {
   <div class="help-page">
   <ol class="rules" start="10">
     <li>Undo and restart are free. Win fast for <b>three stars</b>.</li>`,
-      `<li>הכלים שלכם <b>לבנים</b>, של המחשב <b>אדומים</b>. הקישו על אחד משלכם כדי לראות לאן הוא יכול ללכת, ונחתו על כלי אדום כדי <b>לאכול</b> אותו ולהוריד אותו מהלוח.</li>
+      `<li>הכלים שלכם <b>לבנים</b>, של המחשב <b>אדומים</b>. הקישו על אחד משלכם כדי לראות לאן הוא יכול ללכת, ואז על המשבצת שאליה הוא הולך (או גררו אותו לשם). נחתו על כלי אדום כדי <b>לאכול</b> אותו ולהוריד אותו מהלוח.</li>
     <li>בכל שלב יש <b>כלים חדשים</b>. ה<b>קלף</b> של כל סוג מראה איך הוא זז.</li>
     <li><b>קו</b> הוא החלקה משבצת אחרי משבצת עד שמשהו חוסם אותה; חץ ממשיך עד הקצה.</li>
     <li><b>נקודה בלי קו</b> היא קפיצה: הכלי נוחת שם בקפיצה אחת, מעל כל מה שבדרך.</li>

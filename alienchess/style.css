@@ -8,7 +8,7 @@
   --n: 5; position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr);
   width: min(400px, calc(100 * var(--vw) - 32px), calc(100 * var(--dvh) - 420px - var(--coach-h, 0px))); min-width: 220px; aspect-ratio: 1;
   border-radius: 10px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line), 4px 5px 0 var(--reg);
-  user-select: none; -webkit-user-select: none;
+  user-select: none; -webkit-user-select: none; touch-action: none;
 }
 .board:focus-visible { outline-offset: 4px; }
 .sq { position: relative; background: var(--grain), var(--stock); cursor: pointer; animation: enter .3s var(--d, 0ms) both var(--ease); }
@@ -27,6 +27,8 @@
   transform: translate(calc(var(--c) * 100%), calc(var(--r) * 100%)); transition: transform .32s var(--ease);
   display: grid; place-items: center;
 }
+/* held in a drag: it follows the pointer, over everything */
+.unit.held { transition: none; z-index: 5; }
 .unit .pc { width: 78%; height: 88%; filter: drop-shadow(1px 2px 0 color-mix(in srgb, var(--reg) 40%, transparent)); }
 .unit.gone .pc { animation: gone .35s ease-in forwards; }
 @keyframes gone { to { opacity: 0; transform: scale(.3) rotate(25deg); } }
