@@ -153,7 +153,7 @@
     background: var(--grain), var(--stock); box-shadow: 3px 4px 0 var(--reg); color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.35;
     transition: opacity .5s var(--ease), translate .5s var(--ease), visibility 0s; }
   .new-game[inert] { opacity: 0; translate: 0 6px; visibility: hidden; transition: opacity .5s var(--ease), translate .5s var(--ease), visibility 0s .5s; }
-  .new-fish { flex: none; width: 44px; height: 26px; overflow: visible; animation: new-swim 2.4s ease-in-out infinite alternate; }
+  .new-fish { flex: none; width: 44px; height: 26px; overflow: visible; stroke: none; /* the global svg stroke, clipped by #speck's box, flattened its edges */ animation: new-swim 2.4s ease-in-out infinite alternate; }
   @keyframes new-swim { from { translate: 0 -1.5px; rotate: -3deg; } to { translate: 2px 1.5px; rotate: 3deg; } }
   .new-chain { flex: none; font: 700 26px/1 var(--display); letter-spacing: .01em; color: var(--ink); }
   .new-chain b { font: inherit; color: var(--brand-text); display: inline-block; animation: new-bob 1.6s ease-in-out infinite alternate; }
@@ -166,7 +166,7 @@
   .new-game:hover b { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .12em; text-decoration-color: var(--brand); }
   [dir="rtl"] .new-game:hover .new-go { translate: -4px 0; }
   [dir="rtl"] .new-fish { scale: -1 1; } /* swims the way the line reads */
-  .new-bars { flex: none; width: 44px; height: 26px; overflow: visible; }
+  .new-bars { flex: none; width: 44px; height: 26px; overflow: visible; stroke: none; }
   .new-bars .w { animation: new-ping 1.2s ease-in-out infinite alternate; }
   .new-bars .w + .w { animation-delay: .4s; }
   @keyframes new-ping { from { opacity: .2; } }
