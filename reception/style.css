@@ -190,6 +190,10 @@ svg.art { position: absolute; width: 0; height: 0; overflow: hidden; }
 .piece.used svg { filter: grayscale(1); opacity: .35; }
 .piece.hinted svg { filter: none; opacity: .8; }
 .piece:disabled { cursor: default; }
+.piece { touch-action: none; } /* pressed: a drag onto the city, not a scroll */
+/* a see-through piece follows a drag from the tray until it's over the city */
+.drag-ghost { position: fixed; left: 0; top: 0; width: 54px; height: 54px; margin: -27px 0 0 -27px; padding: 9px; opacity: .6; pointer-events: none; z-index: 50; }
+.drag-ghost svg { width: 100%; height: 100%; overflow: visible; stroke: none; }
 @media (hover: hover) { .piece:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 2px var(--ink), var(--lift); } }
 
 /* keep board, tray, tip and tools together in the middle */
