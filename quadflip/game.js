@@ -83,7 +83,7 @@ function startLevel(G, save) {
     t.className = 'piece';
     t.style.setProperty('--c', `var(${MARKS[k]})`);
     t.innerHTML = pieceSvg(sh);
-    t.onclick = () => pickPiece(k);
+    t.onclick = () => { if (!drag?.moved) pickPiece(k); }; // the end of a drag is not a tap
     return t;
   }));
   refresh();
@@ -246,6 +246,42 @@ $('#board').addEventListener('pointerup', (e) => {
 });
 $('#board').addEventListener('pointercancel', () => { pressed = false; G.at = null; refresh(); });
 $('#board').addEventListener('pointerleave', (e) => { if (!pressed && e.pointerType === 'mouse' && G) { G.at = null; refresh(); } });
+// Drag: press a free tray piece and pull it onto the board, as in Small Fry. Over the board the ghost shows where it lands;
+// letting go there stamps it, anywhere else cancels.
+let drag = null;
+$('#tray').addEventListener('pointerdown', (e) => {
+  const t = e.target.closest('.piece'), k = [...$('#tray').children].indexOf(t);
+  if (!t || t.disabled || e.button > 0 || !playing() || G.placed[k] >= 0) return;
+  drag = { k, x: e.clientX, y: e.clientY, moved: false };
+  t.setPointerCapture(e.pointerId);
+});
+$('#tray').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+    drag.moved = true;
+    pickPiece(drag.k);
+    if (G.sel !== drag.k) return; // the tutorial said no
+    drag.el = document.createElement('div');
+    drag.el.className = 'drag-ghost';
+    drag.el.innerHTML = pieceSvg(G.p.pieces[drag.k]);
+    document.body.append(drag.el);
+  }
+  if (!drag.el) return;
+  const { x, y, inside } = point(e), at = inside && playing() ? landing(x, y) : null, s = pageScale();
+  drag.el.hidden = at !== null; // on the board the tiles' own ghost takes over
+  drag.el.style.translate = `${e.clientX / s}px ${e.clientY / s}px`;
+  if (at !== G.at) { G.at = at; G.kbd = false; refresh(); }
+});
+const endDrag = (e) => {
+  if (!drag?.moved) { drag = null; return; }
+  drag.el?.remove();
+  if (drag.el && e.type === 'pointerup' && G.at !== null && playing()) stamp(G.at);
+  else if (G?.at !== null) { G.at = null; refresh(); }
+  setTimeout(() => { drag = null; }); // after the click it fires, if any
+};
+$('#tray').addEventListener('pointerup', endDrag);
+$('#tray').addEventListener('pointercancel', endDrag);
 // Keyboard focus on the board shows the piece and starts describing it (a mouse click focuses it too, but quietly).
 $('#board').addEventListener('focus', () => { if (playing() && $('#board').matches(':focus-visible')) { G.kbd = true; G.at ??= 0; refresh(); } });
 

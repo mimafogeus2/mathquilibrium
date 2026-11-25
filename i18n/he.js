@@ -1041,8 +1041,8 @@ module.exports = {
       ['<p id="board-keys" class="sr-only">Number keys pick a piece. Arrow keys move it over the board. Space or Enter stamps it, flipping the four tiles under it. Backspace or Z takes back the last stamp.</p>',
         '<p id="board-keys" class="sr-only">מקשי המספרים בוחרים צורה. החצים מזיזים אותה על הלוח. רווח או Enter מחתימים אותה והופכים את ארבע המשבצות שמתחתיה. Backspace או Z מבטלים את ההחתמה האחרונה.</p>'],
       [`<li>Turn every tile back to <b>blank paper</b>.</li>
-    <li class="no-touch">Pick a <b>piece</b>, then click the board: the four tiles under it <b>flip</b>.</li>
-    <li class="touch">Tap a <b>piece</b> below the board to pick it. Then <b>press and drag</b> on the board to aim it, and <b>let go</b> to stamp: the four tiles under it <b>flip</b>. Let go off the board to cancel.</li>
+    <li class="no-touch">Pick a <b>piece</b>, then click the board (or drag the piece onto it): the four tiles under it <b>flip</b>.</li>
+    <li class="touch">Tap a <b>piece</b> below the board to pick it. Then <b>press and drag</b> on the board to aim it, and <b>let go</b> to stamp: the four tiles under it <b>flip</b>. Let go off the board to cancel. Or drag a piece from the tray straight onto the board.</li>
   </ol>
   </div>
   <div class="help-page">
@@ -1052,8 +1052,8 @@ module.exports = {
     <li>Tap a used piece to lift it off again.</li>
     <li>Stuck? <b>Hint</b> places a piece, but costs stars.</li>`,
       `<li>החזירו כל משבצת ל<b>נייר לבן</b>.</li>
-    <li class="no-touch">בחרו <b>צורה</b> ולחצו על הלוח: ארבע המשבצות שמתחתיה <b>מתהפכות</b>.</li>
-    <li class="touch">הקישו על <b>צורה</b> מתחת ללוח כדי לבחור אותה. אחר כך <b>לחצו וגררו</b> על הלוח כדי לכוון, ו<b>שחררו</b> כדי להחתים: ארבע המשבצות שמתחתיה <b>מתהפכות</b>. שחררו מחוץ ללוח כדי לבטל.</li>
+    <li class="no-touch">בחרו <b>צורה</b> ולחצו על הלוח (או גררו אותה אליו): ארבע המשבצות שמתחתיה <b>מתהפכות</b>.</li>
+    <li class="touch">הקישו על <b>צורה</b> מתחת ללוח כדי לבחור אותה. אחר כך <b>לחצו וגררו</b> על הלוח כדי לכוון, ו<b>שחררו</b> כדי להחתים: ארבע המשבצות שמתחתיה <b>מתהפכות</b>. שחררו מחוץ ללוח כדי לבטל. אפשר גם לגרור צורה מהמגש ישר אל הלוח.</li>
   </ol>
   </div>
   <div class="help-page">

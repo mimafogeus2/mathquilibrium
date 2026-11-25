@@ -67,6 +67,10 @@
 .piece.used svg { fill: none; stroke: var(--c, var(--muted)); stroke-width: .09; stroke-dasharray: .16 .1; }
 .piece.hinted svg { stroke: var(--sun-text); stroke-dasharray: none; }
 .piece:disabled { cursor: default; }
+.piece { touch-action: none; } /* pressed: a drag onto the board, not a scroll */
+/* a see-through piece follows a drag from the tray until it's over the board */
+.drag-ghost { position: fixed; left: 0; top: 0; width: 56px; height: 56px; margin: -28px 0 0 -28px; padding: 7px; opacity: .6; pointer-events: none; z-index: 50; }
+.drag-ghost svg { width: 100%; height: 100%; stroke: none; fill: var(--brand); }
 @media (hover: hover) { .piece:not(:disabled):not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1px var(--ink), var(--lift); } }
 
 /* keep board, tray, tip and tools together in the middle */
