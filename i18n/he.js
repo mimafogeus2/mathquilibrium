@@ -586,8 +586,8 @@ module.exports = {
       '<b>Eaten!</b> Undo and try another way.': '<b>נאכל!</b> בטלו ונסו דרך אחרת.',
       '<b>Going in circles.</b> Undo and try another way.': '<b>מסתובבים במעגלים.</b> בטלו ונסו דרך אחרת.',
       '<b>Stuck:</b> every item is placed, and the fry is still in. Undo and try another way.': '<b>תקועים:</b> כל הפריטים במקום, והרקק עדיין בפנים. בטלו ונסו דרך אחרת.',
-      'The fry (orange) looks only <b>straight ahead</b>: the dotted line. Items go only where a fish is looking. Put the <b>mirror</b> where it shows the fry the <b>exit</b>.':
-        'הרקק (הכתום) מסתכל רק <b>ישר קדימה</b>: הקו המנוקד. פריטים מניחים רק במקום שדג מסתכל עליו. שימו את ה<b>מראה</b> במקום שמראה לרקק את ה<b>יציאה</b>.',
+      'The fry (orange) looks only <b>straight ahead</b>: the dotted line. Items go only where a fish is looking. Tap the <b>mirror</b> below to pick it up (tap again to put it back), then tap the dot where it shows the fry the <b>exit</b>. You can also drag it there.':
+        'הרקק (הכתום) מסתכל רק <b>ישר קדימה</b>: הקו המנוקד. פריטים מניחים רק במקום שדג מסתכל עליו. הקישו על ה<b>מראה</b> למטה כדי להרים אותה (הקשה נוספת מחזירה אותה), ואז על הנקודה שבה היא מראה לרקק את ה<b>יציאה</b>. אפשר גם לגרור אותה לשם.',
       "A bigger fish eats a smaller one it sees, and <b>lunges</b> at one that swims into its look. After each item the fish act. Get the fry out without crossing the 2's look.":
         'דג גדול אוכל דג קטן ממנו שהוא רואה, ו<b>מסתער</b> על דג שנכנס למבט שלו. אחרי כל פריט הדגים פועלים. הוציאו את הרקק בלי לחצות את המבט של ה־2.',
       "A <b>flat mirror</b> goes on the rock a fish stares at, and shows it what's behind it.":

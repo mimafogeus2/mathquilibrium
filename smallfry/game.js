@@ -227,14 +227,14 @@ function tankSvg(L, vb = viewOf(L)) {
 // ---------- state ----------
 // G.L: the level. G.states[i]: the tank after the first i placements, once the fish stopped (G.S is the live one). G.placed:
 // [type, spot] in order. G.lock: placements a hint made (and everything before them), which undo can't take back.
-// G.sel: the picked item type. G.busy: fish are moving. G.fail: 'eaten' | 'loop' | 'stuck' | null. G.moved: fish moved since the
+// G.sel: the picked item type, G.slot its tray slot (none picked: no spots shown). G.from: the slot each placement came from. G.busy: fish are moving. G.fail: 'eaten' | 'loop' | 'stuck' | null. G.moved: fish moved since the
 // last placement. G.mistakes: for the stars. G.preview: a spot shown as if placed (mouse hover, or keyboard).
 // Lessons: tiny tanks, one idea each, each with one answer (test.js checks). Nothing is forced: wrong tries play out and fail
 // says why; after two, the coach rings the next move. The menu's Tutorial runs the basics (BASICS); the rest wait for the first
 // level with their mechanic (firstContact starts them). teaches: mechanics, as levelFeatures() names them.
 const LESSONS = [
   { teaches: ['mirror'], line: '7|###X####.....##.....##.....##.....##.....########|16.1.1||/|/@17',
-    text: T('The fry (orange) looks only <b>straight ahead</b>: the dotted line. Items go only where a fish is looking. Put the <b>mirror</b> where it shows the fry the <b>exit</b>.') },
+    text: T('The fry (orange) looks only <b>straight ahead</b>: the dotted line. Items go only where a fish is looking. Tap the <b>mirror</b> below to pick it up (tap again to put it back), then tap the dot where it shows the fry the <b>exit</b>. You can also drag it there.') },
   { teaches: ['pred'], line: '7|#####X##.....##..#..##.....##.....##.....########|36.0.1,25.1.2||//|/@8,/@12',
     text: T('A bigger fish eats a smaller one it sees, and <b>lunges</b> at one that swims into its look. After each item the fish act. Get the fry out without crossing the 2\'s look.') },
   { teaches: ['F'], line: '7|########.....##.....#X.....##.....##.....########|25.1.1||F|F@105',
@@ -271,7 +271,7 @@ function startLevel(G, save) {
   if (G.tut) { G.q ??= lessonQueue || BASICS; G.qi ??= 0; G.miss = 0; lessonQueue = null; }
   const L = levelOf(G), S0 = Fry.initial(L);
   runId++; // a swim still going on the last level stops
-  Object.assign(G, { L, S: Fry.clone(S0), states: [S0], placed: [], lock: 0, sel: null, busy: false, fail: null, why: null, moved: false, mistakes: 0, preview: null, kspot: -1 });
+  Object.assign(G, { L, S: Fry.clone(S0), states: [S0], placed: [], from: [], lock: 0, sel: null, slot: null, busy: false, fail: null, why: null, moved: false, mistakes: 0, preview: null, kspot: -1 });
   let ok = true;
   if (Array.isArray(save.placed)) {
     // replay the saved placements: the fish do what they did
@@ -292,7 +292,6 @@ function startLevel(G, save) {
       G.moved = !!G.fail;
     }
   }
-  G.sel = firstLeft();
   const b = $('#board');
   b.classList.remove('solved', 'failed');
   const vb = viewOf(L);
@@ -338,7 +337,12 @@ function deepLife(vb, hk) {
     { duration: 60000, delay: 6000 + (hk % 9000), iterations: Infinity, easing: 'linear', fill: 'backwards' });
 }
 const FIRST_TIP = T('Rays show where each fish looks. Put a <b>mirror</b> where the fry looks, to show it the <b>exit</b>.');
-const firstLeft = () => { const c = left(); return G.L.items.find((t) => c[t] > 0) ?? null; };
+// tray slots already placed: each placement's own slot, or (restored saves, hints) the first free one of its type
+const usedSlots = () => {
+  const u = new Set();
+  G.placed.forEach(([t], k) => { const i = G.from[k]; u.add(i != null && !u.has(i) && G.L.items[i] === t ? i : G.L.items.findIndex((x, j) => x === t && !u.has(j))); });
+  return u;
+};
 function tip(html, warn = false) {
   $('#tip').innerHTML = html;
   $('#tip').toggleAttribute('data-warn', warn);
@@ -630,12 +634,11 @@ function swallow(ei, pi) {
 }
 
 function refresh() {
-  const c = left();
+  const u = usedSlots();
   $('#tray').querySelectorAll('.slot').forEach((s, i) => {
-    // of a type's slots, the first ones are the ones still in hand
-    const t = s.dataset.type, before = G.L.items.slice(0, i).filter((x) => x === t).length, used = before >= c[t];
+    const t = s.dataset.type, used = u.has(i);
     s.classList.toggle('used', used);
-    s.setAttribute('aria-pressed', String(!used && before === 0 && t === G.sel && !G.done && !G.fail));
+    s.setAttribute('aria-pressed', String(!used && i === G.slot && !!G.sel && !G.done && !G.fail));
     s.disabled = G.done || used || G.busy || !!G.fail;
     s.setAttribute('aria-label', (used ? T('{item}, placed', { item: ITEM[t] }) : ITEM[t]) + (t === '/' || t === '\\' ? ' ' + t : ''));
   });
@@ -657,9 +660,14 @@ function refresh() {
 }
 
 // ---------- moves ----------
-function choose(t) {
-  if (!playing() || G.busy || G.fail || !t || !(left()[t] > 0) || !coachAllows({ pick: t })) return;
+// pick the item in tray slot i; picking the picked one again puts it back
+function choose(i, keep = false) {
+  const t = G.L.items[i];
+  if (!playing() || G.busy || G.fail || !t || usedSlots().has(i)) return;
+  if (G.sel && G.slot === i) { if (!keep) { G.sel = G.slot = null; G.preview = null; G.kspot = -1; sfx.tap(); draw(); } return; }
+  if (!coachAllows({ pick: t })) return;
   G.sel = t;
+  G.slot = i;
   G.preview = null;
   G.kspot = -1;
   sfx.tap();
@@ -672,6 +680,7 @@ function placeAt(at) {
   if (!coachAllows({ t, at })) { G.preview = null; draw(); return; }
   Fry.place(G.S, t, at);
   G.placed.push([t, at]);
+  G.from.push(G.slot);
   G.dropIn = G.placed.length - 1;
   G.preview = null;
   G.kspot = -1;
@@ -679,7 +688,7 @@ function placeAt(at) {
   sfx.place();
   { const W = G.L.W, c = t === 'F' ? at >> 2 : at; ripple(cx(c, W) + (t === 'F' ? DC[at & 3] * 4 : 0), cy(c, W) + (t === 'F' ? DR[at & 3] * 4 : 0)); }
   $('#sr').textContent = T('{item} placed.', { item: ITEM[t] });
-  if (!(left()[t] > 0)) G.sel = firstLeft();
+  G.sel = G.slot = null;
   tip('');
   swim();
 }
@@ -785,12 +794,13 @@ function rewind(k) {
   G.S = Fry.clone(G.states[k]);
   G.states.length = k + 1;
   G.placed.length = k;
+  G.from.length = k;
   G.fail = null;
   G.why = null;
   G.moved = false;
   G.preview = null;
   G.kspot = -1;
-  G.sel = G.sel && left()[G.sel] > 0 ? G.sel : firstLeft();
+  G.sel = G.slot = null;
   for (const el of G.fishEls) el.getAnimations({ subtree: true }).forEach((a) => !(a instanceof CSSAnimation) && a.cancel()); // the swims, not the idle beat
   tip('');
 }
@@ -829,6 +839,7 @@ function hint() {
     G.hinted.add(G.hinted.size);
     G.lock = k + 1;
     G.sel = order[0][0];
+    G.slot = null;
     sfx.hint();
     track('hint');
     placeAt(order[0][1]);
@@ -842,7 +853,47 @@ function finish(pre, rest) {
 }
 
 // ---------- input ----------
-$('#tray').addEventListener('click', (e) => { const s = e.target.closest('.slot'); if (s) { G.kspot = -1; choose(s.dataset.type); } });
+const slotIndex = (s) => [...$('#tray').children].indexOf(s);
+$('#tray').addEventListener('click', (e) => {
+  const s = e.target.closest('.slot');
+  if (drag?.moved) { drag = null; return; } // the end of a drag, not a tap
+  if (s) { G.kspot = -1; choose(slotIndex(s)); }
+});
+// Drag: press a tray item and pull it onto the tank; the spot under the pointer previews, letting go there places it
+let drag = null;
+const spotAt = (e) => document.elementFromPoint(e.clientX, e.clientY)?.closest('#board [data-spot]');
+$('#tray').addEventListener('pointerdown', (e) => {
+  const s = e.target.closest('.slot');
+  if (!s || s.disabled || e.button) return;
+  drag = { i: slotIndex(s), x: e.clientX, y: e.clientY, moved: false };
+  s.setPointerCapture(e.pointerId);
+});
+$('#tray').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  if (!drag.moved) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+    drag.moved = true;
+    choose(drag.i, true);
+    if (G.slot !== drag.i) { drag = null; return; }
+    // a see-through copy of the item follows the pointer, until it snaps onto a spot (the tank's own ghost takes over)
+    drag.el = document.createElement('div');
+    drag.el.className = 'drag-ghost';
+    drag.el.innerHTML = $('#tray').children[drag.i].innerHTML;
+    document.body.append(drag.el);
+  }
+  const s = spotAt(e), at = s ? +s.dataset.spot : null, k = pageScale();
+  drag.el.hidden = !!s;
+  drag.el.style.translate = `${e.clientX / k}px ${e.clientY / k}px`;
+  if (G.preview !== at) { G.preview = at; draw(); }
+});
+$('#tray').addEventListener('pointerup', (e) => {
+  if (!drag?.moved) { drag = null; return; }
+  drag.el?.remove();
+  const s = spotAt(e);
+  if (s) placeAt(+s.dataset.spot); else if (G.preview != null) { G.preview = null; draw(); }
+  setTimeout(() => { drag = null; }); // after the click it fires, if any
+});
+$('#tray').addEventListener('pointercancel', () => { drag?.el?.remove(); drag = null; if (G?.preview != null) { G.preview = null; draw(); } });
 // Mouse: hovering a spot previews the looks with the item there. A click or tap places it.
 $('#board').addEventListener('pointerover', (e) => {
   const s = e.target.closest('[data-spot]');
@@ -859,7 +910,7 @@ $('#board').addEventListener('click', (e) => {
 // Keyboard: 1–9 pick an item from the tray, arrows step through the spots it can go, Enter or Space places it, U / Z / Backspace undo
 function onKey(e) {
   const slots = [...$('#tray').querySelectorAll('.slot')];
-  if (/^[1-9]$/.test(e.key) && +e.key <= slots.length) { G.kspot = -1; choose(slots[+e.key - 1].dataset.type); return true; }
+  if (/^[1-9]$/.test(e.key) && +e.key <= slots.length) { G.kspot = -1; choose(+e.key - 1); return true; }
   if (/^Arrow/.test(e.key) && G.spotList.length) {
     const n = G.spotList.length, d = e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1;
     G.kspot = G.kspot < 0 ? (d > 0 ? 0 : n - 1) : (G.kspot + d + n) % n;
@@ -925,7 +976,8 @@ boot({ name: T('Small Fry'), storeKey: 'smallfry', glyphs: ['🐟', '◆'], star
     G.placed = [];
     for (const [t, at] of G.L.sol) { Fry.place(G.S, t, at); G.placed.push([t, at]); Fry.run(G.L, G.S); }
     G.lock = G.placed.length;
-    G.sel = null;
+    G.sel = G.slot = null;
+    G.from = [];
     G.preview = null;
     draw();
   } });
