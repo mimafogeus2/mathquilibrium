@@ -791,6 +791,8 @@ module.exports = {
       ['<b id="issue-no">No. 1</b>', '<b id="issue-no">גיליון 1</b>'],
       ['<span class="hide-sm">Price: one coffee break</span>', '<span class="hide-sm">מחיר: הפסקת קפה אחת</span>'],
       ['aria-label="Games"', 'aria-label="משחקים"'],
+      [`aria-label="Today's fact"`, 'aria-label="העובדה של היום"'],
+      ['<span class="kicker">Did you <em>know?</em></span>', '<span class="kicker"><em>הידעתם?</em></span>'],
       ['<span class="kicker">01 <em>Math</em></span>', '<span class="kicker">01 <em>חשבון</em></span>'],
       ['<h2>Math<span>quilibrium</span></h2>', '<h2>מאו<span>זן</span></h2>'],
       ['<p>The numbers are given. Fill in the operators so every line is true.</p>', '<p>המספרים נתונים. השלימו את הפעולות כך שכל שורה תהיה נכונה.</p>'],
