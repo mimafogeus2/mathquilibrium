@@ -207,7 +207,7 @@ function pages(dlg) {
   dlg.paged = true;
   go(0);
 }
-pages($('#dlg-help'));
+if ($('#dlg-help')) pages($('#dlg-help')); // the editors have none
 // Opening focuses Next / Got it, not the × that comes first (showModal skips the hidden one)
 for (const b of document.querySelectorAll('#dlg-help form:not(.dlg-x) .btn.primary')) b.autofocus = true;
 
@@ -543,7 +543,7 @@ function copyLink(url, btn) {
 }
 
 // A word game's result (WordSwipe, Orderly): tap a word for a note on it, from notes/<n>.json beside the page ({ subject: { word: note } },
-// written by build-notes.js), and a link to look it up. A word with no note (a custom round's) gets just the link.
+// written by build-notes.js).
 const NOTES = {};
 const TOUCH = matchMedia('(pointer: coarse)').matches; // "tap" on touch screens, "click" with a mouse
 // The win dialog's way to the notes: a button under its first one that closes it onto the result (which tells how to open a note).
@@ -567,8 +567,7 @@ async function wordNote(subject, word) {
     document.body.append(pop);
     addEventListener('keydown', (e) => e.key === 'Escape' && pop.matches(':popover-open') && e.stopImmediatePropagation(), true); // shut the note, not the game
   }
-  const link = `<a href="https://${LANG}.wikipedia.org/w/index.php?search=${encodeURIComponent(word)}" target="_blank" rel="noopener">${T('Look it up')} ↗</a>`;
-  pop.innerHTML = `<button class="note-x" popovertarget="word-note" popovertargetaction="hide" aria-label="${T('Close')}">✕</button><b>${esc(word)}</b><p></p>${link}`;
+  pop.innerHTML = `<button class="note-x" popovertarget="word-note" popovertargetaction="hide" aria-label="${T('Close')}">✕</button><b>${esc(word)}</b><p></p>`;
   pop.dataset.word = word;
   if (!pop.matches(':popover-open')) pop.showPopover();
   const f = `notes/${hash(subject) % 64}.json`; // 64: SHARDS in build-notes.js

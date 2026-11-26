@@ -239,12 +239,13 @@ function review(date) {
   hud();
 }
 
-// Behind the result: every word, ✓ if it fits, ✗ if not, inked by how you answered it (unanswered ones stay blank). Tap one for its note (wordNote(), core.js).
+// Behind the result: every word, ✓ if it fits, ✗ if not, inked by how you answered it (unanswered ones stay blank). Tap one for its note (wordNote(), core.js);
+// a custom round's words have no notes, so they don't open.
 function results() {
-  const HOW = { skip: T('unanswered'), right: T('right'), wrong: T('wrong') };
-  $('#stack').innerHTML = `<p class="muted small results-tip">${TOUCH ? T('Tap a word to learn about it.') : T('Click a word to learn about it.')}</p><ul class="results">${R.cards.map((c, i) => {
+  const HOW = { skip: T('unanswered'), right: T('right'), wrong: T('wrong') }, custom = R.key === 'C';
+  $('#stack').innerHTML = `${custom ? '' : `<p class="muted small results-tip">${TOUCH ? T('Tap a word to learn about it.') : T('Click a word to learn about it.')}</p>`}<ul class="results">${R.cards.map((c, i) => {
     const how = R.marks[i] === undefined ? 'skip' : R.marks[i] ? 'right' : 'wrong';
-    return `<li><button class="${how}" data-w="${esc(c.w)}" aria-label="${esc(c.w)}: ${c.yes ? T('fits') : T("doesn't fit")}, ${HOW[how]}"><i>${c.yes ? '✓' : '✗'}</i>${esc(c.w)}</button></li>`;
+    return `<li><button class="${how}"${custom ? ' disabled' : ''} data-w="${esc(c.w)}" aria-label="${esc(c.w)}: ${c.yes ? T('fits') : T("doesn't fit")}, ${HOW[how]}"><i>${c.yes ? '✓' : '✗'}</i>${esc(c.w)}</button></li>`;
   }).join('')}</ul>`;
 }
 
@@ -263,7 +264,7 @@ function showEnd(rec, daily) {
   $('#end-next b').textContent = daily ? T(navigator.share ? 'Share result' : 'Copy result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); round ? play('C', round) : play('U' + store.n); };
   $('#btn-result').hidden = false;
-  learnButton($('#dlg-end'), T('Learn about these words'), () => $('#game').hidden && daily && review(today())); // reopened from the menu: no list behind it yet
+  learnButton($('#dlg-end'), T('Learn about these words'), () => $('#game').hidden && daily && review(today())).hidden = !!round; // reopened from the menu: no list behind it yet; a custom round has no notes
   winDaily({ date: daily && today() }, $('#dlg-end'));
   $('#dlg-end').showModal();
 }
