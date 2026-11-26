@@ -145,6 +145,7 @@ function play(key, custom) {
     li.querySelector('.val').textContent = it.val;
     return li;
   }));
+  $('#game').classList.toggle('custom', !!lv.custom); // a custom level's cards have no notes: no tip, no tap (style.css)
   screen('game');
   coach(tut && TUT_STEPS, { onEnd: () => { P = null; screen('home'); } });
   layout();
@@ -320,7 +321,7 @@ function showResult(fresh) {
   $('#result').hidden = false;
   $('#res-note').textContent = '';
   $('#res-tip').textContent = TOUCH ? T('Tap a card to learn about it.') : T('Click a card to learn about it.');
-  learnButton($('#dlg-win'), T('Learn about these cards'));
+  learnButton($('#dlg-win'), T('Learn about these cards')).hidden = !!P.lv.custom; // a custom level has no notes
   $('#btn-result').hidden = false;
   starRow($('#res-stars'), s, fresh);
   $('#win-title').textContent = P.lost ? T('Burned!') : T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
@@ -371,7 +372,7 @@ $('#btn-giveup').onclick = giveUp;
 $('#btn-hint').onclick = hint;
 $('#list').addEventListener('pointerdown', drag);
 // The puzzle over: a tap on a card opens its note (wordNote(), core.js)
-const note = (el) => wordNote(P.lv.subject, P.lv.items[el.dataset.i].name);
+const note = (el) => P.lv.custom || wordNote(P.lv.subject, P.lv.items[el.dataset.i].name);
 $('#list').addEventListener('click', (e) => { const el = e.target.closest('.card'); if (el && P?.done) note(el); });
 $('#dlg-help').addEventListener('close', () => remember({ seenHelp: true }));
 document.addEventListener('visibilitychange', () => document.hidden && save());

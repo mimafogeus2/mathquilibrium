@@ -107,7 +107,6 @@ module.exports = {
     // also the strings several games share
     'shared/core.js': {
       'How to play': 'איך משחקים',
-      'Look it up': 'חיפוש בוויקיפדיה',
       'Close': 'סגירה',
       // the tutorial: its menu link, the coach line, and the dialog at its end
       'Tutorial': 'מדריך',

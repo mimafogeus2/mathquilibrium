@@ -181,9 +181,8 @@ a.btn { text-decoration: none; color: inherit; }
 #word-note .note-x { position: absolute; top: 6px; inset-inline-end: 6px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 17px; cursor: pointer; }
 #word-note .note-x:hover { background: var(--slot); color: var(--ink); }
 #word-note b { padding-inline-end: 32px; display: block; font: 600 21px/1.15 var(--display); letter-spacing: -0.01em; }
-#word-note p { margin: 6px 0 8px; text-wrap: pretty; }
+#word-note p { margin: 6px 0 0; text-wrap: pretty; }
 #word-note p:empty { display: none; }
-#word-note a { color: var(--muted); font-size: 13.5px; text-underline-offset: 3px; }
 #timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); min-width: 3.5ch; text-align: end; }
 
 .board-wrap { flex: 1; display: grid; place-items: center; width: 100%; padding: 12px 0; }
