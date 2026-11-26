@@ -107,6 +107,8 @@ module.exports = {
     // also the strings several games share
     'shared/core.js': {
       'How to play': 'איך משחקים',
+      'Look it up': 'חיפוש בוויקיפדיה',
+      'Close': 'סגירה',
       // the tutorial: its menu link, the coach line, and the dialog at its end
       'Tutorial': 'מדריך',
       'Try the tutorial': 'נסו את המדריך',
@@ -197,6 +199,9 @@ module.exports = {
       'Give up? The round ends now, scored as it stands.': 'לוותר? הסבב ייגמר עכשיו, עם הניקוד שצברתם עד כה.',
     },
     'orderly/game.js': {
+      'Tap a card to learn about it.': 'הקישו על קלף כדי לקרוא עליו.',
+      'Click a card to learn about it.': 'לחצו על קלף כדי לקרוא עליו.',
+      'Learn about these cards': 'קראו על הקלפים האלה',
       // the tutorial's round
       'Inventions': 'המצאות',
       'Oldest': 'הכי ישן',
@@ -284,6 +289,9 @@ module.exports = {
       'Clear every field and start over?': 'לנקות את כל השדות ולהתחיל מחדש?',
     },
     'wordswipe/game.js': {
+      'Tap a word to learn about it.': 'הקישו על מילה כדי לקרוא עליה.',
+      'Click a word to learn about it.': 'לחצו על מילה כדי לקרוא עליה.',
+      'Learn about these words': 'קראו על המילים האלה',
       // the tutorial's round
       'Fruit': 'פירות',
       'Apple': 'תפוח',

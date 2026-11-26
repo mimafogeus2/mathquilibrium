@@ -52,6 +52,9 @@
   transition: transform .22s var(--ease), background-color .25s, border-color .25s;
   cursor: grab; outline: none;
 }
+#game:has(#result:not([hidden])) .card { cursor: pointer; }
+.res-tip { margin: 0 0 8px; text-align: center; }
+#game:has(#result[hidden]) .res-tip { display: none; } /* the tip only once the puzzle is over */ /* the puzzle over: a tap opens the card's note */
 .card:focus-visible { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .list.hinting .card { transition-duration: .55s; }
 .card.held { transition: none; cursor: grabbing; z-index: 2; scale: 1.02; box-shadow: var(--float); }
