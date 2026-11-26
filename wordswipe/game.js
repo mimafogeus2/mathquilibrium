@@ -225,12 +225,26 @@ function finish() {
   setTimeout(() => { if (R) results(); showEnd(rec, !!R?.date); }, rec.t ? 700 : 300); // after the last card has flown
 }
 
-// Behind the result: every word, ✓ if it fits, ✗ if not, inked by how you answered it (unanswered ones stay blank).
+// A finished daily, reopened from the menu: its round as it ended (the deal is seeded, the answers are in the record), on the game screen.
+function review(date) {
+  const rec = store.daily[date].r, sp = !IMP && special(SPECIAL, date);
+  R = { key: 'D' + date, date, ...deal(parse(dailyLine(date)), hash('D' + date)), marks: [...rec.m].map((c) => c === '1'), left: rec.t * 1000, over: true };
+  $('#g-title').textContent = T('Daily');
+  $('#g-sub').textContent = shortDate(date) + (sp ? ' · ' + sp.occasion : '');
+  $('#subject').textContent = R.subject;
+  screen('game');
+  $('#game').classList.add('done');
+  $('#btn-result').hidden = false;
+  results();
+  hud();
+}
+
+// Behind the result: every word, ✓ if it fits, ✗ if not, inked by how you answered it (unanswered ones stay blank). Tap one for its note (wordNote(), core.js).
 function results() {
   const HOW = { skip: T('unanswered'), right: T('right'), wrong: T('wrong') };
-  $('#stack').innerHTML = `<ul class="results">${R.cards.map((c, i) => {
+  $('#stack').innerHTML = `<p class="muted small results-tip">${TOUCH ? T('Tap a word to learn about it.') : T('Click a word to learn about it.')}</p><ul class="results">${R.cards.map((c, i) => {
     const how = R.marks[i] === undefined ? 'skip' : R.marks[i] ? 'right' : 'wrong';
-    return `<li class="${how}" aria-label="${esc(c.w)}: ${c.yes ? T('fits') : T("doesn't fit")}, ${HOW[how]}"><i>${c.yes ? '✓' : '✗'}</i>${esc(c.w)}</li>`;
+    return `<li><button class="${how}" data-w="${esc(c.w)}" aria-label="${esc(c.w)}: ${c.yes ? T('fits') : T("doesn't fit")}, ${HOW[how]}"><i>${c.yes ? '✓' : '✗'}</i>${esc(c.w)}</button></li>`;
   }).join('')}</ul>`;
 }
 
@@ -249,6 +263,7 @@ function showEnd(rec, daily) {
   $('#end-next b').textContent = daily ? T(navigator.share ? 'Share result' : 'Copy result') : round ? T('Play again') : T('Round {n}  →', { n: store.n + 1 });
   $('#end-next').onclick = daily ? () => shareDaily(rec) : () => { $('#dlg-end').close(); round ? play('C', round) : play('U' + store.n); };
   $('#btn-result').hidden = false;
+  learnButton($('#dlg-end'), T('Learn about these words'), () => $('#game').hidden && daily && review(today())); // reopened from the menu: no list behind it yet
   winDaily({ date: daily && today() }, $('#dlg-end'));
   $('#dlg-end').showModal();
 }
@@ -277,6 +292,7 @@ $('#btn-back').onclick = goHome;
 $('#btn-yes').onclick = () => answer(true);
 $('#btn-no').onclick = () => answer(false);
 $('#stack').addEventListener('pointerdown', drag);
+$('#stack').addEventListener('click', (e) => { const b = e.target.closest('.results button'); if (b && R) wordNote(R.subject, b.dataset.w); });
 // Giving up runs the clock out: the round ends as if time were up.
 $('#btn-giveup').onclick = async () => { if (R && !R.over && (await ask(T('Give up? The round ends now, scored as it stands.'))) && !R.over) { R.left = 0; hud(); finish(); } };
 $('#btn-result').onclick = () => $('#dlg-end').showModal();

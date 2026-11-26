@@ -169,7 +169,7 @@ function layout(dom = true) {
     el.classList.toggle('link', k < u.length - 1);
     el.classList.toggle('linked', k > 0);
     el.setAttribute('aria-label', T(ok ? '{name}, {pos} of {n}, grouped: {val}' : '{name}, {pos} of {n}', { name: P.lv.items[i].name, pos, n: N, val: P.lv.items[i].val }));
-    el.tabIndex = P.done ? -1 : 0;
+    el.tabIndex = 0; // done: still focusable, Enter opens its note
   }
   // DOM order = visual order, so Tab walks top to bottom. Not mid-drag: re-inserting the held card drops its pointer capture.
   if (dom) $('#list').append(...P.order.map((i) => cards[i]));
@@ -308,6 +308,7 @@ async function giveUp() {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-note').textContent = T("Here's the right order.");
+  $('#res-tip').textContent = TOUCH ? T('Tap a card to learn about it.') : T('Click a card to learn about it.');
   $('#btn-result').hidden = true;
 }
 
@@ -318,6 +319,8 @@ function showResult(fresh) {
   $('#play').hidden = true;
   $('#result').hidden = false;
   $('#res-note').textContent = '';
+  $('#res-tip').textContent = TOUCH ? T('Tap a card to learn about it.') : T('Click a card to learn about it.');
+  learnButton($('#dlg-win'), T('Learn about these cards'));
   $('#btn-result').hidden = false;
   starRow($('#res-stars'), s, fresh);
   $('#win-title').textContent = P.lost ? T('Burned!') : T(['Brilliant!', 'Solved!', 'Nicely done!', 'Sharp!'][Math.floor(Math.random() * 4)]);
@@ -367,6 +370,9 @@ $('#btn-result').onclick = () => $('#dlg-win').showModal();
 $('#btn-giveup').onclick = giveUp;
 $('#btn-hint').onclick = hint;
 $('#list').addEventListener('pointerdown', drag);
+// The puzzle over: a tap on a card opens its note (wordNote(), core.js)
+const note = (el) => wordNote(P.lv.subject, P.lv.items[el.dataset.i].name);
+$('#list').addEventListener('click', (e) => { const el = e.target.closest('.card'); if (el && P?.done) note(el); });
 $('#dlg-help').addEventListener('close', () => remember({ seenHelp: true }));
 document.addEventListener('visibilitychange', () => document.hidden && save());
 document.addEventListener('keydown', (e) => {
@@ -376,6 +382,7 @@ document.addEventListener('keydown', (e) => {
     const all = units(), k = all.findIndex((u) => u.includes(+el.dataset.i)), to = k + (e.key === 'ArrowUp' ? -1 : 1);
     if (to >= 0 && to < all.length && coachAllows({ unit: all[k] })) { place(all.filter((_, x) => x !== k), all[k], to); layout(); el.focus(); sfx.place(); status(); save(); }
   } else if (e.key === 'Escape') $('#btn-back').click();
+  else if (e.key === 'Enter' && el && P.done) note(el);
   else if (e.key === 'Enter' && !document.activeElement?.matches?.('button, a, input')) check(); // focused controls handle their own Enter
   else return;
   e.preventDefault();

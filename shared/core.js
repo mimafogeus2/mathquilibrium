@@ -542,6 +542,41 @@ function copyLink(url, btn) {
   else old();
 }
 
+// A word game's result (WordSwipe, Orderly): tap a word for a note on it, from notes/<n>.json beside the page ({ subject: { word: note } },
+// written by build-notes.js), and a link to look it up. A word with no note (a custom round's) gets just the link.
+const NOTES = {};
+const TOUCH = matchMedia('(pointer: coarse)').matches; // "tap" on touch screens, "click" with a mouse
+// The win dialog's way to the notes: a button under its first one that closes it onto the result (which tells how to open a note).
+// open(), if given, first puts the result on screen (a finished daily reopened from the menu).
+function learnButton(dlg, label, open) {
+  let b = dlg.querySelector('.js-learn');
+  if (!b) {
+    b = Object.assign(document.createElement('button'), { className: 'btn ghost center js-learn' });
+    b.innerHTML = `<b>${esc(label)}</b>`;
+    b.onclick = () => { dlg.close(); b.open?.(); $('.results-tip, #res-tip')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+    dlg.querySelector('.win-actions > :first-child').after(b);
+  }
+  b.open = open;
+  return b;
+}
+async function wordNote(subject, word) {
+  let pop = $('#word-note');
+  if (!pop) {
+    pop = Object.assign(document.createElement('div'), { id: 'word-note', popover: 'auto' });
+    pop.setAttribute('aria-live', 'polite');
+    document.body.append(pop);
+    addEventListener('keydown', (e) => e.key === 'Escape' && pop.matches(':popover-open') && e.stopImmediatePropagation(), true); // shut the note, not the game
+  }
+  const link = `<a href="https://${LANG}.wikipedia.org/w/index.php?search=${encodeURIComponent(word)}" target="_blank" rel="noopener">${T('Look it up')} ↗</a>`;
+  pop.innerHTML = `<button class="note-x" popovertarget="word-note" popovertargetaction="hide" aria-label="${T('Close')}">✕</button><b>${esc(word)}</b><p></p>${link}`;
+  pop.dataset.word = word;
+  if (!pop.matches(':popover-open')) pop.showPopover();
+  const f = `notes/${hash(subject) % 64}.json`; // 64: SHARDS in build-notes.js
+  NOTES[f] ??= fetch(f).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  const note = (await NOTES[f])[subject]?.[word];
+  if (pop.dataset.word === word) pop.querySelector('p').textContent = note || '';
+}
+
 function win() {
   const st = streak();
   G.done = true;
